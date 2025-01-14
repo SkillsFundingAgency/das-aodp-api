@@ -1,7 +1,10 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 using SFA.DAS.AODP.Api.Extensions;
 using SFA.DAS.AODP.Application.Queries.Test;
 using SFA.DAS.AODP.Common.Extensions;
+using SFA.DAS.Api.Common.Configuration;
+using SFA.DAS.Api.Common.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration.LoadConfiguration(builder.Services, builder.Environment.IsDevelopment());
@@ -15,6 +18,9 @@ builder.Services
     .AddHttpContextAccessor()
     .AddHealthChecks();
 
+
+builder.Services.AddAuthentication(configuration);
+
 builder.Services.AddControllers();
 
 builder.Services
@@ -23,6 +29,7 @@ builder.Services
     {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "AODP API", Version = "v1" });
     });
+
 
 var app = builder.Build();
 
@@ -41,3 +48,5 @@ app
 app.MapControllers();
 
 app.Run();
+
+

@@ -16,6 +16,7 @@
 	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
 	  <PackageReference Include="SFA.DAS.Configuration.AzureTableStorage" Version="17.1.113" />
 	  <PackageReference Include="MediatR" Version="12.4.1" />
+	  <PackageReference Include="SFA.DAS.Api.Common" Version="17.1.112" />
 
   </ItemGroup>
 
