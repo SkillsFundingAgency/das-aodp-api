@@ -1,19 +1,15 @@
-﻿namespace SFA.DAS.AODP.Models.Forms.FormBuilder;
+﻿using MediatR;
 
-public class Form
+namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
+
+public class UpdateFormCommand : IRequest<UpdateFormCommandResponse>
 {
     public Guid Id { get; set; }
     public string Name { get; set; }
-    public DateTime Version { get; set; }
+    public string Version { get; set; }
     public bool Published { get; set; }
     public string Key { get; set; }
     public string ApplicationTrackingTemplate { get; set; }
     public string Description { get; set; }
     public int Order { get; set; }
-    public List<Section> Sections { get; set; }
-
-    public Form()
-    {
-        Sections = new List<Section>();
-    }
 }

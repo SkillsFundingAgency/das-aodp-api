@@ -7,12 +7,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Commands\**" />
-	  <EmbeddedResource Remove="Commands\**" />
-	  <None Remove="Commands\**" />
-	</ItemGroup>
-
-	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="13.0.1" />
 		<PackageReference Include="MediatR" Version="12.4.1" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
 	</ItemGroup>
@@ -20,6 +15,10 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\SFA.DAS.AODP.Data\SFA.DAS.AODP.Data.csproj" />
 	  <ProjectReference Include="..\SFA.DAS.AODP.Models\SFA.DAS.AODP.Models.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Queries\FormBuilder\Pages\" />
 	</ItemGroup>
 
 </Project>
