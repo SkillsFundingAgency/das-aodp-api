@@ -1,3 +1,7 @@
-﻿namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
+﻿using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
-public class UpdateSectionCommandResponse : BaseResponse { }
+namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
+
+public class UpdateSectionCommandResponse : BaseResponse {
+    public Section Data { get; set; }
+}

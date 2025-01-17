@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
-public class GetAllSectionsQueryResponse : BaseResponse
+public class GetSectionByIdQueryResponse : BaseResponse
 {
-    public List<Section> Data { get; set; }
+    public Section Data { get; set; }
 }

@@ -1,25 +1,22 @@
 ﻿using AutoMapper;
+using ViewModels = SFA.DAS.AODP.Models.Forms.FormBuilder;
+using Entities = SFA.DAS.AODP.Data.Entities;
 
 namespace SFA.DAS.AODP.Application.AutoMapper.Profiles;
-
-using Models = SFA.DAS.AODP.Models.Forms.FormBuilder;
-using Entities = SFA.DAS.AODP.Data.Entities;
 
 public class AutoMapperProfile : Profile
 {
     public AutoMapperProfile()
     {
-        #region View/DataGrid
+        #region Model -> ViewModel
         //Model -> ViewModel
-        CreateMap<Entities.FormStatus, Models.FormStatus>().ReverseMap();
-        CreateMap<Entities.Form, Models.Form>().ReverseMap();
-        CreateMap<Entities.FormVersion, Models.FormVersion>().ReverseMap();
-        CreateMap<Entities.FormVersion?, Models.FormVersion?>().ReverseMap();
-        CreateMap<List<Entities.FormVersion>, List<Models.FormVersion>>().ReverseMap();
-        CreateMap<List<Entities.FormVersion?>, List<Models.FormVersion?>>().ReverseMap();
-        CreateMap<Entities.FormVersion?, Models.FormVersion?>().ReverseMap();
-        CreateMap<Entities.Section, Models.Section>().ReverseMap();
-        CreateMap<Entities.Page, Models.Page>().ReverseMap();
+        CreateMap<Entities.FormStatus, ViewModels.FormStatus>().ReverseMap();
+        CreateMap<Entities.Form, ViewModels.Form>().ReverseMap();
+        CreateMap<Entities.FormVersion, ViewModels.FormVersion>().ReverseMap();
+        CreateMap<Entities.FormVersion?, ViewModels.FormVersion?>().ReverseMap();
+        CreateMap<Entities.FormVersion?, ViewModels.FormVersion?>().ReverseMap();
+        CreateMap<Entities.Section, ViewModels.Section>().ReverseMap();
+        CreateMap<Entities.Page, ViewModels.Page>().ReverseMap();
 
         #endregion
     }

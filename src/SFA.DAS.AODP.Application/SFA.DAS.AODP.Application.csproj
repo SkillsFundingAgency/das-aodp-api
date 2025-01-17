@@ -17,8 +17,4 @@
 	  <ProjectReference Include="..\SFA.DAS.AODP.Models\SFA.DAS.AODP.Models.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Queries\FormBuilder\Pages\" />
-	</ItemGroup>
-
 </Project>

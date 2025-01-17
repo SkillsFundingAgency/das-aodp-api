@@ -1,3 +1,7 @@
-﻿namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
+﻿using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
-public class UpdatePageCommandResponse : BaseResponse { }
+namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
+
+public class UpdatePageCommandResponse : BaseResponse {
+    public Page Data { get; set; }
+}
