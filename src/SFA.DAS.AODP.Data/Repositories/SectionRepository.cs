@@ -16,12 +16,12 @@ public class SectionRepository : ISectionRepository
 
     public async Task<List<Section>> GetSectionsForFormAsync(Guid formId)
     {
-        return await _context.Sections.Where(v => v.FormId == formId && v.Archived == false).ToListAsync();
+        return await _context.Sections.Where(v => v.FormVersionId == formId).ToListAsync();
     }
 
     public async Task<Section?> GetSectionByIdAsync(Guid sectionId)
     {
-        return await _context.Sections.FirstOrDefaultAsync(v => v.Id == sectionId && v.Archived == false);
+        return await _context.Sections.FirstOrDefaultAsync(v => v.Id == sectionId);
     }
 
     public async Task<Section> Create(Section section)
@@ -38,7 +38,7 @@ public class SectionRepository : ISectionRepository
         {
             var oldSectionId = s.Id;
             s.Id = Guid.NewGuid();
-            s.FormId = newFormId;
+            s.FormVersionId = newFormId;
             await _pageRepository.CopyPagesForNewSection(oldSectionId, s.Id);
         }
         await _context.Sections.AddRangeAsync(sectionsToMigrate);
@@ -48,7 +48,7 @@ public class SectionRepository : ISectionRepository
 
     public async Task<Section?> Update(Section section)
     {
-        var sectionToUpdate = await _context.Sections.FirstOrDefaultAsync(v => v.Id == section.Id && v.Archived == false);
+        var sectionToUpdate = await _context.Sections.FirstOrDefaultAsync(v => v.Id == section.Id);
         if (sectionToUpdate is null)
             return null;
         sectionToUpdate = section;
@@ -56,12 +56,12 @@ public class SectionRepository : ISectionRepository
         return section;
     }
 
-    public async Task<Section?> ArchiveSection(Guid sectionId)
+    public async Task<Section?> DeleteSection(Guid sectionId)
     {
         var sectionToUpdate = await _context.Sections.FirstOrDefaultAsync(v => v.Id == sectionId);
         if (sectionToUpdate is null)
             return null;
-        sectionToUpdate.Archived = true;
+        _context.Sections.Remove(sectionToUpdate);
         await _context.SaveChangesAsync();
         return sectionToUpdate;
     }

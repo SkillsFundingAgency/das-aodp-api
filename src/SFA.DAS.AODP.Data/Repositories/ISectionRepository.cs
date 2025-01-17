@@ -13,7 +13,7 @@ namespace SFA.DAS.AODP.Data.Repositories
         Task<Section?> GetSectionByIdAsync(Guid sectionId);
         Task<Section> Create(Section section);
         Task<Section?> Update(Section section);
-        Task<Section?> ArchiveSection(Guid sectionId);
+        Task<Section?> DeleteSection(Guid sectionId);
         Task<List<Section>> CopySectionsForNewForm(Guid oldFormId, Guid newFormId);
     }
 }

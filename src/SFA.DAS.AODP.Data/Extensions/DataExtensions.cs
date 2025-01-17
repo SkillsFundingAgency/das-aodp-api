@@ -9,7 +9,9 @@ namespace SFA.DAS.AODP.Data.Extensions
         public static IServiceCollection ConfigureDatabase(this IServiceCollection services)
         {
             services.AddDbContext<IApplicationDbContext, ApplicationDbContext>();
-            services.AddTransient<IFormRepository, FormRepository>();
+            services.AddScoped<IFormVersionRepository, FormVersionRepository>();
+            services.AddScoped<ISectionRepository, SectionRepository>();
+            services.AddScoped<IPageRepository, PageRepository>();
 
             return services;
         }

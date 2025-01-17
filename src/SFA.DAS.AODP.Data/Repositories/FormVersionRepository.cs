@@ -4,12 +4,12 @@ using SFA.DAS.AODP.Infrastructure.Context;
 
 namespace SFA.DAS.AODP.Data.Repositories
 {
-    public class FormRepository : IFormRepository
+    public class FormVersionRepository : IFormVersionRepository
     {
         private readonly IApplicationDbContext _context;
         private readonly ISectionRepository _sectionRepository;
 
-        public FormRepository(IApplicationDbContext context, ISectionRepository sectionRepository)
+        public FormVersionRepository(IApplicationDbContext context, ISectionRepository sectionRepository)
         {
             _context = context;
             _sectionRepository = sectionRepository;
@@ -17,26 +17,28 @@ namespace SFA.DAS.AODP.Data.Repositories
 
         public async Task<List<FormVersion>> GetLatestFormVersions()
         {
-            var formDb = new Form { Id = Guid.NewGuid(), Archived = true };
-            _context.Forms.Add(formDb);
+            //var formDb = new Form { Id = Guid.NewGuid(), Archived = true };
+            //_context.Forms.Add(formDb);
 
-            _context.Forms.Add(new Form { Id = Guid.NewGuid(), Archived = false });
-            _context.FormVersions.Add(new()
-            {
-                Id = Guid.NewGuid(),
-                DateCreated = DateTime.Now,
-                FormId = formDb.Id,
-                Description = "Something",
-                Name = "Name",
-                Version = DateTime.Now,
-            });
-            await _context.SaveChangesAsync();
+            //_context.Forms.Add(new Form { Id = Guid.NewGuid(), Archived = false });
+            //_context.FormVersions.Add(new()
+            //{
+            //    Id = Guid.NewGuid(),
+            //    DateCreated = DateTime.Now,
+            //    FormId = formDb.Id,
+            //    Description = "Something",
+            //    Name = "Name",
+            //    Version = DateTime.Now,
+            //});
+            //await _context.SaveChangesAsync();
 
             // end
 
+            var all = _context.FormVersions.ToList();
+
             var top =
                 _context.FormVersions
-                .Where(f => !f.Form.Archived)
+                //.Where(f => !f.Form.Archived)
                 .GroupBy(
                     t => t.FormId
                 )
@@ -50,6 +52,11 @@ namespace SFA.DAS.AODP.Data.Repositories
                 .ToList();
 
             return top;
+        }
+
+        public async Task<FormVersion?> GetFormVersionByIdAsync(Guid formVersionId)
+        {
+            return await _context.FormVersions.FirstOrDefaultAsync(v => v.Id == formVersionId);
         }
 
         public async Task<FormVersion> Create(FormVersion formVersionToAdd)
@@ -83,6 +90,16 @@ namespace SFA.DAS.AODP.Data.Repositories
             formToUpdate = form;
             await _context.SaveChangesAsync();
             return formToUpdate;
+        }
+
+        public async Task<bool> Archive(Guid formVersionId)
+        {
+            var found = await _context.FormVersions.FirstOrDefaultAsync(v => v.Id == formVersionId);
+            if (found is null)
+                return false;
+            found.Status = FormStatus.Archived;
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

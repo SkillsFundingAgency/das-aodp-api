@@ -2,7 +2,7 @@
 {
     public class GetAllFormsResponse
     {
-        public List<SFA.DAS.AODP.Models.Forms.FormBuilder.Form> Forms { get; set; }
+        public List<SFA.DAS.AODP.Models.Forms.FormBuilder.FormVersion> FormVersions { get; set; }
 
     }
 }

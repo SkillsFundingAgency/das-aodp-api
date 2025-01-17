@@ -1,3 +1,8 @@
 ﻿namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
-public class UpdateFormCommandResponse : BaseResponse { }
+using SFA.DAS.AODP.Models.Forms.FormBuilder;
+
+public class UpdateFormCommandResponse : BaseResponse 
+{ 
+    public FormVersion FormVersion { get; set; }
+}

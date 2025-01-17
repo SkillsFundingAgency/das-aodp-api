@@ -14,12 +14,12 @@ public class PageRepository : IPageRepository
 
     public async Task<List<Page>> GetPagesForSectionAsync(Guid sectionId)
     {
-        return await _context.Pages.Where(v => v.SectionId == sectionId && v.Archived == false).ToListAsync();
+        return await _context.Pages.Where(v => v.SectionId == sectionId).ToListAsync();
     }
 
     public async Task<Page?> GetPageByIdAsync(Guid pageId)
     {
-        return await _context.Pages.FirstOrDefaultAsync(v => v.Id == pageId && v.Archived == false);
+        return await _context.Pages.FirstOrDefaultAsync(v => v.Id == pageId);
     }
 
     public async Task<Page> Create(Page page)
@@ -43,7 +43,7 @@ public class PageRepository : IPageRepository
 
     public async Task<Page?> Update(Page page)
     {
-        var pageToUpdate = await _context.Pages.FirstOrDefaultAsync(v => v.Id == page.Id && v.Archived == false);
+        var pageToUpdate = await _context.Pages.FirstOrDefaultAsync(v => v.Id == page.Id);
         if (pageToUpdate is null)
             return null;
         pageToUpdate = page;
@@ -56,7 +56,7 @@ public class PageRepository : IPageRepository
         var pageToUpdate = await _context.Pages.FirstOrDefaultAsync(v => v.Id == pageId);
         if (pageToUpdate is null)
             return null;
-        pageToUpdate.Archived = true;
+        _context.Pages.Remove(pageToUpdate);
         await _context.SaveChangesAsync();
         return pageToUpdate;
     }

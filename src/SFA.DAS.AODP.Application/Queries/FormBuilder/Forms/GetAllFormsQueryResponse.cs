@@ -4,5 +4,5 @@ using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 public class GetAllFormsQueryResponse : BaseResponse
 {
-    public List<Form> Data { get; set; }
+    public List<FormVersion> Data { get; set; }
 }

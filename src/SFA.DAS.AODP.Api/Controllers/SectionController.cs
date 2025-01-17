@@ -17,8 +17,24 @@ namespace SFA.DAS.AODP.Api.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("/api/sections/{formId}")]
-        public async Task<IActionResult> GetSectionsForForm(Guid formId)
+        [HttpGet("/api/sections/{formVersionId}")]
+        public async Task<IActionResult> GetSectionsForForm(Guid formVersionId)
+        {
+            return Ok();
+        }
+
+        // This endpoint will create a new section generating a key and ID 
+        [AllowAnonymous]
+        [HttpPost("/api/sections/{formVersionId}")]
+        public async Task<IActionResult> CreateSection(Guid formVersionId)
+        {
+            return Ok();
+        }
+
+        // This endpoint will create a new section generating a key and ID 
+        [AllowAnonymous]
+        [HttpPut("/api/sections/{formVersionId}/section/{sectionKey}")]
+        public async Task<IActionResult> UpdateSection(Guid formVersionId, Guid sectionKey)
         {
             return Ok();
         }

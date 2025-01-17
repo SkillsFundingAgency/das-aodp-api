@@ -3,17 +3,11 @@
 public class Form
 {
     public Guid Id { get; set; }
-    public string Name { get; set; }
-    public DateTime Version { get; set; }
-    public bool Published { get; set; }
-    public string Key { get; set; }
-    public string ApplicationTrackingTemplate { get; set; }
-    public string Description { get; set; }
-    public int Order { get; set; }
-    public List<Section> Sections { get; set; }
+    public bool Archived { get; set; } = false;
+    public List<FormVersion> FormVersion { get; set; }
 
     public Form()
     {
-        Sections = new List<Section>();
+        FormVersion = new List<FormVersion>();
     }
 }

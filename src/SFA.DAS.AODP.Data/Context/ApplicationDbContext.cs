@@ -18,6 +18,32 @@ namespace SFA.DAS.AODP.Infrastructure.Context
         public virtual DbSet<Section> Sections { get; set; }
         public virtual DbSet<Page> Pages { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseInMemoryDatabase("AODB")
+                .UseAsyncSeeding(async (context, _, ct) =>
+                {
+                    context.Database.EnsureCreated();
+                    var formDb = new Form { Id = Guid.NewGuid(), Archived = true };
+                    context.Set<Form>().Add(formDb);
+
+                    context.Set<Form>().Add(new Form { Id = Guid.NewGuid(), Archived = false });
+                    context.Set<FormVersion>().Add(new()
+                    {
+                        Id = Guid.NewGuid(),
+                        DateCreated = DateTime.Now,
+                        FormId = formDb.Id,
+                        Description = "Something",
+                        Status = FormStatus.Published,
+                        Archived = false,
+                        Name = "Name",
+                        Version = DateTime.Now,
+                    });
+                    await context.SaveChangesAsync();
+                });
+            base.OnConfiguring(optionsBuilder);
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ApprovedQualificationsImport>(entity =>
