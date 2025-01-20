@@ -11,7 +11,7 @@ namespace SFA.DAS.AODP.Data.ExampleData;
 
 public static class DataSeeder
 {
-    public static void Seed(DbContext context)
+    public static async Task SeedAsync(DbContext context, int seedCount = 20)
     {
         Guid NewGuid() => Guid.NewGuid();
 
@@ -27,12 +27,12 @@ public static class DataSeeder
             var validationRules = new List<ValidationRule>();
             var options = new List<Option>();
 
-            for (int i = 1; i <= 20; i++)
+            for (int i = 1; i <= seedCount; i++)
             {
                 var formId = NewGuid();
                 Random random = new Random();
                 bool isArchived = random.Next(0, 2) == 0;
-                var form = new Form { Id = Guid.NewGuid(), Archived = isArchived };
+                var form = new Form { Id = NewGuid(), Archived = isArchived };
                 context.Set<Form>().Add(form);
 
 
@@ -77,14 +77,7 @@ public static class DataSeeder
 
             Console.WriteLine("Seeding data into cache...");
 
-            //cacheManager.Set("Forms", forms);
-            //cacheManager.Set("Sections", sections.Distinct().ToList());
-            //cacheManager.Set("Pages", pages.Distinct().ToList());
-            //cacheManager.Set("Questions", questions.Distinct().ToList());
-            //cacheManager.Set("ValidationRules", validationRules.Distinct().ToList());
-            //cacheManager.Set("Options", options.Distinct().ToList());
-
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             Console.WriteLine("Seeding process completed.");
         }

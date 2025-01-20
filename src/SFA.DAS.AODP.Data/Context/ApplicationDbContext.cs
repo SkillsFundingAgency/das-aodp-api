@@ -24,7 +24,7 @@ namespace SFA.DAS.AODP.Infrastructure.Context
             optionsBuilder.UseInMemoryDatabase("AODB")
                 .UseAsyncSeeding(async (context, _, ct) =>
                 {
-                    context.Database.EnsureCreated();
+                    //context.Database.EnsureCreated();
                     //var formDb = new Form { Id = Guid.NewGuid(), Archived = true };
                     //context.Set<Form>().Add(formDb);
 
@@ -43,7 +43,7 @@ namespace SFA.DAS.AODP.Infrastructure.Context
                     //await context.SaveChangesAsync();
 
                     //########################################
-                    DataSeeder.Seed(context);
+                    await DataSeeder.SeedAsync(context);
 
                 });
             base.OnConfiguring(optionsBuilder);
