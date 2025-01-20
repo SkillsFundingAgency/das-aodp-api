@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Data.ExampleData;
 
 namespace SFA.DAS.AODP.Infrastructure.Context
 {
@@ -24,22 +25,26 @@ namespace SFA.DAS.AODP.Infrastructure.Context
                 .UseAsyncSeeding(async (context, _, ct) =>
                 {
                     context.Database.EnsureCreated();
-                    var formDb = new Form { Id = Guid.NewGuid(), Archived = true };
-                    context.Set<Form>().Add(formDb);
+                    //var formDb = new Form { Id = Guid.NewGuid(), Archived = true };
+                    //context.Set<Form>().Add(formDb);
 
-                    context.Set<Form>().Add(new Form { Id = Guid.NewGuid(), Archived = false });
-                    context.Set<FormVersion>().Add(new()
-                    {
-                        Id = Guid.NewGuid(),
-                        DateCreated = DateTime.Now,
-                        FormId = formDb.Id,
-                        Description = "Something",
-                        Status = FormStatus.Published,
-                        Archived = false,
-                        Name = "Name",
-                        Version = DateTime.Now,
-                    });
-                    await context.SaveChangesAsync();
+                    //context.Set<Form>().Add(new Form { Id = Guid.NewGuid(), Archived = false });
+                    //context.Set<FormVersion>().Add(new()
+                    //{
+                    //    Id = Guid.NewGuid(),
+                    //    DateCreated = DateTime.Now,
+                    //    FormId = formDb.Id,
+                    //    Description = "Something",
+                    //    Status = FormStatus.Published,
+                    //    Archived = false,
+                    //    Name = "Name",
+                    //    Version = DateTime.Now,
+                    //});
+                    //await context.SaveChangesAsync();
+
+                    //########################################
+                    DataSeeder.Seed(context);
+
                 });
             base.OnConfiguring(optionsBuilder);
         }
