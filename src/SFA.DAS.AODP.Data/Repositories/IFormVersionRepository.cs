@@ -9,5 +9,7 @@ namespace SFA.DAS.AODP.Data.Repositories
         Task<FormVersion?> GetFormVersionByIdAsync(Guid formVersionId);
         Task<List<FormVersion>> GetLatestFormVersions();
         Task<FormVersion?> Update(FormVersion form);
+        Task<bool> Publish(Guid formVersionId);
+        Task<bool> Unpublish(Guid formVersionId);
     }
 }
