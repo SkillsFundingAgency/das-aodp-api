@@ -3,14 +3,14 @@ using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 
-public class CreatePageCommandRequestHandler : IRequestHandler<CreatePageCommandRequest, CreatePageCommandResponse>
+public class CreatePageCommandHandler : IRequestHandler<CreatePageCommand, CreatePageCommandResponse>
 {
 
-    public CreatePageCommandRequestHandler()
+    public CreatePageCommandHandler()
     {
     }
 
-    public async Task<CreatePageCommandResponse> Handle(CreatePageCommandRequest request, CancellationToken cancellationToken)
+    public async Task<CreatePageCommandResponse> Handle(CreatePageCommand request, CancellationToken cancellationToken)
     {
         var response = new CreatePageCommandResponse();
         try

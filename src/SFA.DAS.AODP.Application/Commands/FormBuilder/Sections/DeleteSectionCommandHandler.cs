@@ -3,13 +3,13 @@ using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 
-public class DeleteSectionCommandRequestHandler : IRequestHandler<DeleteSectionCommandRequest, DeleteSectionCommandResponse>
+public class DeleteSectionCommandHandler : IRequestHandler<DeleteSectionCommand, DeleteSectionCommandResponse>
 {
-    public DeleteSectionCommandRequestHandler()
+    public DeleteSectionCommandHandler()
     {
     }
 
-    public async Task<DeleteSectionCommandResponse> Handle(DeleteSectionCommandRequest request, CancellationToken cancellationToken)
+    public async Task<DeleteSectionCommandResponse> Handle(DeleteSectionCommand request, CancellationToken cancellationToken)
     {
         var response = new DeleteSectionCommandResponse();
 

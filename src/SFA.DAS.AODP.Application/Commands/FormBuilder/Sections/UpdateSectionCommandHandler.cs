@@ -3,13 +3,13 @@ using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 
-public class UpdateSectionCommandRequestHandler : IRequestHandler<UpdateSectionCommandRequest, UpdateSectionCommandResponse>
+public class UpdateSectionCommandHandler : IRequestHandler<UpdateSectionCommand, UpdateSectionCommandResponse>
 {
-    public UpdateSectionCommandRequestHandler()
+    public UpdateSectionCommandHandler()
     {
     }
 
-    public async Task<UpdateSectionCommandResponse> Handle(UpdateSectionCommandRequest request, CancellationToken cancellationToken)
+    public async Task<UpdateSectionCommandResponse> Handle(UpdateSectionCommand request, CancellationToken cancellationToken)
     {
         var response = new UpdateSectionCommandResponse();
         response.Success = false;

@@ -3,13 +3,13 @@ using SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
 namespace SFA.DAS.AODP.Application.Handlers.FormBuilder.Pages;
 
-public class GetPageByIdQueryRequestHandler : IRequestHandler<GetPageByIdQueryRequest, GetPageByIdQueryResponse>
+public class GetPageByIdQueryHandler : IRequestHandler<GetPageByIdQuery, GetPageByIdQueryResponse>
 {
-    public GetPageByIdQueryRequestHandler()
+    public GetPageByIdQueryHandler()
     {
     }
 
-    public async Task<GetPageByIdQueryResponse> Handle(GetPageByIdQueryRequest request, CancellationToken cancellationToken)
+    public async Task<GetPageByIdQueryResponse> Handle(GetPageByIdQuery request, CancellationToken cancellationToken)
     {
         var response = new GetPageByIdQueryResponse(new());
         response.Success = false;

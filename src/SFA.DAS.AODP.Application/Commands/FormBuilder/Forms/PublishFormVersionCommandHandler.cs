@@ -6,16 +6,16 @@ using ViewModels = SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
-public class PublishFormVersionCommandRequestHandler : IRequestHandler<PublishFormVersionCommandRequest, PublishFormVersionCommandResponse>
+public class PublishFormVersionCommandHandler : IRequestHandler<PublishFormVersionCommand, PublishFormVersionCommandResponse>
 {
     private readonly IFormVersionRepository _formRepository;
 
-    public PublishFormVersionCommandRequestHandler(IFormVersionRepository formRepository)
+    public PublishFormVersionCommandHandler(IFormVersionRepository formRepository)
     {
         _formRepository = formRepository;
     }
 
-    public async Task<PublishFormVersionCommandResponse> Handle(PublishFormVersionCommandRequest request, CancellationToken cancellationToken)
+    public async Task<PublishFormVersionCommandResponse> Handle(PublishFormVersionCommand request, CancellationToken cancellationToken)
     {
         var response = new PublishFormVersionCommandResponse();
         response.Success = false;

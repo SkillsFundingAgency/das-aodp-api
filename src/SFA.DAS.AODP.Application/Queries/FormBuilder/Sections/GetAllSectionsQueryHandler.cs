@@ -3,13 +3,13 @@ using SFA.DAS.AODP.Data.Repositories;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
-public class GetAllSectionsQueryRequestHandler : IRequestHandler<GetAllSectionsQueryRequest, GetAllSectionsQueryResponse>
+public class GetAllSectionsQueryHandler : IRequestHandler<GetAllSectionsQuery, GetAllSectionsQueryResponse>
 {
-    public GetAllSectionsQueryRequestHandler()
+    public GetAllSectionsQueryHandler()
     {
     }
 
-    public async Task<GetAllSectionsQueryResponse> Handle(GetAllSectionsQueryRequest request, CancellationToken cancellationToken)
+    public async Task<GetAllSectionsQueryResponse> Handle(GetAllSectionsQuery request, CancellationToken cancellationToken)
     {
         var response = new GetAllSectionsQueryResponse(new());
         response.Success = false;

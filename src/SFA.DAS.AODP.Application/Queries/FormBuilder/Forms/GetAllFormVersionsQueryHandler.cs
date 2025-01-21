@@ -6,18 +6,18 @@ using ViewModels = SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
-public class GetAllFormVersionsQueryRequestHandler : IRequestHandler<GetAllFormVersionsQueryRequest, GetAllFormVersionsQueryResponse>
+public class GetAllFormVersionsQueryHandler : IRequestHandler<GetAllFormVersionsQuery, GetAllFormVersionsQueryResponse>
 {
     private readonly IFormVersionRepository _formRepository;
     private readonly IMapper _mapper;
 
-    public GetAllFormVersionsQueryRequestHandler(IFormVersionRepository formRepository, IMapper mapper)
+    public GetAllFormVersionsQueryHandler(IFormVersionRepository formRepository, IMapper mapper)
     {
         _formRepository = formRepository;
         _mapper = mapper;
     }
 
-    public async Task<GetAllFormVersionsQueryResponse> Handle(GetAllFormVersionsQueryRequest request, CancellationToken cancellationToken)
+    public async Task<GetAllFormVersionsQueryResponse> Handle(GetAllFormVersionsQuery request, CancellationToken cancellationToken)
     {
         var queryResponse = new GetAllFormVersionsQueryResponse(new())
         {
@@ -27,7 +27,7 @@ public class GetAllFormVersionsQueryRequestHandler : IRequestHandler<GetAllFormV
         {
             var data = await _formRepository.GetLatestFormVersions();
 
-            queryResponse.Data = _mapper.Map<List<Entities.FormVersion>, List<ViewModels.FormVersion>>(data);
+            queryResponse.Data = _mapper.Map<List<GetAllFormVersionsQueryResponse.FormVersion>>(data);
             queryResponse.Success = true;
         }
         catch (Exception ex)

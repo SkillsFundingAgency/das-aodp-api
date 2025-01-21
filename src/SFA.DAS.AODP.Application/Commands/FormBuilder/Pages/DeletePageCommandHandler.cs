@@ -3,13 +3,13 @@ using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 
-public class DeletePageCommandRequestHandler : IRequestHandler<DeletePageCommandRequest, DeletePageCommandResponse>
+public class DeletePageCommandHandler : IRequestHandler<DeletePageCommand, DeletePageCommandResponse>
 {
-    public DeletePageCommandRequestHandler()
+    public DeletePageCommandHandler()
     {
     }
 
-    public async Task<DeletePageCommandResponse> Handle(DeletePageCommandRequest request, CancellationToken cancellationToken)
+    public async Task<DeletePageCommandResponse> Handle(DeletePageCommand request, CancellationToken cancellationToken)
     {
         var response = new DeletePageCommandResponse();
 

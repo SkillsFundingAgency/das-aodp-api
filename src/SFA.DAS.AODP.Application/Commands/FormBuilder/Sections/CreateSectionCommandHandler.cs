@@ -3,15 +3,15 @@ using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 
-public class CreateSectionCommandRequestHandler : IRequestHandler<CreateSectionCommandRequest, CreateSectionCommandResponse>
+public class CreateSectionCommandHandler : IRequestHandler<CreateSectionCommand, CreateSectionCommandResponse>
 {
     //private readonly IGenericRepository<Section> _sectionRepository;
 
-    public CreateSectionCommandRequestHandler()
+    public CreateSectionCommandHandler()
     {
     }
 
-    public async Task<CreateSectionCommandResponse> Handle(CreateSectionCommandRequest request, CancellationToken cancellationToken)
+    public async Task<CreateSectionCommandResponse> Handle(CreateSectionCommand request, CancellationToken cancellationToken)
     {
         var response = new CreateSectionCommandResponse();
         try

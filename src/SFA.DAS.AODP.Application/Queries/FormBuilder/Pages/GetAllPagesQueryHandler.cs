@@ -2,13 +2,13 @@
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
-public class GetAllPagesQueryRequestHandler : IRequestHandler<GetAllPagesQueryRequest, GetAllPagesQueryResponse>
+public class GetAllPagesQueryHandler : IRequestHandler<GetAllPagesQuery, GetAllPagesQueryResponse>
 {
-    public GetAllPagesQueryRequestHandler()
+    public GetAllPagesQueryHandler()
     {
     }
 
-    public async Task<GetAllPagesQueryResponse> Handle(GetAllPagesQueryRequest request, CancellationToken cancellationToken)
+    public async Task<GetAllPagesQueryResponse> Handle(GetAllPagesQuery request, CancellationToken cancellationToken)
     {
         var response = new GetAllPagesQueryResponse(new());
         response.Success = false;

@@ -3,7 +3,7 @@ using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
-public class UpdateFormVersionCommandRequest : IRequest<UpdateFormVersionCommandResponse>
+public class PublishFormVersionCommand : IRequest<PublishFormVersionCommandResponse>
 {
-    public FormVersion Data { get; set; }
+    public Guid FormVersionId { get; set; }
 }

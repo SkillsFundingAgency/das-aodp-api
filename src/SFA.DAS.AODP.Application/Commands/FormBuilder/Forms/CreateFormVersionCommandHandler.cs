@@ -1,23 +1,23 @@
 ﻿using AutoMapper;
 using MediatR;
 using SFA.DAS.AODP.Data.Repositories;
-using ReturnModels = SFA.DAS.AODP.Models.Forms.FormBuilder;
+//using ReturnModels = SFA.DAS.AODP.Models.Forms.FormBuilder;
 using Entities = SFA.DAS.AODP.Data.Entities;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
-public class CreateFormVersionCommandRequestHandler : IRequestHandler<CreateFormVersionCommandRequest, CreateFormVersionCommandResponse>
+public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersionCommand, CreateFormVersionCommandResponse>
 {
     private readonly IFormVersionRepository _formVersionRepository;
     private readonly IMapper _mapper;
 
-    public CreateFormVersionCommandRequestHandler(IFormVersionRepository formVersionRepository, IMapper mapper)
+    public CreateFormVersionCommandHandler(IFormVersionRepository formVersionRepository, IMapper mapper)
     {
         _formVersionRepository = formVersionRepository;
         _mapper = mapper;
     }
 
-    public async Task<CreateFormVersionCommandResponse> Handle(CreateFormVersionCommandRequest request, CancellationToken cancellationToken)
+    public async Task<CreateFormVersionCommandResponse> Handle(CreateFormVersionCommand request, CancellationToken cancellationToken)
     {
         var response = new CreateFormVersionCommandResponse
         {
@@ -28,7 +28,7 @@ public class CreateFormVersionCommandRequestHandler : IRequestHandler<CreateForm
         {
             var formVersionToCreate = _mapper.Map<Entities.FormVersion>(request.Data);
             var form = _formVersionRepository.Create(formVersionToCreate);
-            var createdForm = _mapper.Map<ReturnModels.FormVersion>(form);
+            var createdForm = _mapper.Map<CreateFormVersionCommandResponse.FormVersion>(form);
 
             response.Data = createdForm;
             response.Success = true;
