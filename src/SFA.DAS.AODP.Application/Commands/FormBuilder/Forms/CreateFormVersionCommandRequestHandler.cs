@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
 using SFA.DAS.AODP.Data.Repositories;
-using ViewModels = SFA.DAS.AODP.Models.Forms.FormBuilder;
+using ReturnModels = SFA.DAS.AODP.Models.Forms.FormBuilder;
 using Entities = SFA.DAS.AODP.Data.Entities;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
@@ -28,7 +28,7 @@ public class CreateFormVersionCommandRequestHandler : IRequestHandler<CreateForm
         {
             var formVersionToCreate = _mapper.Map<Entities.FormVersion>(request.Data);
             var form = _formVersionRepository.Create(formVersionToCreate);
-            var createdForm = _mapper.Map<ViewModels.FormVersion>(form);
+            var createdForm = _mapper.Map<ReturnModels.FormVersion>(form);
 
             response.Data = createdForm;
             response.Success = true;
