@@ -61,5 +61,7 @@
   <ItemGroup>
     <Build Include="Tables\Form.sql" />
     <Build Include="Tables\FormVersion.sql" />
+    <Build Include="Tables\Page.sql" />
+    <Build Include="Tables\Section.sql" />
   </ItemGroup>
 </Project>

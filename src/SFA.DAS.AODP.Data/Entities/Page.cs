@@ -8,7 +8,6 @@ public class Page
     public Guid Key { get; set; }
     public string Description { get; set; }
     public int Order { get; set; }
-    public int? NextPageId { get; set; }
     public List<Question> Questions { get; set; }
 
     public Page()

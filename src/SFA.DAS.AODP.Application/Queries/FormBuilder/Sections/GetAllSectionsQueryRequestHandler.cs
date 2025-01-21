@@ -11,7 +11,7 @@ public class GetAllSectionsQueryRequestHandler : IRequestHandler<GetAllSectionsQ
 
     public async Task<GetAllSectionsQueryResponse> Handle(GetAllSectionsQueryRequest request, CancellationToken cancellationToken)
     {
-        var response = new GetAllSectionsQueryResponse();
+        var response = new GetAllSectionsQueryResponse(new());
         response.Success = false;
         try
         {

@@ -2,7 +2,4 @@
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
-public class GetAllPagesQueryRequest : IRequest<GetAllPagesQueryResponse>
-{
-    public Guid SectionId { get; set; }
-}
+public record GetAllPagesQueryRequest(Guid SectionId) : IRequest<GetAllPagesQueryResponse>;

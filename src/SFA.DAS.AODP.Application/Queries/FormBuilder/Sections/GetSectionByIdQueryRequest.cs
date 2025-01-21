@@ -2,7 +2,4 @@
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
-public class GetSectionByIdQueryRequest : IRequest<GetSectionByIdQueryResponse>
-{
-    public Guid Id { get; set; }
-}
+public record GetSectionByIdQueryRequest(Guid Id = default) : IRequest<GetSectionByIdQueryResponse>;

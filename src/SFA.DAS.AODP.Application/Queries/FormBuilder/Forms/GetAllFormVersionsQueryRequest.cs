@@ -2,4 +2,4 @@
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
-public class GetAllFormVersionsQueryRequest : IRequest<GetAllFormVersionsQueryResponse> { }
+public class GetAllFormVersionsQueryRequest : IRequest<GetAllFormVersionsQueryResponse>;

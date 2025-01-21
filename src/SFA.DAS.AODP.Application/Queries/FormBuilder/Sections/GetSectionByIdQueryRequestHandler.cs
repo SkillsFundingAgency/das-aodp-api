@@ -11,7 +11,7 @@ public class GetSectionByIdQueryRequestHandler : IRequestHandler<GetSectionByIdQ
 
     public async Task<GetSectionByIdQueryResponse> Handle(GetSectionByIdQueryRequest request, CancellationToken cancellationToken)
     {
-        var response = new GetSectionByIdQueryResponse();
+        var response = new GetSectionByIdQueryResponse(new());
         response.Success = false;
         try
         {

@@ -11,7 +11,7 @@ public class GetPageByIdQueryRequestHandler : IRequestHandler<GetPageByIdQueryRe
 
     public async Task<GetPageByIdQueryResponse> Handle(GetPageByIdQueryRequest request, CancellationToken cancellationToken)
     {
-        var response = new GetPageByIdQueryResponse();
+        var response = new GetPageByIdQueryResponse(new());
         response.Success = false;
         try
         {

@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
-public class GetPageByIdQueryResponse : BaseResponse
+public class GetPageByIdQueryResponse(Page data) : BaseResponse
 {
-    public Page Data { get; set; }
+    public Page Data { get; set; } = data;
 }

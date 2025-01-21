@@ -10,7 +10,7 @@ public class GetAllPagesQueryRequestHandler : IRequestHandler<GetAllPagesQueryRe
 
     public async Task<GetAllPagesQueryResponse> Handle(GetAllPagesQueryRequest request, CancellationToken cancellationToken)
     {
-        var response = new GetAllPagesQueryResponse();
+        var response = new GetAllPagesQueryResponse(new());
         response.Success = false;
         try
         {

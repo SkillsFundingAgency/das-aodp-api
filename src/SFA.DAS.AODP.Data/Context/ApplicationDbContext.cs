@@ -55,6 +55,8 @@ namespace SFA.DAS.AODP.Infrastructure.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+
             modelBuilder.Entity<ApprovedQualificationsImport>(entity =>
             {
                 entity.HasKey(e => e.Id).HasName("PK__Approved__3214EC07A1181B65");
@@ -342,11 +344,7 @@ namespace SFA.DAS.AODP.Infrastructure.Context
                     .IsUnicode(false);
                 entity.Property(e => e.UiLastUpdatedDate).HasColumnType("datetime");
             });
-
-            //OnModelCreatingPartial(modelBuilder);
         }
-
-        //partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {

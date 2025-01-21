@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
-public class GetAllPagesQueryResponse : BaseResponse
+public class GetAllPagesQueryResponse(List<Page> data) : BaseResponse
 {
-    public List<Page> Data { get; set; }
+    public List<Page> Data { get; set; } = data;
 }

@@ -40,9 +40,7 @@ namespace SFA.DAS.AODP.Api.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetByIdAsync(Guid formVersionId)
         {
-            var query = new GetFormVersionByIdQueryRequest() {
-                Id = formVersionId
-            };
+            var query = new GetFormVersionByIdQueryRequest(formVersionId);
 
             var response = await _mediator.Send(query);
 

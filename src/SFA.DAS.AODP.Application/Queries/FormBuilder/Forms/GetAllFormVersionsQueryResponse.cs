@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
-public class GetAllFormVersionsQueryResponse : BaseResponse
+public class GetAllFormVersionsQueryResponse(List<FormVersion> data) : BaseResponse
 {
-    public List<FormVersion> Data { get; set; }
+    public List<FormVersion> Data { get; set; } = data;
 }

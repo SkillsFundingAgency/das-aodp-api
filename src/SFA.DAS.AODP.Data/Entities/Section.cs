@@ -8,7 +8,6 @@ public class Section
     public int Order { get; set; }
     public string Title { get; set; }
     public string Description { get; set; }
-    public int? NextSectionId { get; set; }
     public List<Page> Pages { get; set; }
 
     public Section()
