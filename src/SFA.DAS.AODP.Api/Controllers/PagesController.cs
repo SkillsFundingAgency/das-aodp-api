@@ -22,7 +22,7 @@ namespace SFA.DAS.AODP.Api.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllAsync(Guid sectionId)
         {
-            var query = new GetAllPagesQueryRequest()
+            var query = new GetAllPagesQueryRequest(new())
             {
                 SectionId = sectionId
             };
@@ -44,7 +44,7 @@ namespace SFA.DAS.AODP.Api.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetByIdAsync(Guid pageId, Guid sectionId)
         {
-            var query = new GetPageByIdQueryRequest() {
+            var query = new GetPageByIdQueryRequest(new()) {
                 Id = pageId
             };
 

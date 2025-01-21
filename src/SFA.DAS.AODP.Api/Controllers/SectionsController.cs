@@ -22,7 +22,7 @@ namespace SFA.DAS.AODP.Api.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllAsync([FromRoute] Guid formId)
         {
-            var query = new GetAllSectionsQueryRequest()
+            var query = new GetAllSectionsQueryRequest(new())
             {
                 FormId = formId
             };

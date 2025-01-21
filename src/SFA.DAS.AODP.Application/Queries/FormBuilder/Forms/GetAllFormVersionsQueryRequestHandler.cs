@@ -19,7 +19,7 @@ public class GetAllFormVersionsQueryRequestHandler : IRequestHandler<GetAllFormV
 
     public async Task<GetAllFormVersionsQueryResponse> Handle(GetAllFormVersionsQueryRequest request, CancellationToken cancellationToken)
     {
-        var queryResponse = new GetAllFormVersionsQueryResponse
+        var queryResponse = new GetAllFormVersionsQueryResponse(new())
         {
             Success = false
         };
