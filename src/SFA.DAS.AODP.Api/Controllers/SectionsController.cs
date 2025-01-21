@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
-using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 namespace SFA.DAS.AODP.Api.Controllers
 {
@@ -17,19 +16,17 @@ namespace SFA.DAS.AODP.Api.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet("/api/sections/form/{formId}")]
-        [ProducesResponseType(typeof(List<Section>), StatusCodes.Status200OK)]
+        [HttpGet("/api/sections/form/{formVersionId}")]
+        [ProducesResponseType(typeof(GetAllSectionsQueryResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllAsync([FromRoute] Guid formId)
+        public async Task<IActionResult> GetAllAsync([FromRoute] Guid formVersionId)
         {
-            var query = new GetAllSectionsQueryRequest()
-            {
-                FormId = formId
-            };
+            var query = new GetAllSectionsQuery(formVersionId);
+
             var response = await _mediator.Send(query);
             if (response.Success)
             {
-                return Ok(response.Data);
+                return Ok(response);
             }
 
             var errorObjectResult = new ObjectResult(response.ErrorMessage);
@@ -38,15 +35,12 @@ namespace SFA.DAS.AODP.Api.Controllers
             return errorObjectResult;
         }
 
-        [HttpGet("/api/sections/{sectionId}/form/{formId}")]
-        [ProducesResponseType(typeof(List<Page>), StatusCodes.Status200OK)]
+        [HttpGet("/api/sections/{sectionId}/form/{formVersionId}")]
+        [ProducesResponseType(typeof(GetSectionByIdQueryResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetByIdAsync([FromRoute] Guid sectionId, [FromRoute] Guid formId)
+        public async Task<IActionResult> GetByIdAsync([FromRoute] Guid sectionId, [FromRoute] Guid formVersionId)
         {
-            var query = new GetSectionByIdQueryRequest()
-            {
-                Id = sectionId
-            };
+            var query = new GetSectionByIdQuery(sectionId, formVersionId);
 
             var response = await _mediator.Send(query);
 
@@ -54,7 +48,7 @@ namespace SFA.DAS.AODP.Api.Controllers
             {
                 if (response.Data is null)
                     return NotFound();
-                return Ok(response.Data);
+                return Ok(response);
             }
 
             var errorObjectResult = new ObjectResult(response.ErrorMessage);
@@ -64,21 +58,18 @@ namespace SFA.DAS.AODP.Api.Controllers
         }
 
         [HttpPost("/api/sections")]
-        [ProducesResponseType(typeof(Section), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(CreateSectionCommandResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> CreateAsync([FromBody] Section model)
+        public async Task<IActionResult> CreateAsync([FromBody] CreateSectionCommand.Section section)
         {
-            var command = new CreateSectionCommandRequest
-            {
-                Data = model,
-            };
+            var command = new CreateSectionCommand(section);
 
             var response = await _mediator.Send(command);
             if (response.Success)
             {
                 if (response.Data is null)
                     return NotFound();
-                return Ok(response.Data);
+                return Ok(response);
             }
 
             var errorObjectResult = new ObjectResult(response.ErrorMessage);
@@ -87,15 +78,12 @@ namespace SFA.DAS.AODP.Api.Controllers
             return errorObjectResult;
         }
 
-        [HttpPut("/api/sections/{formId}")]
-        [ProducesResponseType(typeof(Section), StatusCodes.Status200OK)]
+        [HttpPut("/api/sections/{formVersionId}")]
+        [ProducesResponseType(typeof(UpdateSectionCommandResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateAsync([FromRoute] Guid formId, [FromBody] Section model)
+        public async Task<IActionResult> UpdateAsync([FromRoute] Guid formVersionId, [FromBody] UpdateSectionCommand.Section section)
         {
-            var command = new UpdateSectionCommandRequest
-            {
-                Data = model,
-            };
+            var command = new UpdateSectionCommand(formVersionId, section);
 
             var response = await _mediator.Send(command);
 
@@ -103,7 +91,7 @@ namespace SFA.DAS.AODP.Api.Controllers
             {
                 if (response.Data is null)
                     return NotFound();
-                return Ok(response.Data);
+                return Ok(response);
             }
 
             var errorObjectResult = new ObjectResult(response.ErrorMessage);
@@ -113,19 +101,16 @@ namespace SFA.DAS.AODP.Api.Controllers
         }
 
         [HttpDelete("/api/sections/{sectionId}")]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(DeleteSectionCommandResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> RemoveAsync([FromRoute] Guid sectionId)
         {
-            var command = new DeleteSectionCommandRequest
-            {
-                Id = sectionId,
-            };
+            var command = new DeleteSectionCommand(sectionId);
 
             var response = await _mediator.Send(command);
             if (response.Success)
             {
-                return Ok(response.Data);
+                return Ok(response);
             }
 
             var errorObjectResult = new ObjectResult(response.ErrorMessage);

@@ -22,33 +22,14 @@ namespace SFA.DAS.AODP.Infrastructure.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(new SqlConnection()
-            {
-                ConnectionString = "Data Source=.;Initial Catalog=SFA.DAS.AODP;Integrated Security=True;TrustServerCertificate=True"
-            })
+            optionsBuilder
+                .UseSqlServer(new SqlConnection()
+                {
+                    ConnectionString = "Data Source=.;Initial Catalog=SFA.DAS.AODP;Integrated Security=True;TrustServerCertificate=True"
+                })
                 .UseAsyncSeeding(async (context, _, ct) =>
                 {
-                    //context.Database.EnsureCreated();
-                    //var formDb = new Form { Id = Guid.NewGuid(), Archived = true };
-                    //context.Set<Form>().Add(formDb);
-
-                    //context.Set<Form>().Add(new Form { Id = Guid.NewGuid(), Archived = false });
-                    //context.Set<FormVersion>().Add(new()
-                    //{
-                    //    Id = Guid.NewGuid(),
-                    //    DateCreated = DateTime.Now,
-                    //    FormId = formDb.Id,
-                    //    Description = "Something",
-                    //    Status = FormStatus.Published,
-                    //    Archived = false,
-                    //    Name = "Name",
-                    //    Version = DateTime.Now,
-                    //});
-                    //await context.SaveChangesAsync();
-
-                    //########################################
                     await DataSeeder.SeedAsync(context);
-
                 });
             base.OnConfiguring(optionsBuilder);
         }

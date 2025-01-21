@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
-using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 namespace SFA.DAS.AODP.Api.Controllers
 {
@@ -18,15 +17,15 @@ namespace SFA.DAS.AODP.Api.Controllers
         }
 
         [HttpGet("/api/forms")]
-        [ProducesResponseType(typeof(List<FormVersion>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetAllFormVersionsQueryResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllAsync()
         {
-            var query = new GetAllFormVersionsQueryRequest();
+            var query = new GetAllFormVersionsQuery();
             var response = await _mediator.Send(query);
             if (response.Success)
             {
-                return Ok(response.Data);
+                return Ok(response);
             }
 
             var errorObjectResult = new ObjectResult(response.ErrorMessage);
@@ -36,13 +35,11 @@ namespace SFA.DAS.AODP.Api.Controllers
         }
 
         [HttpGet("/api/forms/{formVersionId}")]
-        [ProducesResponseType(typeof(FormVersion), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GetFormVersionByIdQueryResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetByIdAsync(Guid formVersionId)
         {
-            var query = new GetFormVersionByIdQueryRequest() {
-                Id = formVersionId
-            };
+            var query = new GetFormVersionByIdQuery(formVersionId);
 
             var response = await _mediator.Send(query);
 
@@ -50,7 +47,7 @@ namespace SFA.DAS.AODP.Api.Controllers
             {
                 if (response.Data is null)
                     return NotFound();
-                return Ok(response.Data);
+                return Ok(response);
             }
 
             var errorObjectResult = new ObjectResult(response.ErrorMessage);
@@ -60,21 +57,18 @@ namespace SFA.DAS.AODP.Api.Controllers
         }
 
         [HttpPost("/api/forms")]
-        [ProducesResponseType(typeof(FormVersion), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(CreateFormVersionCommandResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> CreateAsync([FromBody] FormVersion formVersion)
+        public async Task<IActionResult> CreateAsync([FromBody] CreateFormVersionCommand.FormVersion formVersion)
         {
-            var command = new CreateFormVersionCommandRequest
-            {
-                Data = formVersion,
-            };
+            var command = new CreateFormVersionCommand(formVersion);
 
             var response = await _mediator.Send(command);
             if (response.Success)
             {
                 if (response.Data is null)
                     return NotFound();
-                return Ok(response.Data);
+                return Ok(response);
             }
 
             var errorObjectResult = new ObjectResult(response.ErrorMessage);
@@ -84,14 +78,11 @@ namespace SFA.DAS.AODP.Api.Controllers
         }
 
         [HttpPut("/api/forms/{formVersionId}")]
-        [ProducesResponseType(typeof(FormVersion), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UpdateFormVersionCommandResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateAsync(Guid formVersionId, [FromBody] FormVersion formVersion)
+        public async Task<IActionResult> UpdateAsync(Guid formVersionId, [FromBody] UpdateFormVersionCommand.FormVersion formVersion)
         {
-            var command = new UpdateFormVersionCommandRequest
-            {
-                Data = formVersion,
-            };
+            var command = new UpdateFormVersionCommand(formVersionId, formVersion);
 
             var response = await _mediator.Send(command);
 
@@ -99,7 +90,7 @@ namespace SFA.DAS.AODP.Api.Controllers
             {
                 if (response.Data is null)
                     return NotFound();
-                return Ok(response.Data);
+                return Ok(response);
             }
 
             var errorObjectResult = new ObjectResult(response.ErrorMessage);
@@ -121,19 +112,16 @@ namespace SFA.DAS.AODP.Api.Controllers
         }
 
         [HttpDelete("/api/forms/{formVersionId}")]
-        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(DeleteFormVersionCommandResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> RemoveAsync(Guid formVersionId)
         {
-            var command = new DeleteFormVersionCommandRequest
-            {
-                Id = formVersionId,
-            };
+            var command = new DeleteFormVersionCommand(formVersionId);
 
             var response = await _mediator.Send(command);
             if (response.Success)
             {
-                return Ok(response.Data);
+                return Ok(response);
             }
 
             var errorObjectResult = new ObjectResult(response.ErrorMessage);

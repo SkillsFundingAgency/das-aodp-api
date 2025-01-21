@@ -1,8 +1,17 @@
-﻿namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
+﻿using MediatR;
 
-public class UpdatePageCommandResponse : BaseResponse
+namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
+
+public class UpdatePageCommand : IRequest<UpdatePageCommandResponse>
 {
-    public Page Data { get; set; }
+    public readonly Guid PageId;
+    public readonly Page Data;
+
+    public UpdatePageCommand(Guid pageId, Page data)
+    {
+        PageId = pageId;
+        Data = data;
+    }
 
     public class Page
     {

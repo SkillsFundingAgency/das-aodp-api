@@ -1,8 +1,16 @@
-﻿namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
+﻿using MediatR;
+using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
-public class UpdateSectionCommandResponse : BaseResponse
+namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
+
+public class CreateSectionCommand : IRequest<CreateSectionCommandResponse>
 {
-    public Section Data { get; set; }
+    public readonly Section Data;
+
+    public CreateSectionCommand(Section data)
+    {
+        Data = data;
+    }
 
     public class Section
     {

@@ -1,11 +1,16 @@
-﻿using SFA.DAS.AODP.Models.Forms.FormBuilder;
+﻿using MediatR;
+using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
-
-public class CreateFormVersionCommandResponse : BaseResponse
+public class CreateFormVersionCommand : IRequest<CreateFormVersionCommandResponse>
 {
-    public FormVersion Data { get; set; }
+    public readonly FormVersion Data;
+
+    public CreateFormVersionCommand(FormVersion data)
+    {
+        Data = data;
+    }
 
     public class FormVersion
     {
@@ -14,6 +19,7 @@ public class CreateFormVersionCommandResponse : BaseResponse
         public string Name { get; set; }
         public DateTime Version { get; set; }
         public FormStatus Status { get; set; }
+        public bool Archived { get; set; }
         public string Description { get; set; }
         public int Order { get; set; }
         public DateTime DateCreated { get; set; }
