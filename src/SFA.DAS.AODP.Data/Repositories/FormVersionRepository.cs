@@ -117,4 +117,9 @@ public class FormVersionRepository : IFormVersionRepository
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public Task<bool> Unpublish(Guid formVersionId)
+    {
+        throw new NotImplementedException();
+    }
 }

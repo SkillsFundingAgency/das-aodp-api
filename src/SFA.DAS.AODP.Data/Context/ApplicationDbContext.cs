@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.ExampleData;
 
@@ -21,7 +22,10 @@ namespace SFA.DAS.AODP.Infrastructure.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseInMemoryDatabase("AODB")
+            optionsBuilder.UseSqlServer(new SqlConnection()
+            {
+                ConnectionString = "Data Source=.;Initial Catalog=SFA.DAS.AODP;Integrated Security=True;TrustServerCertificate=True"
+            })
                 .UseAsyncSeeding(async (context, _, ct) =>
                 {
                     //context.Database.EnsureCreated();

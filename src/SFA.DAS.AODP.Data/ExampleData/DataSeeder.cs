@@ -21,11 +21,11 @@ public static class DataSeeder
 
             var forms = new List<Form>();
             var formVersions = new List<FormVersion>();
-            var sections = new List<Section>();
-            var pages = new List<Page>();
-            var questions = new List<Question>();
-            var validationRules = new List<ValidationRule>();
-            var options = new List<Option>();
+            //var sections = new List<Section>();
+            //var pages = new List<Page>();
+            //var questions = new List<Question>();
+            //var validationRules = new List<ValidationRule>();
+            //var options = new List<Option>();
 
             for (int i = 1; i <= seedCount; i++)
             {
@@ -36,41 +36,39 @@ public static class DataSeeder
                 context.Set<Form>().Add(form);
 
 
-                var questionOptions = CreateOptions(4);
-                var formValidationRules = CreateValidationRules();
-                var formSections = CreateSections(formId, questionOptions, formValidationRules);
+                //var questionOptions = CreateOptions(4);
+                //var formValidationRules = CreateValidationRules();
+                //var formSections = CreateSections(formId, questionOptions, formValidationRules);
 
-                foreach (var section in formSections)
-                {
-                    sections.Add(section);
-                    foreach (var page in section.Pages)
-                    {
-                        pages.Add(page);
-                        foreach (var question in page.Questions)
-                        {
-                            questions.Add(question);
-                            validationRules.AddRange(question.ValidationRules);
-                            options.AddRange(question.Options);
-                        }
-                    }
-                }
+                //foreach (var section in formSections)
+                //{
+                //    sections.Add(section);
+                //    foreach (var page in section.Pages)
+                //    {
+                //        pages.Add(page);
+                //        foreach (var question in page.Questions)
+                //        {
+                //            questions.Add(question);
+                //            validationRules.AddRange(question.ValidationRules);
+                //            options.AddRange(question.Options);
+                //        }
+                //    }
+                //}
 
                 context.Set<FormVersion>().Add(new()
                 {
-                    Id = NewGuid(),
                     DateCreated = DateTime.Now,
                     FormId = form.Id,
                     Description = "Something",
                     Status = FormStatus.Draft,
-                    Archived = false,
                     Name = "Name",
                     Version = DateTime.Now,
                 });
 
-                context.Set<Section>().AddRange(sections);
-                context.Set<Page>().AddRange(pages);
-                context.Set<Question>().AddRange(questions);
-                context.Set<Option>().AddRange(options);
+                //context.Set<Section>().AddRange(sections);
+                //context.Set<Page>().AddRange(pages);
+                //context.Set<Question>().AddRange(questions);
+                //context.Set<Option>().AddRange(options);
 
                 Console.WriteLine($"Created Form {i} with ID: {formId}");
             }

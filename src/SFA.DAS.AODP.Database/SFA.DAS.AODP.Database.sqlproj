@@ -60,5 +60,6 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Form.sql" />
+    <Build Include="Tables\FormVersion.sql" />
   </ItemGroup>
 </Project>
