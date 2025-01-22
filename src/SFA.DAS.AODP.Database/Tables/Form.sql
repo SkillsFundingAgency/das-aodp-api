@@ -1,12 +1,9 @@
-﻿CREATE TABLE [dbo].[Form](
-	[Id] [uniqueidentifier] NOT NULL,
+﻿CREATE TABLE [dbo].[Forms](
+	[Id] [uniqueidentifier] NOT NULL DEFAULT (newid()),
 	[Archived] [bit] NOT NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
-GO
-
-ALTER TABLE [dbo].[Form] ADD  CONSTRAINT [DF_Form_Id]  DEFAULT (newid()) FOR [Id]
 GO
