@@ -18,23 +18,23 @@ public static class AddDataProtectionExtensions
                 .PersistKeysToFileSystem(new DirectoryInfo(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "keys")));
 
         }
-        else
-        {
-            var redisConfiguration = configuration.GetRequiredSection("RedisConnectionSettings")
-                .Get<RedisConnectionSettings>()!;
+        //else
+        //{
+        //    var redisConfiguration = configuration.GetRequiredSection("RedisConnectionSettings")
+        //        .Get<RedisConnectionSettings>()!;
 
-            var redisConnectionString = redisConfiguration.RedisConnectionString;
-            var dataProtectionKeysDatabase = redisConfiguration.DataProtectionKeysDatabase;
+        //    var redisConnectionString = redisConfiguration.RedisConnectionString;
+        //    var dataProtectionKeysDatabase = redisConfiguration.DataProtectionKeysDatabase;
 
-            var redis = ConnectionMultiplexer
-                .Connect($"{redisConnectionString},{dataProtectionKeysDatabase}");
+        //    var redis = ConnectionMultiplexer
+        //        .Connect($"{redisConnectionString},{dataProtectionKeysDatabase}");
 
 
-            services
-                .AddDataProtection()
-                .PersistKeysToStackExchangeRedis(redis, $"{applicationName}-DataProtectionKeys")
-                .SetApplicationName(applicationName);
-        }
+        //    services
+        //        .AddDataProtection()
+        //        .PersistKeysToStackExchangeRedis(redis, $"{applicationName}-DataProtectionKeys")
+        //        .SetApplicationName(applicationName);
+        //}
         return services;
     }
 }
