@@ -1,11 +1,7 @@
 ﻿namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
-public class GetAllPagesQueryResponse(List<Page> data) : BaseResponse
+public class GetAllPagesQueryResponse : BaseResponse
 {
-<<<<<<< HEAD
-    public List<Page> Data { get; set; } = data;
-}
-=======
     public List<Page> Data { get; set; }
 
     public class Page
@@ -19,4 +15,3 @@ public class GetAllPagesQueryResponse(List<Page> data) : BaseResponse
         public int? NextPageId { get; set; }
     }
 }
->>>>>>> ab4b648a65944bfdc978e773d93dae3cd911f872

@@ -4,9 +4,6 @@ namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
 public class GetSectionByIdQueryResponse(Section data) : BaseResponse
 {
-<<<<<<< HEAD
-    public Section Data { get; set; } = data;
-=======
     public Section Data { get; set; }
 
     public class Section
@@ -19,5 +16,4 @@ public class GetSectionByIdQueryResponse(Section data) : BaseResponse
         public string Description { get; set; }
         public int? NextSectionId { get; set; }
     }
->>>>>>> ab4b648a65944bfdc978e773d93dae3cd911f872
 }
