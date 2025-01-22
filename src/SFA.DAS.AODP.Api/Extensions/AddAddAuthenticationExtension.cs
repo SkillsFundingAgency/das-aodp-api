@@ -28,7 +28,7 @@ public static class AddAddAuthenticationExtension
 
     private static bool ConfigurationIsLocalOrDev(IConfigurationRoot configuration)
     {
-        return configuration["Environment"].Equals("LOCAL", StringComparison.CurrentCultureIgnoreCase) ||
-               configuration["Environment"].Equals("DEV", StringComparison.CurrentCultureIgnoreCase);
+        return configuration["EnvironmentName"].Equals("LOCAL", StringComparison.CurrentCultureIgnoreCase) ||
+               configuration["EnvironmentName"].Equals("DEV", StringComparison.CurrentCultureIgnoreCase);
     }
 }

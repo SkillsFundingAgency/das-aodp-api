@@ -26,7 +26,7 @@ namespace SFA.DAS.AODP.Common.Extensions
                 {
                     options.ConfigurationKeys = configuration["ConfigNames"].Split(",");
                     options.StorageConnectionString = configuration["ConfigurationStorageConnectionString"];
-                    options.EnvironmentName = configuration["Environment"];
+                    options.EnvironmentName = configuration["EnvironmentName"];
                     options.PreFixConfigurationKeys = false;
                 }
                    );
