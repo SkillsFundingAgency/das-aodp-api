@@ -19,7 +19,7 @@ namespace SFA.DAS.AODP.Common.Extensions
                 .AddJsonFile("appsettings.Development.json", true);
 #endif
 
-            if (isDevelopment)
+            if (!isDevelopment)
             {
 
                 configBuilder.AddAzureTableStorage(options =>
