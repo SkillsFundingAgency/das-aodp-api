@@ -8,10 +8,6 @@ public class Section
     public int Order { get; set; }
     public string Title { get; set; }
     public string Description { get; set; }
-    public List<Page> Pages { get; set; }
-
-    public Section()
-    {
-        Pages = new List<Page>();
-    }
+    public virtual List<Page> Pages { get; set; }
+    public virtual FormVersion FormVersion { get; set; }
 }

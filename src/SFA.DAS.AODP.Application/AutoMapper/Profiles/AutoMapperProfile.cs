@@ -38,6 +38,7 @@ public class AutoMapperProfile : Profile
         #region Query Response Mapping
         CreateMap<Entities.FormVersion, GetAllFormVersionsQueryResponse.FormVersion>().ReverseMap();
         CreateMap<Entities.FormVersion, GetFormVersionByIdQueryResponse.FormVersion>().ReverseMap();
+        CreateMap<Entities.Section, GetFormVersionByIdQueryResponse.Section>().ReverseMap();
         CreateMap<Entities.Section, GetAllSectionsQueryResponse.Section>().ReverseMap();
         CreateMap<Entities.Section, GetSectionByIdQueryResponse.Section>().ReverseMap();
         CreateMap<Entities.Page, GetAllPagesQueryResponse.Page>().ReverseMap();

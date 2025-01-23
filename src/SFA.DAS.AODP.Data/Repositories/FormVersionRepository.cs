@@ -17,21 +17,10 @@ public class FormVersionRepository : IFormVersionRepository
 
     public async Task<List<FormVersion>> GetLatestFormVersions()
     {
-        var all = _context.FormVersions.ToList();
-
         var top =
             _context.FormVersions
-            //.Where(f => !f.Form.Archived)
-            .GroupBy(
-                t => t.FormId
-            )
-            .Select(t => new
-            {
-                FormId = t.Key,
-                LatestForm = t.OrderByDescending(x => x.DateCreated).First()
-            })
-            .AsEnumerable()
-            .Select(t => t.LatestForm)
+            .Where(f => !f.Form.Archived)
+            .Where(f => f.Status != FormStatus.Archived)
             .ToList();
 
         return top;
@@ -39,12 +28,12 @@ public class FormVersionRepository : IFormVersionRepository
 
     public async Task<FormVersion?> GetFormVersionByIdAsync(Guid formVersionId)
     {
-        return await _context.FormVersions.FirstOrDefaultAsync(v => v.Id == formVersionId);
+        return await _context.FormVersions.Include(f => f.Sections).FirstOrDefaultAsync(v => v.Id == formVersionId);
     }
 
     public async Task<FormVersion> Create(FormVersion formVersionToAdd)
     {
-        var form = new Form() 
+        var form = new Form()
         {
             Id = Guid.NewGuid(),
         };
