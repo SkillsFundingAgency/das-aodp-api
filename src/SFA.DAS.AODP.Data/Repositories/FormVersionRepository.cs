@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Infrastructure.Context;
 
 namespace SFA.DAS.AODP.Data.Repositories;
@@ -19,27 +20,29 @@ public class FormVersionRepository : IFormVersionRepository
     {
         var all = _context.FormVersions.ToList();
 
-        var top =
-            _context.FormVersions
-            //.Where(f => !f.Form.Archived)
-            .GroupBy(
-                t => t.FormId
-            )
-            .Select(t => new
-            {
-                FormId = t.Key,
-                LatestForm = t.OrderByDescending(x => x.DateCreated).First()
-            })
-            .AsEnumerable()
-            .Select(t => t.LatestForm)
-            .ToList();
+        var top =  _context.FormVersions
+                .Where(f => !f.Form.Archived)
+                .GroupBy(
+                    t => t.FormId
+                )
+                .Select(t => new
+                {
+                    FormId = t.Key,
+                    LatestForm = t.OrderByDescending(x => x.DateCreated).First()
+                })
+                .AsEnumerable()
+                .Select(t => t.LatestForm)
+                .ToList();
 
         return top;
     }
 
     public async Task<FormVersion?> GetFormVersionByIdAsync(Guid formVersionId)
     {
-        return await _context.FormVersions.FirstOrDefaultAsync(v => v.Id == formVersionId);
+        var res = await _context.FormVersions.FirstOrDefaultAsync(v => v.Id == formVersionId);
+        if (res is null)
+            throw new RecordNotFoundException(formVersionId);
+        return res;
     }
 
     public async Task<FormVersion> Create(FormVersion formVersionToAdd)
@@ -57,11 +60,11 @@ public class FormVersionRepository : IFormVersionRepository
         return formVersionToAdd;
     }
 
-    public async Task<FormVersion?> Update(FormVersion form)
+    public async Task<FormVersion> Update(FormVersion form)
     {
         var formToUpdate = await _context.FormVersions.FirstOrDefaultAsync(v => v.Id == form.Id);
         if (formToUpdate is null)
-            return null;
+            throw new RecordNotFoundException(form.Id);
         if (formToUpdate.Status == FormStatus.Published)
         {
             var oldFormId = form.Id;
@@ -79,7 +82,7 @@ public class FormVersionRepository : IFormVersionRepository
     {
         var found = await _context.FormVersions.FirstOrDefaultAsync(v => v.Id == formVersionId);
         if (found is null)
-            return false;
+            throw new RecordNotFoundException(formVersionId);
         found.Status = FormStatus.Archived;
         await _context.SaveChangesAsync();
         return true;
@@ -93,7 +96,8 @@ public class FormVersionRepository : IFormVersionRepository
             .Where(v => v.Status == FormStatus.Published)
             .ToListAsync();
 
-        if (newPublishedForm is null) return false;
+        if (newPublishedForm is null)
+            throw new RecordNotFoundException(formVersionId);
 
         newPublishedForm.Status = FormStatus.Published;
 
@@ -106,20 +110,16 @@ public class FormVersionRepository : IFormVersionRepository
         return true;
     }
 
-    public async Task<bool> UnPublish(Guid formVersionId)
+    public async Task<bool> Unpublish(Guid formVersionId)
     {
         var form = await _context.FormVersions
             .FirstOrDefaultAsync(v => v.Id == formVersionId);
 
-        if (form is null) return false;
+        if (form is null)
+            throw new RecordNotFoundException(formVersionId);
 
         form.Status = FormStatus.Archived;
         await _context.SaveChangesAsync();
         return true;
-    }
-
-    public Task<bool> Unpublish(Guid formVersionId)
-    {
-        throw new NotImplementedException();
     }
 }
