@@ -24,6 +24,7 @@ namespace SFA.DAS.AODP.Infrastructure.Context
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
+                .UseInMemoryDatabase("AODP")
                 .UseAsyncSeeding(async (context, _, ct) =>
                 {
                     await DataSeeder.SeedAsync(context);
