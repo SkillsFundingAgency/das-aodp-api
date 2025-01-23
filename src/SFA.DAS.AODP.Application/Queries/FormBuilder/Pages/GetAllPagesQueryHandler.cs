@@ -1,12 +1,13 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
+using SFA.DAS.AODP.Data.Repositories;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
-public class GetAllPagesQueryHandler : IRequestHandler<GetAllPagesQuery, GetAllPagesQueryResponse>
+public class GetAllPagesQueryHandler(IPageRepository pageRepository, IMapper mapper) : IRequestHandler<GetAllPagesQuery, GetAllPagesQueryResponse>
 {
-    public GetAllPagesQueryHandler()
-    {
-    }
+    private readonly IPageRepository PageRepository = pageRepository;
+    private readonly IMapper Mapper = mapper;
 
     public async Task<GetAllPagesQueryResponse> Handle(GetAllPagesQuery request, CancellationToken cancellationToken)
     {
@@ -14,7 +15,9 @@ public class GetAllPagesQueryHandler : IRequestHandler<GetAllPagesQuery, GetAllP
         response.Success = false;
         try
         {
-            // response.Data = await _sectionRepository.GetSectionsForFormAsync(request.FormId);
+            var pages = await PageRepository.GetPagesForSectionAsync(request.SectionId);
+
+            response.Data = Mapper.Map<List<GetAllPagesQueryResponse.Page>>(pages);
             response.Success = true;
         }
         catch (Exception ex)

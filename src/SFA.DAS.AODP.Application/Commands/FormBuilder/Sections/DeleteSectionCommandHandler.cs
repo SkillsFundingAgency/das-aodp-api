@@ -1,13 +1,14 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
+using SFA.DAS.AODP.Data.Repositories;
 using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 
-public class DeleteSectionCommandHandler : IRequestHandler<DeleteSectionCommand, DeleteSectionCommandResponse>
+public class DeleteSectionCommandHandler(ISectionRepository sectionRepository, IMapper mapper) : IRequestHandler<DeleteSectionCommand, DeleteSectionCommandResponse>
 {
-    public DeleteSectionCommandHandler()
-    {
-    }
+    private readonly ISectionRepository SectionRepository = sectionRepository;
+    private readonly IMapper Mapper = mapper;
 
     public async Task<DeleteSectionCommandResponse> Handle(DeleteSectionCommand request, CancellationToken cancellationToken)
     {
@@ -15,16 +16,14 @@ public class DeleteSectionCommandHandler : IRequestHandler<DeleteSectionCommand,
 
         try
         {
-            //var section = _sectionRepository.GetById(request.Id);
-            //if (section == null)
-            //{
-            //    response.Success = false;
-            //    response.ErrorMessage = $"Section with id '{section!.Id}' could not be found.";
+            var res = await SectionRepository.DeleteSection(request.SectionId);
 
-            //    return response;
-            //}
-
-            //_sectionRepository.Delete(request.Id);
+            if (res is null)
+            {
+                response.Success = false;
+                response.ErrorMessage = $"Section with id '{request.SectionId}' could not be found.";
+                return response;
+            }
             response.Success = true;
         }
         catch (Exception ex)

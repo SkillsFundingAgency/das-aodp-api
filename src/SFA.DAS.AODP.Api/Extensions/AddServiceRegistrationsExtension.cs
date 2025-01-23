@@ -11,7 +11,7 @@ public static class AddServiceRegistrationsExtension
     {
         services.AddSingleton(configuration);
 
-        services.ConfigureDatabase();
+        services.ConfigureDatabase(configuration);
         return services;
     }
 }

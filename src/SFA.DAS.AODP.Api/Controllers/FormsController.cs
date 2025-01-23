@@ -102,13 +102,39 @@ namespace SFA.DAS.AODP.Api.Controllers
         [HttpPut("/api/forms/{formVersionId}/publish")]
         public async Task<IActionResult> PublishAsync(Guid formVersionId)
         {
-            return Ok();
+            var command = new PublishFormVersionCommand(formVersionId);
+            
+            var response = await _mediator.Send(command);
+
+            if (response.Success)
+                return Ok(response);
+
+            if (response.NotFound)
+                return NotFound();
+
+            var errorObjectResult = new ObjectResult(response.ErrorMessage);
+            errorObjectResult.StatusCode = StatusCodes.Status500InternalServerError;
+
+            return errorObjectResult;
         }
 
         [HttpPut("/api/forms/{formVersionId}/unpublish")]
         public async Task<IActionResult> UnpublishAsync(Guid formVersionId)
         {
-            return Ok();
+            var command = new UnpublishFormVersionCommand(formVersionId);
+
+            var response = await _mediator.Send(command);
+
+            if (response.Success)
+                return Ok(response);
+
+            if (response.NotFound)
+                return NotFound();
+
+            var errorObjectResult = new ObjectResult(response.ErrorMessage);
+            errorObjectResult.StatusCode = StatusCodes.Status500InternalServerError;
+
+            return errorObjectResult;
         }
 
         [HttpDelete("/api/forms/{formVersionId}")]

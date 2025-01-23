@@ -1,8 +1,5 @@
-﻿using SFA.DAS.AODP.Models.Forms.Application;
-using SFA.DAS.AODP.Models.Forms.FormSchema;
-using SFA.DAS.AODP.Models.Exceptions.FormValidation;
-
-namespace SFA.DAS.AODP.Models.Forms.Validators;
+﻿
+namespace SFA.DAS.AODP.Data.Entities;
 
 public class DateValidator
 {
@@ -14,7 +11,7 @@ public class DateValidator
 
     public DateSpan? GreaterThanTimeInFuture { get; set; }
     public DateSpan? LessThanTimeInFuture { get; set; }
-    public DateSpan? GreaterThanTimeInPast { get; set; }
+    public DateSpan? GreaterThanTimeInPast{ get; set; }
     public DateSpan? LessThanTimeInPast { get; set; }
 }
 

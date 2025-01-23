@@ -1,8 +1,5 @@
-﻿using SFA.DAS.AODP.Models.Forms.Application;
-using SFA.DAS.AODP.Models.Forms.FormSchema;
-using SFA.DAS.AODP.Models.Exceptions.FormValidation;
-
-namespace SFA.DAS.AODP.Models.Forms.Validators;
+﻿
+namespace SFA.DAS.AODP.Data.Entities;
 
 public class DecimalValidator
 {

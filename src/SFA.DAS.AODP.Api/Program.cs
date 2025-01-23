@@ -5,6 +5,7 @@ using SFA.DAS.AODP.Common.Extensions;
 using SFA.DAS.AODP.Infrastructure.Context;
 using SFA.DAS.AODP.Application.AutoMapper.Profiles;
 using SFA.DAS.AODP.Application.Swashbuckle;
+using SFA.DAS.AODP.Data.ExampleData;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration.LoadConfiguration(builder.Services, builder.Environment.IsDevelopment());

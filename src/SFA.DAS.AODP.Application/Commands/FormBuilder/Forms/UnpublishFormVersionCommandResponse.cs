@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
-public class PublishFormVersionCommandResponse : BaseResponse 
+public class UnpublishFormVersionCommandResponse : BaseResponse 
 { 
     public bool NotFound { get; set; } 
 }

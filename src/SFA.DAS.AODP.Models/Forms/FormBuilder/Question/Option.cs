@@ -1,4 +1,4 @@
-﻿namespace SFA.DAS.AODP.Data.Entities;
+﻿namespace SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 public class Option
 {

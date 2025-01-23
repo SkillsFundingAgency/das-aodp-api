@@ -1,13 +1,14 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
+using SFA.DAS.AODP.Data.Repositories;
 
 namespace SFA.DAS.AODP.Application.Handlers.FormBuilder.Pages;
 
-public class GetPageByIdQueryHandler : IRequestHandler<GetPageByIdQuery, GetPageByIdQueryResponse>
+public class GetPageByIdQueryHandler(IPageRepository pageRepository, IMapper mapper) : IRequestHandler<GetPageByIdQuery, GetPageByIdQueryResponse>
 {
-    public GetPageByIdQueryHandler()
-    {
-    }
+    private readonly IPageRepository PageRepository = pageRepository;
+    private readonly IMapper Mapper = mapper;
 
     public async Task<GetPageByIdQueryResponse> Handle(GetPageByIdQuery request, CancellationToken cancellationToken)
     {
@@ -15,7 +16,16 @@ public class GetPageByIdQueryHandler : IRequestHandler<GetPageByIdQuery, GetPage
         response.Success = false;
         try
         {
-            //response.Data = _pageRepository.GetById(request.Id);
+            var page = await PageRepository.GetPageByIdAsync(request.PageId);
+
+            if (page is null)
+            {
+                response.Success = false;
+                response.ErrorMessage = $"Page with id '{request.PageId}' could not be found.";
+                return response;
+            }
+
+            response.Data = Mapper.Map<GetPageByIdQueryResponse.Page>(page);
             response.Success = true;
         }
         catch (Exception ex)

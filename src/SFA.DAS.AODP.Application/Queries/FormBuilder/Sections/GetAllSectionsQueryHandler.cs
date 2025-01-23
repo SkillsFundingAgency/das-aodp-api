@@ -1,13 +1,13 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using MediatR;
 using SFA.DAS.AODP.Data.Repositories;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
-public class GetAllSectionsQueryHandler : IRequestHandler<GetAllSectionsQuery, GetAllSectionsQueryResponse>
+public class GetAllSectionsQueryHandler(ISectionRepository sectionRepository, IMapper mapper) : IRequestHandler<GetAllSectionsQuery, GetAllSectionsQueryResponse>
 {
-    public GetAllSectionsQueryHandler()
-    {
-    }
+    private readonly ISectionRepository SectionRepository = sectionRepository;
+    private readonly IMapper Mapper = mapper;
 
     public async Task<GetAllSectionsQueryResponse> Handle(GetAllSectionsQuery request, CancellationToken cancellationToken)
     {
@@ -15,7 +15,9 @@ public class GetAllSectionsQueryHandler : IRequestHandler<GetAllSectionsQuery, G
         response.Success = false;
         try
         {
-            // response.Data = await _sectionRepository.GetSectionsForFormAsync(request.FormId);
+            var sections = await SectionRepository.GetSectionsForFormAsync(request.FormVersionId);
+
+            response.Data = Mapper.Map<List<GetAllSectionsQueryResponse.Section>>(sections);
             response.Success = true;
         }
         catch (Exception ex)

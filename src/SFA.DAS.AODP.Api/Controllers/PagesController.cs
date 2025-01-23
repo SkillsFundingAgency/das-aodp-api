@@ -21,10 +21,7 @@ namespace SFA.DAS.AODP.Api.Controllers
         [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAllAsync(Guid sectionId)
         {
-            var query = new GetAllPagesQueryRequest(new())
-            {
-                SectionId = sectionId
-            };
+            var query = new GetAllPagesQuery(sectionId);
 
             var response = await _mediator.Send(query);
             if (response.Success)

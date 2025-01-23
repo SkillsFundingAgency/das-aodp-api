@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.ExampleData;
 
@@ -23,10 +24,6 @@ namespace SFA.DAS.AODP.Infrastructure.Context
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
-                .UseSqlServer(new SqlConnection()
-                {
-                    ConnectionString = "Data Source=.;Initial Catalog=SFA.DAS.AODP;Integrated Security=True;TrustServerCertificate=True"
-                })
                 .UseAsyncSeeding(async (context, _, ct) =>
                 {
                     await DataSeeder.SeedAsync(context);
@@ -36,7 +33,30 @@ namespace SFA.DAS.AODP.Infrastructure.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
+            modelBuilder.Entity<Page>(entity =>
+            {
+                entity.OwnsMany(
+                    e => e.Questions, ownedNavigationBuilder =>
+                    {
+                        ownedNavigationBuilder.ToJson();
+                        ownedNavigationBuilder.OwnsMany(q => q.RoutingPoints);
+                        ownedNavigationBuilder.OwnsMany(q => q.MultiChoice);
+                        ownedNavigationBuilder.OwnsOne(q => q.BooleanValidaor);
+                        ownedNavigationBuilder.OwnsOne(q => q.DecimalValidator);
+                        ownedNavigationBuilder.OwnsOne(q => q.IntegerValidator);
+                        ownedNavigationBuilder.OwnsOne(q => q.TextValidator);
+                        ownedNavigationBuilder.OwnsOne(q => q.MultiChoiceValidator);
+                        ownedNavigationBuilder.OwnsOne(
+                            q => q.DateValidator, builder =>
+                            {
+                                builder.OwnsOne(v => v.GreaterThanTimeInFuture);
+                                builder.OwnsOne(v => v.LessThanTimeInFuture);
+                                builder.OwnsOne(v => v.GreaterThanTimeInPast);
+                                builder.OwnsOne(v => v.LessThanTimeInPast);
+                            });
+                    }
+                );
+            });
 
             modelBuilder.Entity<ApprovedQualificationsImport>(entity =>
             {
