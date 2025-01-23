@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[Forms](
+CREATE TABLE [dbo].[Forms](
 	[Id] [uniqueidentifier] NOT NULL DEFAULT (newid()),
 	[Archived] [bit] NOT NULL,
 PRIMARY KEY CLUSTERED 
