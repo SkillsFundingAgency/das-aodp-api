@@ -16,6 +16,10 @@ public class FormVersionRepository : IFormVersionRepository
         _sectionRepository = sectionRepository;
     }
 
+    /// <summary>
+    /// Returns all the latest form versions for all given forms. 
+    /// </summary>
+    /// <returns></returns>
     public async Task<List<FormVersion>> GetLatestFormVersions()
     {
         var all = _context.FormVersions.ToList();
@@ -37,7 +41,13 @@ public class FormVersionRepository : IFormVersionRepository
         return top;
     }
 
-    public async Task<FormVersion?> GetFormVersionByIdAsync(Guid formVersionId)
+    /// <summary>
+    /// Gets a form version by its DB Id. 
+    /// </summary>
+    /// <param name="formVersionId"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task<FormVersion> GetFormVersionByIdAsync(Guid formVersionId)
     {
         var res = await _context.FormVersions.FirstOrDefaultAsync(v => v.Id == formVersionId);
         if (res is null)
@@ -45,6 +55,11 @@ public class FormVersionRepository : IFormVersionRepository
         return res;
     }
 
+    /// <summary>
+    /// Creates a new form and a related form version from a passed in form version. 
+    /// </summary>
+    /// <param name="formVersionToAdd"></param>
+    /// <returns></returns>
     public async Task<FormVersion> Create(FormVersion formVersionToAdd)
     {
         var form = new Form() 
@@ -60,6 +75,12 @@ public class FormVersionRepository : IFormVersionRepository
         return formVersionToAdd;
     }
 
+    /// <summary>
+    /// Updates a given form version using the data and DB Id from a passed in form model. 
+    /// </summary>
+    /// <param name="form"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
     public async Task<FormVersion> Update(FormVersion form)
     {
         var formToUpdate = await _context.FormVersions.FirstOrDefaultAsync(v => v.Id == form.Id);
@@ -78,6 +99,12 @@ public class FormVersionRepository : IFormVersionRepository
         return formToUpdate;
     }
 
+    /// <summary>
+    /// Sets the status of a form version with a given Id to the status of archived. 
+    /// </summary>
+    /// <param name="formVersionId"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
     public async Task<bool> Archive(Guid formVersionId)
     {
         var found = await _context.FormVersions.FirstOrDefaultAsync(v => v.Id == formVersionId);
@@ -88,6 +115,12 @@ public class FormVersionRepository : IFormVersionRepository
         return true;
     }
 
+    /// <summary>
+    /// Sets the status of a form version with the given ID and with the current status of "Draft" to "Published". 
+    /// </summary>
+    /// <param name="formVersionId"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
     public async Task<bool> Publish(Guid formVersionId)
     {
         var newPublishedForm = await _context.FormVersions
@@ -110,6 +143,12 @@ public class FormVersionRepository : IFormVersionRepository
         return true;
     }
 
+    /// <summary>
+    /// Sets the status of a form version with the given ID to "Archived". 
+    /// </summary>
+    /// <param name="formVersionId"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
     public async Task<bool> Unpublish(Guid formVersionId)
     {
         var form = await _context.FormVersions
