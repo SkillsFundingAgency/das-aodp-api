@@ -19,7 +19,7 @@ public class PagesController : Controller
         _logger = logger;
     }
 
-    [HttpGet("/api/pages/section/{sectionId}")]
+    [HttpGet("/api/forms/{formVersionId}/sections/{sectionId}/pages")]
     [ProducesResponseType(typeof(GetAllPagesQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetAllAsync(Guid sectionId)
@@ -36,7 +36,7 @@ public class PagesController : Controller
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
-    [HttpGet("/api/pages/{pageId}/section/{sectionId}")]
+    [HttpGet("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}")]
     [ProducesResponseType(typeof(GetPageByIdQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -46,7 +46,7 @@ public class PagesController : Controller
 
         var response = await _mediator.Send(query);
 
-        if (response.Success && response.Data is not null)
+        if (response.Success)
         {
             return Ok(response);
         }
@@ -61,55 +61,58 @@ public class PagesController : Controller
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
-    [HttpPost("/api/pages")]
+    [HttpPost("/api/forms/{formVersionId}/sections/{sectionId}/pages")]
     [ProducesResponseType(typeof(CreatePageCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateAsync([FromBody] CreatePageCommand.Page page)
+    public async Task<IActionResult> CreateAsync([FromRoute] Guid formVersionId, [FromRoute] Guid sectionId, [FromBody] CreatePageCommand command)
     {
-        var command = new CreatePageCommand(page);
+        command.FormVersionId = formVersionId;
+        command.SectionId = sectionId;
 
         var response = await _mediator.Send(command);
-        if (response.Success && response.Data is not null)
+        if (response.Success && response.Id != default)
         {
             return Ok(response);
         }
 
         if (response.InnerException is LockedRecordException)
         {
-            _logger.LogError($"Request to add page with section Id `{page.SectionId}` but form version is locked. ");
+            _logger.LogError($"Request to add page with section Id `{command.SectionId}` but form version is locked. ");
             return Forbid();
         }
 
         if (response.InnerException is DependantNotFoundException)
         {
-            _logger.LogError(message: $"Request to add page with section Id `{page.SectionId}` but no section with this Id can be found. ", exception: response.InnerException);
+            _logger.LogError(message: $"Request to add page with section Id `{command.SectionId}` but no section with this Id can be found. ", exception: response.InnerException);
             return NotFound();
         }
 
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
-    [HttpPut("/api/pages/{pageId}")]
+    [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}")]
     [ProducesResponseType(typeof(UpdatePageCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateAsync([FromRoute] Guid pageId, [FromBody] UpdatePageCommand.Page page)
+    public async Task<IActionResult> UpdateAsync([FromRoute] Guid formVersionId, [FromRoute] Guid sectionId, [FromRoute] Guid pageId, [FromBody] UpdatePageCommand command)
     {
-        var command = new UpdatePageCommand(pageId, page);
+        command.FormVersionId = formVersionId;
+        command.SectionId = sectionId;
+        command.Id = pageId;
 
         var response = await _mediator.Send(command);
 
-        if (response.Success && response.Data is not null)
+        if (response.Success)
         {
             return Ok(response);
         }
 
         if (response.InnerException is LockedRecordException)
         {
-            _logger.LogError($"Request to update page with section Id `{page.SectionId}` and page Id `{pageId}` but form version is locked. ");
+            _logger.LogError($"Request to update page with section Id `{sectionId}` and page Id `{pageId}` but form version is locked. ");
             return Forbid();
         }
 
@@ -122,7 +125,7 @@ public class PagesController : Controller
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
-    [HttpDelete("/api/pages/{pageId}")]
+    [HttpDelete("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}")]
     [ProducesResponseType(typeof(DeletePageCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

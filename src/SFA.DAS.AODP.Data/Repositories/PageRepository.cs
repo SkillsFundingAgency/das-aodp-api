@@ -2,6 +2,7 @@
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Infrastructure.Context;
+using SFA.DAS.AODP.Models.Form;
 
 namespace SFA.DAS.AODP.Data.Repositories;
 
@@ -22,6 +23,18 @@ public class PageRepository : IPageRepository
     public async Task<List<Page>> GetPagesForSectionAsync(Guid sectionId)
     {
         return await _context.Pages.Where(v => v.SectionId == sectionId).ToListAsync();
+    }
+
+    /// <summary>
+    /// Gets max order for pages for given section id.
+    /// </summary>
+    /// <param name="sectionId"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    public int GetMaxOrderBySectionId(Guid sectionId)
+    {
+        var res = _context.Pages.Where(v => v.SectionId == sectionId).Max(s => (int?)s.Order) ?? 0;
+        return res;
     }
 
     /// <summary>
@@ -52,8 +65,11 @@ public class PageRepository : IPageRepository
         if (!await _context.Sections.AnyAsync(v => v.Id == page.SectionId))
             throw new NoForeignKeyException(page.SectionId);
 
-        if (!await _context.Sections.AnyAsync(v => v.Id == page.SectionId && v.FormVersion.Status != FormStatus.Draft))
+        if (!await _context.Sections.AnyAsync(v => v.Id == page.SectionId && v.FormVersion.Status == FormVersionStatus.Draft.ToString()))
             throw new RecordLockedException();
+
+        page.Id = Guid.NewGuid();
+        page.Key = Guid.NewGuid();
 
         _context.Pages.Add(page);
         await _context.SaveChangesAsync();
@@ -93,7 +109,7 @@ public class PageRepository : IPageRepository
         if (pageToUpdate is null)
             throw new RecordNotFoundException(page.Id);
 
-        if (!await _context.Sections.AnyAsync(v => v.Id == page.SectionId && v.FormVersion.Status != FormStatus.Draft))
+        if (!await _context.Sections.AnyAsync(v => v.Id == page.SectionId && v.FormVersion.Status == FormVersionStatus.Draft.ToString()))
             throw new RecordLockedException();
 
         pageToUpdate = page;
@@ -115,7 +131,7 @@ public class PageRepository : IPageRepository
         if (pageToUpdate is null)
             throw new RecordNotFoundException(pageId);
 
-        if (!await _context.Sections.AnyAsync(v => v.Id == pageToUpdate.SectionId && v.FormVersion.Status != FormStatus.Draft))
+        if (!await _context.Sections.AnyAsync(v => v.Id == pageToUpdate.SectionId && v.FormVersion.Status != FormVersionStatus.Draft.ToString()))
             throw new RecordLockedException();
 
         _context.Pages.Remove(pageToUpdate);

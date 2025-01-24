@@ -1,6 +1,4 @@
-﻿using SFA.DAS.AODP.Models.Forms.FormSchema;
-
-namespace SFA.DAS.AODP.Models.Forms.Application;
+﻿namespace SFA.DAS.AODP.Models.Archived.Forms.Application;
 
 public class AnsweredQuestion
 {
@@ -8,7 +6,7 @@ public class AnsweredQuestion
     public int QuestionSchemaId { get; set; }
     public int Index { get; set; }
     public AnsweredStatus AnsweredStatus { get; set; }
-    public QuestionType Type { get; set; }
+    //public QuestionType Type { get; set; }
     public string? TextValue { get; set; }
     public int? IntegerValue { get; set; }
     public float? DecimalValue { get; set; }

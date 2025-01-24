@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[FormVersions](
 	[Id] [uniqueidentifier] NOT NULL DEFAULT (newid()),
 	[FormId] [uniqueidentifier] NOT NULL,
-	[Name] [nvarchar](max) NOT NULL,
+	[Title] [nvarchar](max) NOT NULL,
 	[Version] DATETIME NOT NULL,
 	[Status] [nvarchar](100) NOT NULL,
 	[Description] [nvarchar](max) NULL,

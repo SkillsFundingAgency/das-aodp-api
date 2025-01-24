@@ -1,6 +1,6 @@
-﻿using SFA.DAS.AODP.Models.Forms.Validators;
+﻿using SFA.DAS.AODP.Models.Archived.Forms.Validators;
 
-namespace SFA.DAS.AODP.Models.Forms.FormBuilder;
+namespace SFA.DAS.AODP.Models.Archived.Forms.FormBuilder.Question;
 
 public class Question
 {

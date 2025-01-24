@@ -1,27 +1,28 @@
-﻿using AutoMapper;
-using MediatR;
-using SFA.DAS.AODP.Data.Repositories;
-using SFA.DAS.AODP.Data.Exceptions;
-using Entities = SFA.DAS.AODP.Data.Entities;
+﻿using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
+using SFA.DAS.AODP.Data.Exceptions;
+using SFA.DAS.AODP.Data.Repositories;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 
-public class CreateSectionCommandHandler(ISectionRepository sectionRepository, IMapper mapper) : IRequestHandler<CreateSectionCommand, CreateSectionCommandResponse>
+public class CreateSectionCommandHandler(ISectionRepository sectionRepository) : IRequestHandler<CreateSectionCommand, CreateSectionCommandResponse>
 {
-    private readonly ISectionRepository SectionRepository = sectionRepository;
-    private readonly IMapper Mapper = mapper;
-
     public async Task<CreateSectionCommandResponse> Handle(CreateSectionCommand request, CancellationToken cancellationToken)
     {
         var response = new CreateSectionCommandResponse();
         try
         {
-            var sectionToCreate = Mapper.Map<Entities.Section>(request.Data);
-            var createdSection = await SectionRepository.Create(sectionToCreate);
+            var maxOrder = await sectionRepository.GetMaxOrderByFormVersionIdAsync(request.FormVersionId);
+            var createdSection = await sectionRepository.Create(new()
+            {
+                Description = request.Description,
+                Title = request.Title,
+                FormVersionId = request.FormVersionId,
+                Order = ++maxOrder,
+          
+            });
 
-
-            response.Data = Mapper.Map<CreateSectionCommandResponse.Section>(createdSection);
+            response.Id = createdSection.Id;
             response.Success = true;
         }
         catch (NoForeignKeyException ex)

@@ -21,7 +21,7 @@ public class PublishFormVersionCommandHandler : IRequestHandler<PublishFormVersi
 
         try
         {
-            var found = await _formRepository.Publish(request.FormVersionId);
+            await _formRepository.Publish(request.FormVersionId);
 
             response.Success = true;
         }

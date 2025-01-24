@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using SFA.DAS.AODP.Data.Repositories;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
@@ -7,12 +6,12 @@ namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 public class GetAllFormVersionsQueryHandler : IRequestHandler<GetAllFormVersionsQuery, GetAllFormVersionsQueryResponse>
 {
     private readonly IFormVersionRepository _formRepository;
-    private readonly IMapper _mapper;
 
-    public GetAllFormVersionsQueryHandler(IFormVersionRepository formRepository, IMapper mapper)
+
+    public GetAllFormVersionsQueryHandler(IFormVersionRepository formRepository)
     {
         _formRepository = formRepository;
-        _mapper = mapper;
+
     }
 
     public async Task<GetAllFormVersionsQueryResponse> Handle(GetAllFormVersionsQuery request, CancellationToken cancellationToken)
@@ -25,7 +24,8 @@ public class GetAllFormVersionsQueryHandler : IRequestHandler<GetAllFormVersions
         {
             var data = await _formRepository.GetLatestFormVersions();
 
-            queryResponse.Data = _mapper.Map<List<GetAllFormVersionsQueryResponse.FormVersion>>(data);
+            queryResponse.Data = [.. data];
+
             queryResponse.Success = true;
         }
         catch (Exception ex)

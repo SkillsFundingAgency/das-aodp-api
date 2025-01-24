@@ -8,12 +8,12 @@ namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersionCommand, CreateFormVersionCommandResponse>
 {
     private readonly IFormVersionRepository _formVersionRepository;
-    private readonly IMapper _mapper;
 
-    public CreateFormVersionCommandHandler(IFormVersionRepository formVersionRepository, IMapper mapper)
+
+    public CreateFormVersionCommandHandler(IFormVersionRepository formVersionRepository)
     {
         _formVersionRepository = formVersionRepository;
-        _mapper = mapper;
+
     }
 
     public async Task<CreateFormVersionCommandResponse> Handle(CreateFormVersionCommand request, CancellationToken cancellationToken)
@@ -25,11 +25,14 @@ public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersion
 
         try
         {
-            var formVersionToCreate = _mapper.Map<Entities.FormVersion>(request.Data);
-            var form = await _formVersionRepository.Create(formVersionToCreate);
-            var createdForm = _mapper.Map<CreateFormVersionCommandResponse.FormVersion>(form);
+            var form = await _formVersionRepository.Create(new()
+            {
+                Title = request.Title,
+                Description = request.Description,
+                Order = request.Order,
+            });
 
-            response.Data = createdForm;
+            response.Id = form.Id;
             response.Success = true;
         }
         catch (Exception ex)

@@ -9,12 +9,12 @@ namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 public class GetFormVersionByIdQueryHandler : IRequestHandler<GetFormVersionByIdQuery, GetFormVersionByIdQueryResponse>
 {
     private readonly IFormVersionRepository _formRepository;
-    private IMapper _mapper { get; }
+    
 
-    public GetFormVersionByIdQueryHandler(IFormVersionRepository formRepository, IMapper mapper)
+    public GetFormVersionByIdQueryHandler(IFormVersionRepository formRepository)
     {
         _formRepository = formRepository;
-        _mapper = mapper;
+        
     }
 
     public async Task<GetFormVersionByIdQueryResponse> Handle(GetFormVersionByIdQuery request, CancellationToken cancellationToken)
@@ -24,7 +24,7 @@ public class GetFormVersionByIdQueryHandler : IRequestHandler<GetFormVersionById
         try
         {
             var formVersion = await _formRepository.GetFormVersionByIdAsync(request.FormVersionId);
-            response.Data = _mapper.Map<GetFormVersionByIdQueryResponse.FormVersion>(formVersion);
+            response.Data = formVersion;
             response.Success = true;
         }
         catch (RecordNotFoundException ex)

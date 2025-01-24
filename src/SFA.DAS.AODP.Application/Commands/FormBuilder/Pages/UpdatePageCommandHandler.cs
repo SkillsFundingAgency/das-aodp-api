@@ -7,10 +7,10 @@ using Entities = SFA.DAS.AODP.Data.Entities;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 
-public class UpdatePageCommandHandler(IPageRepository pageRepository, IMapper mapper) : IRequestHandler<UpdatePageCommand, UpdatePageCommandResponse>
+public class UpdatePageCommandHandler(IPageRepository pageRepository) : IRequestHandler<UpdatePageCommand, UpdatePageCommandResponse>
 {
     private readonly IPageRepository PageRepository = pageRepository;
-    private readonly IMapper Mapper = mapper;
+    
 
     public async Task<UpdatePageCommandResponse> Handle(UpdatePageCommand request, CancellationToken cancellationToken)
     {
@@ -19,9 +19,12 @@ public class UpdatePageCommandHandler(IPageRepository pageRepository, IMapper ma
 
         try
         {
-            var pageToUpdate = Mapper.Map<Entities.Page>(request.Data);
-            var page = await PageRepository.Update(pageToUpdate);
+            var section = await PageRepository.GetPageByIdAsync(request.Id);
+            section.Title = request.Title;
+            section.Description = request.Description;
 
+
+            await PageRepository.Update(section);
             response.Success = true;
         }
         catch (RecordLockedException)

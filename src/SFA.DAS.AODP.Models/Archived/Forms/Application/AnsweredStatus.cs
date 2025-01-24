@@ -1,4 +1,4 @@
-﻿namespace SFA.DAS.AODP.Models.Forms.Application;
+﻿namespace SFA.DAS.AODP.Models.Archived.Forms.Application;
 
 public enum AnsweredStatus
 {

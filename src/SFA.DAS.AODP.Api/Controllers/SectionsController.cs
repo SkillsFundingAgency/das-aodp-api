@@ -19,7 +19,7 @@ public class SectionsController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet("/api/sections/form/{formVersionId}")]
+    [HttpGet("/api/forms/{formVersionId}/sections")]
     [ProducesResponseType(typeof(GetAllSectionsQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetAllAsync([FromRoute] Guid formVersionId)
@@ -36,7 +36,7 @@ public class SectionsController : ControllerBase
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
-    [HttpGet("/api/sections/{sectionId}/form/{formVersionId}")]
+    [HttpGet("/api/forms/{formVersionId}/sections/{sectionId}")]
     [ProducesResponseType(typeof(GetSectionByIdQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -46,7 +46,7 @@ public class SectionsController : ControllerBase
 
         var response = await _mediator.Send(query);
 
-        if (response.Success && response.Data is not null)
+        if (response.Success)
         {
             return Ok(response);
         }
@@ -61,59 +61,59 @@ public class SectionsController : ControllerBase
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
-    [HttpPost("/api/sections")]
+    [HttpPost("/api/forms/{formVersionId}/sections")]
     [ProducesResponseType(typeof(CreateSectionCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateSectionCommand.Section section)
+    public async Task<IActionResult> CreateAsync(Guid formVersionId, [FromBody] CreateSectionCommand command)
     {
-        var command = new CreateSectionCommand(section);
+        command.FormVersionId = formVersionId;
 
         var response = await _mediator.Send(command);
-        if (response.Success && response.Data is not null)
+        if (response.Success)
         {
             return Ok(response);
         }
 
         if (response.InnerException is DependantNotFoundException)
         {
-            _logger.LogError($"Request to add section to form version Id `{section.FormVersionId}` but no form version with this Id can be found. ");
+            _logger.LogError($"Request to add section to form version Id `{command.FormVersionId}` but no form version with this Id can be found. ");
             return NotFound();
         }
 
-        _logger.LogError(message: $"Error thrown creating new section on form version Id `{section.FormVersionId}`.", exception: response.InnerException);
+        _logger.LogError(message: $"Error thrown creating new section on form version Id `{command.FormVersionId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
-    [HttpPut("/api/sections/{formVersionId}")]
+    [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}")]
     [ProducesResponseType(typeof(UpdateSectionCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateAsync([FromRoute] Guid formVersionId, [FromBody] UpdateSectionCommand.Section section)
+    public async Task<IActionResult> UpdateAsync([FromRoute] Guid formVersionId, [FromRoute] Guid sectionId, [FromBody] UpdateSectionCommand command)
     {
-        var command = new UpdateSectionCommand(formVersionId, section);
-
+        command.FormVersionId = formVersionId;
+        command.Id = sectionId;
         var response = await _mediator.Send(command);
 
-        if (response.Success && response.Data is not null)
+        if (response.Success)
         {
             return Ok(response);
         }
 
         if (response.InnerException is LockedRecordException)
         {
-            _logger.LogError($"Request to update section with section Id `{section.Id}` and form version Id `{formVersionId}` but form version is locked. ");
+            _logger.LogError($"Request to update section with section Id `{sectionId}` and form version Id `{formVersionId}` but form version is locked. ");
             return Forbid();
         }
 
         if (response.InnerException is NotFoundException)
         {
-            _logger.LogError($"Request to update section with section Id `{section.Id}` and form version Id `{formVersionId}` returned 404 (not found).");
+            _logger.LogError($"Request to update section with section Id `{sectionId}` and form version Id `{formVersionId}` returned 404 (not found).");
             return NotFound();
         }
 
-        _logger.LogError(message: $"Error thrown updating section with form version Id `{formVersionId}` and section Id `{section.Id}`.", exception: response.InnerException);
+        _logger.LogError(message: $"Error thrown updating section with form version Id `{formVersionId}` and section Id `{sectionId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 

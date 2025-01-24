@@ -45,7 +45,7 @@ public class FormsController : Controller
 
         var response = await _mediator.Send(query);
 
-        if (response.Success && response.Data is not null)
+        if (response.Success)
         {
             return Ok(response);
         }
@@ -63,12 +63,10 @@ public class FormsController : Controller
     [HttpPost("/api/forms")]
     [ProducesResponseType(typeof(CreateFormVersionCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateFormVersionCommand.FormVersion formVersion)
+    public async Task<IActionResult> CreateAsync([FromBody] CreateFormVersionCommand command)
     {
-        var command = new CreateFormVersionCommand(formVersion);
-
         var response = await _mediator.Send(command);
-        if (response.Success && response.Data is not null)
+        if (response.Success)
         {
             return Ok(response);
         }
@@ -81,13 +79,13 @@ public class FormsController : Controller
     [ProducesResponseType(typeof(UpdateFormVersionCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UpdateAsync(Guid formVersionId, [FromBody] UpdateFormVersionCommand.FormVersion formVersion)
+    public async Task<IActionResult> UpdateAsync(Guid formVersionId, [FromBody] UpdateFormVersionCommand command)
     {
-        var command = new UpdateFormVersionCommand(formVersionId, formVersion);
+        command.FormVersionId = formVersionId;
 
         var response = await _mediator.Send(command);
 
-        if (response.Success && response.Data is not null)
+        if (response.Success)
         {
             return Ok(response);
         }

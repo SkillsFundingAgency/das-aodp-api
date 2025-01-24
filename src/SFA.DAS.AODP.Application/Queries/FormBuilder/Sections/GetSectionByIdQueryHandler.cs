@@ -6,10 +6,10 @@ using SFA.DAS.AODP.Data.Repositories;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
-public class GetSectionByIdQueryHandler(ISectionRepository sectionRepository, IMapper mapper) : IRequestHandler<GetSectionByIdQuery, GetSectionByIdQueryResponse>
+public class GetSectionByIdQueryHandler(ISectionRepository sectionRepository) : IRequestHandler<GetSectionByIdQuery, GetSectionByIdQueryResponse>
 {
     private readonly ISectionRepository SectionRepository = sectionRepository;
-    private readonly IMapper Mapper = mapper;
+
 
     public async Task<GetSectionByIdQueryResponse> Handle(GetSectionByIdQuery request, CancellationToken cancellationToken)
     {
@@ -19,7 +19,7 @@ public class GetSectionByIdQueryHandler(ISectionRepository sectionRepository, IM
         {
             var section = await SectionRepository.GetSectionByIdAsync(request.SectionId);
 
-            response.Data = Mapper.Map<GetSectionByIdQueryResponse.Section>(section);
+            response.Data = section;
             response.Success = true;
         }
         catch (RecordNotFoundException ex)

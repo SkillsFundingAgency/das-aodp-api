@@ -10,12 +10,12 @@ namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 public class UpdateFormVersionCommandHandler : IRequestHandler<UpdateFormVersionCommand, UpdateFormVersionCommandResponse>
 {
     private readonly IFormVersionRepository _formRepository;
-    private readonly IMapper _mapper;
+    
 
-    public UpdateFormVersionCommandHandler(IFormVersionRepository formRepository, IMapper mapper)
+    public UpdateFormVersionCommandHandler(IFormVersionRepository formRepository)
     {
         _formRepository = formRepository;
-        _mapper = mapper;
+        
     }
 
     public async Task<UpdateFormVersionCommandResponse> Handle(UpdateFormVersionCommand request, CancellationToken cancellationToken)
@@ -24,11 +24,13 @@ public class UpdateFormVersionCommandHandler : IRequestHandler<UpdateFormVersion
 
         try
         {
-            var formVersionToUpdate = _mapper.Map<Entities.FormVersion>(request.Data);
-            var form = await _formRepository.Update(formVersionToUpdate);
-            var updatedForm = _mapper.Map<UpdateFormVersionCommandResponse.FormVersion>(form);
+            var formVersion = await _formRepository.GetFormVersionByIdAsync(request.FormVersionId);
+            formVersion.Order = request.Order;
+            formVersion.Title = request.Name;
+            formVersion.Description = request.Description;
 
-            response.Data = updatedForm;
+
+            await _formRepository.Update(formVersion);
             response.Success = true;
         }
         catch (RecordNotFoundException ex)

@@ -7,10 +7,10 @@ using SFA.DAS.AODP.Data.Repositories;
 
 namespace SFA.DAS.AODP.Application.Handlers.FormBuilder.Pages;
 
-public class GetPageByIdQueryHandler(IPageRepository pageRepository, IMapper mapper) : IRequestHandler<GetPageByIdQuery, GetPageByIdQueryResponse>
+public class GetPageByIdQueryHandler(IPageRepository pageRepository) : IRequestHandler<GetPageByIdQuery, GetPageByIdQueryResponse>
 {
     private readonly IPageRepository PageRepository = pageRepository;
-    private readonly IMapper Mapper = mapper;
+
 
     public async Task<GetPageByIdQueryResponse> Handle(GetPageByIdQuery request, CancellationToken cancellationToken)
     {
@@ -20,7 +20,7 @@ public class GetPageByIdQueryHandler(IPageRepository pageRepository, IMapper map
         {
             var page = await PageRepository.GetPageByIdAsync(request.PageId);
 
-            response.Data = Mapper.Map<GetPageByIdQueryResponse.Page>(page);
+            response.Data = page;
             response.Success = true;
         }
         catch (RecordNotFoundException ex)

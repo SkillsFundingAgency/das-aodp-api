@@ -22,7 +22,6 @@ public class DeleteFormVersionCommandHandler : IRequestHandler<DeleteFormVersion
         try
         {
             var success = await _formVersionRepository.Archive(request.FormVersionId);
-            response.Data = success;
             response.Success = true;
         }
         catch (RecordNotFoundException ex)

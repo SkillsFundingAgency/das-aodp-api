@@ -7,10 +7,8 @@ using SFA.DAS.AODP.Application.Exceptions;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 
-public class UpdateSectionCommandHandler(ISectionRepository sectionRepository, IMapper mapper) : IRequestHandler<UpdateSectionCommand, UpdateSectionCommandResponse>
+public class UpdateSectionCommandHandler(ISectionRepository _sectionRepository) : IRequestHandler<UpdateSectionCommand, UpdateSectionCommandResponse>
 {
-    private readonly ISectionRepository SectionRepository = sectionRepository;
-    private readonly IMapper Mapper = mapper;
 
     public async Task<UpdateSectionCommandResponse> Handle(UpdateSectionCommand request, CancellationToken cancellationToken)
     {
@@ -19,8 +17,12 @@ public class UpdateSectionCommandHandler(ISectionRepository sectionRepository, I
 
         try
         {
-            var sectionToUpdate = Mapper.Map<Entities.Section>(request.Data);
-            var section = await SectionRepository.Update(sectionToUpdate);
+            var section = await _sectionRepository.GetSectionByIdAsync(request.Id);
+            section.Title = request.Title;
+            section.Description = request.Description;
+
+
+            await _sectionRepository.Update(section);
             response.Success = true;
         }
         catch (RecordLockedException)

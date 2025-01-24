@@ -7,20 +7,29 @@ using Entities = SFA.DAS.AODP.Data.Entities;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 
-public class CreatePageCommandHandler(IPageRepository pageRepository, IMapper mapper) : IRequestHandler<CreatePageCommand, CreatePageCommandResponse>
+public class CreatePageCommandHandler(IPageRepository _pageRepository) : IRequestHandler<CreatePageCommand, CreatePageCommandResponse>
 {
-    private readonly IPageRepository PageRepository = pageRepository;
-    private readonly IMapper Mapper = mapper;
+
 
     public async Task<CreatePageCommandResponse> Handle(CreatePageCommand request, CancellationToken cancellationToken)
     {
         var response = new CreatePageCommandResponse();
         try
         {
-            var pageToCreate = Mapper.Map<Entities.Page>(request.Data);
-            var createdPage = await PageRepository.Create(pageToCreate);
+            var maxOrder = _pageRepository.GetMaxOrderBySectionId(request.SectionId);
 
-            response.Data = Mapper.Map<CreatePageCommandResponse.Page>(createdPage);
+            var pageToCreate = new Entities.Page()
+            {
+                Description = request.Description,
+                Title = request.Title,
+                Order = ++maxOrder,
+                SectionId = request.SectionId
+
+            };
+
+            var createdPage = await _pageRepository.Create(pageToCreate);
+
+            response.Id = createdPage.Id;
             response.Success = true;
         }
         catch (RecordLockedException)

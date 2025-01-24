@@ -1,11 +1,8 @@
-﻿using SFA.DAS.AODP.Application.Exceptions;
+﻿namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
-namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
-
-/// <exception cref="NotFoundException"></exception>
-public class GetSectionByIdQueryResponse : BaseResponse
+public class GetSectionByIdQueryResponse() : BaseResponse
 {
-    public Section Data { get; set; } = new Section();
+    public Section Data { get; set; }
 
     public class Section
     {
@@ -13,8 +10,43 @@ public class GetSectionByIdQueryResponse : BaseResponse
         public Guid FormVersionId { get; set; }
         public Guid Key { get; set; }
         public int Order { get; set; }
-        public string Title { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public int? NextSectionId { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public List<Page> Pages { get; set; }
+
+        public static implicit operator Section(Data.Entities.Section entity)
+        {
+            return new()
+            {
+                Id = entity.Id,
+                FormVersionId = entity.FormVersionId,
+                Title = entity.Title,
+                Key = entity.Key,
+                Description = entity.Description,
+                Order = entity.Order,
+                Pages = entity.Pages != null ? [..entity.Pages] : new()
+
+            };
+        }
+    }
+
+
+    public class Page
+    {
+        public Guid Id { get; set; }
+        public Guid Key { get; set; }
+        public int Order { get; set; }
+        public string Title { get; set; }
+
+        public static implicit operator Page(Data.Entities.Page entity)
+        {
+            return new()
+            {
+                Id = entity.Id,
+                Key = entity.Key,
+                Order = entity.Order,
+                Title = entity.Title
+            };
+        }
     }
 }

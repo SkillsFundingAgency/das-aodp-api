@@ -2,6 +2,7 @@
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Infrastructure.Context;
+using SFA.DAS.AODP.Models.Form;
 
 namespace SFA.DAS.AODP.Data.Repositories;
 
@@ -42,6 +43,18 @@ public class SectionRepository : ISectionRepository
     }
 
     /// <summary>
+    /// Gets a section with a given Id. 
+    /// </summary>
+    /// <param name="sectionId"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task<int> GetMaxOrderByFormVersionIdAsync(Guid formVersionId)
+    {
+        var res = _context.Sections.Where(v => v.FormVersionId == formVersionId).Max(s => (int?)s.Order) ?? 0;
+        return res;
+    }
+
+    /// <summary>
     /// Creates a new section, throws if the form version Id is not found. 
     /// </summary>
     /// <param name="section"></param>
@@ -51,6 +64,9 @@ public class SectionRepository : ISectionRepository
     {
         if (!await _context.FormVersions.AnyAsync(v => v.Id == section.FormVersionId))
             throw new NoForeignKeyException(section.FormVersionId);
+
+        section.Id = Guid.NewGuid();
+        section.Key = Guid.NewGuid();
 
         _context.Sections.Add(section);
         await _context.SaveChangesAsync();
@@ -89,12 +105,9 @@ public class SectionRepository : ISectionRepository
     /// <exception cref="RecordLockedException"></exception>
     public async Task<Section> Update(Section section)
     {
-        var sectionToUpdate = await _context.Sections.FirstOrDefaultAsync(v => v.Id == section.Id);
-        if (sectionToUpdate is null)
-            throw new RecordNotFoundException(section.Id);
-        if (_context.FormVersions.Any(v => v.Id == section.FormVersionId && v.Status != FormStatus.Draft))
+        if (_context.FormVersions.Any(v => v.Id == section.FormVersionId && v.Status != FormVersionStatus.Draft.ToString()))
             throw new RecordLockedException();
-        sectionToUpdate = section;
+        _context.Sections.Update(section);
         await _context.SaveChangesAsync();
         return section;
     }

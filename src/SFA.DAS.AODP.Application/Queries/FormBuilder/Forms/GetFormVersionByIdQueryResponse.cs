@@ -1,5 +1,4 @@
-﻿using SFA.DAS.AODP.Models.Forms.FormBuilder;
-using SFA.DAS.AODP.Application.Exceptions;
+﻿using SFA.DAS.AODP.Application.Exceptions;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
@@ -13,12 +12,28 @@ public class GetFormVersionByIdQueryResponse : BaseResponse
     {
         public Guid Id { get; set; }
         public Guid FormId { get; set; }
-        public string Name { get; set; }
+        public string Title { get; set; }
         public DateTime Version { get; set; }
-        public FormStatus Status { get; set; }
+        public string Status { get; set; }
         public string Description { get; set; }
         public int Order { get; set; }
         public List<Section> Sections { get; set; }
+
+        public static implicit operator FormVersion(Data.Entities.FormVersion formVersion)
+        {
+            return new FormVersion()
+            {
+                Id = formVersion.Id,
+                FormId = formVersion.FormId,
+                Description = formVersion.Description,
+                Order = formVersion.Order,
+                Title = formVersion.Title,
+                Version = formVersion.Version,
+                Status = formVersion.Status,
+                Sections = [.. formVersion.Sections]
+
+            };
+        }
     }
 
     public class Section
@@ -27,5 +42,19 @@ public class GetFormVersionByIdQueryResponse : BaseResponse
         public Guid Key { get; set; }
         public int Order { get; set; }
         public string Title { get; set; }
+
+        public static implicit operator Section(Data.Entities.Section section)
+        {
+            return new()
+            {
+                Id = section.Id,
+                Key = section.Key,
+                Order = section.Order,
+                Title = section.Title
+            };
+        }
     }
+
+
+
 }

@@ -12,6 +12,19 @@ public class GetAllPagesQueryResponse : BaseResponse
         public Guid Key { get; set; }
         public string Description { get; set; } = string.Empty;
         public int Order { get; set; }
-        public int? NextPageId { get; set; }
+
+        public static implicit operator Page(Data.Entities.Page entity)
+        {
+            return (new()
+            {
+                Id = entity.Id,
+                Title = entity.Title,
+                Description = entity.Description,
+                Order = entity.Order,
+                SectionId = entity.SectionId,
+                Key = entity.Key
+            });
+        }
+
     }
 }

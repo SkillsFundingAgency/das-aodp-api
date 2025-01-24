@@ -4,10 +4,10 @@ using SFA.DAS.AODP.Data.Repositories;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
-public class GetAllPagesQueryHandler(IPageRepository pageRepository, IMapper mapper) : IRequestHandler<GetAllPagesQuery, GetAllPagesQueryResponse>
+public class GetAllPagesQueryHandler(IPageRepository pageRepository) : IRequestHandler<GetAllPagesQuery, GetAllPagesQueryResponse>
 {
     private readonly IPageRepository PageRepository = pageRepository;
-    private readonly IMapper Mapper = mapper;
+    
 
     public async Task<GetAllPagesQueryResponse> Handle(GetAllPagesQuery request, CancellationToken cancellationToken)
     {
@@ -17,7 +17,7 @@ public class GetAllPagesQueryHandler(IPageRepository pageRepository, IMapper map
         {
             var pages = await PageRepository.GetPagesForSectionAsync(request.SectionId);
 
-            response.Data = Mapper.Map<List<GetAllPagesQueryResponse.Page>>(pages);
+            response.Data = [.. pages];
             response.Success = true;
         }
         catch (Exception ex)

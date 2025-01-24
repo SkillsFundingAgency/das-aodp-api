@@ -1,11 +1,9 @@
 using Microsoft.OpenApi.Models;
 using SFA.DAS.AODP.Api.Extensions;
 using SFA.DAS.AODP.Application.Queries.Test;
+using SFA.DAS.AODP.Application.Swashbuckle;
 using SFA.DAS.AODP.Common.Extensions;
 using SFA.DAS.AODP.Infrastructure.Context;
-using SFA.DAS.AODP.Application.AutoMapper.Profiles;
-using SFA.DAS.AODP.Application.Swashbuckle;
-using SFA.DAS.AODP.Data.ExampleData;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration.LoadConfiguration(builder.Services, builder.Environment.IsDevelopment());
@@ -32,8 +30,6 @@ builder.Services
         c.CustomSchemaIds(type => schemaHelper.GetSchemaId(type));
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "AODP Inner API", Version = "v1" });
     });
-
-builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 var app = builder.Build();
 
