@@ -1,10 +1,11 @@
-﻿using SFA.DAS.AODP.Models.Forms.FormBuilder;
+﻿using SFA.DAS.AODP.Application.Exceptions;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
-public class GetSectionByIdQueryResponse(Section data) : BaseResponse
+/// <exception cref="NotFoundException"></exception>
+public class GetSectionByIdQueryResponse : BaseResponse
 {
-    public Section Data { get; set; }
+    public Section Data { get; set; } = new Section();
 
     public class Section
     {
@@ -12,8 +13,8 @@ public class GetSectionByIdQueryResponse(Section data) : BaseResponse
         public Guid FormVersionId { get; set; }
         public Guid Key { get; set; }
         public int Order { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public int? NextSectionId { get; set; }
     }
 }

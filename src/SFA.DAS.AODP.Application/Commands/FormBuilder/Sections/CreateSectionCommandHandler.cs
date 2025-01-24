@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using MediatR;
-using SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 using SFA.DAS.AODP.Data.Repositories;
-using SFA.DAS.AODP.Models.Forms.FormBuilder;
+using SFA.DAS.AODP.Data.Exceptions;
 using Entities = SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Application.Exceptions;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 
@@ -23,6 +23,11 @@ public class CreateSectionCommandHandler(ISectionRepository sectionRepository, I
 
             response.Data = Mapper.Map<CreateSectionCommandResponse.Section>(createdSection);
             response.Success = true;
+        }
+        catch (NoForeignKeyException ex)
+        {
+            response.Success = false;
+            response.InnerException = new DependantNotFoundException(ex.ForeignKey);
         }
         catch (Exception ex)
         {

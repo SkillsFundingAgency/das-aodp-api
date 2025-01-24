@@ -19,8 +19,8 @@ public class UpdateSectionCommand : IRequest<UpdateSectionCommandResponse>
         public Guid FormVersionId { get; set; }
         public Guid Key { get; set; }
         public int Order { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public int? NextSectionId { get; set; }
     }
 }

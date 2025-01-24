@@ -1,8 +1,6 @@
-﻿using SFA.DAS.AODP.Models.Forms.FormBuilder;
+﻿using SFA.DAS.AODP.Application.Exceptions;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
-public class UnpublishFormVersionCommandResponse : BaseResponse 
-{ 
-    public bool NotFound { get; set; } 
-}
+/// <exception cref="NotFoundException"></exception>
+public class UnpublishFormVersionCommandResponse : BaseResponse;

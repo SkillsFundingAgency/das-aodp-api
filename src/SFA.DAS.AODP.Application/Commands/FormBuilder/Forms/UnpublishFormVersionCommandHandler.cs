@@ -1,8 +1,7 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using SFA.DAS.AODP.Data.Repositories;
-using Entities = SFA.DAS.AODP.Data.Entities;
-using ViewModels = SFA.DAS.AODP.Models.Forms.FormBuilder;
+using SFA.DAS.AODP.Data.Exceptions;
+using SFA.DAS.AODP.Application.Exceptions;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
@@ -23,18 +22,11 @@ public class UnpublishFormVersionCommandHandler : IRequestHandler<UnpublishFormV
         try
         {
             var found = await _formRepository.Unpublish(request.FormVersionId);
-
-            if (!found)
-            {
-                response.ErrorMessage = $"Not found form version with ID {request.FormVersionId}. ";
-                response.NotFound = true;
-                response.Success = false;
-            }
-            else
-            {
-                response.NotFound = false;
-                response.Success = true;
-            }
+            response.Success = true;
+        }
+        catch (RecordNotFoundException ex)
+        {
+            response.InnerException = new NotFoundException(ex.Id);
         }
         catch (Exception ex)
         {

@@ -22,11 +22,10 @@ public class FormVersionRepository : IFormVersionRepository
     /// <returns></returns>
     public async Task<List<FormVersion>> GetLatestFormVersions()
     {
-        var top =
-            _context.FormVersions
+        var top = await _context.FormVersions
             .Where(f => !f.Form.Archived)
             .Where(f => f.Status != FormStatus.Archived)
-            .ToList();
+            .ToListAsync();
 
         return top;
     }

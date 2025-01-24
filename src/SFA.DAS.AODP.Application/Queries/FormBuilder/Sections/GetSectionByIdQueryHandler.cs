@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using MediatR;
+using SFA.DAS.AODP.Application.Exceptions;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories;
-using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
@@ -12,21 +13,19 @@ public class GetSectionByIdQueryHandler(ISectionRepository sectionRepository, IM
 
     public async Task<GetSectionByIdQueryResponse> Handle(GetSectionByIdQuery request, CancellationToken cancellationToken)
     {
-        var response = new GetSectionByIdQueryResponse(new());
+        var response = new GetSectionByIdQueryResponse();
         response.Success = false;
         try
         {
             var section = await SectionRepository.GetSectionByIdAsync(request.SectionId);
 
-            if (section is null)
-            {
-                response.Success = false;
-                response.ErrorMessage = $"Section with id '{request.SectionId}' could not be found.";
-                return response;
-            }
-
             response.Data = Mapper.Map<GetSectionByIdQueryResponse.Section>(section);
             response.Success = true;
+        }
+        catch (RecordNotFoundException ex)
+        {
+            response.Success = false;
+            response.InnerException = new NotFoundException(ex.Id);
         }
         catch (Exception ex)
         {

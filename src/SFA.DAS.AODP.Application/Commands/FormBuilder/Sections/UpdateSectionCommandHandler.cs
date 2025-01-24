@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using MediatR;
 using SFA.DAS.AODP.Data.Repositories;
-using SFA.DAS.AODP.Models.Forms.FormBuilder;
+using SFA.DAS.AODP.Data.Exceptions;
 using Entities = SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Application.Exceptions;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 
@@ -20,14 +21,17 @@ public class UpdateSectionCommandHandler(ISectionRepository sectionRepository, I
         {
             var sectionToUpdate = Mapper.Map<Entities.Section>(request.Data);
             var section = await SectionRepository.Update(sectionToUpdate);
-
-            if (section == null)
-            {
-                response.Success = false;
-                response.ErrorMessage = $"Section with id '{request.Data.Id}' could not be found.";
-                return response;
-            }
             response.Success = true;
+        }
+        catch (RecordLockedException)
+        {
+            response.Success = false;
+            response.InnerException = new LockedRecordException();
+        }
+        catch (RecordNotFoundException ex)
+        {
+            response.Success = false;
+            response.InnerException = new NotFoundException(ex.Id);
         }
         catch (Exception ex)
         {

@@ -1,6 +1,7 @@
-﻿namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
+﻿using SFA.DAS.AODP.Application.Exceptions;
 
-public class DeletePageCommandResponse : BaseResponse
-{
-    public bool Data { get; set; }
-}
+namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
+
+/// <exception cref="LockedRecordException"></exception>
+/// <exception cref="DependantNotFoundException"></exception>
+public class DeletePageCommandResponse : BaseResponse;

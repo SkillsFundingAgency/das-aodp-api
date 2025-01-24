@@ -1,6 +1,6 @@
-﻿namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
+﻿using SFA.DAS.AODP.Application.Exceptions;
 
-public class DeleteSectionCommandResponse : BaseResponse
-{
-    public bool Data { get; set; }
-}
+namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
+
+/// <exception cref="NotFoundException"></exception>
+public class DeleteSectionCommandResponse : BaseResponse;

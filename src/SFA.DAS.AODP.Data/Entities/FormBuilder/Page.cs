@@ -4,14 +4,9 @@ public class Page
 {
     public Guid Id { get; set; }
     public Guid SectionId { get; set; }
-    public string Title { get; set; }
+    public string Title { get; set; } = string.Empty;
     public Guid Key { get; set; }
-    public string Description { get; set; }
+    public string Description { get; set; } = string.Empty;
     public int Order { get; set; }
-    public List<Question> Questions { get; set; }
-
-    public Page()
-    {
-        Questions = new List<Question>();
-    }
+    public List<Question> Questions { get; set; } = new List<Question>();
 }

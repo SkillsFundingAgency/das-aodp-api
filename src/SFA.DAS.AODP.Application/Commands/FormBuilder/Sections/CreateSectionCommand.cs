@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using SFA.DAS.AODP.Models.Forms.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 
@@ -18,8 +17,8 @@ public class CreateSectionCommand : IRequest<CreateSectionCommandResponse>
         public Guid FormVersionId { get; set; }
         public Guid Key { get; set; }
         public int Order { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public int? NextSectionId { get; set; }
     }
 }

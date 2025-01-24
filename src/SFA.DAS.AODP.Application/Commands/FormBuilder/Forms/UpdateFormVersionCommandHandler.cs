@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using MediatR;
 using SFA.DAS.AODP.Data.Repositories;
+using SFA.DAS.AODP.Data.Exceptions;
+using SFA.DAS.AODP.Application.Exceptions;
 using Entities = SFA.DAS.AODP.Data.Entities;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
@@ -19,16 +21,20 @@ public class UpdateFormVersionCommandHandler : IRequestHandler<UpdateFormVersion
     public async Task<UpdateFormVersionCommandResponse> Handle(UpdateFormVersionCommand request, CancellationToken cancellationToken)
     {
         var response = new UpdateFormVersionCommandResponse();
-        response.Success = false;
 
         try
         {
             var formVersionToUpdate = _mapper.Map<Entities.FormVersion>(request.Data);
-            var form = _formRepository.Update(formVersionToUpdate);
+            var form = await _formRepository.Update(formVersionToUpdate);
             var updatedForm = _mapper.Map<UpdateFormVersionCommandResponse.FormVersion>(form);
 
             response.Data = updatedForm;
             response.Success = true;
+        }
+        catch (RecordNotFoundException ex)
+        {
+            response.InnerException = new NotFoundException(ex.Id);
+            response.Success = false;
         }
         catch (Exception ex)
         {

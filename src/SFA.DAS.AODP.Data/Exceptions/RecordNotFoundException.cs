@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace SFA.DAS.AODP.Data.Exceptions;
 
-namespace SFA.DAS.AODP.Data.Exceptions;
-
+/// <summary>
+/// Thrown when a database record cannot be found for a given Id. 
+/// </summary>
+/// <param name="id"></param>
 public class RecordNotFoundException(Guid id) : Exception
 {
     public Guid Id { get; set; } = id;

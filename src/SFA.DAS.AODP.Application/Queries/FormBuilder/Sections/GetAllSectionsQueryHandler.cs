@@ -11,7 +11,7 @@ public class GetAllSectionsQueryHandler(ISectionRepository sectionRepository, IM
 
     public async Task<GetAllSectionsQueryResponse> Handle(GetAllSectionsQuery request, CancellationToken cancellationToken)
     {
-        var response = new GetAllSectionsQueryResponse(new());
+        var response = new GetAllSectionsQueryResponse();
         response.Success = false;
         try
         {

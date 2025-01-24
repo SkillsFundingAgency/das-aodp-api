@@ -1,7 +1,10 @@
 ﻿using SFA.DAS.AODP.Models.Forms.FormBuilder;
+using SFA.DAS.AODP.Application.Exceptions;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
+
+/// <exception cref="NotFoundException"></exception>
 public class GetFormVersionByIdQueryResponse : BaseResponse
 {
     public FormVersion? Data { get; set; }

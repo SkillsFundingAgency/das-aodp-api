@@ -1,159 +1,160 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
+using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
-namespace SFA.DAS.AODP.Api.Controllers
+namespace SFA.DAS.AODP.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class FormsController : Controller
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class FormsController : Controller
+    private readonly IMediator _mediator;
+
+    public FormsController(IMediator mediator)
     {
-        private readonly IMediator _mediator;
+        _mediator = mediator;
+    }
 
-        public FormsController(IMediator mediator)
+    [HttpGet("/api/forms")]
+    [ProducesResponseType(typeof(GetAllFormVersionsQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetAllAsync()
+    {
+        var query = new GetAllFormVersionsQuery();
+        var response = await _mediator.Send(query);
+        if (response.Success)
         {
-            _mediator = mediator;
+            return Ok(response);
         }
 
-        [HttpGet("/api/forms")]
-        [ProducesResponseType(typeof(GetAllFormVersionsQueryResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllAsync()
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpGet("/api/forms/{formVersionId}")]
+    [ProducesResponseType(typeof(GetFormVersionByIdQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetByIdAsync(Guid formVersionId)
+    {
+        var query = new GetFormVersionByIdQuery(formVersionId);
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success && response.Data is not null)
         {
-            var query = new GetAllFormVersionsQuery();
-            var response = await _mediator.Send(query);
-            if (response.Success)
-            {
-                return Ok(response);
-            }
-
-            var errorObjectResult = new ObjectResult(response.ErrorMessage);
-            errorObjectResult.StatusCode = StatusCodes.Status500InternalServerError;
-
-            return errorObjectResult;
+            return Ok(response);
         }
 
-        [HttpGet("/api/forms/{formVersionId}")]
-        [ProducesResponseType(typeof(GetFormVersionByIdQueryResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetByIdAsync(Guid formVersionId)
+        if (response.InnerException is NotFoundException)
         {
-            var query = new GetFormVersionByIdQuery(formVersionId);
-
-            var response = await _mediator.Send(query);
-
-            if (response.Success)
-            {
-                if (response.Data is null)
-                    return NotFound();
-                return Ok(response);
-            }
-
-            var errorObjectResult = new ObjectResult(response.ErrorMessage);
-            errorObjectResult.StatusCode = StatusCodes.Status500InternalServerError;
-
-            return errorObjectResult;
+            return NotFound();
         }
 
-        [HttpPost("/api/forms")]
-        [ProducesResponseType(typeof(CreateFormVersionCommandResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> CreateAsync([FromBody] CreateFormVersionCommand.FormVersion formVersion)
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpPost("/api/forms")]
+    [ProducesResponseType(typeof(CreateFormVersionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> CreateAsync([FromBody] CreateFormVersionCommand.FormVersion formVersion)
+    {
+        var command = new CreateFormVersionCommand(formVersion);
+
+        var response = await _mediator.Send(command);
+        if (response.Success && response.Data is not null)
         {
-            var command = new CreateFormVersionCommand(formVersion);
-
-            var response = await _mediator.Send(command);
-            if (response.Success)
-            {
-                if (response.Data is null)
-                    return NotFound();
-                return Ok(response);
-            }
-
-            var errorObjectResult = new ObjectResult(response.ErrorMessage);
-            errorObjectResult.StatusCode = StatusCodes.Status500InternalServerError;
-
-            return errorObjectResult;
+            return Ok(response);
         }
 
-        [HttpPut("/api/forms/{formVersionId}")]
-        [ProducesResponseType(typeof(UpdateFormVersionCommandResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateAsync(Guid formVersionId, [FromBody] UpdateFormVersionCommand.FormVersion formVersion)
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpPut("/api/forms/{formVersionId}")]
+    [ProducesResponseType(typeof(UpdateFormVersionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> UpdateAsync(Guid formVersionId, [FromBody] UpdateFormVersionCommand.FormVersion formVersion)
+    {
+        var command = new UpdateFormVersionCommand(formVersionId, formVersion);
+
+        var response = await _mediator.Send(command);
+
+        if (response.Success && response.Data is not null)
         {
-            var command = new UpdateFormVersionCommand(formVersionId, formVersion);
-
-            var response = await _mediator.Send(command);
-
-            if (response.Success)
-            {
-                if (response.Data is null)
-                    return NotFound();
-                return Ok(response);
-            }
-
-            var errorObjectResult = new ObjectResult(response.ErrorMessage);
-            errorObjectResult.StatusCode = StatusCodes.Status500InternalServerError;
-
-            return errorObjectResult;
+            return Ok(response);
         }
 
-        [HttpPut("/api/forms/{formVersionId}/publish")]
-        public async Task<IActionResult> PublishAsync(Guid formVersionId)
+        if (response.InnerException is NotFoundException)
         {
-            var command = new PublishFormVersionCommand(formVersionId);
-            
-            var response = await _mediator.Send(command);
-
-            if (response.Success)
-                return Ok(response);
-
-            if (response.NotFound)
-                return NotFound();
-
-            var errorObjectResult = new ObjectResult(response.ErrorMessage);
-            errorObjectResult.StatusCode = StatusCodes.Status500InternalServerError;
-
-            return errorObjectResult;
+            return NotFound();
         }
 
-        [HttpPut("/api/forms/{formVersionId}/unpublish")]
-        public async Task<IActionResult> UnpublishAsync(Guid formVersionId)
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpPut("/api/forms/{formVersionId}/publish")]
+    [ProducesResponseType(typeof(UpdateFormVersionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> PublishAsync(Guid formVersionId)
+    {
+        var command = new PublishFormVersionCommand(formVersionId);
+        
+        var response = await _mediator.Send(command);
+
+        if (response.Success)
+            return Ok(response);
+
+        if (response.InnerException is NotFoundException)
         {
-            var command = new UnpublishFormVersionCommand(formVersionId);
-
-            var response = await _mediator.Send(command);
-
-            if (response.Success)
-                return Ok(response);
-
-            if (response.NotFound)
-                return NotFound();
-
-            var errorObjectResult = new ObjectResult(response.ErrorMessage);
-            errorObjectResult.StatusCode = StatusCodes.Status500InternalServerError;
-
-            return errorObjectResult;
+            return NotFound();
         }
 
-        [HttpDelete("/api/forms/{formVersionId}")]
-        [ProducesResponseType(typeof(DeleteFormVersionCommandResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> RemoveAsync(Guid formVersionId)
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpPut("/api/forms/{formVersionId}/unpublish")]
+    [ProducesResponseType(typeof(UpdateFormVersionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> UnpublishAsync(Guid formVersionId)
+    {
+        var command = new UnpublishFormVersionCommand(formVersionId);
+
+        var response = await _mediator.Send(command);
+
+        if (response.Success)
+            return Ok(response);
+
+        if (response.InnerException is NotFoundException)
         {
-            var command = new DeleteFormVersionCommand(formVersionId);
-
-            var response = await _mediator.Send(command);
-            if (response.Success)
-            {
-                return Ok(response);
-            }
-
-            var errorObjectResult = new ObjectResult(response.ErrorMessage);
-            errorObjectResult.StatusCode = StatusCodes.Status500InternalServerError;
-
-            return errorObjectResult;
+            return NotFound();
         }
+
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpDelete("/api/forms/{formVersionId}")]
+    [ProducesResponseType(typeof(DeleteFormVersionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> RemoveAsync(Guid formVersionId)
+    {
+        var command = new DeleteFormVersionCommand(formVersionId);
+
+        var response = await _mediator.Send(command);
+        if (response.Success)
+        {
+            return Ok(response);
+        }
+
+        if (response.InnerException is NotFoundException)
+        {
+            return NotFound();
+        }
+
+        return StatusCode(StatusCodes.Status500InternalServerError);
     }
 }

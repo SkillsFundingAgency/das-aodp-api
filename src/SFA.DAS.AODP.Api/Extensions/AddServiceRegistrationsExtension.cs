@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using SFA.DAS.AODP.Data.Extensions;
+﻿using SFA.DAS.AODP.Data.Extensions;
 using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Api.Extensions;

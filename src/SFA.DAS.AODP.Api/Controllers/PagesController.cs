@@ -1,122 +1,143 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
+using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
-namespace SFA.DAS.AODP.Api.Controllers
+namespace SFA.DAS.AODP.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class PagesController : Controller
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class PagesController : Controller
+    private readonly IMediator _mediator;
+
+    public PagesController(IMediator mediator)
     {
-        private readonly IMediator _mediator;
+        _mediator = mediator;
+    }
 
-        public PagesController(IMediator mediator)
+    [HttpGet("/api/pages/section/{sectionId}")]
+    [ProducesResponseType(typeof(GetAllPagesQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetAllAsync(Guid sectionId)
+    {
+        var query = new GetAllPagesQuery(sectionId);
+
+        var response = await _mediator.Send(query);
+        if (response.Success)
         {
-            _mediator = mediator;
+            return Ok(response);
         }
 
-        [HttpGet("/api/pages/section/{sectionId}")]
-        [ProducesResponseType(typeof(GetAllPagesQueryResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAllAsync(Guid sectionId)
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpGet("/api/pages/{pageId}/section/{sectionId}")]
+    [ProducesResponseType(typeof(GetPageByIdQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetByIdAsync(Guid pageId, Guid sectionId)
+    {
+        var query = new GetPageByIdQuery(pageId, sectionId);
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success && response.Data is not null)
         {
-            var query = new GetAllPagesQuery(sectionId);
-
-            var response = await _mediator.Send(query);
-            if (response.Success)
-            {
-                return Ok(response);
-            }
-
-            var errorObjectResult = new ObjectResult(response.ErrorMessage);
-            errorObjectResult.StatusCode = StatusCodes.Status500InternalServerError;
-
-            return errorObjectResult;
+            return Ok(response);
         }
 
-        [HttpGet("/api/pages/{pageId}/section/{sectionId}")]
-        [ProducesResponseType(typeof(GetPageByIdQueryResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetByIdAsync(Guid pageId, Guid sectionId)
+        if (response.InnerException is NotFoundException)
         {
-            var query = new GetPageByIdQuery(pageId, sectionId);
-
-            var response = await _mediator.Send(query);
-
-            if (response.Success)
-            {
-                if (response.Data is null)
-                    return NotFound();
-                return Ok(response);
-            }
-
-            var errorObjectResult = new ObjectResult(response.ErrorMessage);
-            errorObjectResult.StatusCode = StatusCodes.Status500InternalServerError;
-
-            return errorObjectResult;
+            return NotFound();
         }
 
-        [HttpPost("/api/pages")]
-        [ProducesResponseType(typeof(CreatePageCommandResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> CreateAsync([FromBody] CreatePageCommand.Page page)
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpPost("/api/pages")]
+    [ProducesResponseType(typeof(CreatePageCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> CreateAsync([FromBody] CreatePageCommand.Page page)
+    {
+        var command = new CreatePageCommand(page);
+
+        var response = await _mediator.Send(command);
+        if (response.Success && response.Data is not null)
         {
-            var command = new CreatePageCommand(page);
-
-            var response = await _mediator.Send(command);
-            if (response.Success)
-            {
-                if (response.Data is null)
-                    return NotFound();
-                return Ok(response);
-            }
-
-            var errorObjectResult = new ObjectResult(response.ErrorMessage);
-            errorObjectResult.StatusCode = StatusCodes.Status500InternalServerError;
-
-            return errorObjectResult;
+            return Ok(response);
         }
 
-        [HttpPut("/api/pages/{pageId}")]
-        [ProducesResponseType(typeof(UpdatePageCommandResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateAsync([FromRoute] Guid pageId, [FromBody] UpdatePageCommand.Page page)
+        if (response.InnerException is LockedRecordException)
         {
-            var command = new UpdatePageCommand(pageId, page);
-
-            var response = await _mediator.Send(command);
-
-            if (response.Success)
-            {
-                if (response.Data is null)
-                    return NotFound();
-                return Ok(response);
-            }
-
-            var errorObjectResult = new ObjectResult(response.ErrorMessage);
-            errorObjectResult.StatusCode = StatusCodes.Status500InternalServerError;
-
-            return errorObjectResult;
+            return Forbid();
         }
 
-        [HttpDelete("/api/pages/{pageId}")]
-        [ProducesResponseType(typeof(DeletePageCommandResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> RemoveAsync([FromRoute] Guid pageId)
+        if (response.InnerException is DependantNotFoundException)
         {
-            var command = new DeletePageCommand(pageId);
-
-            var response = await _mediator.Send(command);
-            if (response.Success)
-            {
-                return Ok(response);
-            }
-
-            var errorObjectResult = new ObjectResult(response.ErrorMessage);
-            errorObjectResult.StatusCode = StatusCodes.Status500InternalServerError;
-
-            return errorObjectResult;
+            return NotFound();
         }
+
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpPut("/api/pages/{pageId}")]
+    [ProducesResponseType(typeof(UpdatePageCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> UpdateAsync([FromRoute] Guid pageId, [FromBody] UpdatePageCommand.Page page)
+    {
+        var command = new UpdatePageCommand(pageId, page);
+
+        var response = await _mediator.Send(command);
+
+        if (response.Success && response.Data is not null)
+        {
+            return Ok(response);
+        }
+
+        if (response.InnerException is LockedRecordException)
+        {
+            return Forbid();
+        }
+
+        if (response.InnerException is DependantNotFoundException)
+        {
+            return NotFound();
+        }
+
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpDelete("/api/pages/{pageId}")]
+    [ProducesResponseType(typeof(DeletePageCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> RemoveAsync([FromRoute] Guid pageId)
+    {
+        var command = new DeletePageCommand(pageId);
+
+        var response = await _mediator.Send(command);
+        if (response.Success)
+        {
+            return Ok(response);
+        }
+
+        if (response.InnerException is LockedRecordException)
+        {
+            return Forbid();
+        }
+
+        if (response.InnerException is DependantNotFoundException)
+        {
+            return NotFound();
+        }
+
+        return StatusCode(StatusCodes.Status500InternalServerError);
     }
 }

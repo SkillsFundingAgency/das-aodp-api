@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
 using MediatR;
 using SFA.DAS.AODP.Data.Repositories;
-using SFA.DAS.AODP.Models.Forms.FormBuilder;
+using SFA.DAS.AODP.Data.Exceptions;
+using SFA.DAS.AODP.Application.Exceptions;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 
-public class DeletePageCommandHandler(IPageRepository pageRepository, IMapper mapper) : IRequestHandler<DeletePageCommand, DeletePageCommandResponse>
+public class DeletePageCommandHandler(IPageRepository pageRepository) : IRequestHandler<DeletePageCommand, DeletePageCommandResponse>
 {
     private readonly IPageRepository PageRepository = pageRepository;
-    private readonly IMapper Mapper = mapper;
 
     public async Task<DeletePageCommandResponse> Handle(DeletePageCommand request, CancellationToken cancellationToken)
     {
@@ -18,14 +18,17 @@ public class DeletePageCommandHandler(IPageRepository pageRepository, IMapper ma
         {
             var res = await PageRepository.Archive(request.PageId);
 
-            if (res is null)
-            {
-                response.Success = false;
-                response.ErrorMessage = $"Page with id '{request.PageId}' could not be found.";
-                return response;
-            }
-
             response.Success = true;
+        }
+        catch (RecordLockedException)
+        {
+            response.Success = false;
+            response.InnerException = new LockedRecordException();
+        }
+        catch (NoForeignKeyException ex)
+        {
+            response.Success = false;
+            response.InnerException = new DependantNotFoundException(ex.ForeignKey);
         }
         catch (Exception ex)
         {

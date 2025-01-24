@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using MediatR;
 using SFA.DAS.AODP.Data.Repositories;
-using SFA.DAS.AODP.Models.Forms.FormBuilder;
+using SFA.DAS.AODP.Data.Exceptions;
+using SFA.DAS.AODP.Application.Exceptions;
 using Entities = SFA.DAS.AODP.Data.Entities;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
@@ -21,13 +22,17 @@ public class UpdatePageCommandHandler(IPageRepository pageRepository, IMapper ma
             var pageToUpdate = Mapper.Map<Entities.Page>(request.Data);
             var page = await PageRepository.Update(pageToUpdate);
 
-            if (page == null)
-            {
-                response.Success = false;
-                response.ErrorMessage = $"Page with id '{request.Data.Id}' could not be found.";
-                return response;
-            }
             response.Success = true;
+        }
+        catch (RecordLockedException)
+        {
+            response.Success = false;
+            response.InnerException = new LockedRecordException();
+        }
+        catch (NoForeignKeyException ex)
+        {
+            response.Success = false;
+            response.InnerException = new DependantNotFoundException(ex.ForeignKey);
         }
         catch (Exception ex)
         {

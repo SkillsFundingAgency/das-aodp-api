@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Infrastructure.Context;
 
 namespace SFA.DAS.AODP.Data.Repositories;
@@ -14,31 +15,63 @@ public class SectionRepository : ISectionRepository
         _pageRepository = pageRepository;
     }
 
-    public async Task<List<Section>> GetSectionsForFormAsync(Guid formId)
+    /// <summary>
+    /// Gets all sections for a given form version Id. 
+    /// Does not check if the form version Id is valid, will just return an empty list if so. 
+    /// </summary>
+    /// <param name="formVersionId"></param>
+    /// <returns></returns>
+    public async Task<List<Section>> GetSectionsForFormAsync(Guid formVersionId)
     {
-        return await _context.Sections.Where(v => v.FormVersionId == formId).ToListAsync();
+        return await _context.Sections.Where(v => v.FormVersionId == formVersionId).ToListAsync();
     }
 
-    public async Task<Section?> GetSectionByIdAsync(Guid sectionId)
+    /// <summary>
+    /// Gets a section with a given Id. 
+    /// </summary>
+    /// <param name="sectionId"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task<Section> GetSectionByIdAsync(Guid sectionId)
     {
-        return await _context.Sections.FirstOrDefaultAsync(v => v.Id == sectionId);
+        var res = await _context.Sections.FirstOrDefaultAsync(v => v.Id == sectionId);
+        if (res is null)
+            throw new RecordNotFoundException(sectionId);
+
+        return res;
     }
 
+    /// <summary>
+    /// Creates a new section, throws if the form version Id is not found. 
+    /// </summary>
+    /// <param name="section"></param>
+    /// <returns></returns>
+    /// <exception cref="NoForeignKeyException"></exception>
     public async Task<Section> Create(Section section)
     {
+        if (!await _context.FormVersions.AnyAsync(v => v.Id == section.FormVersionId))
+            throw new NoForeignKeyException(section.FormVersionId);
+
         _context.Sections.Add(section);
         await _context.SaveChangesAsync();
         return section;
     }
 
-    public async Task<List<Section>> CopySectionsForNewForm(Guid oldFormId, Guid newFormId)
+    /// <summary>
+    /// Copies all sections associated with one form version id to another. 
+    /// Used when creating a new form version from an old one. 
+    /// </summary>
+    /// <param name="oldFormVersionId"></param>
+    /// <param name="newFormVersionId"></param>
+    /// <returns></returns>
+    public async Task<List<Section>> CopySectionsForNewForm(Guid oldFormVersionId, Guid newFormVersionId)
     {
-        var sectionsToMigrate = await GetSectionsForFormAsync(oldFormId);
+        var sectionsToMigrate = await GetSectionsForFormAsync(oldFormVersionId);
         foreach (var s in sectionsToMigrate)
         {
             var oldSectionId = s.Id;
             s.Id = Guid.NewGuid();
-            s.FormVersionId = newFormId;
+            s.FormVersionId = newFormVersionId;
             await _pageRepository.CopyPagesForNewSection(oldSectionId, s.Id);
         }
         await _context.Sections.AddRangeAsync(sectionsToMigrate);
@@ -46,21 +79,37 @@ public class SectionRepository : ISectionRepository
         return sectionsToMigrate;
     }
 
-    public async Task<Section?> Update(Section section)
+    /// <summary>
+    /// Updates a section's data, throws if no section for the given Id can be found, 
+    /// or if the linked form version is not in draft. 
+    /// </summary>
+    /// <param name="section"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    /// <exception cref="RecordLockedException"></exception>
+    public async Task<Section> Update(Section section)
     {
         var sectionToUpdate = await _context.Sections.FirstOrDefaultAsync(v => v.Id == section.Id);
         if (sectionToUpdate is null)
-            return null;
+            throw new RecordNotFoundException(section.Id);
+        if (_context.FormVersions.Any(v => v.Id == section.FormVersionId && v.Status != FormStatus.Draft))
+            throw new RecordLockedException();
         sectionToUpdate = section;
         await _context.SaveChangesAsync();
         return section;
     }
 
-    public async Task<Section?> DeleteSection(Guid sectionId)
+    /// <summary>
+    /// Deletes a section with a given Id, throws if no record can be found for a given Id. 
+    /// </summary>
+    /// <param name="sectionId"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task<Section> DeleteSection(Guid sectionId)
     {
         var sectionToUpdate = await _context.Sections.FirstOrDefaultAsync(v => v.Id == sectionId);
         if (sectionToUpdate is null)
-            return null;
+            throw new RecordNotFoundException(sectionId);
         _context.Sections.Remove(sectionToUpdate);
         await _context.SaveChangesAsync();
         return sectionToUpdate;

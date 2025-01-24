@@ -5,16 +5,16 @@ namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
 public class CreateFormVersionCommandResponse : BaseResponse
 {
-    public FormVersion Data { get; set; }
+    public FormVersion Data { get; set; } = new FormVersion();
 
     public class FormVersion
     {
         public Guid Id { get; set; }
         public Guid FormId { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public DateTime Version { get; set; }
         public FormStatus Status { get; set; }
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
         public int Order { get; set; }
         public DateTime DateCreated { get; set; }
     }

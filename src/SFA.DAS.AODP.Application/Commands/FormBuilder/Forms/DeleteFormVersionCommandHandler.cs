@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using SFA.DAS.AODP.Application.Exceptions;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
@@ -22,6 +24,10 @@ public class DeleteFormVersionCommandHandler : IRequestHandler<DeleteFormVersion
             var success = await _formVersionRepository.Archive(request.FormVersionId);
             response.Data = success;
             response.Success = true;
+        }
+        catch (RecordNotFoundException ex)
+        {
+            response.InnerException = new NotFoundException(ex.Id);
         }
         catch (Exception ex)
         {

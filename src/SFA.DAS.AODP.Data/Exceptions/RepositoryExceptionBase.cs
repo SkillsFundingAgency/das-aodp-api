@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace SFA.DAS.AODP.Data.Exceptions;
 
-namespace SFA.DAS.AODP.Data.Exceptions;
-
+/// <summary>
+/// Base exception for all repositories. 
+/// </summary>
 public class RepositoryExceptionBase : Exception
 {
     public RepositoryExceptionBase() : base() { }
