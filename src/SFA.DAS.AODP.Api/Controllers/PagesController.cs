@@ -11,10 +11,12 @@ namespace SFA.DAS.AODP.Api.Controllers;
 public class PagesController : Controller
 {
     private readonly IMediator _mediator;
+    private readonly ILogger<FormsController> _logger;
 
-    public PagesController(IMediator mediator)
+    public PagesController(IMediator mediator, ILogger<FormsController> logger)
     {
         _mediator = mediator;
+        _logger = logger;
     }
 
     [HttpGet("/api/pages/section/{sectionId}")]
@@ -30,6 +32,7 @@ public class PagesController : Controller
             return Ok(response);
         }
 
+        _logger.LogError(message: $"Error thrown getting all pages for section Id `{sectionId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
@@ -50,9 +53,11 @@ public class PagesController : Controller
 
         if (response.InnerException is NotFoundException)
         {
+            _logger.LogError($"Request for page with section Id `{sectionId}` and page Id `{pageId}` returned 404 (not found).");
             return NotFound();
         }
 
+        _logger.LogError(message: $"Error thrown getting page for section Id `{sectionId}` and page Id `{pageId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
@@ -73,11 +78,13 @@ public class PagesController : Controller
 
         if (response.InnerException is LockedRecordException)
         {
+            _logger.LogError($"Request to add page with section Id `{page.SectionId}` but form version is locked. ");
             return Forbid();
         }
 
         if (response.InnerException is DependantNotFoundException)
         {
+            _logger.LogError(message: $"Request to add page with section Id `{page.SectionId}` but no section with this Id can be found. ", exception: response.InnerException);
             return NotFound();
         }
 
@@ -102,11 +109,13 @@ public class PagesController : Controller
 
         if (response.InnerException is LockedRecordException)
         {
+            _logger.LogError($"Request to update page with section Id `{page.SectionId}` and page Id `{pageId}` but form version is locked. ");
             return Forbid();
         }
 
-        if (response.InnerException is DependantNotFoundException)
+        if (response.InnerException is NotFoundException)
         {
+            _logger.LogError($"Request to edit page with page Id `{pageId}` but no page with this Id can be found. ");
             return NotFound();
         }
 
@@ -130,11 +139,13 @@ public class PagesController : Controller
 
         if (response.InnerException is LockedRecordException)
         {
+            _logger.LogError($"Request to delete page with page Id `{pageId}` but form version is locked. ");
             return Forbid();
         }
 
-        if (response.InnerException is DependantNotFoundException)
+        if (response.InnerException is NotFoundException)
         {
+            _logger.LogError($"Request to delete page with page Id `{pageId}` but no page with this Id can be found. ");
             return NotFound();
         }
 

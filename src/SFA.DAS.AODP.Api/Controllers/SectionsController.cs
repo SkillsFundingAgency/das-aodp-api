@@ -11,10 +11,12 @@ namespace SFA.DAS.AODP.Api.Controllers;
 public class SectionsController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ILogger<SectionsController> _logger;
 
-    public SectionsController(IMediator mediator)
+    public SectionsController(IMediator mediator, ILogger<SectionsController> logger)
     {
         _mediator = mediator;
+        _logger = logger;
     }
 
     [HttpGet("/api/sections/form/{formVersionId}")]
@@ -30,6 +32,7 @@ public class SectionsController : ControllerBase
             return Ok(response);
         }
 
+        _logger.LogError(message: $"Error thrown getting all sections for form version Id `{formVersionId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
@@ -50,9 +53,11 @@ public class SectionsController : ControllerBase
 
         if (response.InnerException is NotFoundException)
         {
+            _logger.LogError($"Request for section with section Id `{sectionId}` and form version Id `{formVersionId}` returned 404 (not found).");
             return NotFound();
         }
 
+        _logger.LogError(message: $"Error thrown getting section with form version Id `{formVersionId}` and section Id `{sectionId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
@@ -70,11 +75,13 @@ public class SectionsController : ControllerBase
             return Ok(response);
         }
 
-        if (response.InnerException is NotFoundException)
+        if (response.InnerException is DependantNotFoundException)
         {
+            _logger.LogError($"Request to add section to form version Id `{section.FormVersionId}` but no form version with this Id can be found. ");
             return NotFound();
         }
 
+        _logger.LogError(message: $"Error thrown creating new section on form version Id `{section.FormVersionId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
@@ -96,14 +103,17 @@ public class SectionsController : ControllerBase
 
         if (response.InnerException is LockedRecordException)
         {
+            _logger.LogError($"Request to update section with section Id `{section.Id}` and form version Id `{formVersionId}` but form version is locked. ");
             return Forbid();
         }
 
         if (response.InnerException is NotFoundException)
         {
+            _logger.LogError($"Request to update section with section Id `{section.Id}` and form version Id `{formVersionId}` returned 404 (not found).");
             return NotFound();
         }
 
+        _logger.LogError(message: $"Error thrown updating section with form version Id `{formVersionId}` and section Id `{section.Id}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
@@ -123,9 +133,11 @@ public class SectionsController : ControllerBase
 
         if (response.InnerException is NotFoundException)
         {
+            _logger.LogError($"Request to delete section with section Id `{sectionId}` returned 404 (not found).");
             return NotFound();
         }
 
+        _logger.LogError(message: $"Error thrown deleting section with the section Id `{sectionId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 }

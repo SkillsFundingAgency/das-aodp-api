@@ -29,10 +29,10 @@ public class UpdatePageCommandHandler(IPageRepository pageRepository, IMapper ma
             response.Success = false;
             response.InnerException = new LockedRecordException();
         }
-        catch (NoForeignKeyException ex)
+        catch (RecordNotFoundException ex)
         {
             response.Success = false;
-            response.InnerException = new DependantNotFoundException(ex.ForeignKey);
+            response.InnerException = new NotFoundException(ex.Id);
         }
         catch (Exception ex)
         {

@@ -11,10 +11,12 @@ namespace SFA.DAS.AODP.Api.Controllers;
 public class FormsController : Controller
 {
     private readonly IMediator _mediator;
+    private readonly ILogger<FormsController> _logger;
 
-    public FormsController(IMediator mediator)
+    public FormsController(IMediator mediator, ILogger<FormsController> logger)
     {
         _mediator = mediator;
+        _logger = logger;
     }
 
     [HttpGet("/api/forms")]
@@ -29,6 +31,7 @@ public class FormsController : Controller
             return Ok(response);
         }
 
+        _logger.LogError(message: $"Error thrown getting all forms versions.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
@@ -49,9 +52,11 @@ public class FormsController : Controller
 
         if (response.InnerException is NotFoundException)
         {
+            _logger.LogWarning($"Request for form version with Id `{formVersionId}` returned 404 (not found). ");
             return NotFound();
         }
 
+        _logger.LogError(message: $"Error thrown getting a form version with the Id `{formVersionId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
@@ -68,6 +73,7 @@ public class FormsController : Controller
             return Ok(response);
         }
 
+        _logger.LogError(message: $"Error thrown creating a form and form version.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
@@ -88,9 +94,11 @@ public class FormsController : Controller
 
         if (response.InnerException is NotFoundException)
         {
+            _logger.LogWarning($"Request to update form version with Id `{formVersionId}` returned 404 (not found). ");
             return NotFound();
         }
 
+        _logger.LogError(message: $"Error thrown updating a form version with the Id `{formVersionId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
@@ -109,9 +117,11 @@ public class FormsController : Controller
 
         if (response.InnerException is NotFoundException)
         {
+            _logger.LogWarning($"Request to publish form version with Id `{formVersionId}` returned 404 (not found). ");
             return NotFound();
         }
 
+        _logger.LogError(message: $"Error thrown publishing a form version with the Id `{formVersionId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
@@ -130,9 +140,11 @@ public class FormsController : Controller
 
         if (response.InnerException is NotFoundException)
         {
+            _logger.LogWarning($"Request to unpublish form version with Id `{formVersionId}` returned 404 (not found). ");
             return NotFound();
         }
 
+        _logger.LogError(message: $"Error thrown unpublishing a form version with the Id `{formVersionId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
@@ -152,9 +164,11 @@ public class FormsController : Controller
 
         if (response.InnerException is NotFoundException)
         {
+            _logger.LogWarning($"Request to delete form version with Id `{formVersionId}` returned 404 (not found). ");
             return NotFound();
         }
 
+        _logger.LogError(message: $"Error thrown deleting a form version with the Id `{formVersionId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 }
