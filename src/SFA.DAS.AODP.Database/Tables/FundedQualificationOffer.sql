@@ -2,8 +2,8 @@
 (
 	[Id] INT IDENTITY(1,1) NOT NULL,
 	[FundedQualificationId] Int NOT NULL,
-	[Name] varchar(max)  NULL,
-	[Notes] varchar(max)  NULL,
+	[Name] varchar(255)  NULL,
+	[Notes] varchar(1000)  NULL,
 	[FundingAvailable] BIT NULL,
 	[FundingApprovalStartDate] DATETIME NULL,
 	[FundingApprovalEndDate] DATETIME NULL,
