@@ -1,6 +1,4 @@
-﻿using SFA.DAS.AODP.Models.Archived.Forms.FormBuilder;
-
-namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
+﻿namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
 public class GetAllSectionsQueryResponse() : BaseResponse
 {

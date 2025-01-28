@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories;
@@ -19,7 +18,7 @@ public class GetSectionByIdQueryHandler(ISectionRepository sectionRepository) : 
         {
             var section = await SectionRepository.GetSectionByIdAsync(request.SectionId);
 
-            response.Data = section;
+            response = section;
             response.Success = true;
         }
         catch (RecordNotFoundException ex)

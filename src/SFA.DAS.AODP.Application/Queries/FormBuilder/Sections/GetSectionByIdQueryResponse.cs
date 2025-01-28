@@ -2,32 +2,28 @@
 
 public class GetSectionByIdQueryResponse() : BaseResponse
 {
-    public Section Data { get; set; }
+    public Guid Id { get; set; }
+    public Guid FormVersionId { get; set; }
+    public Guid Key { get; set; }
+    public int Order { get; set; }
+    public string Title { get; set; }
+    public string Description { get; set; }
+    public List<Page> Pages { get; set; }
 
-    public class Section
+    public static implicit operator GetSectionByIdQueryResponse(Data.Entities.Section entity)
     {
-        public Guid Id { get; set; }
-        public Guid FormVersionId { get; set; }
-        public Guid Key { get; set; }
-        public int Order { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public List<Page> Pages { get; set; }
-
-        public static implicit operator Section(Data.Entities.Section entity)
+        return new()
         {
-            return new()
-            {
-                Id = entity.Id,
-                FormVersionId = entity.FormVersionId,
-                Title = entity.Title,
-                Key = entity.Key,
-                Description = entity.Description,
-                Order = entity.Order,
-                Pages = entity.Pages != null ? [..entity.Pages] : new()
+            Id = entity.Id,
+            FormVersionId = entity.FormVersionId,
+            Title = entity.Title,
+            Key = entity.Key,
+            Description = entity.Description,
+            Order = entity.Order,
+            Pages = entity.Pages != null ? [.. entity.Pages] : new()
 
-            };
-        }
+        };
+
     }
 
 

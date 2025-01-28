@@ -8,5 +8,6 @@ public class Page
     public Guid Key { get; set; }
     public string Description { get; set; } = string.Empty;
     public int Order { get; set; }
-    public List<Question> Questions { get; set; } = new List<Question>();
+    public List<Question> Questions { get; set; } = new();
+    public virtual Section Section { get; set; }
 }

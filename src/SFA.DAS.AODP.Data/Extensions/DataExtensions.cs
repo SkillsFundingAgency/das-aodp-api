@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Repositories;
 using SFA.DAS.AODP.Infrastructure.Context;
 
@@ -18,6 +16,7 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IFormVersionRepository, FormVersionRepository>();
             services.AddScoped<ISectionRepository, SectionRepository>();
             services.AddScoped<IPageRepository, PageRepository>();
+            services.AddScoped<IQuestionRepository, QuestionRepository>();
 
             return services;
         }

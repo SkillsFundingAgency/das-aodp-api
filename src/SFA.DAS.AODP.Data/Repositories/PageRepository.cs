@@ -5,7 +5,6 @@ using SFA.DAS.AODP.Infrastructure.Context;
 using SFA.DAS.AODP.Models.Form;
 
 namespace SFA.DAS.AODP.Data.Repositories;
-
 public class PageRepository : IPageRepository
 {
     private readonly IApplicationDbContext _context;
@@ -45,7 +44,7 @@ public class PageRepository : IPageRepository
     /// <exception cref="RecordNotFoundException"></exception>
     public async Task<Page> GetPageByIdAsync(Guid pageId)
     {
-        var res = await _context.Pages.FirstOrDefaultAsync(v => v.Id == pageId);
+        var res = await _context.Pages.Include(p => p.Questions).FirstOrDefaultAsync(v => v.Id == pageId);
         if (res is null)
             throw new RecordNotFoundException(pageId);
 

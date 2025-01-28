@@ -35,7 +35,7 @@ public class SectionRepository : ISectionRepository
     /// <exception cref="RecordNotFoundException"></exception>
     public async Task<Section> GetSectionByIdAsync(Guid sectionId)
     {
-        var res = await _context.Sections.FirstOrDefaultAsync(v => v.Id == sectionId);
+        var res = await _context.Sections.Include(s => s.Pages).FirstOrDefaultAsync(v => v.Id == sectionId);
         if (res is null)
             throw new RecordNotFoundException(sectionId);
 
