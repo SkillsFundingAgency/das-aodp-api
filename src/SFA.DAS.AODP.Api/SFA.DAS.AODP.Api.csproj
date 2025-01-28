@@ -17,12 +17,13 @@
 	  <PackageReference Include="SFA.DAS.Configuration.AzureTableStorage" Version="17.1.113" />
 	  <PackageReference Include="MediatR" Version="12.4.1" />
 	  <PackageReference Include="SFA.DAS.Api.Common" Version="17.1.112" />
-	  <PackageReference Include="System.Text.Json" Version="6.0.10" />
+	  <PackageReference Include="System.Text.Json" Version="9.0.0" />
 
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SFA.DAS.AODP.Application\SFA.DAS.AODP.Application.csproj" />
+    <ProjectReference Include="..\SFA.DAS.AODP.Data\SFA.DAS.AODP.Data.csproj" />
     <ProjectReference Include="..\SFA.DAS.AODP.Models\SFA.DAS.AODP.Models.csproj" />
   </ItemGroup>
 
