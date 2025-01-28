@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 using SFA.DAS.AODP.Data.Exceptions;
@@ -7,20 +6,16 @@ using SFA.DAS.AODP.Data.Repositories;
 
 namespace SFA.DAS.AODP.Application.Handlers.FormBuilder.Pages;
 
-public class GetPageByIdQueryHandler(IPageRepository pageRepository) : IRequestHandler<GetPageByIdQuery, GetPageByIdQueryResponse>
+public class GetPageByIdQueryHandler(IPageRepository _pageRepository) : IRequestHandler<GetPageByIdQuery, GetPageByIdQueryResponse>
 {
-    private readonly IPageRepository PageRepository = pageRepository;
-
-
     public async Task<GetPageByIdQueryResponse> Handle(GetPageByIdQuery request, CancellationToken cancellationToken)
     {
         var response = new GetPageByIdQueryResponse();
-        response.Success = false;
         try
         {
-            var page = await PageRepository.GetPageByIdAsync(request.PageId);
+            var page = await _pageRepository.GetPageByIdAsync(request.PageId);
 
-            response.Data = page;
+            response = page;
             response.Success = true;
         }
         catch (RecordNotFoundException ex)

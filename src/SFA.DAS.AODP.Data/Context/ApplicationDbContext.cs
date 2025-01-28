@@ -17,38 +17,11 @@ namespace SFA.DAS.AODP.Infrastructure.Context
         public virtual DbSet<FormVersion> FormVersions { get; set; }
         public virtual DbSet<Section> Sections { get; set; }
         public virtual DbSet<Page> Pages { get; set; }
+        public virtual DbSet<Question> Questions { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Page>(entity =>
-            {
-                entity.OwnsMany(
-                    e => e.Questions, ownedNavigationBuilder =>
-                    {
-                        ownedNavigationBuilder.ToJson();
-                        ownedNavigationBuilder.OwnsMany(q => q.RoutingPoints);
-                        ownedNavigationBuilder.OwnsMany(q => q.MultiChoice);
-                        ownedNavigationBuilder.OwnsOne(q => q.BooleanValidaor);
-                        ownedNavigationBuilder.OwnsOne(q => q.DecimalValidator);
-                        ownedNavigationBuilder.OwnsOne(q => q.IntegerValidator);
-                        ownedNavigationBuilder.OwnsOne(q => q.TextValidator);
-                        ownedNavigationBuilder.OwnsOne(q => q.MultiChoiceValidator);
-                        ownedNavigationBuilder.OwnsOne(
-                            q => q.DateValidator, builder =>
-                            {
-                                builder.OwnsOne(v => v.GreaterThanTimeInFuture);
-                                builder.OwnsOne(v => v.LessThanTimeInFuture);
-                                builder.OwnsOne(v => v.GreaterThanTimeInPast);
-                                builder.OwnsOne(v => v.LessThanTimeInPast);
-                            });
-                    }
-                );
-            });
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
