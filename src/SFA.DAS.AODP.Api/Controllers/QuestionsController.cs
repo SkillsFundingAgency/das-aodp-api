@@ -113,7 +113,7 @@ public class QuestionsController : Controller
             return NotFound();
         }
 
-        _logger.LogError(message: $"Error thrown getting page for section Id `{sectionId}` and page Id `{pageId}`.", exception: response.InnerException);
+        _logger.LogError(message: $"Error thrown getting question for Id `{questionId}` and page Id `{pageId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 }

@@ -59,6 +59,7 @@
   <ItemGroup>
     <Folder Include="Properties" />
     <Folder Include="Tables" />
+    <Folder Include="Views" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Form.sql" />
@@ -66,5 +67,9 @@
     <Build Include="Tables\Page.sql" />
     <Build Include="Tables\Section.sql" />
     <Build Include="Tables\Question.sql" />
+    <Build Include="Tables\Route.sql" />
+    <Build Include="Tables\QuestionOption.sql" />
+    <Build Include="Tables\QuestionValidation.sql" />
+    <Build Include="Views\View_AvailableQuestionsForRouting.sql" />
   </ItemGroup>
 </Project>

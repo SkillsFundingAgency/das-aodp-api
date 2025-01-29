@@ -13,6 +13,9 @@ namespace SFA.DAS.AODP.Infrastructure.Context
         DbSet<Section> Sections { get; set; }
         DbSet<Page> Pages { get; set; }
         DbSet<Question> Questions { get; set; }
+        DbSet<QuestionOption> QuestionOptions { get; set; }
+        DbSet<QuestionValidation> QuestionValidations { get; set; }
+        DbSet<View_AvailableQuestionsForRouting> View_AvailableQuestionsForRoutings { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BulkInsertAsync<T>(IEnumerable<T> entities, CancellationToken cancellationToken = default) where T : class;

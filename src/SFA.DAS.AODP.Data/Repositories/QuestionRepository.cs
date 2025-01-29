@@ -59,7 +59,10 @@ public class QuestionRepository : IQuestionRepository
     /// <exception cref="RecordNotFoundException"></exception>
     public async Task<Question> GetQuestionByIdAsync(Guid id)
     {
-        var res = await _context.Questions.FirstOrDefaultAsync(v => v.Id == id);
+        var res = await _context.Questions
+            .Include(q => q.QuestionValidation)
+            .Include(q => q.QuestionOptions)
+            .FirstOrDefaultAsync(v => v.Id == id);
         return res is null ? throw new RecordNotFoundException(id) : res;
     }
 
@@ -74,8 +77,6 @@ public class QuestionRepository : IQuestionRepository
     /// <exception cref="RecordLockedException"></exception>
     public async Task<Question> Update(Question question)
     {
-        await ValidateQuestionForChange(question.Id);
-
         _context.Questions.Update(question);
         await _context.SaveChangesAsync();
         return question;
@@ -97,7 +98,13 @@ public class QuestionRepository : IQuestionRepository
         await _context.SaveChangesAsync();
     }
 
-    private async Task ValidateQuestionForChange(Guid questionId)
+
+    //public async Task<List<Question>> GetQuestionsForRoutingAsync(Guid formVersionId)
+    //{
+    //    var section = _context.Sections.Where(s => s.Pages.Q)
+    //}
+
+    public async Task ValidateQuestionForChange(Guid questionId)
     {
         if (!await _context.Questions.AnyAsync(v => v.Id == questionId))
             throw new RecordNotFoundException(questionId);

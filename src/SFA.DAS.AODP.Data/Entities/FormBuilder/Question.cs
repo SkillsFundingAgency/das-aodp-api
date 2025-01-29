@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace SFA.DAS.AODP.Data.Entities;
+﻿namespace SFA.DAS.AODP.Data.Entities;
 
 public class Question
 {
@@ -12,19 +10,12 @@ public class Question
     public int Order { get; set; }
     public string Description { get; set; } = string.Empty;
     public string? Hint { get; set; } = string.Empty;
-    public string? MultiChoice { get; set; }
-    public string? TextValidator { get; set; }
-    public string? IntegerValidator { get; set; }
-    public string? DecimalValidator { get; set; }
-    public string? DateValidator { get; set; }
-    public string? MultiChoiceValidator { get; set; }
-    public string? RadioValidator { get; set; }
-    public string? BooleanValidaor { get; set; }
     public Guid Key { get; set; }
 
     public virtual Page Page { get; set; }
+    public virtual QuestionValidation QuestionValidation { get; set; }
+    public virtual List<QuestionOption> QuestionOptions { get; set; }
 }
-
 public enum QuestionType
 {
     Text,        // Not null, length min, length max 

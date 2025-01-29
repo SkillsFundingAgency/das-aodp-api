@@ -28,6 +28,7 @@ public class GetQuestionByIdQueryResponse() : BaseResponse
     {
         public Guid Id { get; set; }
         public string Value { get; set; }
+        public int Order { get; set; }
     }
 
     public static implicit operator GetQuestionByIdQueryResponse(Data.Entities.Question entity)
@@ -44,14 +45,27 @@ public class GetQuestionByIdQueryResponse() : BaseResponse
             Type = entity.Type,
         };
 
-        if (question.Type == QuestionType.Text.ToString() && !string.IsNullOrWhiteSpace(entity.TextValidator))
+        if (question.Type == QuestionType.Text.ToString() && entity.QuestionValidation != null)
         {
-            question.TextInput = JsonConvert.DeserializeObject<TextInputOptions>(entity.TextValidator);
+            question.TextInput = new()
+            {
+                MinLength = entity.QuestionValidation.MinLength,
+                MaxLength = entity.QuestionValidation.MaxLength,
+            };
         }
 
-        else if (question.Type == QuestionType.Radio.ToString() && !string.IsNullOrWhiteSpace(entity.RadioValidator))
+        else if (question.Type == QuestionType.Radio.ToString() && entity.QuestionOptions != null)
         {
-            question.RadioOptions = JsonConvert.DeserializeObject<List<RadioOptionItem>>(entity.RadioValidator);
+            question.RadioOptions = new();
+            foreach (var option in entity.QuestionOptions)
+            {
+                question.RadioOptions.Add(new()
+                {
+                    Id = option.Id,
+                    Value = option.Value,
+                    Order = option.Order,
+                });
+            }
         }
 
         return question;

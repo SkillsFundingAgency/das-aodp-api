@@ -1,5 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Data.EntityConifguration;
+using System.Reflection.Emit;
 
 namespace SFA.DAS.AODP.Infrastructure.Context
 {
@@ -18,10 +21,21 @@ namespace SFA.DAS.AODP.Infrastructure.Context
         public virtual DbSet<Section> Sections { get; set; }
         public virtual DbSet<Page> Pages { get; set; }
         public virtual DbSet<Question> Questions { get; set; }
+        public virtual DbSet<QuestionOption> QuestionOptions { get; set; }
+        public virtual DbSet<QuestionValidation> QuestionValidations { get; set; }
+
+        public virtual DbSet<View_AvailableQuestionsForRouting> View_AvailableQuestionsForRoutings { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
+
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

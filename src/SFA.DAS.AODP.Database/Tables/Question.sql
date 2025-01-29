@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[Question](
+﻿CREATE TABLE [dbo].[Questions](
 	[Id] [uniqueidentifier] NOT NULL,
 	[PageId] [uniqueidentifier] NOT NULL,
 	[Title] [nvarchar](max) NOT NULL,
@@ -7,26 +7,20 @@
 	[Order] [int] NOT NULL,
 	[Description] [nvarchar](max) NULL,
 	[Hint] [nvarchar](max) NULL,
-	[MultiChoice] [nvarchar](max) NULL,
-	[TextValidator] [nvarchar](max) NULL,
-	[IntegerValidator] [nvarchar](max) NULL,
-	[DecimalValidator] [nvarchar](max) NULL,
-	[DateValidator] [nvarchar](max) NULL,
-	[MultiChoiceValidator] [nvarchar](max) NULL,
-	[BooleanValidaor] [nvarchar](max) NULL,
-	[RadioValidator] [nvarchar](max) NULL,
-	[Key] [uniqueidentifier] NOT NULL
+	[Key] [uniqueidentifier] NOT NULL,
+ CONSTRAINT [PK_Questions] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 
-ALTER TABLE [dbo].[Question] ADD  CONSTRAINT [DF_Questions_Id]  DEFAULT (newid()) FOR [Id]
+ALTER TABLE [dbo].[Questions] ADD  CONSTRAINT [DF_Questions_Id]  DEFAULT (newid()) FOR [Id]
 GO
 
-ALTER TABLE [dbo].[Question]  WITH CHECK ADD  CONSTRAINT [FK_Questions_Pages] FOREIGN KEY([PageId])
+ALTER TABLE [dbo].[Questions]  WITH CHECK ADD  CONSTRAINT [FK_Questions_Pages] FOREIGN KEY([PageId])
 REFERENCES [dbo].[Pages] ([Id])
 GO
 
-ALTER TABLE [dbo].[Question] CHECK CONSTRAINT [FK_Questions_Pages]
+ALTER TABLE [dbo].[Questions] CHECK CONSTRAINT [FK_Questions_Pages]
 GO
-
-

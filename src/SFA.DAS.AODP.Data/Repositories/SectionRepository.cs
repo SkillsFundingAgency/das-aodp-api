@@ -5,7 +5,6 @@ using SFA.DAS.AODP.Infrastructure.Context;
 using SFA.DAS.AODP.Models.Form;
 
 namespace SFA.DAS.AODP.Data.Repositories;
-
 public class SectionRepository : ISectionRepository
 {
     private readonly IApplicationDbContext _context;
@@ -127,4 +126,10 @@ public class SectionRepository : ISectionRepository
         await _context.SaveChangesAsync();
         return sectionToUpdate;
     }
+
+    public async Task<List<Section>> GetSectionsByIdAsync(List<Guid> sectionIds)
+    {
+        return await _context.Sections.Where(s => sectionIds.Contains(s.Id)).Include(s => s.Pages).ToListAsync();
+    }
 }
+

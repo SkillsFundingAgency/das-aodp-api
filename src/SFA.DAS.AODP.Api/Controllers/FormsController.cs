@@ -5,7 +5,6 @@ using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
 namespace SFA.DAS.AODP.Api.Controllers;
-
 [ApiController]
 [Route("api/[controller]")]
 public class FormsController : Controller
@@ -107,7 +106,7 @@ public class FormsController : Controller
     public async Task<IActionResult> PublishAsync(Guid formVersionId)
     {
         var command = new PublishFormVersionCommand(formVersionId);
-        
+
         var response = await _mediator.Send(command);
 
         if (response.Success)
