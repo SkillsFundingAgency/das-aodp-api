@@ -17,8 +17,4 @@
 	  <ProjectReference Include="..\SFA.DAS.AODP.Models\SFA.DAS.AODP.Models.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Commands\FormBuilder\Routes\" />
-	</ItemGroup>
-
 </Project>

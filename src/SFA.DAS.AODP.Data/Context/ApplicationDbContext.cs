@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.EntityConifguration;
 using System.Reflection.Emit;
 
@@ -23,8 +24,10 @@ namespace SFA.DAS.AODP.Infrastructure.Context
         public virtual DbSet<Question> Questions { get; set; }
         public virtual DbSet<QuestionOption> QuestionOptions { get; set; }
         public virtual DbSet<QuestionValidation> QuestionValidations { get; set; }
+        public virtual DbSet<Route> Routes { get; set; }
 
         public virtual DbSet<View_AvailableQuestionsForRouting> View_AvailableQuestionsForRoutings { get; set; }
+        public virtual DbSet<View_QuestionRoutingDetail> View_QuestionRoutingDetails { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

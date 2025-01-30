@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Data.EntityConifguration
 {
-   
+
     [ExcludeFromCodeCoverage]
     public class View_AvailableQuestionsForRoutingEntityConfiguration : IEntityTypeConfiguration<View_AvailableQuestionsForRouting>
     {

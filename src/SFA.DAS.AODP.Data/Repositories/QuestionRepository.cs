@@ -99,10 +99,15 @@ public class QuestionRepository : IQuestionRepository
     }
 
 
-    //public async Task<List<Question>> GetQuestionsForRoutingAsync(Guid formVersionId)
-    //{
-    //    var section = _context.Sections.Where(s => s.Pages.Q)
-    //}
+    public async Task<Question> GetQuestionDetailForRoutingAsync(Guid questionId)
+    {
+        return await _context.Questions
+                        .Include(q => q.Page)
+                        .ThenInclude(q => q.Section)
+                        .Include(q => q.QuestionOptions)
+                        .Include(q => q.Routes)
+                        .FirstOrDefaultAsync(q => q.Id == questionId) ?? throw new RecordNotFoundException(questionId);
+    }
 
     public async Task ValidateQuestionForChange(Guid questionId)
     {

@@ -12,7 +12,7 @@ public class CreateSectionCommandHandler(ISectionRepository sectionRepository) :
         var response = new CreateSectionCommandResponse();
         try
         {
-            var maxOrder = await sectionRepository.GetMaxOrderByFormVersionIdAsync(request.FormVersionId);
+            var maxOrder = sectionRepository.GetMaxOrderByFormVersionId(request.FormVersionId);
             var createdSection = await sectionRepository.Create(new()
             {
                 Description = request.Description,

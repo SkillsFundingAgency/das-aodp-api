@@ -1,4 +1,6 @@
-﻿namespace SFA.DAS.AODP.Data.Entities;
+﻿using SFA.DAS.AODP.Data.Entities.FormBuilder;
+
+namespace SFA.DAS.AODP.Data.Entities;
 
 public class Question
 {
@@ -15,6 +17,7 @@ public class Question
     public virtual Page Page { get; set; }
     public virtual QuestionValidation QuestionValidation { get; set; }
     public virtual List<QuestionOption> QuestionOptions { get; set; }
+    public virtual List<Route> Routes { get; set; }
 }
 public enum QuestionType
 {

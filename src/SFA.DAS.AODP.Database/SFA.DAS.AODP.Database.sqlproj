@@ -71,5 +71,6 @@
     <Build Include="Tables\QuestionOption.sql" />
     <Build Include="Tables\QuestionValidation.sql" />
     <Build Include="Views\View_AvailableQuestionsForRouting.sql" />
+    <Build Include="Views\View_QuestionRoutingDetails.sql" />
   </ItemGroup>
 </Project>

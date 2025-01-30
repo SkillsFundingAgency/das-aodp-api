@@ -16,5 +16,6 @@ namespace SFA.DAS.AODP.Data.Repositories
         Task<Page?> Archive(Guid pageId);
         Task<List<Page>> CopyPagesForNewSection(Guid oldSectionId, Guid newSectionId);
         int GetMaxOrderBySectionId(Guid sectionId);
+        Task<List<Page>> GetNextPagesInSectionByOrderAsync(Guid sectionId, int order);
     }
 }

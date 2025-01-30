@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 namespace SFA.DAS.AODP.Infrastructure.Context
 {
@@ -16,6 +17,8 @@ namespace SFA.DAS.AODP.Infrastructure.Context
         DbSet<QuestionOption> QuestionOptions { get; set; }
         DbSet<QuestionValidation> QuestionValidations { get; set; }
         DbSet<View_AvailableQuestionsForRouting> View_AvailableQuestionsForRoutings { get; set; }
+        DbSet<Route> Routes { get; set; }
+        DbSet<View_QuestionRoutingDetail> View_QuestionRoutingDetails { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BulkInsertAsync<T>(IEnumerable<T> entities, CancellationToken cancellationToken = default) where T : class;

@@ -9,8 +9,6 @@ namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 
 public class CreatePageCommandHandler(IPageRepository _pageRepository) : IRequestHandler<CreatePageCommand, CreatePageCommandResponse>
 {
-
-
     public async Task<CreatePageCommandResponse> Handle(CreatePageCommand request, CancellationToken cancellationToken)
     {
         var response = new CreatePageCommandResponse();

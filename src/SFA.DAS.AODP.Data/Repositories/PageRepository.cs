@@ -36,6 +36,11 @@ public class PageRepository : IPageRepository
         return res;
     }
 
+    public async Task<List<Page>> GetNextPagesInSectionByOrderAsync(Guid sectionId, int order)
+    {
+        return await _context.Pages.Where(v => v.SectionId == sectionId && v.Order > order).ToListAsync();
+    }
+
     /// <summary>
     /// Gets a page with a given Id, throws if no page is found with the given Id. 
     /// </summary>

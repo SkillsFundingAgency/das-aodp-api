@@ -8,6 +8,7 @@ namespace SFA.DAS.AODP.Data.Repositories
         Task<Question> Create(Question question);
         int GetMaxOrderByPageId(Guid pageId);
         Task<Question> GetQuestionByIdAsync(Guid id);
+        Task<Question> GetQuestionDetailForRoutingAsync(Guid questionId);
         Task<Question> Update(Question question);
         Task ValidateQuestionForChange(Guid questionId);
     }

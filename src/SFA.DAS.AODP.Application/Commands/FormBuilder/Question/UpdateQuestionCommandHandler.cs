@@ -59,7 +59,7 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
                     {
                         var option = question.QuestionOptions.First(q => q.Id == request.RadioOptions[i].Id);
                         option.Value = request.RadioOptions[i].Value;
-                        option.Order = i;
+                        option.Order = i + 1;
                     }
 
                 }

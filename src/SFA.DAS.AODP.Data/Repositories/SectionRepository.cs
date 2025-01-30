@@ -41,16 +41,16 @@ public class SectionRepository : ISectionRepository
         return res;
     }
 
-    /// <summary>
-    /// Gets a section with a given Id. 
-    /// </summary>
-    /// <param name="sectionId"></param>
-    /// <returns></returns>
-    /// <exception cref="RecordNotFoundException"></exception>
-    public async Task<int> GetMaxOrderByFormVersionIdAsync(Guid formVersionId)
+
+    public int GetMaxOrderByFormVersionId(Guid formVersionId)
     {
-        var res = _context.Sections.Where(v => v.FormVersionId == formVersionId).Max(s => (int?)s.Order) ?? 0;
-        return res;
+        return _context.Sections.Where(v => v.FormVersionId == formVersionId).Max(s => (int?)s.Order) ?? 0;
+
+    }
+
+    public async Task<List<Section>> GetNextSectionsByOrderAsync(Guid formVersionId, int order)
+    {
+        return await _context.Sections.Where(v => v.FormVersionId == formVersionId && v.Order > order).ToListAsync();
     }
 
     /// <summary>
