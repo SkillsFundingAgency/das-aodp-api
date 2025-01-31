@@ -1,6 +1,4 @@
-﻿using SFA.DAS.AODP.Data.Entities.FormBuilder;
-
-namespace SFA.DAS.AODP.Data.Entities;
+﻿namespace SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 public class Question
 {

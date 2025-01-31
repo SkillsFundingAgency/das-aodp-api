@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Questions;
 
@@ -31,7 +31,7 @@ public class GetQuestionByIdQueryResponse() : BaseResponse
         public int Order { get; set; }
     }
 
-    public static implicit operator GetQuestionByIdQueryResponse(Data.Entities.Question entity)
+    public static implicit operator GetQuestionByIdQueryResponse(Question entity)
     {
         var question = new GetQuestionByIdQueryResponse()
         {

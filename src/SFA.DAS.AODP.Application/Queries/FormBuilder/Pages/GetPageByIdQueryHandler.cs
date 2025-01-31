@@ -1,10 +1,9 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
-using SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories;
 
-namespace SFA.DAS.AODP.Application.Handlers.FormBuilder.Pages;
+namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
 public class GetPageByIdQueryHandler(IPageRepository _pageRepository) : IRequestHandler<GetPageByIdQuery, GetPageByIdQueryResponse>
 {

@@ -2,7 +2,7 @@
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
-namespace SFA.DAS.AODP.Infrastructure.Context
+namespace SFA.DAS.AODP.Data.Context
 {
     public interface IApplicationDbContext
     {

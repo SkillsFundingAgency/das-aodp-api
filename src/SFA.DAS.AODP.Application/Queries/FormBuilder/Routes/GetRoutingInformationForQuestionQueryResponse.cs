@@ -1,4 +1,6 @@
-﻿namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Routes
+﻿using SFA.DAS.AODP.Data.Entities.FormBuilder;
+
+namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Routes
 {
     public class GetRoutingInformationForQuestionQueryResponse : BaseResponse
     {
@@ -47,7 +49,7 @@
 
         }
 
-        public static GetRoutingInformationForQuestionQueryResponse Map(Data.Entities.Question question, List<Data.Entities.Section> sections, List<Data.Entities.Page> pages)
+        public static GetRoutingInformationForQuestionQueryResponse Map(Question question, List<Data.Entities.FormBuilder.Section> sections, List<Data.Entities.FormBuilder.Page> pages)
         {
             GetRoutingInformationForQuestionQueryResponse response = new()
             {
@@ -57,7 +59,7 @@
                 SectionTitle = question.Page.Section.Title,
             };
 
-            foreach (Data.Entities.Section section in sections ?? [])
+            foreach (Data.Entities.FormBuilder.Section section in sections ?? [])
             {
                 response.NextSections.Add(new()
                 {
@@ -68,7 +70,7 @@
             }
 
 
-            foreach (Data.Entities.Page page in pages ?? [])
+            foreach (Data.Entities.FormBuilder.Page page in pages ?? [])
             {
                 response.NextPages.Add(new()
                 {
@@ -80,7 +82,7 @@
 
 
 
-            foreach (Data.Entities.QuestionOption option in question.QuestionOptions ?? [])
+            foreach (QuestionOption option in question.QuestionOptions ?? [])
             {
                 response.RadioOptions.Add(new()
                 {

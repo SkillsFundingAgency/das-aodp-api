@@ -16,7 +16,7 @@ public class CreatePageCommandHandler(IPageRepository _pageRepository) : IReques
         {
             var maxOrder = _pageRepository.GetMaxOrderBySectionId(request.SectionId);
 
-            var pageToCreate = new Entities.Page()
+            var pageToCreate = new Entities.FormBuilder.Page()
             {
                 Description = request.Description,
                 Title = request.Title,

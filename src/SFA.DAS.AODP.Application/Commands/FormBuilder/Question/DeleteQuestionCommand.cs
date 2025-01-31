@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Questions;
+namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
 public class DeleteQuestionCommand : IRequest<DeleteQuestionCommandResponse>
 {

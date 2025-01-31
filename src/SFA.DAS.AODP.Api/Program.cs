@@ -2,7 +2,6 @@ using Microsoft.OpenApi.Models;
 using SFA.DAS.AODP.Api.Extensions;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 using SFA.DAS.AODP.Application.Swashbuckle;
-using SFA.DAS.AODP.Common.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration.LoadConfiguration(builder.Services, builder.Environment.IsDevelopment());

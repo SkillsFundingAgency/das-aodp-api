@@ -1,6 +1,6 @@
 ﻿using SFA.DAS.AODP.Application.Exceptions;
 
-namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
+namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
 /// <exception cref="LockedRecordException"></exception>
 /// <exception cref="DependantNotFoundException"></exception>

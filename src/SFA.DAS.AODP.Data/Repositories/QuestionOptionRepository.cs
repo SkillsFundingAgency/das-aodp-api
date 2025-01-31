@@ -1,5 +1,5 @@
-﻿using SFA.DAS.AODP.Data.Entities;
-using SFA.DAS.AODP.Infrastructure.Context;
+﻿using SFA.DAS.AODP.Data.Context;
+using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 namespace SFA.DAS.AODP.Data.Repositories
 {

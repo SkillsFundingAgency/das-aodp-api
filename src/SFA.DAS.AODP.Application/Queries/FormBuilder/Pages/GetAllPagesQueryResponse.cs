@@ -13,7 +13,7 @@ public class GetAllPagesQueryResponse : BaseResponse
         public string Description { get; set; } = string.Empty;
         public int Order { get; set; }
 
-        public static implicit operator Page(Data.Entities.Page entity)
+        public static implicit operator Page(Data.Entities.FormBuilder.Page entity)
         {
             return (new()
             {

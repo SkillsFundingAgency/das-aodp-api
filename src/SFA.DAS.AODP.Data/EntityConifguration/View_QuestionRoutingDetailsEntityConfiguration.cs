@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Data.EntityConifguration

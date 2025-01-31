@@ -1,4 +1,6 @@
-﻿namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
+﻿using SFA.DAS.AODP.Data.Entities.FormBuilder;
+
+namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
 public class GetSectionByIdQueryResponse() : BaseResponse
 {
@@ -10,7 +12,7 @@ public class GetSectionByIdQueryResponse() : BaseResponse
     public string Description { get; set; }
     public List<Page> Pages { get; set; }
 
-    public static implicit operator GetSectionByIdQueryResponse(Data.Entities.Section entity)
+    public static implicit operator GetSectionByIdQueryResponse(Section entity)
     {
         return new()
         {
@@ -34,7 +36,7 @@ public class GetSectionByIdQueryResponse() : BaseResponse
         public int Order { get; set; }
         public string Title { get; set; }
 
-        public static implicit operator Page(Data.Entities.Page entity)
+        public static implicit operator Page(Data.Entities.FormBuilder.Page entity)
         {
             return new()
             {

@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
+namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
 public class CreateQuestionCommand : IRequest<CreateQuestionCommandResponse>
 {

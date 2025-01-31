@@ -1,11 +1,10 @@
 ﻿using AutoMapper;
 using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
-using SFA.DAS.AODP.Application.Queries.FormBuilder.Questions;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories;
 
-namespace SFA.DAS.AODP.Application.Handlers.FormBuilder.Questions;
+namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Questions;
 
 public class GetQuestionByIdQueryHandler(IQuestionRepository _QuestionRepository) : IRequestHandler<GetQuestionByIdQuery, GetQuestionByIdQueryResponse>
 {

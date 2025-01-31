@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Questions;
+namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
 public class UpdateQuestionCommand : IRequest<UpdateQuestionCommandResponse>
 {
@@ -23,7 +23,7 @@ public class UpdateQuestionCommand : IRequest<UpdateQuestionCommandResponse>
 
     public class RadioOptionItem
     {
-        public Guid Id { get; set; } 
+        public Guid Id { get; set; }
         public string Value { get; set; }
     }
 }

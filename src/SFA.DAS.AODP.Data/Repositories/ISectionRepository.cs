@@ -1,4 +1,4 @@
-﻿using SFA.DAS.AODP.Data.Entities;
+﻿using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
 
 namespace SFA.DAS.AODP.Data.Repositories;

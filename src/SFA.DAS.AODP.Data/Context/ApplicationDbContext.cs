@@ -5,7 +5,7 @@ using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.EntityConifguration;
 using System.Reflection.Emit;
 
-namespace SFA.DAS.AODP.Infrastructure.Context
+namespace SFA.DAS.AODP.Data.Context
 {
     public class ApplicationDbContext : DbContext, IApplicationDbContext
     {

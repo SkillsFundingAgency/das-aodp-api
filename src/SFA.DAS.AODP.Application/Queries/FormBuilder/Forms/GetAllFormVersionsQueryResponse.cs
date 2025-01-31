@@ -18,7 +18,7 @@ public class GetAllFormVersionsQueryResponse : BaseResponse
         public int Order { get; set; }
         public DateTime DateCreated { get; set; }
 
-        public static implicit operator FormVersion(Data.Entities.FormVersion entity)
+        public static implicit operator FormVersion(Data.Entities.FormBuilder.FormVersion entity)
         {
             return (new()
             {

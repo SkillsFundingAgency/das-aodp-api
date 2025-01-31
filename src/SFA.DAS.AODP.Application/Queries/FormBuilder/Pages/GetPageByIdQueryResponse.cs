@@ -1,4 +1,6 @@
-﻿namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
+﻿using SFA.DAS.AODP.Data.Entities.FormBuilder;
+
+namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
 public class GetPageByIdQueryResponse() : BaseResponse
 {
@@ -10,7 +12,7 @@ public class GetPageByIdQueryResponse() : BaseResponse
     public int Order { get; set; }
     public List<Question> Questions { get; set; }
 
-    public static implicit operator GetPageByIdQueryResponse(Data.Entities.Page entity)
+    public static implicit operator GetPageByIdQueryResponse(Page entity)
     {
         return new()
         {
@@ -32,7 +34,7 @@ public class GetPageByIdQueryResponse() : BaseResponse
         public int Order { get; set; }
         public string Title { get; set; }
 
-        public static implicit operator Question(Data.Entities.Question question)
+        public static implicit operator Question(Data.Entities.FormBuilder.Question question)
         {
             return new()
             {

@@ -14,7 +14,7 @@ public class GetAllSectionsQueryResponse() : BaseResponse
         public string Description { get; set; }
 
 
-        public static implicit operator Section(Data.Entities.Section entity)
+        public static implicit operator Section(Data.Entities.FormBuilder.Section entity)
         {
             return (new()
             {

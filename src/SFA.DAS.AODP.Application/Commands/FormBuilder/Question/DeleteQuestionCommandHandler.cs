@@ -4,7 +4,7 @@ using SFA.DAS.AODP.Data.Repositories;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Application.Exceptions;
 
-namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Questions;
+namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
 public class DeleteQuestionCommandHandler(IQuestionRepository _questionRepository) : IRequestHandler<DeleteQuestionCommand, DeleteQuestionCommandResponse>
 {

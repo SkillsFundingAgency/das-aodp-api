@@ -1,10 +1,10 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
-using SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories;
 
-namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Questions;
+namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
 public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepository, IQuestionValidationRepository _questionValidationRepository, IQuestionOptionRepository _questionOptionRepository) : IRequestHandler<UpdateQuestionCommand, UpdateQuestionCommandResponse>
 {

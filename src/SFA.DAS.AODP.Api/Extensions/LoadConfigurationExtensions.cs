@@ -1,6 +1,6 @@
 ﻿using SFA.DAS.Configuration.AzureTableStorage;
 using System.Diagnostics.CodeAnalysis;
-namespace SFA.DAS.AODP.Common.Extensions;
+namespace SFA.DAS.AODP.Api.Extensions;
 
 
 [ExcludeFromCodeCoverage]

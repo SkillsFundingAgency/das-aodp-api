@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Repositories;
-using SFA.DAS.AODP.Infrastructure.Context;
 
 namespace SFA.DAS.AODP.Data.Extensions
 {

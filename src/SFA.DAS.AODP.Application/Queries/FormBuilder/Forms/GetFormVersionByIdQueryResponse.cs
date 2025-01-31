@@ -1,4 +1,5 @@
 ﻿using SFA.DAS.AODP.Application.Exceptions;
+using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
@@ -15,7 +16,7 @@ public class GetFormVersionByIdQueryResponse : BaseResponse
     public int Order { get; set; }
     public List<Section> Sections { get; set; }
 
-    public static implicit operator GetFormVersionByIdQueryResponse(Data.Entities.FormVersion formVersion)
+    public static implicit operator GetFormVersionByIdQueryResponse(FormVersion formVersion)
     {
         return new GetFormVersionByIdQueryResponse()
         {
@@ -39,7 +40,7 @@ public class GetFormVersionByIdQueryResponse : BaseResponse
         public int Order { get; set; }
         public string Title { get; set; }
 
-        public static implicit operator Section(Data.Entities.Section section)
+        public static implicit operator Section(Data.Entities.FormBuilder.Section section)
         {
             return new()
             {

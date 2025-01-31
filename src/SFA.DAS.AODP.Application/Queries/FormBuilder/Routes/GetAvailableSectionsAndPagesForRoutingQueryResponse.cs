@@ -1,4 +1,4 @@
-﻿using SFA.DAS.AODP.Data.Entities;
+﻿using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Routes
 {

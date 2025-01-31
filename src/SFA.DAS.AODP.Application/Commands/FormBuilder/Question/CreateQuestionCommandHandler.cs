@@ -4,7 +4,7 @@ using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories;
 using Entities = SFA.DAS.AODP.Data.Entities;
 
-namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
+namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
 public class CreateQuestionCommandHandler(IQuestionRepository _questionRepository) : IRequestHandler<CreateQuestionCommand, CreateQuestionCommandResponse>
 {
@@ -15,7 +15,7 @@ public class CreateQuestionCommandHandler(IQuestionRepository _questionRepositor
         {
             var maxOrder = _questionRepository.GetMaxOrderByPageId(request.PageId);
 
-            var questionToCreate = new Entities.Question()
+            var questionToCreate = new Entities.FormBuilder.Question()
             {
                 Required = request.Required,
                 Title = request.Title,
