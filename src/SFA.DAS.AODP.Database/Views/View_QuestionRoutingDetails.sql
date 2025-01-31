@@ -1,14 +1,19 @@
 ﻿CREATE VIEW [dbo].[View_QuestionRoutingDetails] AS
 SELECT
 SourceSection.FormVersionId,
+
 Questions.Id QuestionId,
 Questions.[Order] QuestionOrder,
+Questions.Title QuestionTitle,
+
 SourceSection.Id SectionId,
 SourceSection.[Order] SectionOrder,
 SourceSection.Title SectionTitle,
+
 SourcePage.id PageId,
 SourcePage.Title PageTitle,
 SourcePage.[Order] PageOrder,
+
 QuestionOptions.Id OptionId,
 QuestionOptions.Value OptionValue,
 QuestionOptions.[Order] OptionOrder,

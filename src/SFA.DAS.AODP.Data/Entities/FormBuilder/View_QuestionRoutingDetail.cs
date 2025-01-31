@@ -16,7 +16,7 @@ public class View_QuestionRoutingDetail
     public string SectionTitle { get; set; }
     public string OptionValue { get; set; }
     public string? NextPageTitle { get; set; }
-    public string NextSectionTitle { get; set; }
+    public string? NextSectionTitle { get; set; }
 
     public int QuestionOrder { get; set; }
     public int PageOrder { get; set; }

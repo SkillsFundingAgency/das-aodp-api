@@ -23,6 +23,7 @@ namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Routes
         }
 
 
+        //TODO: see if can use multiple views or direct entity queries to make mapping simpler
         public static implicit operator GetAvailableSectionsAndPagesForRoutingQueryResponse(List<View_AvailableQuestionsForRouting> entities)
         {
             GetAvailableSectionsAndPagesForRoutingQueryResponse response = new();

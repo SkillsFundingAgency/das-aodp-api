@@ -5,7 +5,7 @@ namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Routes
 
     public class GetRoutingInformationForFormQueryResponse : BaseResponse
     {
-        public List<Section> Sections { get; set; }
+        public List<Section> Sections { get; set; } = new();
         public class Section
         {
             public Guid Id { get; set; }
@@ -47,6 +47,7 @@ namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Routes
         }
 
 
+        //TODO: see if can use multiple views or direct entity queries to make mapping simpler
         public static GetRoutingInformationForFormQueryResponse Map(List<View_QuestionRoutingDetail> routes)
         {
             GetRoutingInformationForFormQueryResponse response = new();
