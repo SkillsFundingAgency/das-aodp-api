@@ -51,7 +51,7 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
                         question.QuestionOptions.Add(new()
                         {
                             QuestionId = request.Id,
-                            Order = i,
+                            Order = i + 1,
                             Value = request.RadioOptions[i].Value
                         });
                     }
