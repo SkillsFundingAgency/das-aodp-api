@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Exceptions;
-using SFA.DAS.AODP.Data.Repositories;
+using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 using Entities = SFA.DAS.AODP.Data.Entities;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
@@ -17,7 +17,6 @@ public class CreatePageCommandHandler(IPageRepository _pageRepository) : IReques
 
             var pageToCreate = new Entities.FormBuilder.Page()
             {
-                Description = request.Description,
                 Title = request.Title,
                 Order = ++maxOrder,
                 SectionId = request.SectionId

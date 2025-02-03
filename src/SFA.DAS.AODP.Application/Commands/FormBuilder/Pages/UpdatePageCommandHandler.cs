@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using MediatR;
-using SFA.DAS.AODP.Data.Repositories;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Application.Exceptions;
 using Entities = SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 
@@ -21,7 +21,6 @@ public class UpdatePageCommandHandler(IPageRepository pageRepository) : IRequest
         {
             var section = await PageRepository.GetPageByIdAsync(request.Id);
             section.Title = request.Title;
-            section.Description = request.Description;
 
 
             await PageRepository.Update(section);
