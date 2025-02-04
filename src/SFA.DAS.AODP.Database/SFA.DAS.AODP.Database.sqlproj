@@ -64,7 +64,6 @@
     <Folder Include="Schemas" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="Views\ViewFundedQualificationsAndAssociatedOffers.sql" />
     <Build Include="Tables\Form.sql" />
     <Build Include="Tables\FormVersion.sql" />
     <Build Include="Tables\Page.sql" />
