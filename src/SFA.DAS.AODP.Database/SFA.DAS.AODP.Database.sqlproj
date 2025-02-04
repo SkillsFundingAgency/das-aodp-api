@@ -69,18 +69,18 @@
     <Build Include="Tables\Page.sql" />
     <Build Include="Tables\Section.sql" />
     <Build Include="Tables\Question.sql" />
-    <Build Include="Tables\dbo.action_type.sql" />
-    <Build Include="Tables\dbo.awarding_organisation.sql" />
-    <Build Include="Tables\dbo.qualification.sql" />
-    <Build Include="Tables\dbo.qualification_discussion_history.sql" />
-    <Build Include="Tables\funded.qualification_offers.sql" />
-    <Build Include="Tables\funded.qualifications.sql" />
-    <Build Include="Tables\regulated.lifecycle_stage.sql" />
-    <Build Include="Tables\regulated.process_status.sql" />
-    <Build Include="Tables\regulated.qualification_versions.sql" />
-    <Build Include="Tables\regulated.version_field_changes.sql" />
-    <Build Include="Schemas\funded.Schema.sql" />
-    <Build Include="Schemas\regulated.Schema.sql" />
+    <Build Include="Schemas\funded_Schema.sql" />
+    <Build Include="Schemas\regulated_Schema.sql" />
+    <Build Include="Tables\dbo_ActionType.sql" />
+    <Build Include="Tables\dbo_AwardingOrganisation.sql" />
+    <Build Include="Tables\dbo_Qualification.sql" />
+    <Build Include="Tables\dbo_QualificationDiscussionHistory.sql" />
+    <Build Include="Tables\funded_QualificationOffers.sql" />
+    <Build Include="Tables\funded_Qualifications.sql" />
+    <Build Include="Tables\regulated_LifecycleStage.sql" />
+    <Build Include="Tables\regulated_ProcessStatus.sql" />
+    <Build Include="Tables\regulated_QualificationVersions.sql" />
+    <Build Include="Tables\regulated_VersionFieldChanges.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
