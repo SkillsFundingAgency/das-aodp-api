@@ -6,9 +6,30 @@ namespace SFA.DAS.AODP.Data.Repositories
     {
         private static readonly List<NewQualification> MockNewQualifications = new()
         {
-            new NewQualification { Id = 1, Title = "EDEXCEL Intermediate GNVQ in Business" },
-            new NewQualification { Id = 2, Title = "OCR Intermediate GNVQ in Science" },
-            new NewQualification { Id = 3, Title = "EDEXCEL Intermediate GNVQ in Art and Design" }
+            new NewQualification
+            {
+                Id = 1,
+                Title = "EDEXCEL Intermediate GNVQ in Business",
+                Reference = "BUS123",
+                AwardingOrganisation = "EDEXCEL",
+                Status = "Active"
+            },
+            new NewQualification
+            {
+                Id = 2,
+                Title = "OCR Intermediate GNVQ in Science",
+                Reference = "SCI456",
+                AwardingOrganisation = "OCR",
+                Status = "Inactive"
+            },
+            new NewQualification
+            {
+                Id = 3,
+                Title = "EDEXCEL Intermediate GNVQ in Art and Design",
+                Reference = "ART789",
+                AwardingOrganisation = "EDEXCEL",
+                Status = "Active"
+            }
         };
 
         private static readonly List<QualificationDetails> MockQualificationDetails = new()
