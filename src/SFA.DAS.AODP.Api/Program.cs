@@ -4,6 +4,7 @@ using SFA.DAS.AODP.Application.Queries.Test;
 using SFA.DAS.AODP.Application.Swashbuckle;
 using SFA.DAS.AODP.Common.Extensions;
 using SFA.DAS.AODP.Infrastructure.Context;
+using SFA.DAS.AODP.Application.Queries.Qualifications;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration.LoadConfiguration(builder.Services, builder.Environment.IsDevelopment());
@@ -11,7 +12,10 @@ var configuration = builder.Configuration.LoadConfiguration(builder.Services, bu
 // Add services to the container.
 builder.Services
     .AddServiceRegistrations(configuration)
-    .AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<TestQueryHandler>())
+    .AddMediatR(cfg =>
+        cfg.RegisterServicesFromAssemblies(
+            typeof(TestQueryHandler).Assembly,
+            typeof(GetNewQualificationsQueryHandler).Assembly))
     .AddLogging()
     .AddDataProtectionKeys("das-aodp-api", configuration, builder.Environment.IsDevelopment())
     .AddHttpContextAccessor()
