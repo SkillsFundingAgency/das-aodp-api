@@ -1,9 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
-using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
-using SFA.DAS.AODP.Models.Archived.Forms.FormBuilder;
 using SFA.DAS.AODP.Models.Form;
 
 namespace SFA.DAS.AODP.Data.Repositories.FormBuilder;
@@ -11,12 +9,10 @@ namespace SFA.DAS.AODP.Data.Repositories.FormBuilder;
 public class FormVersionRepository : IFormVersionRepository
 {
     private readonly IApplicationDbContext _context;
-    private readonly ISectionRepository _sectionRepository;
 
-    public FormVersionRepository(IApplicationDbContext context, ISectionRepository sectionRepository)
+    public FormVersionRepository(IApplicationDbContext context)
     {
         _context = context;
-        _sectionRepository = sectionRepository;
     }
 
     /// <summary>
@@ -29,6 +25,17 @@ public class FormVersionRepository : IFormVersionRepository
             await _context.FormVersions
             .Where(f => f.Form.Status != FormStatus.Deleted.ToString())
             .Where(f => f.Status != FormVersionStatus.Archived.ToString())
+            .ToListAsync();
+
+        return top;
+    }
+
+    public async Task<List<FormVersion>> GetPublishedFormVersions()
+    {
+        var top =
+            await _context.FormVersions
+            .Where(f => f.Form.Status == FormStatus.Active.ToString())
+            .Where(f => f.Status == FormVersionStatus.Published.ToString())
             .ToListAsync();
 
         return top;

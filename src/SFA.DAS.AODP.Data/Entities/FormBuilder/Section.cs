@@ -11,4 +11,5 @@ public class Section
     public int? PagesCount { get; set; }
     public virtual List<Page> Pages { get; set; }
     public virtual FormVersion FormVersion { get; set; }
+    public virtual View_SectionPageCount View_SectionPageCount { get; set; }
 }

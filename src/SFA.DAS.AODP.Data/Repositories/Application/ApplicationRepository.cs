@@ -2,6 +2,7 @@
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
+using System;
 
 namespace SFA.DAS.AODP.Data.Repositories.Application
 {
@@ -14,6 +15,14 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             _context = context;
         }
 
+        public async Task<List<Data.Entities.Application.Application>> GetByOrganisationId(Guid organisationId)
+        {
+            return await _context.Applications
+                //.Where(v => v.OrganisationId == organisationId) //TODO: add filter back when org code setup
+                .ToListAsync();
+
+        }
+
         public async Task<Data.Entities.Application.Application> Create(Data.Entities.Application.Application application)
         {
             application.Id = Guid.NewGuid();
@@ -23,10 +32,15 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             return application;
         }
 
-        public async Task<Data.Entities.Application.Application> GetApplicationByIdAsync(Guid applicationId)
+        public async Task<Entities.Application.Application> GetByIdAsync(Guid applicationId)
         {
             var res = await _context.Applications.FirstOrDefaultAsync(v => v.Id == applicationId);
             return res is null ? throw new RecordNotFoundException(applicationId) : res;
+        }
+
+        public async Task<List<View_RemainingPagesBySectionForApplication>> GetRemainingPagesBySectionForApplicationsAsync(Guid applicationId)
+        {
+            return await _context.View_RemainingPagesBySectionForApplication.Where(a => a.ApplicationId == applicationId).ToListAsync();
         }
     }
 }

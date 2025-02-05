@@ -57,5 +57,6 @@ namespace SFA.DAS.AODP.Data.Repositories.FormBuilder
         /// <returns></returns>
         /// <exception cref="RecordNotFoundException"></exception>
         Task<bool> Unpublish(Guid formVersionId);
+        Task<List<FormVersion>> GetPublishedFormVersions();
     }
 }

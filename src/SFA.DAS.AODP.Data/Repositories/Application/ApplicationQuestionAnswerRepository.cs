@@ -1,4 +1,5 @@
-﻿using SFA.DAS.AODP.Data.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Application;
 
 namespace SFA.DAS.AODP.Data.Repositories.Application
@@ -19,6 +20,11 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             await _context.SaveChangesAsync();
 
             return application;
+        }
+
+        public async Task<List<ApplicationQuestionAnswer>> GetAnswersByApplicationAndPageId(Guid applicationId, Guid pageId)
+        {
+            return await _context.ApplicationQuestionAnswers.Where(a => a.ApplicationPage.PageId == pageId && a.ApplicationPage.ApplicationId == applicationId).ToListAsync();
         }
 
         public async Task<Data.Entities.Application.ApplicationQuestionAnswer> Update(Data.Entities.Application.ApplicationQuestionAnswer application)

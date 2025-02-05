@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SFA.DAS.AODP.Data.Entities.FormBuilder;
+﻿using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 namespace SFA.DAS.AODP.Data.Repositories.FormBuilder
 {
     public interface IPageRepository
     {
         Task<List<Page>> GetPagesForSectionAsync(Guid sectionId);
-        Task<Page?> GetPageByIdAsync(Guid pageId);
+        Task<Page> GetPageByIdAsync(Guid pageId);
         Task<Page> Create(Page page);
         Task<Page?> Update(Page page);
         Task<Page?> Archive(Guid pageId);
@@ -18,5 +13,7 @@ namespace SFA.DAS.AODP.Data.Repositories.FormBuilder
         int GetMaxOrderBySectionId(Guid sectionId);
         Task<List<Page>> GetNextPagesInSectionByOrderAsync(Guid sectionId, int order);
         Task<Page> GetPageForApplicationAsync(int pageOrder, Guid sectionId);
+        Task<List<Guid>> GetPagesIdInSectionByOrderAsync(Guid sectionId, int startOrder, int? endOrder);
+        Task<List<Guid>> GetPagesIdInFormBySectionOrderAsync(Guid formVersionId, int startSectionOrder, int? endSectionOrder);
     }
 }

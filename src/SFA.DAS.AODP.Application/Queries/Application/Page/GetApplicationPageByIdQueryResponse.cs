@@ -3,7 +3,6 @@ using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 public class GetApplicationPageByIdQueryResponse : BaseResponse
 {
-
     public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -12,6 +11,14 @@ public class GetApplicationPageByIdQueryResponse : BaseResponse
 
     public List<Question> Questions { get; set; }
     public Guid SectionId { get; private set; }
+    public class RouteInformation
+    {
+        public Guid OptionId { get; set; }
+        public int? NextPageOrder { get; set; }
+        public int? NextSectionOrder { get; set; }
+        public bool EndForm { get; set; }
+        public bool EndSection { get; set; }
+    }
 
     public class Question
     {
@@ -24,6 +31,9 @@ public class GetApplicationPageByIdQueryResponse : BaseResponse
 
         public TextInputOptions TextInput { get; set; } = new();
         public RadioOptions RadioButton { get; set; } = new();
+
+        public List<RouteInformation> Routes { get; set; } = new();
+
 
 
         public static implicit operator Question(SFA.DAS.AODP.Data.Entities.FormBuilder.Question entity)
@@ -58,6 +68,21 @@ public class GetApplicationPageByIdQueryResponse : BaseResponse
                         Value = option.Value,
                         Order = option.Order,
                     });
+                }
+
+                if (entity.Routes != null && entity.Routes.Count > 0)
+                {
+                    foreach (var route in entity.Routes)
+                    {
+                        model.Routes.Add(new()
+                        {
+                            EndForm = route.EndForm,
+                            EndSection = route.EndSection,
+                            NextPageOrder = route.NextPage?.Order,
+                            NextSectionOrder = route.NextSection?.Order,
+                            OptionId = route.SourceOptionId
+                        });
+                    }
                 }
             }
 
@@ -94,8 +119,8 @@ public class GetApplicationPageByIdQueryResponse : BaseResponse
             SectionId = entity.SectionId,
             Title = entity.Title,
             Order = entity.Order,
-            Questions = entity.Questions != null ? [.. entity.Questions] : new()
-
+            Questions = entity.Questions != null ? [.. entity.Questions] : new(),
+            TotalSectionPages = entity.Section.View_SectionPageCount.PageCount
         };
     }
 }

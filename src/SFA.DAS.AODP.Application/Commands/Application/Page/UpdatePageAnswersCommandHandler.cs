@@ -9,12 +9,14 @@ public class UpdatePageAnswersCommandHandler : IRequestHandler<UpdatePageAnswers
     private readonly IQuestionRepository _questionRepository;
     private readonly IApplicationPageRepository _applicationPageRepository;
     private readonly IApplicationQuestionAnswerRepository _questionAnswerRepository;
+    private readonly IPageRepository _pageRepository;
 
-    public UpdatePageAnswersCommandHandler(IQuestionRepository questionRepository, IApplicationPageRepository applicationPageRepository, IApplicationQuestionAnswerRepository questionAnswerRepository)
+    public UpdatePageAnswersCommandHandler(IQuestionRepository questionRepository, IApplicationPageRepository applicationPageRepository, IApplicationQuestionAnswerRepository questionAnswerRepository, IPageRepository pageRepository)
     {
         _questionRepository = questionRepository;
         _applicationPageRepository = applicationPageRepository;
         _questionAnswerRepository = questionAnswerRepository;
+        _pageRepository = pageRepository;
     }
 
     public async Task<UpdatePageAnswersCommandResponse> Handle(UpdatePageAnswersCommand request, CancellationToken cancellationToken)
@@ -26,38 +28,45 @@ public class UpdatePageAnswersCommandHandler : IRequestHandler<UpdatePageAnswers
 
         try
         {
-            var page = await _applicationPageRepository.GetApplicationPageByPageIdAsync(request.ApplicationId, request.PageId);
-            page ??= new()
+            var formPage = await _pageRepository.GetPageByIdAsync(request.PageId);
+            var applicationPage = await _applicationPageRepository.GetApplicationPageByPageIdAsync(request.ApplicationId, request.PageId);
+            applicationPage ??= new()
             {
                 PageId = request.PageId,
                 ApplicationId = request.ApplicationId,
             };
-            page.Status = ApplicationPageStatus.Completed.ToString();
+            applicationPage.Status = ApplicationPageStatus.Completed.ToString();
 
-            await _applicationPageRepository.UpsertAsync(page);
+            await _applicationPageRepository.UpsertAsync(applicationPage);
 
 
-            page.QuestionAnswers ??= [];
+            applicationPage.QuestionAnswers ??= [];
             foreach (var requestQuestion in request.Questions)
             {
-                var answer = page?.QuestionAnswers?.FirstOrDefault(q => q.QuestionId == requestQuestion.QuestionId);
+                var answer = applicationPage?.QuestionAnswers?.FirstOrDefault(q => q.QuestionId == requestQuestion.QuestionId);
 
                 if (answer == null)
                 {
                     answer = new()
                     {
                         QuestionId = requestQuestion.QuestionId,
-                        ApplicationPageId = page.Id,
+                        ApplicationPageId = applicationPage.Id,
                     };
-                    page.QuestionAnswers?.Add(answer);
+                    applicationPage.QuestionAnswers?.Add(answer);
                 }
 
                 if (requestQuestion.QuestionType == QuestionType.Text.ToString())
                 {
                     answer.TextValue = requestQuestion?.Answer?.TextValue;
                 }
+                else if (requestQuestion.QuestionType == QuestionType.Radio.ToString())
+                {
+                    answer.OptionsValue = requestQuestion?.Answer?.RadioChoiceValue;
+                }
             }
-            await _questionAnswerRepository.UpsertAsync(page.QuestionAnswers);
+            await _questionAnswerRepository.UpsertAsync(applicationPage.QuestionAnswers);
+
+            await HandleRoutingAsync(request, formPage);
 
             response.Success = true;
         }
@@ -68,5 +77,54 @@ public class UpdatePageAnswersCommandHandler : IRequestHandler<UpdatePageAnswers
         }
 
         return response;
+    }
+
+    private async Task HandleRoutingAsync(UpdatePageAnswersCommand request, Page formPage)
+    {
+        List<ApplicationPage> applicationPagesToUpsert = new();
+
+        if (request.Routing != null)
+        {
+            List<Guid> pageIdsToSkip = new();
+            // handle pages in same section
+            if (request.Routing.NextPageOrder.HasValue || request.Routing.EndSection)
+            {
+                var currentSectionPagesToSkip = await _pageRepository.GetPagesIdInSectionByOrderAsync(request.SectionId, formPage.Order + 1, request.Routing.NextPageOrder);
+                pageIdsToSkip.AddRange(currentSectionPagesToSkip);
+            }
+
+            if (request.Routing.NextSectionOrder.HasValue || request.Routing.EndForm)
+            {
+                var nextSectionsPagesToSkip = await _pageRepository.GetPagesIdInFormBySectionOrderAsync(request.SectionId, formPage.Section.Order + 1, request.Routing.NextSectionOrder);
+                pageIdsToSkip.AddRange(nextSectionsPagesToSkip);
+
+            }
+
+            var existingApplicationPages = await _applicationPageRepository.GetApplicationPagesByPageIdsAsync(request.ApplicationId, pageIdsToSkip);
+
+            foreach (var pageId in pageIdsToSkip)
+            {
+                var appPage = existingApplicationPages.FirstOrDefault(f => f.PageId == pageId) ?? new()
+                {
+                    PageId = pageId,
+                    ApplicationId = request.ApplicationId,
+                };
+
+                appPage.Status = ApplicationPageStatus.Skipped.ToString();
+                appPage.SkippedByQuestionId = request.Routing.QuestionId;
+
+                applicationPagesToUpsert.Add(appPage);
+            }
+
+            var existingSkippedPages = await _applicationPageRepository.GetSkippedApplicationPagesByQuestionIdAsync(request.ApplicationId, request.Routing.QuestionId, pageIdsToSkip);
+            foreach (var skippedPage in existingSkippedPages)
+            {
+                skippedPage.Status = ApplicationPageStatus.NotStarted.ToString();
+                skippedPage.SkippedByQuestionId = null;
+                applicationPagesToUpsert.Add(skippedPage);
+            }
+
+        }
+        await _applicationPageRepository.UpsertAsync(applicationPagesToUpsert);
     }
 }

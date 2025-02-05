@@ -32,9 +32,43 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             return application;
         }
 
+        public async Task<Data.Entities.Application.ApplicationPage?> GetApplicationPageByPageIdAsync(Guid applicationId, Guid pageId)
+        {
+            return await _context
+                .ApplicationPages
+                .Include(x => x.QuestionAnswers)
+                .FirstOrDefaultAsync(v => v.PageId == pageId && v.ApplicationId == applicationId);
+        }
+
+        public async Task<List<ApplicationPage>> GetSkippedApplicationPagesByQuestionIdAsync(Guid applicationId, Guid questionId, List<Guid> pageIdsToIgnore)
+        {
+            return await _context.ApplicationPages.Where(a => a.ApplicationId == applicationId && a.SkippedByQuestionId == questionId && !pageIdsToIgnore.Contains(a.PageId)).ToListAsync();
+        }
+
+        public async Task<List<ApplicationPage>> GetApplicationPagesByPageIdsAsync(Guid applicationId, List<Guid> pageIds)
+        {
+            return await _context.ApplicationPages.Where(a => a.ApplicationId == applicationId && pageIds.Contains(a.PageId)).ToListAsync();
+        }
+
+        public async Task UpsertAsync(List<ApplicationPage> applicationPagesToUpsert)
+        {
+            foreach (var page in applicationPagesToUpsert)
+            {
+                UpsertPage(page);
+
+            }
+            await _context.SaveChangesAsync();
+        }
+
         public async Task UpsertAsync(ApplicationPage page)
         {
+            UpsertPage(page);
 
+            await _context.SaveChangesAsync();
+        }
+
+        private void UpsertPage(ApplicationPage page)
+        {
             if (page.Id == default)
             {
                 page.Id = Guid.NewGuid();
@@ -45,16 +79,11 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             {
                 _context.ApplicationPages.Update(page);
             }
-
-            await _context.SaveChangesAsync();
         }
 
-        public async Task<Data.Entities.Application.ApplicationPage?> GetApplicationPageByPageIdAsync(Guid applicationId, Guid pageId)
+        public async Task<List<ApplicationPage>> GetBySectionIdAsync(Guid sectionId, Guid applicationId)
         {
-            return await _context
-                .ApplicationPages
-                .Include(x => x.QuestionAnswers)
-                .FirstOrDefaultAsync(v => v.PageId == pageId && v.ApplicationId == applicationId);
+            return await _context.ApplicationPages.Where(a => a.ApplicationId == applicationId && a.Page.SectionId == sectionId).ToListAsync();
         }
     }
 }

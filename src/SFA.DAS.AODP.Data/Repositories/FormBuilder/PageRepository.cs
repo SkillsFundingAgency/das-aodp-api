@@ -41,6 +41,16 @@ public class PageRepository : IPageRepository
         return await _context.Pages.Where(v => v.SectionId == sectionId && v.Order > order).ToListAsync();
     }
 
+    public async Task<List<Guid>> GetPagesIdInSectionByOrderAsync(Guid sectionId, int startOrderInclusive, int? endOrderExclusive)
+    {
+        return await _context.Pages.Where(v => v.SectionId == sectionId && v.Order >= startOrderInclusive && (!endOrderExclusive.HasValue || v.Order < endOrderExclusive)).Select(p => p.Id).ToListAsync();
+    }
+
+    public async Task<List<Guid>> GetPagesIdInFormBySectionOrderAsync(Guid formVersionId, int startSectionOrderInclusive, int? endSectionOrderInclusive)
+    {
+        return await _context.Pages.Where(v => v.Section.FormVersionId == formVersionId && v.Section.Order >= startSectionOrderInclusive && (!endSectionOrderInclusive.HasValue || v.Section.Order <= endSectionOrderInclusive)).Select(p => p.Id).ToListAsync();
+    }
+
     /// <summary>
     /// Gets a page with a given Id, throws if no page is found with the given Id. 
     /// </summary>
@@ -49,7 +59,7 @@ public class PageRepository : IPageRepository
     /// <exception cref="RecordNotFoundException"></exception>
     public async Task<Page> GetPageByIdAsync(Guid pageId)
     {
-        var res = await _context.Pages.Include(p => p.Questions).FirstOrDefaultAsync(v => v.Id == pageId);
+        var res = await _context.Pages.Include(p => p.Questions).Include(p => p.Section).FirstOrDefaultAsync(v => v.Id == pageId);
         if (res is null)
             throw new RecordNotFoundException(pageId);
 
@@ -146,11 +156,24 @@ public class PageRepository : IPageRepository
     public async Task<Page> GetPageForApplicationAsync(int pageOrder, Guid sectionId)
     {
         return await _context.Pages.Where(p => p.Order == pageOrder && p.SectionId == sectionId)
+
             .Include(p => p.Questions)
             .ThenInclude(q => q.QuestionValidation)
+
             .Include(p => p.Questions)
             .ThenInclude(q => q.QuestionOptions)
+
             .Include(p => p.Section)
+            .ThenInclude(s => s.View_SectionPageCount)
+
+            .Include(q => q.Questions)
+            .ThenInclude(q => q.Routes)
+            .ThenInclude(r => r.NextPage)
+
+            .Include(q => q.Questions)
+            .ThenInclude(q => q.Routes)
+            .ThenInclude(r => r.NextSection)
+
             .FirstOrDefaultAsync() ?? throw new RecordNotFoundException(sectionId);
 
 

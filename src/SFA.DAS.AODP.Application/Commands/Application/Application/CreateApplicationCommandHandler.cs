@@ -25,6 +25,7 @@ public class CreateApplicationCommandHandler : IRequestHandler<CreateApplication
                 FormVersionId = request.FormVersionId,
                 Name = request.Title,
                 Owner = request.Owner,
+                CreatedAt = DateTime.UtcNow,
             });
 
             response.Id = form.Id;

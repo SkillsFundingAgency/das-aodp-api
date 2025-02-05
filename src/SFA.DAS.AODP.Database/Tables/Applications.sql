@@ -5,6 +5,10 @@ CREATE TABLE [dbo].[Applications](
 	[OrganisationId] [uniqueidentifier] NULL,
     [Name] NVARCHAR(MAX) NOT NULL, 
     [Owner] NVARCHAR(4000) NOT NULL, 
+    [Submitted] BIT NULL, 
+    [SubmittedAt] DATE NULL, 
+    [Reference] NVARCHAR(400) NULL, 
+    [CreatedAt] DATETIME NULL, 
     CONSTRAINT [PK_Applications] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC

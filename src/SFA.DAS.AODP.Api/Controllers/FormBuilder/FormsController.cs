@@ -60,9 +60,9 @@ public class FormsController : Controller
     }
 
     [HttpPost("/api/forms")]
-    [ProducesResponseType(typeof(CreateApplicationCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CreateFormVersionCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateAsync([FromBody] CreateApplicationCommand command)
+    public async Task<IActionResult> CreateAsync([FromBody] CreateFormVersionCommand command)
     {
         var response = await _mediator.Send(command);
         if (response.Success)

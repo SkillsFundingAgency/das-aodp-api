@@ -3,6 +3,7 @@
 	[ApplicationId] [uniqueidentifier] NOT NULL,
 	[PageId] [uniqueidentifier] NOT NULL,
 	[Status] [nvarchar](50) NULL,
+	[SkippedByQuestionId] [uniqueidentifier] NULL
  CONSTRAINT [PK_ApplicationPages] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
@@ -19,6 +20,10 @@ GO
 
 ALTER TABLE [dbo].[ApplicationPages]  WITH CHECK ADD  CONSTRAINT [FK_ApplicationPages_Pages] FOREIGN KEY([PageId])
 REFERENCES [dbo].[Pages] ([Id])
+GO
+
+ALTER TABLE [dbo].[ApplicationPages]  WITH CHECK ADD  CONSTRAINT [FK_ApplicationPages_Questions] FOREIGN KEY(SkippedByQuestionId)
+REFERENCES [dbo].[Questions] ([Id])
 GO
 
 ALTER TABLE [dbo].[ApplicationPages] CHECK CONSTRAINT [FK_ApplicationPages_Pages]
