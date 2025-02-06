@@ -4,7 +4,8 @@
 	[Key] [uniqueidentifier] NOT NULL,
 	[Order] [int] NOT NULL,
 	[Title] [nvarchar](max) NOT NULL,
-	[Description] [nvarchar](max) NOT NULL,
+	[Description] [nvarchar](max) NULL,
+	[PagesCount] [int] NULL
  CONSTRAINT [PK_Sections] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC

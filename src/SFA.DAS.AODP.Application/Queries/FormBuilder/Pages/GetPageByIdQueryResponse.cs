@@ -20,7 +20,6 @@ public class GetPageByIdQueryResponse() : BaseResponse
             SectionId = entity.SectionId,
             Title = entity.Title,
             Key = entity.Key,
-            Description = entity.Description,
             Order = entity.Order,
             Questions = entity.Questions != null ? [.. entity.Questions] : new()
 

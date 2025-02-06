@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using MediatR;
-using SFA.DAS.AODP.Data.Repositories;
+using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 

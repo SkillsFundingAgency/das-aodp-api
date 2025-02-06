@@ -1,8 +1,9 @@
 ﻿using MediatR;
+using Newtonsoft.Json;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
-using SFA.DAS.AODP.Data.Repositories;
+using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
@@ -54,9 +55,9 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
                             Order = i + 1,
                             Value = request.RadioOptions[i].Value
                         });
-                    }
+            }
                     else
-                    {
+            {
                         var option = question.QuestionOptions.First(q => q.Id == request.RadioOptions[i].Id);
                         option.Value = request.RadioOptions[i].Value;
                         option.Order = i + 1;
