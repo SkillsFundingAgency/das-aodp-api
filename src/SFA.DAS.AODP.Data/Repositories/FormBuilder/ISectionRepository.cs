@@ -58,4 +58,20 @@ public interface ISectionRepository
     int GetMaxOrderByFormVersionId(Guid formVersionId);
     Task<List<Section>> GetSectionsByIdAsync(List<Guid> sectionIds);
     Task<List<Section>> GetNextSectionsByOrderAsync(Guid formVersionId, int order);
+
+    /// <summary>
+    /// Finds a section with a given Id, and finds the next section with a lower Order (so will appear higher in the list) and switches them. 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    Task<bool> MoveSectionOrderUp(Guid sectionId);
+
+    /// <summary>
+    /// Finds a section with a given Id, and finds the next section with a higher Order (so will appear lower in the list) and switches them. 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    Task<bool> MoveSectionOrderDown(Guid id);
 }
