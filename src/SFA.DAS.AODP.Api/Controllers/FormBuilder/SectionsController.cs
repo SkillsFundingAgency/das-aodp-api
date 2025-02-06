@@ -119,7 +119,7 @@ public class SectionsController : ControllerBase
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
-    [HttpDelete("/api/sections/{sectionId}")]
+    [HttpDelete("/api/forms/{formVersionId}/sections/{sectionId}")]
     [ProducesResponseType(typeof(DeleteSectionCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
