@@ -78,6 +78,20 @@ public class FormVersionRepository : IFormVersionRepository
     /// <exception cref="RecordNotFoundException"></exception>
     public async Task<FormVersion> Update(FormVersion form)
     {
+        var formToUpdate = await _context.FormVersions.FirstOrDefaultAsync(f => f.Id == form.Id);
+        if (formToUpdate == null)
+            throw new RecordNotFoundException(form.Id);
+        if (formToUpdate.Status == FormVersionStatus.Published.ToString())
+        {
+            form.Id = Guid.NewGuid();
+            form.Version = DateTime.Now;
+            form.DateCreated = DateTime.Now;
+            form.Status = FormVersionStatus.Draft.ToString();
+            await _context.FormVersions.AddAsync(form);
+            await _context.SaveChangesAsync();
+            await _sectionRepository.CopySectionsForNewForm(formToUpdate.Id, form.Id);
+            return form;
+        }
         _context.FormVersions.Update(form);
         await _context.SaveChangesAsync();
         return form;
