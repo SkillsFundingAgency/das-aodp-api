@@ -154,7 +154,7 @@ public class SectionsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> MoveDownAsync([FromRoute] Guid formVersionId, [FromRoute] Guid sectionId)
     {
-        var query = new MoveSectionUpCommand()
+        var query = new MoveSectionDownCommand()
         {
             SectionId = sectionId,
             FormVersionId = formVersionId,
