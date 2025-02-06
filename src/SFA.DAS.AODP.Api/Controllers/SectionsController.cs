@@ -118,6 +118,26 @@ public class SectionsController : ControllerBase
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
+    [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/MoveUp")]
+    [ProducesResponseType(typeof(UpdateSectionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> MoveUpAsync([FromRoute] Guid formVersionId, [FromRoute] Guid sectionId)
+    {
+        return Ok();
+    }
+
+    [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/MoveDown")]
+    [ProducesResponseType(typeof(UpdateSectionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> MoveDownAsync([FromRoute] Guid formVersionId, [FromRoute] Guid sectionId)
+    {
+        return Ok();
+    }
+
     [HttpDelete("/api/sections/{sectionId}")]
     [ProducesResponseType(typeof(DeleteSectionCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
