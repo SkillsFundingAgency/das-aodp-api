@@ -1,5 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SFA.DAS.AODP.Application.Commands.FormBuilder;
+using SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
@@ -91,7 +93,29 @@ public class QuestionsController : Controller
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> MoveDownAsync([FromRoute] Guid formVersionId, [FromRoute] Guid sectionId, [FromRoute] Guid pageId, [FromRoute] Guid questionId, [FromBody] UpdateQuestionCommand command)
     {
-        return Ok();
+        var query = new MoveQuestionDownCommand()
+        {
+            SectionId = sectionId,
+            FormVersionId = formVersionId,
+            PageId = pageId,
+            QuestionId = questionId,
+        };
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success)
+        {
+            return Ok(response);
+        }
+
+        if (response.InnerException is NotFoundException)
+        {
+            _logger.LogError($"Request to move page down with question Id `{questionId}` and form page Id `{pageId}` returned 404 (not found).");
+            return NotFound();
+        }
+
+        _logger.LogError(message: $"Error thrown getting section to move down with question Id `{questionId}` and page Id `{pageId}`.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
     [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/questions/{questionId}/MoveUp")]
@@ -101,7 +125,29 @@ public class QuestionsController : Controller
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> MoveUpAsync([FromRoute] Guid formVersionId, [FromRoute] Guid sectionId, [FromRoute] Guid pageId, [FromRoute] Guid questionId, [FromBody] UpdateQuestionCommand command)
     {
-        return Ok();
+        var query = new MoveQuestionUpCommand()
+        {
+            SectionId = sectionId,
+            FormVersionId = formVersionId,
+            PageId = pageId,
+            QuestionId = questionId,
+        };
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success)
+        {
+            return Ok(response);
+        }
+
+        if (response.InnerException is NotFoundException)
+        {
+            _logger.LogError($"Request to move page up with question Id `{questionId}` and form page Id `{pageId}` returned 404 (not found).");
+            return NotFound();
+        }
+
+        _logger.LogError(message: $"Error thrown getting section to move up with question Id `{questionId}` and page Id `{pageId}`.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
     [HttpGet("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/questions/{questionId}")]

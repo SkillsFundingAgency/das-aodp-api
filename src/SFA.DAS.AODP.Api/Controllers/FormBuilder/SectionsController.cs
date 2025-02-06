@@ -121,22 +121,60 @@ public class SectionsController : ControllerBase
 
     [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/MoveUp")]
     [ProducesResponseType(typeof(UpdateSectionCommandResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> MoveUpAsync([FromRoute] Guid formVersionId, [FromRoute] Guid sectionId)
     {
-        return Ok();
+        var query = new MoveSectionUpCommand()
+        {
+            SectionId = sectionId,
+            FormVersionId = formVersionId
+        };
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success)
+        {
+            return Ok(response);
+        }
+
+        if (response.InnerException is NotFoundException)
+        {
+            _logger.LogError($"Request to move section up with section Id `{sectionId}` and form version Id `{formVersionId}` returned 404 (not found).");
+            return NotFound();
+        }
+
+        _logger.LogError(message: $"Error thrown getting section to move up with form version Id `{formVersionId}` and section Id `{sectionId}`.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
     [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/MoveDown")]
     [ProducesResponseType(typeof(UpdateSectionCommandResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> MoveDownAsync([FromRoute] Guid formVersionId, [FromRoute] Guid sectionId)
     {
-        return Ok();
+        var query = new MoveSectionUpCommand()
+        {
+            SectionId = sectionId,
+            FormVersionId = formVersionId,
+        };
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success)
+        {
+            return Ok(response);
+        }
+
+        if (response.InnerException is NotFoundException)
+        {
+            _logger.LogError($"Request to move section down with section Id `{sectionId}` and form version Id `{formVersionId}` returned 404 (not found).");
+            return NotFound();
+        }
+
+        _logger.LogError(message: $"Error thrown getting section to move down with form version Id `{formVersionId}` and section Id `{sectionId}`.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
     [HttpDelete("/api/sections/{sectionId}")]
