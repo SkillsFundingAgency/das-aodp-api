@@ -72,5 +72,10 @@
     <Build Include="Tables\QuestionValidation.sql" />
     <Build Include="Views\View_AvailableQuestionsForRouting.sql" />
     <Build Include="Views\View_QuestionRoutingDetails.sql" />
+    <Build Include="Tables\ApplicationQuestionAnswers.sql" />
+    <Build Include="Tables\Applications.sql" />
+    <Build Include="Tables\ApplicationPages.sql" />
+    <Build Include="Views\View_SectionPageCount.sql" />
+    <Build Include="Views\View_RemainingPagesBySectionForApplication.sql" />
   </ItemGroup>
 </Project>
