@@ -10,7 +10,7 @@ public class Route
     public bool EndSection { get; set; }
     public bool EndForm { get; set; }
 
-    public Question SourceQuestion { get; set; }
-    public Page NextPage { get; set; }
-    public Section NextSection { get; set; }
+    public virtual Question SourceQuestion { get; set; }
+    public virtual Page NextPage { get; set; }
+    public virtual Section NextSection { get; set; }
 }
