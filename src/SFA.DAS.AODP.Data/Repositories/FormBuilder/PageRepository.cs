@@ -186,7 +186,7 @@ public class PageRepository : IPageRepository
             .FirstOrDefaultAsync() ?? throw new RecordNotFoundException(sectionId);
     }
 
-    public async Task UpdatePageOrdering(Guid sectionId, int deletedPageOrder)
+    private async Task UpdatePageOrdering(Guid sectionId, int deletedPageOrder)
     {
         await _context.Pages
             .Where(p => p.SectionId == sectionId && p.Order > deletedPageOrder)
