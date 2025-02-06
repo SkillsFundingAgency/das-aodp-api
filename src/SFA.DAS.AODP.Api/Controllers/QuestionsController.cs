@@ -7,6 +7,8 @@ using SFA.DAS.AODP.Application.Queries.FormBuilder.Questions;
 
 namespace SFA.DAS.AODP.Api.Controllers;
 
+[ApiController]
+[Route("api/[controller]")]
 public class QuestionsController : Controller
 {
     private readonly IMediator _mediator;
