@@ -25,11 +25,12 @@ public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersion
 
         try
         {
+            var order = _formVersionRepository.GetMaxOrder();
             var form = await _formVersionRepository.Create(new()
             {
                 Title = request.Title,
                 Description = request.Description,
-                Order = request.Order,
+                Order = order + 1,
             });
 
             response.Id = form.Id;

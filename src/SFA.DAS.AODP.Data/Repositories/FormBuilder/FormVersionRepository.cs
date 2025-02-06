@@ -15,6 +15,12 @@ public class FormVersionRepository : IFormVersionRepository
         _context = context;
     }
 
+    public int GetMaxOrder()
+    {
+        var res = _context.FormVersions.Max(s => (int?)s.Order) ?? 0;
+        return res;
+    }
+
     /// <summary>
     /// Returns all the latest form versions for all given forms. 
     /// </summary>
@@ -129,14 +135,14 @@ public class FormVersionRepository : IFormVersionRepository
     {
         var newPublishedForm = await _context.FormVersions
             .FirstOrDefaultAsync(v => v.Id == formVersionId);
-
-        var oldPublishedForms = await _context.FormVersions
-            .Where(v => v.Status == FormVersionStatus.Published.ToString())
-            .ToListAsync();
-
         if (newPublishedForm is null)
             throw new RecordNotFoundException(formVersionId);
 
+        var oldPublishedForms = await _context.FormVersions
+            .Where(v => v.Status == FormVersionStatus.Published.ToString() && v.FormId == newPublishedForm.FormId)
+            .ToListAsync();
+
+  
         newPublishedForm.Status = FormVersionStatus.Published.ToString();
 
         // There shouldn't be multiple published forms, but just in case this is safer 
