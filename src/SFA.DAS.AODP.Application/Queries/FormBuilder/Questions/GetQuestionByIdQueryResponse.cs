@@ -60,7 +60,7 @@ public class GetQuestionByIdQueryResponse() : BaseResponse
             foreach (var option in entity.QuestionOptions)
             {
                 question.RadioOptions.Add(new()
-                {
+        {
                     Id = option.Id,
                     Value = option.Value,
                     Order = option.Order,

@@ -23,7 +23,7 @@ public class UpdateQuestionCommand : IRequest<UpdateQuestionCommandResponse>
 
     public class RadioOptionItem
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; set; } 
         public string Value { get; set; }
     }
 }
