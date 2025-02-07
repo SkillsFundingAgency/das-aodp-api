@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
+using SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
@@ -146,6 +147,67 @@ public class PagesController : Controller
             return NotFound();
         }
 
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/MoveUp")]
+    [ProducesResponseType(typeof(UpdatePageCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> MoveUpAsync([FromRoute] Guid formVersionId, [FromRoute] Guid sectionId, [FromRoute] Guid pageId)
+    {
+        var query = new MovePageUpCommand()
+        {
+            SectionId = sectionId,
+            FormVersionId = formVersionId,
+            PageId = pageId
+        };
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success)
+        {
+            return Ok(response);
+        }
+
+        if (response.InnerException is NotFoundException)
+        {
+            _logger.LogError($"Request to move page up with section Id `{sectionId}` and form page Id `{pageId}` returned 404 (not found).");
+            return NotFound();
+        }
+
+        _logger.LogError(message: $"Error thrown getting section to move up with section Id `{sectionId}` and page Id `{pageId}`.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+
+    [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/MoveDown")]
+    [ProducesResponseType(typeof(UpdatePageCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> MoveDownAsync([FromRoute] Guid formVersionId, [FromRoute] Guid sectionId, [FromRoute] Guid pageId)
+    {
+        var query = new MovePageDownCommand()
+        {
+            SectionId = sectionId,
+            FormVersionId = formVersionId,
+            PageId = pageId
+        };
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success)
+        {
+            return Ok(response);
+        }
+
+        if (response.InnerException is NotFoundException)
+        {
+            _logger.LogError($"Request to move page down with section Id `{sectionId}` and form page Id `{pageId}` returned 404 (not found).");
+            return NotFound();
+        }
+
+        _logger.LogError(message: $"Error thrown getting section to move down with section Id `{sectionId}` and page Id `{pageId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 

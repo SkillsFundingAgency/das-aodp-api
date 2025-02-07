@@ -179,7 +179,58 @@ public class PageRepository : IPageRepository
             .ThenInclude(r => r.NextSection)
 
             .FirstOrDefaultAsync() ?? throw new RecordNotFoundException(sectionId);
+    }
 
 
+    /// <summary>
+    /// Finds a question with a given Id, and finds the next section with a lower Order (so will appear higher in the list) and switches them. 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task<bool> MovePageOrderUp(Guid id)
+    {
+        var modelToUpdate = await _context.Pages.FirstOrDefaultAsync(v => v.Id == id);
+        if (modelToUpdate is null)
+            throw new RecordNotFoundException(id);
+
+        var nextHigherModel = await _context.Pages
+            .OrderBy(v => v.Order)
+            .Where(v => v.Order < modelToUpdate.Order)
+            .FirstOrDefaultAsync();
+        if (nextHigherModel is null)
+            return true;
+        var nextHighest = nextHigherModel.Order;
+        nextHigherModel.Order = modelToUpdate.Order;
+        modelToUpdate.Order = nextHighest;
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+    /// <summary>
+    /// Finds a question with a given Id, and finds the next section with a higher Order (so will appear lower in the list) and switches them. 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task<bool> MovePageOrderDown(Guid id)
+    {
+        var modelToUpdate = await _context.Pages.FirstOrDefaultAsync(v => v.Id == id);
+        if (modelToUpdate is null)
+            throw new RecordNotFoundException(id);
+
+        var nextLowerModel = await _context.Pages
+            .OrderByDescending(v => v.Order)
+            .Where(v => v.Order > modelToUpdate.Order)
+            .FirstOrDefaultAsync();
+        if (nextLowerModel is null)
+            return true;
+        var nextLowest = nextLowerModel.Order;
+        nextLowerModel.Order = modelToUpdate.Order;
+        modelToUpdate.Order = nextLowest;
+        await _context.SaveChangesAsync();
+
+        return true;
     }
 }
