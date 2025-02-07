@@ -30,4 +30,19 @@ public class QuestionValidationRepository : IQuestionValidationRepository
         }
         await _context.SaveChangesAsync();
     }
+
+    public async Task CopyQuestionValidationForNewFormVersion(Dictionary<Guid, Guid> oldNewQuestionIds)
+    {
+        var oldIds = oldNewQuestionIds.Keys.ToList();
+
+        var toMigrate = await _context.QuestionValidations.AsNoTracking().Where(v => oldIds.Contains(v.QuestionId)).ToListAsync();
+        foreach (var entity in toMigrate)
+        {
+            entity.QuestionId = oldNewQuestionIds[entity.QuestionId];
+            entity.Id = Guid.NewGuid();
+        }
+        await _context.QuestionValidations.AddRangeAsync(toMigrate);
+        await _context.SaveChangesAsync();
+    }
+
 }

@@ -59,5 +59,9 @@ namespace SFA.DAS.AODP.Data.Repositories.FormBuilder
         Task<bool> Unpublish(Guid formVersionId);
         Task<List<FormVersion>> GetPublishedFormVersions();
         int GetMaxOrder();
+        Task<FormVersion?> GetDraftFormVersionByFormId(Guid formId);
+        Task<FormVersion?> GetPublishedFormVersionByFormId(Guid formId);
+        Task<FormVersion> CreateDraftAsync(Guid publishedFormVersionId);
+        Task<bool> IsFormVersionEditable(Guid formVersionId);
     }
 }

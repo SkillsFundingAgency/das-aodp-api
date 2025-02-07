@@ -145,6 +145,30 @@ public class FormsController : Controller
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
+
+    [HttpPut("/api/forms/{formId}/new-version")]
+    [ProducesResponseType(typeof(UpdateFormVersionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> CreateDraftAsync([FromRoute] Guid formId)
+    {
+        var command = new CreateDraftFormVersionCommand(formId);
+
+        var response = await _mediator.Send(command);
+
+        if (response.Success)
+            return Ok(response);
+
+        if (response.InnerException is NotFoundException)
+        {
+            _logger.LogWarning($"Request to create draft form version with Id `{formId}` returned 404 (not found). ");
+            return NotFound();
+        }
+
+        _logger.LogError(message: $"Error thrown creating a draft form version with the Id `{formId}`.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
     [HttpDelete("/api/forms/{formVersionId}")]
     [ProducesResponseType(typeof(DeleteFormVersionCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

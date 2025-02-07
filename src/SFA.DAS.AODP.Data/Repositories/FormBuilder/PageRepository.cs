@@ -3,6 +3,7 @@ using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Models.Form;
+using static System.Collections.Specialized.BitVector32;
 
 namespace SFA.DAS.AODP.Data.Repositories.FormBuilder;
 public class PageRepository : IPageRepository
@@ -90,23 +91,26 @@ public class PageRepository : IPageRepository
         return page;
     }
 
-    /// <summary>
-    /// Copies all pages with a given section id, to a new section id. 
-    /// Used when creating a new form version from an old one. 
-    /// </summary>
-    /// <param name="oldSectionId"></param>
-    /// <param name="newSectionId"></param>
-    /// <returns></returns>
-    public async Task<List<Page>> CopyPagesForNewSection(Guid oldSectionId, Guid newSectionId)
+
+    public async Task<Dictionary<Guid, Guid>> CopyPagesForNewFormVersion(Dictionary<Guid, Guid> oldNewSectionIds)
     {
-        var pagesToMigrate = await GetPagesForSectionAsync(oldSectionId);
-        foreach (var p in pagesToMigrate)
+        var oldNewIds = new Dictionary<Guid, Guid>();
+
+        var oldIds = oldNewSectionIds.Keys.ToList();
+        var pagesToMigrate = await _context.Pages.AsNoTracking().Where(v => oldIds.Contains(v.SectionId)).ToListAsync();
+
+        foreach (var page in pagesToMigrate)
         {
-            p.SectionId = newSectionId;
+            var oldPageId = page.Id;
+            page.SectionId = oldNewSectionIds[page.SectionId];
+            page.Id = Guid.NewGuid();
+
+            oldNewIds.Add(oldPageId, page.Id);
         }
         await _context.Pages.AddRangeAsync(pagesToMigrate);
         await _context.SaveChangesAsync();
-        return pagesToMigrate;
+
+        return oldNewIds;
     }
 
     /// <summary>

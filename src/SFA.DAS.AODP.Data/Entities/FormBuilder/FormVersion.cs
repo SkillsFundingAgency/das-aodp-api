@@ -13,8 +13,8 @@ public class FormVersion
     public string Description { get; set; }
     public int Order { get; set; }
     public DateTime DateCreated { get; set; }
-    public virtual Form Form { get; set; } = new Form();
-    public virtual List<Section> Sections { get; set; } = new List<Section>();
+    public virtual Form Form { get; set; } 
+    public virtual List<Section> Sections { get; set; }
 }
 
 

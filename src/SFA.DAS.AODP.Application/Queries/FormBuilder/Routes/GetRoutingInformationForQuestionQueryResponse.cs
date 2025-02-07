@@ -14,6 +14,7 @@ namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Routes
         public List<RadioOptionItem> RadioOptions { get; set; } = new();
         public List<Page> NextPages { get; set; } = new();
         public List<Section> NextSections { get; set; } = new();
+        public bool Editable { get; set; }
 
         public class RadioOptionItem
         {
@@ -49,7 +50,7 @@ namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Routes
 
         }
 
-        public static GetRoutingInformationForQuestionQueryResponse Map(Question question, List<Data.Entities.FormBuilder.Section> sections, List<Data.Entities.FormBuilder.Page> pages)
+        public static GetRoutingInformationForQuestionQueryResponse Map(Question question, List<Data.Entities.FormBuilder.Section> sections, List<Data.Entities.FormBuilder.Page> pages, bool editable)
         {
             GetRoutingInformationForQuestionQueryResponse response = new()
             {
@@ -57,6 +58,7 @@ namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Routes
                 PageTitle = question.Page.Title,
                 QuestionTitle = question.Title,
                 SectionTitle = question.Page.Section.Title,
+                Editable = editable
             };
 
             foreach (Data.Entities.FormBuilder.Section section in sections ?? [])

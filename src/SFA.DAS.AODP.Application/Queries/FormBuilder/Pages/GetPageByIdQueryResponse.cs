@@ -11,6 +11,7 @@ public class GetPageByIdQueryResponse() : BaseResponse
     public string Description { get; set; }
     public int Order { get; set; }
     public List<Question> Questions { get; set; }
+    public bool Editable { get; set; }
 
     public static implicit operator GetPageByIdQueryResponse(Page entity)
     {

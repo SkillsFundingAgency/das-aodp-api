@@ -79,19 +79,24 @@ public class SectionRepository : ISectionRepository
     /// <param name="oldFormVersionId"></param>
     /// <param name="newFormVersionId"></param>
     /// <returns></returns>
-    public async Task<List<Section>> CopySectionsForNewForm(Guid oldFormVersionId, Guid newFormVersionId)
+    public async Task<Dictionary<Guid, Guid>> CopySectionsForNewFormVersion(Guid oldFormVersionId, Guid newFormVersionId)
     {
-        var sectionsToMigrate = await GetSectionsForFormAsync(oldFormVersionId);
-        foreach (var s in sectionsToMigrate)
+        var oldNewIds = new Dictionary<Guid, Guid>();
+        var sectionsToMigrate = await _context.Sections.AsNoTracking().Where(v => v.FormVersionId == oldFormVersionId).ToListAsync();
+        foreach (var section in sectionsToMigrate)
         {
-            var oldSectionId = s.Id;
-            s.Id = Guid.NewGuid();
-            s.FormVersionId = newFormVersionId;
-            await _pageRepository.CopyPagesForNewSection(oldSectionId, s.Id);
+            var oldSectionId = section.Id;
+
+            section.Id = Guid.NewGuid();
+            section.FormVersionId = newFormVersionId;
+
+            oldNewIds.Add(oldSectionId, section.Id);
+
         }
         await _context.Sections.AddRangeAsync(sectionsToMigrate);
         await _context.SaveChangesAsync();
-        return sectionsToMigrate;
+
+        return oldNewIds;
     }
 
     /// <summary>

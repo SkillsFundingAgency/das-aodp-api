@@ -123,4 +123,24 @@ public class QuestionRepository : IQuestionRepository
     {
         return await _context.Questions.Where(q => q.Id == questionid).Select(q => q.Type).FirstOrDefaultAsync() ?? throw new RecordNotFoundException(questionid);
     }
+
+    public async Task<Dictionary<Guid, Guid>> CopyQuestionsForNewFormVersion(Dictionary<Guid, Guid> oldNewPageIds)
+    {
+        var oldNewIds = new Dictionary<Guid, Guid>();
+        var oldIds = oldNewPageIds.Keys.ToList();
+
+        var toMigrate = await _context.Questions.AsNoTracking().Where(v => oldIds.Contains(v.PageId)).ToListAsync();
+        foreach (var entity in toMigrate)
+        {
+            var oldId = entity.Id;
+            entity.PageId = oldNewPageIds[entity.PageId];
+            entity.Id = Guid.NewGuid();
+
+            oldNewIds.Add(oldId, entity.Id);
+        }
+        await _context.Questions.AddRangeAsync(toMigrate);
+        await _context.SaveChangesAsync();
+
+        return oldNewIds;
+    }
 }
