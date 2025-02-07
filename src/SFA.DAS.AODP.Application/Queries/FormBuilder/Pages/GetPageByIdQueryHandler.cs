@@ -5,7 +5,7 @@ using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
-public class GetPageByIdQueryHandler(IPageRepository _pageRepository) : IRequestHandler<GetPageByIdQuery, GetPageByIdQueryResponse>
+public class GetPageByIdQueryHandler(IPageRepository _pageRepository, IFormVersionRepository _formVersionRepository) : IRequestHandler<GetPageByIdQuery, GetPageByIdQueryResponse>
 {
     public async Task<GetPageByIdQueryResponse> Handle(GetPageByIdQuery request, CancellationToken cancellationToken)
     {
@@ -15,6 +15,8 @@ public class GetPageByIdQueryHandler(IPageRepository _pageRepository) : IRequest
             var page = await _pageRepository.GetPageByIdAsync(request.PageId);
 
             response = page;
+
+            response.Editable = await _formVersionRepository.IsFormVersionEditable(request.FormVersionId);
             response.Success = true;
         }
         catch (RecordNotFoundException ex)

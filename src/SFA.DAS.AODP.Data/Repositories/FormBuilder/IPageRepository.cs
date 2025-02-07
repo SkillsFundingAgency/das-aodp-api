@@ -9,13 +9,12 @@ namespace SFA.DAS.AODP.Data.Repositories.FormBuilder
         Task<Page> Create(Page page);
         Task<Page?> Update(Page page);
         Task<Page?> Archive(Guid pageId);
-        Task<List<Page>> CopyPagesForNewSection(Guid oldSectionId, Guid newSectionId);
         int GetMaxOrderBySectionId(Guid sectionId);
         Task<List<Page>> GetNextPagesInSectionByOrderAsync(Guid sectionId, int order);
         Task<Page> GetPageForApplicationAsync(int pageOrder, Guid sectionId);
         Task<List<Guid>> GetPagesIdInSectionByOrderAsync(Guid sectionId, int startOrder, int? endOrder);
         Task<List<Guid>> GetPagesIdInFormBySectionOrderAsync(Guid formVersionId, int startSectionOrder, int? endSectionOrder);
-
+        Task<Dictionary<Guid, Guid>> CopyPagesForNewFormVersion(Dictionary<Guid, Guid> oldNewSectionIds);
         /// <summary>
         /// Finds a question with a given Id, and finds the next section with a higher Order (so will appear lower in the list) and switches them. 
         /// </summary>

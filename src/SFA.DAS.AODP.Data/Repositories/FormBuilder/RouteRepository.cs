@@ -54,5 +54,27 @@ public class RouteRepository : IRouteRepository
         }
         await _context.SaveChangesAsync();
     }
+
+    public async Task CopyRoutesForNewFormVersion(Dictionary<Guid, Guid> oldNewQuestionIds,
+        Dictionary<Guid, Guid> oldNewPageIds,
+        Dictionary<Guid, Guid> oldNewSectionIds,
+        Dictionary<Guid, Guid> oldNewOptionIds)
+    {
+        var sourceQuestionOldIds = oldNewQuestionIds.Keys.ToList();
+        var toMigrate = await _context.Routes.AsNoTracking().Where(v => sourceQuestionOldIds.Contains(v.SourceQuestionId)).ToListAsync();
+        foreach (var entity in toMigrate)
+        {
+            entity.SourceQuestionId = oldNewQuestionIds[entity.SourceQuestionId];
+            entity.SourceOptionId = oldNewOptionIds[entity.SourceOptionId];
+
+            if (entity.NextPageId != null) entity.NextPageId = oldNewPageIds[entity.NextPageId.Value];
+            if (entity.NextSectionId != null) entity.NextSectionId = oldNewSectionIds[entity.NextSectionId.Value];
+
+
+            entity.Id = Guid.NewGuid();
+        }
+        await _context.Routes.AddRangeAsync(toMigrate);
+        await _context.SaveChangesAsync();
+    }
 }
 

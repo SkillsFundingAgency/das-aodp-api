@@ -1,4 +1,5 @@
-﻿using SFA.DAS.AODP.Data.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 namespace SFA.DAS.AODP.Data.Repositories.FormBuilder
@@ -35,5 +36,26 @@ namespace SFA.DAS.AODP.Data.Repositories.FormBuilder
             }
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Dictionary<Guid, Guid>> CopyQuestionOptionsForNewFormVersion(Dictionary<Guid, Guid> oldNewQuestionIds)
+        {
+            var oldNewIds = new Dictionary<Guid, Guid>();
+            var oldIds = oldNewQuestionIds.Keys.ToList();
+
+            var toMigrate = await _context.QuestionOptions.AsNoTracking().Where(v => oldIds.Contains(v.QuestionId)).ToListAsync();
+            foreach (var entity in toMigrate)
+            {
+                var oldId = entity.Id;
+                entity.QuestionId = oldNewQuestionIds[entity.QuestionId];
+                entity.Id = Guid.NewGuid();
+
+                oldNewIds.Add(oldId, entity.Id);
+            }
+            await _context.QuestionOptions.AddRangeAsync(toMigrate);
+            await _context.SaveChangesAsync();
+
+            return oldNewIds;
+        }
+
     }
 }

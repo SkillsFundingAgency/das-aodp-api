@@ -9,10 +9,28 @@ namespace SFA.DAS.AODP.Data.Repositories.FormBuilder;
 public class FormVersionRepository : IFormVersionRepository
 {
     private readonly IApplicationDbContext _context;
+    private readonly ISectionRepository _sectionRepository;
+    private readonly IPageRepository _pageRepository;
+    private readonly IQuestionRepository _questionRepository;
+    private readonly IQuestionOptionRepository _questionOptionRepository;
+    private readonly IQuestionValidationRepository _questionValidationRepository;
+    private readonly IRouteRepository _routeRepository;
 
-    public FormVersionRepository(IApplicationDbContext context)
+    public FormVersionRepository(IApplicationDbContext context, ISectionRepository sectionRepository, IPageRepository pageRepository, IQuestionRepository questionRepository, IQuestionOptionRepository questionOptionRepository, IQuestionValidationRepository questionValidationRepository, IRouteRepository routeRepository)
     {
         _context = context;
+        _sectionRepository = sectionRepository;
+        _pageRepository = pageRepository;
+        _questionRepository = questionRepository;
+        _questionOptionRepository = questionOptionRepository;
+        _questionValidationRepository = questionValidationRepository;
+        _routeRepository = routeRepository;
+    }
+
+    public int GetMaxOrder()
+    {
+        var res = _context.FormVersions.Max(s => (int?)s.Order) ?? 0;
+        return res;
     }
 
     /// <summary>
@@ -28,6 +46,32 @@ public class FormVersionRepository : IFormVersionRepository
             .ToListAsync();
 
         return top;
+    }
+
+    /// <summary>
+    /// Returns the draft form version for given form. 
+    /// </summary>
+    /// <returns></returns>
+    public async Task<FormVersion?> GetDraftFormVersionByFormId(Guid formId)
+    {
+        return await _context.FormVersions
+        .Where(f => f.FormId == formId)
+        .Where(f => f.Status == FormVersionStatus.Draft.ToString())
+        .FirstOrDefaultAsync();
+
+    }
+
+    /// <summary>
+    /// Returns the published form version for given form. 
+    /// </summary>
+    /// <returns></returns>
+    public async Task<FormVersion?> GetPublishedFormVersionByFormId(Guid formId)
+    {
+        return await _context.FormVersions
+        .Where(f => f.FormId == formId)
+        .Where(f => f.Status == FormVersionStatus.Published.ToString())
+        .FirstOrDefaultAsync();
+
     }
 
     public async Task<List<FormVersion>> GetPublishedFormVersions()
@@ -89,17 +133,7 @@ public class FormVersionRepository : IFormVersionRepository
         var formToUpdate = await _context.FormVersions.FirstOrDefaultAsync(f => f.Id == form.Id);
         if (formToUpdate == null)
             throw new RecordNotFoundException(form.Id);
-        //if (formToUpdate.Status == FormVersionStatus.Published.ToString())
-        //{
-        //    form.Id = Guid.NewGuid();
-        //    form.Version = DateTime.Now;
-        //    form.DateCreated = DateTime.Now;
-        //    form.Status = FormVersionStatus.Draft.ToString();
-        //    await _context.FormVersions.AddAsync(form);
-        //    await _context.SaveChangesAsync();
-        //    await _sectionRepository.CopySectionsForNewForm(formToUpdate.Id, form.Id);
-        //    return form;
-        //}
+
         _context.FormVersions.Update(form);
         await _context.SaveChangesAsync();
         return form;
@@ -129,13 +163,13 @@ public class FormVersionRepository : IFormVersionRepository
     {
         var newPublishedForm = await _context.FormVersions
             .FirstOrDefaultAsync(v => v.Id == formVersionId);
-
-        var oldPublishedForms = await _context.FormVersions
-            .Where(v => v.Status == FormVersionStatus.Published.ToString())
-            .ToListAsync();
-
         if (newPublishedForm is null)
             throw new RecordNotFoundException(formVersionId);
+
+        var oldPublishedForms = await _context.FormVersions
+            .Where(v => v.Status == FormVersionStatus.Published.ToString() && v.FormId == newPublishedForm.FormId)
+            .ToListAsync();
+
 
         newPublishedForm.Status = FormVersionStatus.Published.ToString();
 
@@ -161,5 +195,48 @@ public class FormVersionRepository : IFormVersionRepository
         form.Status = FormVersionStatus.Archived.ToString();
         await _context.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<bool> IsFormVersionEditable(Guid formVersionId)
+    {
+        return await _context.FormVersions.AnyAsync(f => f.Id == formVersionId && f.Status == FormVersionStatus.Draft.ToString());
+    }
+
+    public async Task<FormVersion> CreateDraftAsync(Guid publishedFormVersionId)
+    {
+        using var transaction = await _context.StartTransactionAsync();
+        try
+        {
+            var formVersion = _context.FormVersions.AsNoTracking().First(f => f.Id == publishedFormVersionId);
+            formVersion.Id = Guid.NewGuid();
+            formVersion.Version = DateTime.UtcNow;
+            formVersion.Status = FormVersionStatus.Draft.ToString();
+
+            _context.FormVersions.Add(formVersion);
+            await _context.SaveChangesAsync();
+
+
+            var sectionIds = await _sectionRepository.CopySectionsForNewFormVersion(publishedFormVersionId, formVersion.Id);
+
+            var pageIds = await _pageRepository.CopyPagesForNewFormVersion(sectionIds);
+
+            var questionIds = await _questionRepository.CopyQuestionsForNewFormVersion(pageIds);
+
+            var optionIds = await _questionOptionRepository.CopyQuestionOptionsForNewFormVersion(questionIds);
+
+            await _questionValidationRepository.CopyQuestionValidationForNewFormVersion(questionIds);
+
+            await _routeRepository.CopyRoutesForNewFormVersion(questionIds, pageIds, sectionIds, optionIds);
+
+            await transaction.CommitAsync();
+
+            return formVersion;
+        }
+
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 }

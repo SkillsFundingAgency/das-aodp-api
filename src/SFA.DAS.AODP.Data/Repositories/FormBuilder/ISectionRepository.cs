@@ -54,11 +54,10 @@ public interface ISectionRepository
     /// <param name="oldFormVersionId"></param>
     /// <param name="newFormVersionId"></param>
     /// <returns></returns>
-    Task<List<Section>> CopySectionsForNewForm(Guid oldFormId, Guid newFormId);
     int GetMaxOrderByFormVersionId(Guid formVersionId);
     Task<List<Section>> GetSectionsByIdAsync(List<Guid> sectionIds);
     Task<List<Section>> GetNextSectionsByOrderAsync(Guid formVersionId, int order);
-
+    Task<Dictionary<Guid,Guid>> CopySectionsForNewFormVersion(Guid oldFormVersionId, Guid newFormVersionId);
     /// <summary>
     /// Finds a section with a given Id, and finds the next section with a lower Order (so will appear higher in the list) and switches them. 
     /// </summary>

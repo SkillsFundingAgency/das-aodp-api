@@ -7,7 +7,7 @@ using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Questions;
 
-public class GetQuestionByIdQueryHandler(IQuestionRepository _QuestionRepository) : IRequestHandler<GetQuestionByIdQuery, GetQuestionByIdQueryResponse>
+public class GetQuestionByIdQueryHandler(IQuestionRepository _QuestionRepository, IFormVersionRepository _formVersionRepository) : IRequestHandler<GetQuestionByIdQuery, GetQuestionByIdQueryResponse>
 {
     public async Task<GetQuestionByIdQueryResponse> Handle(GetQuestionByIdQuery request, CancellationToken cancellationToken)
     {
@@ -18,6 +18,7 @@ public class GetQuestionByIdQueryHandler(IQuestionRepository _QuestionRepository
             var question = await _QuestionRepository.GetQuestionByIdAsync(request.QuestionId);
 
             response = question;
+            response.Editable = await _formVersionRepository.IsFormVersionEditable(request.FormVersionId);
             response.Success = true;
         }
         catch (RecordNotFoundException ex)

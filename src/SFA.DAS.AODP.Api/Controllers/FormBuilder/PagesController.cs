@@ -40,9 +40,9 @@ public class PagesController : Controller
     [ProducesResponseType(typeof(GetPageByIdQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetByIdAsync(Guid pageId, Guid sectionId)
+    public async Task<IActionResult> GetByIdAsync(Guid formVersionId, Guid pageId, Guid sectionId)
     {
-        var query = new GetPageByIdQuery(pageId, sectionId);
+        var query = new GetPageByIdQuery(pageId, sectionId, formVersionId);
 
         var response = await _mediator.Send(query);
 
@@ -58,6 +58,31 @@ public class PagesController : Controller
         }
 
         _logger.LogError(message: $"Error thrown getting page for section Id `{sectionId}` and page Id `{pageId}`.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpGet("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/preview")]
+    [ProducesResponseType(typeof(GetPageByIdQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetPagePreviewByIdAsync(Guid formVersionId, Guid pageId, Guid sectionId)
+    {
+        var query = new GetPagePreviewByIdQuery(pageId, sectionId, formVersionId);
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success)
+        {
+            return Ok(response);
+        }
+
+        if (response.InnerException is NotFoundException)
+        {
+            _logger.LogError($"Request for page preview with section Id `{sectionId}` and page Id `{pageId}` returned 404 (not found).");
+            return NotFound();
+        }
+
+        _logger.LogError(message: $"Error thrown getting page preview for section Id `{sectionId}` and page Id `{pageId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 

@@ -11,6 +11,7 @@ public class GetSectionByIdQueryResponse() : BaseResponse
     public string Title { get; set; }
     public string Description { get; set; }
     public List<Page> Pages { get; set; }
+    public bool Editable { get; set; }
 
     public static implicit operator GetSectionByIdQueryResponse(Section entity)
     {

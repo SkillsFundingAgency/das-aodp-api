@@ -5,7 +5,7 @@ using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Routes
 {
-    public class GetRoutingInformationForFormQueryHandler(IRouteRepository _routeRepository) : IRequestHandler<GetRoutingInformationForFormQuery, GetRoutingInformationForFormQueryResponse>
+    public class GetRoutingInformationForFormQueryHandler(IRouteRepository _routeRepository, IFormVersionRepository _formVersionRepository) : IRequestHandler<GetRoutingInformationForFormQuery, GetRoutingInformationForFormQueryResponse>
     {
         public async Task<GetRoutingInformationForFormQueryResponse> Handle(GetRoutingInformationForFormQuery request, CancellationToken cancellationToken)
         {
@@ -15,7 +15,7 @@ namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Routes
             {
                 var routes = await _routeRepository.GetQuestionRoutingDetailsByFormVersionId(request.FormVersionId);
 
-                response = GetRoutingInformationForFormQueryResponse.Map(routes);
+                response = GetRoutingInformationForFormQueryResponse.Map(routes, await _formVersionRepository.IsFormVersionEditable(request.FormVersionId));
                 response.Success = true;
             }
             catch (RecordNotFoundException ex)

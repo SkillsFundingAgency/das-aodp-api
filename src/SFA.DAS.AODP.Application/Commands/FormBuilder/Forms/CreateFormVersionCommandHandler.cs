@@ -1,7 +1,5 @@
-﻿using AutoMapper;
-using MediatR;
+﻿using MediatR;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
-using Entities = SFA.DAS.AODP.Data.Entities;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
@@ -25,11 +23,12 @@ public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersion
 
         try
         {
+            var order = _formVersionRepository.GetMaxOrder();
             var form = await _formVersionRepository.Create(new()
             {
                 Title = request.Title,
                 Description = request.Description,
-                Order = request.Order,
+                Order = order + 1,
             });
 
             response.Id = form.Id;
