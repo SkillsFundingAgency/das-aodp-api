@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
-using SFA.DAS.AODP.Data.EntityConifguration;
+using SFA.DAS.AODP.Data.EntityConfiguration;
 using System.Reflection.Emit;
 
 namespace SFA.DAS.AODP.Data.Context

@@ -1,6 +1,4 @@
-﻿using SFA.DAS.AODP.Application;
-
-public class GetApplicationSectionByIdQueryResponse : BaseResponse
+﻿public class GetApplicationSectionByIdQueryResponse
 {
     public string SectionTitle { get; set; }
 

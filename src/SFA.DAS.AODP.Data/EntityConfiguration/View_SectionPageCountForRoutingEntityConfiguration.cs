@@ -4,7 +4,7 @@ using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection.Emit;
 
-namespace SFA.DAS.AODP.Data.EntityConifguration
+namespace SFA.DAS.AODP.Data.EntityConfiguration
 {
     [ExcludeFromCodeCoverage]
     public class View_SectionPageCountForRoutingEntityConfiguration : IEntityTypeConfiguration<View_SectionPageCount>

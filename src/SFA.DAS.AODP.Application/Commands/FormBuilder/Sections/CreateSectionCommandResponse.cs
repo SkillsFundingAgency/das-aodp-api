@@ -3,7 +3,7 @@
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 
 /// <exception cref="DependantNotFoundException"></exception>
-public class CreateSectionCommandResponse : BaseResponse
+public class CreateSectionCommandResponse
 {
     public Guid Id { get; set; }
 

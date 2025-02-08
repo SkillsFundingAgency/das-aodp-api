@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
+using SFA.DAS.AODP.Models.Form;
 
 namespace SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
@@ -53,6 +54,12 @@ public class RouteRepository : IRouteRepository
             }
         }
         await _context.SaveChangesAsync();
+    }
+
+
+    public async Task<bool> IsRouteEditable(Guid id)
+    {
+        return await _context.Routes.AnyAsync(v => v.Id == id && v.SourceQuestion.Page.Section.FormVersion.Status == FormVersionStatus.Draft.ToString());
     }
 
     public async Task CopyRoutesForNewFormVersion(Dictionary<Guid, Guid> oldNewQuestionIds,

@@ -30,7 +30,7 @@ public class RoutesController : Controller
         var response = await _mediator.Send(query);
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         _logger.LogError(message: $"Error thrown getting available sections for form version.", exception: response.InnerException);
@@ -49,7 +49,7 @@ public class RoutesController : Controller
         var response = await _mediator.Send(query);
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         _logger.LogError(message: $"Error thrown getting routes for form version.", exception: response.InnerException);
@@ -68,7 +68,7 @@ public class RoutesController : Controller
         var response = await _mediator.Send(query);
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         _logger.LogError(message: $"Error thrown getting available questions for page.", exception: response.InnerException);
@@ -89,7 +89,7 @@ public class RoutesController : Controller
         var response = await _mediator.Send(query);
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         _logger.LogError(message: $"Error thrown getting question routing information.", exception: response.InnerException);
@@ -104,7 +104,7 @@ public class RoutesController : Controller
         var response = await _mediator.Send(command);
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         _logger.LogError(message: $"Error thrown configuring question routing information.", exception: response.InnerException);

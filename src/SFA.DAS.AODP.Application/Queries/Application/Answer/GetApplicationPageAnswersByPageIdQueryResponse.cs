@@ -1,7 +1,7 @@
 ﻿using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Entities.Application;
 
-public class GetApplicationPageAnswersByPageIdQueryResponse : BaseResponse
+public class GetApplicationPageAnswersByPageIdQueryResponse
 {
     public List<Question> Questions { get; set; } = new();
 

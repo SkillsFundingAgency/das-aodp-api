@@ -6,13 +6,15 @@ using Entities = SFA.DAS.AODP.Data.Entities;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 
-public class CreatePageCommandHandler(IPageRepository _pageRepository) : IRequestHandler<CreatePageCommand, CreatePageCommandResponse>
+public class CreatePageCommandHandler(IPageRepository _pageRepository, ISectionRepository _sectionRepository) : IRequestHandler<CreatePageCommand, BaseMediatrResponse<CreatePageCommandResponse>>
 {
-    public async Task<CreatePageCommandResponse> Handle(CreatePageCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<CreatePageCommandResponse>> Handle(CreatePageCommand request, CancellationToken cancellationToken)
     {
-        var response = new CreatePageCommandResponse();
+        var response = new BaseMediatrResponse<CreatePageCommandResponse>();
         try
         {
+            if (!await _sectionRepository.IsSectionEditable(request.SectionId)) throw new RecordLockedException();
+
             var maxOrder = _pageRepository.GetMaxOrderBySectionId(request.SectionId);
 
             var pageToCreate = new Entities.FormBuilder.Page()
@@ -24,8 +26,8 @@ public class CreatePageCommandHandler(IPageRepository _pageRepository) : IReques
             };
 
             var createdPage = await _pageRepository.Create(pageToCreate);
-               
-            response.Id = createdPage.Id;
+
+            response.Value = new() { Id = createdPage.Id };
             response.Success = true;
         }
         catch (RecordLockedException)

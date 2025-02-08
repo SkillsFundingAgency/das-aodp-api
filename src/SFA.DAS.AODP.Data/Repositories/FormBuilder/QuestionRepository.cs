@@ -92,7 +92,7 @@ public class QuestionRepository : IQuestionRepository
     /// <exception cref="RecordLockedException"></exception>
     public async Task Archive(Guid questionId)
     {
-        await ValidateQuestionForChange(questionId);
+        if (!await IsQuestionEditable(questionId)) throw new RecordLockedException();
 
         _context.Questions.Remove(await GetQuestionByIdAsync(questionId));
         await _context.SaveChangesAsync();
@@ -109,13 +109,9 @@ public class QuestionRepository : IQuestionRepository
                         .FirstOrDefaultAsync(q => q.Id == questionId) ?? throw new RecordNotFoundException(questionId);
     }
 
-    public async Task ValidateQuestionForChange(Guid questionId)
+    public async Task<bool> IsQuestionEditable(Guid id)
     {
-        if (!await _context.Questions.AnyAsync(v => v.Id == questionId))
-            throw new RecordNotFoundException(questionId);
-
-        if (!await _context.Questions.AnyAsync(v => v.Id == questionId && v.Page.Section.FormVersion.Status == FormVersionStatus.Draft.ToString()))
-            throw new RecordLockedException();
+        return await _context.Questions.AnyAsync(v => v.Id == id && v.Page.Section.FormVersion.Status == FormVersionStatus.Draft.ToString());
     }
 
 

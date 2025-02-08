@@ -1,8 +1,8 @@
-﻿using MediatR;
+﻿using MediatR;using SFA.DAS.AODP.Application;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
-public class CreateQuestionCommand : IRequest<CreateQuestionCommandResponse>
+public class CreateQuestionCommand : IRequest<BaseMediatrResponse<CreateQuestionCommandResponse>>
 {
     public Guid FormVersionId { get; set; }
     public Guid SectionId { get; set; }

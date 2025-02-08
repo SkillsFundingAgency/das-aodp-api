@@ -3,7 +3,6 @@ using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Models.Form;
-using static System.Collections.Specialized.BitVector32;
 
 namespace SFA.DAS.AODP.Data.Repositories.FormBuilder;
 public class PageRepository : IPageRepository
@@ -80,9 +79,6 @@ public class PageRepository : IPageRepository
         if (!await _context.Sections.AnyAsync(v => v.Id == page.SectionId))
             throw new NoForeignKeyException(page.SectionId);
 
-        if (!await _context.Sections.AnyAsync(v => v.Id == page.SectionId && v.FormVersion.Status == FormVersionStatus.Draft.ToString()))
-            throw new RecordLockedException();
-
         page.Id = Guid.NewGuid();
         page.Key = Guid.NewGuid();
 
@@ -127,9 +123,6 @@ public class PageRepository : IPageRepository
         if (pageToUpdate is null)
             throw new RecordNotFoundException(page.Id);
 
-        if (!await _context.Sections.AnyAsync(v => v.Id == page.SectionId && v.FormVersion.Status == FormVersionStatus.Draft.ToString()))
-            throw new RecordLockedException();
-
         pageToUpdate = page;
         await _context.SaveChangesAsync();
         return pageToUpdate;
@@ -148,9 +141,6 @@ public class PageRepository : IPageRepository
         var pageToUpdate = await _context.Pages.FirstOrDefaultAsync(v => v.Id == pageId);
         if (pageToUpdate is null)
             throw new RecordNotFoundException(pageId);
-
-        if (!await _context.Sections.AnyAsync(v => v.Id == pageToUpdate.SectionId && v.FormVersion.Status != FormVersionStatus.Draft.ToString()))
-            throw new RecordLockedException();
 
         _context.Pages.Remove(pageToUpdate);
         await _context.SaveChangesAsync();
@@ -232,5 +222,10 @@ public class PageRepository : IPageRepository
         await _context.SaveChangesAsync();
 
         return true;
+    }
+
+    public async Task<bool> IsPageEditable(Guid id)
+    {
+        return await _context.Pages.AnyAsync(v => v.Id == id && v.Section.FormVersion.Status == FormVersionStatus.Draft.ToString());
     }
 }

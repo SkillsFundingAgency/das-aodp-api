@@ -3,7 +3,7 @@ using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
-public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersionCommand, CreateFormVersionCommandResponse>
+public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersionCommand, BaseMediatrResponse<CreateFormVersionCommandResponse>>
 {
     private readonly IFormVersionRepository _formVersionRepository;
 
@@ -14,12 +14,9 @@ public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersion
 
     }
 
-    public async Task<CreateFormVersionCommandResponse> Handle(CreateFormVersionCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<CreateFormVersionCommandResponse>> Handle(CreateFormVersionCommand request, CancellationToken cancellationToken)
     {
-        var response = new CreateFormVersionCommandResponse
-        {
-            Success = false
-        };
+        var response = new BaseMediatrResponse<CreateFormVersionCommandResponse>();
 
         try
         {
@@ -31,7 +28,7 @@ public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersion
                 Order = order + 1,
             });
 
-            response.Id = form.Id;
+            response.Value = new() { Id = form.Id };
             response.Success = true;
         }
         catch (Exception ex)

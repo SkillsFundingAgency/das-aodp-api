@@ -2,26 +2,23 @@
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 
-public class MoveSectionUpCommandHandler(ISectionRepository sectionRepository) : IRequestHandler<MoveSectionUpCommand, MoveSectionUpCommandResponse>
+public class MoveSectionUpCommandHandler(ISectionRepository sectionRepository) : IRequestHandler<MoveSectionUpCommand, BaseMediatrResponse<EmptyResponse>>
 {
     private readonly ISectionRepository _sectionRepository = sectionRepository;
 
-    public async Task<MoveSectionUpCommandResponse> Handle(MoveSectionUpCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(MoveSectionUpCommand request, CancellationToken cancellationToken)
     {
-        var response = new MoveSectionUpCommandResponse()
+        var response = new BaseMediatrResponse<EmptyResponse>()
         {
         };
 
         try
         {
+            if (!await _sectionRepository.IsSectionEditable(request.SectionId)) throw new RecordLockedException();
+
             var res = await _sectionRepository.MoveSectionOrderUp(request.SectionId);
             response.Success = true;
         }

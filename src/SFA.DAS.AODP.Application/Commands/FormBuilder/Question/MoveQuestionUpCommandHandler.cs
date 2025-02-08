@@ -2,26 +2,23 @@
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder;
 
-public class MoveQuestionUpCommandHandler(IQuestionRepository questionRepository) : IRequestHandler<MoveQuestionUpCommand, MoveQuestionUpCommandResponse>
+public class MoveQuestionUpCommandHandler(IQuestionRepository questionRepository) : IRequestHandler<MoveQuestionUpCommand, BaseMediatrResponse<EmptyResponse>>
 {
     private readonly IQuestionRepository _questionRepository = questionRepository;
 
-    public async Task<MoveQuestionUpCommandResponse> Handle(MoveQuestionUpCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(MoveQuestionUpCommand request, CancellationToken cancellationToken)
     {
-        var response = new MoveQuestionUpCommandResponse()
+        var response = new BaseMediatrResponse<EmptyResponse>()
         {
         };
 
         try
         {
+            if (!await _questionRepository.IsQuestionEditable(request.QuestionId)) throw new RecordLockedException();
+
             var res = await _questionRepository.MoveQuestionOrderUp(request.QuestionId);
             response.Success = true;
         }

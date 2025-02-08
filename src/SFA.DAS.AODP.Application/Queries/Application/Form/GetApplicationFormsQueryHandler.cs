@@ -1,7 +1,8 @@
 ﻿using MediatR;
+using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
-public class GetApplicationFormsQueryHandler : IRequestHandler<GetApplicationFormsQuery, GetApplicationFormsQueryResponse>
+public class GetApplicationFormsQueryHandler : IRequestHandler<GetApplicationFormsQuery, BaseMediatrResponse< GetApplicationFormsQueryResponse>>
 {
     private readonly IFormVersionRepository _formVersionRepository;
 
@@ -10,14 +11,13 @@ public class GetApplicationFormsQueryHandler : IRequestHandler<GetApplicationFor
         _formVersionRepository = formVersionRepository;
     }
 
-    public async Task<GetApplicationFormsQueryResponse> Handle(GetApplicationFormsQuery request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<GetApplicationFormsQueryResponse>> Handle(GetApplicationFormsQuery request, CancellationToken cancellationToken)
     {
-        var response = new GetApplicationFormsQueryResponse();
-        response.Success = false;
+        var response = new BaseMediatrResponse<GetApplicationFormsQueryResponse>();
         try
         {
             var result = await _formVersionRepository.GetPublishedFormVersions();
-            response = result;
+            response.Value = result;
             response.Success = true;
         }
         catch (Exception ex)

@@ -5,7 +5,7 @@ namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
 
 /// <exception cref="NotFoundException"></exception>
-public class GetFormVersionByIdQueryResponse : BaseResponse
+public class GetFormVersionByIdQueryResponse
 {
     public Guid Id { get; set; }
     public Guid FormId { get; set; }

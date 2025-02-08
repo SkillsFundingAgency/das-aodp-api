@@ -1,11 +1,9 @@
-﻿using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Data.Entities.Application;
-using SFA.DAS.AODP.Data.Entities.FormBuilder;
+﻿using SFA.DAS.AODP.Data.Entities.Application;
 
-public class GetApplicationFormStatusByApplicationIdQueryResponse : BaseResponse
+public class GetApplicationFormStatusByApplicationIdQueryResponse
 {
     public string ApplicationName { get; set; }
-    public string Reference { get; set; }
+    public string? Reference { get; set; }
 
     public bool ReadyForSubmit { get; set; }
     public DateTime? SubmittedDate { get; set; }

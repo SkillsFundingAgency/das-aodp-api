@@ -1,7 +1,7 @@
 ﻿using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
-public class GetApplicationPageByIdQueryResponse : BaseResponse
+public class GetApplicationPageByIdQueryResponse
 {
     public Guid Id { get; set; }
     public string Title { get; set; } = string.Empty;

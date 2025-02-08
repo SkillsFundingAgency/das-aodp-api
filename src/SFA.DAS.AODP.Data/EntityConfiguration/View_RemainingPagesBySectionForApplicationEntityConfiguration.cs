@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using SFA.DAS.AODP.Data.Entities.FormBuilder;
+using SFA.DAS.AODP.Data.Entities.Application;
 using System.Diagnostics.CodeAnalysis;
 
-namespace SFA.DAS.AODP.Data.EntityConifguration
+namespace SFA.DAS.AODP.Data.EntityConfiguration
 {
     [ExcludeFromCodeCoverage]
     public class View_RemainingPagesBySectionForApplicationEntityConfiguration : IEntityTypeConfiguration<View_RemainingPagesBySectionForApplication>

@@ -3,7 +3,7 @@
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Routes
 {
 
-    public class GetRoutingInformationForFormQueryResponse : BaseResponse
+    public class GetRoutingInformationForFormQueryResponse
     {
         public List<Section> Sections { get; set; } = new();
         public bool Editable { get; set; }

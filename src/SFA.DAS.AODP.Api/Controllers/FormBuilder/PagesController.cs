@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 using SFA.DAS.AODP.Application.Exceptions;
@@ -29,7 +30,7 @@ public class PagesController : Controller
         var response = await _mediator.Send(query);
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         _logger.LogError(message: $"Error thrown getting all pages for section Id `{sectionId}`.", exception: response.InnerException);
@@ -48,7 +49,7 @@ public class PagesController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)
@@ -73,7 +74,7 @@ public class PagesController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)
@@ -97,9 +98,9 @@ public class PagesController : Controller
         command.SectionId = sectionId;
 
         var response = await _mediator.Send(command);
-        if (response.Success && response.Id != default)
+        if (response.Success && response.Value.Id != default)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is LockedRecordException)
@@ -118,7 +119,7 @@ public class PagesController : Controller
     }
 
     [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}")]
-    [ProducesResponseType(typeof(UpdatePageCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -132,7 +133,7 @@ public class PagesController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is LockedRecordException)
@@ -151,7 +152,7 @@ public class PagesController : Controller
     }
 
     [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/MoveUp")]
-    [ProducesResponseType(typeof(UpdatePageCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> MoveUpAsync([FromRoute] Guid formVersionId, [FromRoute] Guid sectionId, [FromRoute] Guid pageId)
@@ -167,7 +168,7 @@ public class PagesController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)
@@ -182,7 +183,7 @@ public class PagesController : Controller
 
 
     [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/MoveDown")]
-    [ProducesResponseType(typeof(UpdatePageCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> MoveDownAsync([FromRoute] Guid formVersionId, [FromRoute] Guid sectionId, [FromRoute] Guid pageId)
@@ -198,7 +199,7 @@ public class PagesController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)
@@ -212,7 +213,7 @@ public class PagesController : Controller
     }
 
     [HttpDelete("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}")]
-    [ProducesResponseType(typeof(DeletePageCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -223,7 +224,7 @@ public class PagesController : Controller
         var response = await _mediator.Send(command);
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is LockedRecordException)

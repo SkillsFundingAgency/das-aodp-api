@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
@@ -30,7 +31,7 @@ public class ApplicationsController : Controller
         var response = await _mediator.Send(query);
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         _logger.LogError(message: $"Error thrown getting published forms.", exception: response.InnerException);
@@ -50,7 +51,7 @@ public class ApplicationsController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)
@@ -76,7 +77,7 @@ public class ApplicationsController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)
@@ -101,7 +102,7 @@ public class ApplicationsController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)
@@ -128,7 +129,7 @@ public class ApplicationsController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)
@@ -155,7 +156,7 @@ public class ApplicationsController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)
@@ -181,7 +182,7 @@ public class ApplicationsController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)
@@ -208,7 +209,7 @@ public class ApplicationsController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)
@@ -222,7 +223,7 @@ public class ApplicationsController : Controller
     }
 
     [HttpPut("/api/applications/{applicationId}/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}")]
-    [ProducesResponseType(typeof(UpdateQuestionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -237,7 +238,7 @@ public class ApplicationsController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is LockedRecordException)
@@ -263,7 +264,7 @@ public class ApplicationsController : Controller
         var response = await _mediator.Send(command);
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         _logger.LogError(message: $"Error thrown creating a application.", exception: response.InnerException);

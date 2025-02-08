@@ -109,11 +109,14 @@ public class SectionRepository : ISectionRepository
     /// <exception cref="RecordLockedException"></exception>
     public async Task<Section> Update(Section section)
     {
-        if (_context.FormVersions.Any(v => v.Id == section.FormVersionId && v.Status != FormVersionStatus.Draft.ToString()))
-            throw new RecordLockedException();
         _context.Sections.Update(section);
         await _context.SaveChangesAsync();
         return section;
+    }
+
+    public async Task<bool> IsSectionEditable(Guid id)
+    {
+        return await _context.Sections.AnyAsync(v => v.Id == id && v.FormVersion.Status == FormVersionStatus.Draft.ToString());
     }
 
     /// <summary>

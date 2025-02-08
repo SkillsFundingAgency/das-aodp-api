@@ -5,11 +5,12 @@ using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
-public class GetSectionByIdQueryHandler(ISectionRepository _sectionRepository, IFormVersionRepository _formVersionRepository) : IRequestHandler<GetSectionByIdQuery, GetSectionByIdQueryResponse>
+public class GetSectionByIdQueryHandler(ISectionRepository _sectionRepository, IFormVersionRepository _formVersionRepository)
+    : IRequestHandler<GetSectionByIdQuery, BaseMediatrResponse<GetSectionByIdQueryResponse>>
 {
-    public async Task<GetSectionByIdQueryResponse> Handle(GetSectionByIdQuery request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<GetSectionByIdQueryResponse>> Handle(GetSectionByIdQuery request, CancellationToken cancellationToken)
     {
-        var response = new GetSectionByIdQueryResponse
+        var response = new BaseMediatrResponse<GetSectionByIdQueryResponse>
         {
             Success = false
         };
@@ -17,8 +18,8 @@ public class GetSectionByIdQueryHandler(ISectionRepository _sectionRepository, I
         {
             var section = await _sectionRepository.GetSectionByIdAsync(request.SectionId);
 
-            response = section;
-            response.Editable = await _formVersionRepository.IsFormVersionEditable(request.FormVersionId);
+            response.Value = section;
+            response.Value.Editable = await _formVersionRepository.IsFormVersionEditable(request.FormVersionId);
             response.Success = true;
         }
         catch (RecordNotFoundException ex)

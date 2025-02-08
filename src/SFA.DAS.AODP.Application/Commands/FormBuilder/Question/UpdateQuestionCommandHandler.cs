@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using SFA.DAS.AODP.Application;
 using Newtonsoft.Json;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
@@ -7,16 +8,18 @@ using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
-public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepository, IQuestionValidationRepository _questionValidationRepository, IQuestionOptionRepository _questionOptionRepository) : IRequestHandler<UpdateQuestionCommand, UpdateQuestionCommandResponse>
+public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepository,
+    IQuestionValidationRepository _questionValidationRepository,
+    IQuestionOptionRepository _questionOptionRepository) : IRequestHandler<UpdateQuestionCommand, BaseMediatrResponse<EmptyResponse>>
 {
-    public async Task<UpdateQuestionCommandResponse> Handle(UpdateQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(UpdateQuestionCommand request, CancellationToken cancellationToken)
     {
-        var response = new UpdateQuestionCommandResponse();
+        var response = new BaseMediatrResponse<EmptyResponse>();
         response.Success = false;
 
         try
         {
-            await _questionRepository.ValidateQuestionForChange(request.Id);
+            if (!await _questionRepository.IsQuestionEditable(request.Id)) throw new RecordLockedException();
 
             var question = await _questionRepository.GetQuestionByIdAsync(request.Id);
 
@@ -55,9 +58,9 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
                             Order = i + 1,
                             Value = request.RadioOptions[i].Value
                         });
-            }
+                    }
                     else
-            {
+                    {
                         var option = question.QuestionOptions.First(q => q.Id == request.RadioOptions[i].Id);
                         option.Value = request.RadioOptions[i].Value;
                         option.Order = i + 1;

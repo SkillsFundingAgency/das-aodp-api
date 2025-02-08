@@ -1,4 +1,4 @@
-﻿using MediatR;
+﻿using MediatR;using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
@@ -6,18 +6,18 @@ using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Routes
 {
-    public class ConfigureRoutingForQuestionCommandHandler(IRouteRepository _routeRepository, IQuestionRepository _questionRepository) : IRequestHandler<ConfigureRoutingForQuestionCommand, ConfigureRoutingForQuestionCommandResponse>
+    public class ConfigureRoutingForQuestionCommandHandler(IRouteRepository _routeRepository, IQuestionRepository _questionRepository) : IRequestHandler<ConfigureRoutingForQuestionCommand, BaseMediatrResponse<EmptyResponse>>
     {
-        public async Task<ConfigureRoutingForQuestionCommandResponse> Handle(ConfigureRoutingForQuestionCommand request, CancellationToken cancellationToken)
+        public async Task<BaseMediatrResponse<EmptyResponse>> Handle(ConfigureRoutingForQuestionCommand request, CancellationToken cancellationToken)
         {
-            var response = new ConfigureRoutingForQuestionCommandResponse()
+            var response = new BaseMediatrResponse<EmptyResponse>()
             {
                 Success = false
             };
 
             try
             {
-                await _questionRepository.ValidateQuestionForChange(request.QuestionId);
+                if (!await _questionRepository.IsQuestionEditable(request.QuestionId)) throw new RecordLockedException();
 
                 List<Route> dbRoutes = await _routeRepository.GetRoutesByQuestionId(request.QuestionId);
 

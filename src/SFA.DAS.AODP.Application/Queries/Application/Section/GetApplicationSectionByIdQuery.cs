@@ -1,6 +1,6 @@
-﻿using MediatR;
+﻿using MediatR;using SFA.DAS.AODP.Application;
 
-public class GetApplicationSectionByIdQuery : IRequest<GetApplicationSectionByIdQueryResponse>
+public class GetApplicationSectionByIdQuery : IRequest<BaseMediatrResponse<GetApplicationSectionByIdQueryResponse>>
 {
     public GetApplicationSectionByIdQuery(Guid sectionId, Guid formVersionId)
     {

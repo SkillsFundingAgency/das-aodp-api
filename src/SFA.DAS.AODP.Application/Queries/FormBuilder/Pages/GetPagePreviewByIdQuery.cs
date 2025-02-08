@@ -1,8 +1,8 @@
-﻿using MediatR;
+﻿using MediatR;using SFA.DAS.AODP.Application;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
-public class GetPagePreviewByIdQuery : IRequest<GetPagePreviewByIdQueryResponse>
+public class GetPagePreviewByIdQuery : IRequest<BaseMediatrResponse<GetPagePreviewByIdQueryResponse>>
 {
     public readonly Guid PageId;
     public readonly Guid SectionId;

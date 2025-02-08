@@ -73,4 +73,5 @@ public interface ISectionRepository
     /// <returns></returns>
     /// <exception cref="RecordNotFoundException"></exception>
     Task<bool> MoveSectionOrderDown(Guid id);
+    Task<bool> IsSectionEditable(Guid id);
 }

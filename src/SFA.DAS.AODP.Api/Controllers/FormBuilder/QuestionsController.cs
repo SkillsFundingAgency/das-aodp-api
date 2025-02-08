@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.FormBuilder;
-using SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
@@ -32,9 +32,9 @@ public class QuestionsController : Controller
         command.PageId = pageId;
 
         var response = await _mediator.Send(command);
-        if (response.Success && response.Id != default)
+        if (response.Success && response.Value.Id != default)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is LockedRecordException)
@@ -53,7 +53,7 @@ public class QuestionsController : Controller
     }
 
     [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/questions/{questionId}")]
-    [ProducesResponseType(typeof(UpdateQuestionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -68,7 +68,7 @@ public class QuestionsController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is LockedRecordException)
@@ -87,7 +87,7 @@ public class QuestionsController : Controller
     }
 
     [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/questions/{questionId}/MoveDown")]
-    [ProducesResponseType(typeof(UpdateQuestionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -105,7 +105,7 @@ public class QuestionsController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)
@@ -119,7 +119,7 @@ public class QuestionsController : Controller
     }
 
     [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/questions/{questionId}/MoveUp")]
-    [ProducesResponseType(typeof(UpdateQuestionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -137,7 +137,7 @@ public class QuestionsController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)
@@ -168,7 +168,7 @@ public class QuestionsController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)

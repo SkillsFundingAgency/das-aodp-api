@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Routes
 {
-    public class GetRoutingInformationForQuestionQueryResponse : BaseResponse
+    public class GetRoutingInformationForQuestionQueryResponse
     {
         public Guid QuestionId { get; set; }
 

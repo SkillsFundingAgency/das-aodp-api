@@ -30,5 +30,6 @@ namespace SFA.DAS.AODP.Data.Repositories.FormBuilder
         /// <returns></returns>
         /// <exception cref="RecordNotFoundException"></exception>
         Task<bool> MovePageOrderUp(Guid id);
+        Task<bool> IsPageEditable(Guid id);
     }
 }

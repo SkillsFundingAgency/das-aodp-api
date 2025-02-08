@@ -27,7 +27,7 @@ namespace SFA.DAS.AODP.Data.Repositories.FormBuilder
         /// <returns></returns>
         /// <exception cref="RecordNotFoundException"></exception>
         Task<bool> MoveQuestionOrderUp(Guid id);
+        Task<bool> IsQuestionEditable(Guid id);
         Task<Question> Update(Question question);
-        Task ValidateQuestionForChange(Guid questionId);
     }
 }
