@@ -1,14 +1,20 @@
 using Microsoft.OpenApi.Models;
 using SFA.DAS.AODP.Api.Extensions;
+using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Application.Queries.Test;
 using SFA.DAS.AODP.Application.Swashbuckle;
-using SFA.DAS.AODP.Common.Extensions;
 using SFA.DAS.AODP.Infrastructure.Context;
-using SFA.DAS.AODP.Application.Queries.Qualifications;
 
 var builder = WebApplication.CreateBuilder(args);
-var configuration = builder.Configuration.LoadConfiguration(builder.Services, builder.Environment.IsDevelopment());
 
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddUserSecrets<Program>(optional: true)
+    .AddEnvironmentVariables();
+
+var configuration = builder.Configuration;
 // Add services to the container.
 builder.Services
     .AddServiceRegistrations(configuration)
