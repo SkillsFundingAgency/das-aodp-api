@@ -1,69 +1,68 @@
-﻿using SFA.DAS.AODP.Models.Qualifications;
+﻿using Microsoft.EntityFrameworkCore;
+using SFA.DAS.AODP.Infrastructure.Context;
+using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Data.Repositories
 {
     public class NewQualificationsRepository : INewQualificationsRepository
     {
-        private static readonly List<NewQualification> MockNewQualifications = new()
-        {
-            new NewQualification
-            {
-                Id = 1,
-                Title = "EDEXCEL Intermediate GNVQ in Business",
-                Reference = "BUS123",
-                AwardingOrganisation = "EDEXCEL",
-                Status = "Active"
-            },
-            new NewQualification
-            {
-                Id = 2,
-                Title = "OCR Intermediate GNVQ in Science",
-                Reference = "SCI456",
-                AwardingOrganisation = "OCR",
-                Status = "Inactive"
-            },
-            new NewQualification
-            {
-                Id = 3,
-                Title = "EDEXCEL Intermediate GNVQ in Art and Design",
-                Reference = "ART789",
-                AwardingOrganisation = "EDEXCEL",
-                Status = "Active"
-            }
-        };
+        private readonly ApplicationDbContext _context;
 
-        private static readonly List<QualificationDetails> MockQualificationDetails = new()
+        public NewQualificationsRepository(ApplicationDbContext context)
         {
-            new QualificationDetails
+            _context = context;
+        }
+
+        public async Task<List<NewQualification>> GetAllNewQualificationsAsync()
+        {
+            var qualifications = await _context.QualificationNewReviewRequired.ToListAsync();
+
+            return qualifications.Select(q => new NewQualification
+            {
+                Title = q.QualificationTitle,
+                Reference = q.QualificationReference,
+                AwardingOrganisation = q.AwardingOrganisation,
+                Status = "New"
+            }).ToList();
+        }
+
+        public async Task<QualificationDetails?> GetQualificationDetailsByIdAsync(string qualificationReference)
+        {
+            var qualification = await _context.QualificationNewReviewRequired
+                .Where(q => q.QualificationReference == qualificationReference) 
+                .AsNoTracking() 
+                .FirstOrDefaultAsync();
+
+            if (qualification == null)
+            {
+                return null;
+            }
+
+            return new QualificationDetails
             {
                 Success = true,
-                Id = 1,
-                Status = "Decision required",
-                Priority = "High",
-                Changes = "Qualification title, Level",
-                QualificationReference = "BUS123",
-                AwardingOrganisation = "EDEXCEL",
-                Title = "EDEXCEL Intermediate GNVQ in Business",
-                QualificationType = "Vocational",
-                Level = "3",
-                ProposedChanges = "None",
-                AgeGroup = "16-18",
-                Category = "Business",
-                Subject = "Commerce",
-                SectorSubjectArea = "Business & Finance",
-                Comments = "Requires funding review"
-            }
-        };
+                QualificationReference = qualification.QualificationReference,
+                AwardingOrganisation = qualification.AwardingOrganisation,
+                Title = qualification.QualificationTitle,
+                QualificationType = qualification.QualificationType,
+                Level = qualification.Level,
+                AgeGroup = qualification.AgeGroup,
+                Subject = qualification.Subject,
+                SectorSubjectArea = qualification.SectorSubjectArea,
+                Comments = "No comments available",
 
-        public Task<List<NewQualification>> GetAllNewQualificationsAsync()
-        {
-            return Task.FromResult(MockNewQualifications);
+                // Placeholder values for missing properties
+                Id = 1, 
+                Status = "Pending Review", 
+                Priority = "Medium", 
+                Changes = "No recent changes", 
+                ProposedChanges = "None", 
+                Category = "General Education" 
+            };
         }
 
-        public Task<QualificationDetails?> GetQualificationDetailsByIdAsync(int id)
-        {
-            var qualification = MockQualificationDetails.FirstOrDefault(q => q.Id == id);
-            return Task.FromResult(qualification);
-        }
+
     }
 }
+
+

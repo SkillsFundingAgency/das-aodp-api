@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using SFA.DAS.AODP.Data.Repositories;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualifications
@@ -19,7 +14,7 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
 
         public async Task<GetQualificationDetailsQueryResponse> Handle(GetQualificationDetailsQuery request, CancellationToken cancellationToken)
         {
-            var qualification = await _repository.GetQualificationDetailsByIdAsync(request.Id);
+            var qualification = await _repository.GetQualificationDetailsByIdAsync(request.QualificationReference);
             if (qualification == null)
             {
                 return new GetQualificationDetailsQueryResponse { Success = false };

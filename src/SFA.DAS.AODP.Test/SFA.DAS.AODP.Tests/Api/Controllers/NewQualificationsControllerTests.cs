@@ -4,7 +4,6 @@ using Moq;
 using SFA.DAS.AODP.Api.Controllers;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Models.Qualifications;
-using Xunit;
 
 namespace SFA.DAS.AODP.Tests.Api.Controllers
 {
@@ -58,7 +57,7 @@ namespace SFA.DAS.AODP.Tests.Api.Controllers
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualificationDetails(1);
+            var result = await _controller.GetQualificationDetails("test123");
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -76,7 +75,7 @@ namespace SFA.DAS.AODP.Tests.Api.Controllers
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualificationDetails(1);
+            var result = await _controller.GetQualificationDetails("test123");
 
             // Assert
             Assert.IsType<NotFoundResult>(result);

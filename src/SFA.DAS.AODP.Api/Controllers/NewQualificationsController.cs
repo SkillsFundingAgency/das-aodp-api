@@ -14,13 +14,19 @@ namespace SFA.DAS.AODP.Api.Controllers
         public async Task<IActionResult> GetAllNewQualifications()
         {
             var result = await _mediator.Send(new GetNewQualificationsQuery());
+            
+            if (!result.Success)
+            {
+                return NotFound();
+            }
+
             return Ok(result);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetQualificationDetails(int id)
+        [HttpGet("{qualificationReference}")]
+        public async Task<IActionResult> GetQualificationDetails(string qualificationReference)
         {
-            var result = await _mediator.Send(new GetQualificationDetailsQuery { Id = id });
+            var result = await _mediator.Send(new GetQualificationDetailsQuery { QualificationReference = qualificationReference });
 
             if (!result.Success)
             {
