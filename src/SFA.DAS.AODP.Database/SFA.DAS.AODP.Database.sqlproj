@@ -82,6 +82,7 @@
     <Build Include="Tables\QualificationVersions.sql" />
     <Build Include="Tables\VersionFieldChanges.sql" />
     <Build Include="Views\v_QualificationNewReviewRequired.sql" />
+    <Build Include="Tables\QualificationImportStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
