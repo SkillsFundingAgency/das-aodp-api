@@ -184,7 +184,7 @@ public class QuestionsController : Controller
     }
 
     [HttpDelete("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/questions/{questionId}")]
-    [ProducesResponseType(typeof(DeleteQuestionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
