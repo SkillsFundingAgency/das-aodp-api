@@ -1,11 +1,11 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Exceptions;
-using SFA.DAS.AODP.Data.Repositories;
+using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
-public class DeleteFormVersionCommandHandler : IRequestHandler<DeleteFormVersionCommand, DeleteFormVersionCommandResponse>
+public class DeleteFormVersionCommandHandler : IRequestHandler<DeleteFormVersionCommand, BaseMediatrResponse<EmptyResponse>>
 {
     private readonly IFormVersionRepository _formVersionRepository;
 
@@ -14,10 +14,9 @@ public class DeleteFormVersionCommandHandler : IRequestHandler<DeleteFormVersion
         _formVersionRepository = formVersionRepository;
     }
 
-    public async Task<DeleteFormVersionCommandResponse> Handle(DeleteFormVersionCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(DeleteFormVersionCommand request, CancellationToken cancellationToken)
     {
-        var response = new DeleteFormVersionCommandResponse();
-        response.Success = false;
+        var response = new BaseMediatrResponse<EmptyResponse>();
 
         try
         {

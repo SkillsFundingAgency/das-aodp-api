@@ -1,6 +1,6 @@
 CREATE TABLE [dbo].[Forms](
 	[Id] [uniqueidentifier] NOT NULL DEFAULT (newid()),
-	[Archived] [bit] NOT NULL,
+	[Status] NVARCHAR(100) NOT NULL,
 PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC

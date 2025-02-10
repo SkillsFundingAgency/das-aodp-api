@@ -1,21 +1,23 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Exceptions;
-using SFA.DAS.AODP.Data.Repositories;
+using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 using Entities = SFA.DAS.AODP.Data.Entities;
 
-namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
+namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
-public class CreateQuestionCommandHandler(IQuestionRepository _questionRepository) : IRequestHandler<CreateQuestionCommand, CreateQuestionCommandResponse>
+public class CreateQuestionCommandHandler(IQuestionRepository _questionRepository, IPageRepository _pageRepository) : IRequestHandler<CreateQuestionCommand, BaseMediatrResponse<CreateQuestionCommandResponse>>
 {
-    public async Task<CreateQuestionCommandResponse> Handle(CreateQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<CreateQuestionCommandResponse>> Handle(CreateQuestionCommand request, CancellationToken cancellationToken)
     {
-        var response = new CreateQuestionCommandResponse();
+        var response = new BaseMediatrResponse<CreateQuestionCommandResponse>();
         try
         {
+            if (!await _pageRepository.IsPageEditable(request.PageId)) throw new RecordLockedException();
+
             var maxOrder = _questionRepository.GetMaxOrderByPageId(request.PageId);
 
-            var questionToCreate = new Entities.Question()
+            var questionToCreate = new Entities.FormBuilder.Question()
             {
                 Required = request.Required,
                 Title = request.Title,
@@ -26,7 +28,7 @@ public class CreateQuestionCommandHandler(IQuestionRepository _questionRepositor
 
             var created = await _questionRepository.Create(questionToCreate);
 
-            response.Id = created.Id;
+            response.Value.Id = created.Id;
             response.Success = true;
         }
         catch (RecordLockedException)

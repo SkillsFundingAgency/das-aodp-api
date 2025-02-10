@@ -3,9 +3,7 @@
 	[SectionId] [uniqueidentifier] NOT NULL,
 	[Title] [nvarchar](max) NOT NULL,
 	[Key] [uniqueidentifier] NOT NULL,
-	[Description] [nvarchar](max) NOT NULL,
 	[Order] [int] NOT NULL,
- [Questions] NVARCHAR(MAX) NOT NULL, 
     CONSTRAINT [PK_Pages] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC

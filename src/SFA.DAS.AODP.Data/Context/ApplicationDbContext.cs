@@ -1,7 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Options;
 using SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Data.Entities.Application;
+using SFA.DAS.AODP.Data.Entities.FormBuilder;
+using SFA.DAS.AODP.Data.EntityConfiguration;
+using System.Reflection.Emit;
 
-namespace SFA.DAS.AODP.Infrastructure.Context
+namespace SFA.DAS.AODP.Data.Context
 {
     public class ApplicationDbContext : DbContext, IApplicationDbContext
     {
@@ -18,10 +24,29 @@ namespace SFA.DAS.AODP.Infrastructure.Context
         public virtual DbSet<Section> Sections { get; set; }
         public virtual DbSet<Page> Pages { get; set; }
         public virtual DbSet<Question> Questions { get; set; }
+        public virtual DbSet<QuestionOption> QuestionOptions { get; set; }
+        public virtual DbSet<QuestionValidation> QuestionValidations { get; set; }
+        public virtual DbSet<Route> Routes { get; set; }
+
+        public virtual DbSet<View_AvailableQuestionsForRouting> View_AvailableQuestionsForRoutings { get; set; }
+        public virtual DbSet<View_QuestionRoutingDetail> View_QuestionRoutingDetails { get; set; }
+        public virtual DbSet<View_SectionPageCount> View_SectionPageCount { get; set; }
+
+        public DbSet<Application> Applications { get; set; }
+        public DbSet<ApplicationPage> ApplicationPages { get; set; }
+        public DbSet<ApplicationQuestionAnswer> ApplicationQuestionAnswers { get; set; }
+        public DbSet<View_RemainingPagesBySectionForApplication> View_RemainingPagesBySectionForApplication { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
+
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -32,6 +57,11 @@ namespace SFA.DAS.AODP.Infrastructure.Context
         public async Task BulkInsertAsync<T>(IEnumerable<T> entities, CancellationToken cancellationToken = default) where T : class
         {
             await this.BulkInsertAsync(entities.ToList(), options => options.BatchSize = 1000, cancellationToken: cancellationToken);
+        }
+
+        public async Task<IDbContextTransaction> StartTransactionAsync()
+        {
+            return await Database.BeginTransactionAsync();
         }
 
     }

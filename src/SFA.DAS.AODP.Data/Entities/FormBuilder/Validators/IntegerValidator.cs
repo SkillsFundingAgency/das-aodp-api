@@ -1,5 +1,4 @@
-﻿
-namespace SFA.DAS.AODP.Data.Entities;
+﻿namespace SFA.DAS.AODP.Data.Entities.FormBuilder.Validators;
 
 public class IntegerValidator
 {

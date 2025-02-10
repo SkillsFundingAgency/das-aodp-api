@@ -1,16 +1,18 @@
-﻿namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
+﻿using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
-public class GetSectionByIdQueryResponse() : BaseResponse
+namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
+
+public class GetSectionByIdQueryResponse()
 {
     public Guid Id { get; set; }
     public Guid FormVersionId { get; set; }
     public Guid Key { get; set; }
     public int Order { get; set; }
     public string Title { get; set; }
-    public string Description { get; set; }
     public List<Page> Pages { get; set; }
+    public bool Editable { get; set; }
 
-    public static implicit operator GetSectionByIdQueryResponse(Data.Entities.Section entity)
+    public static implicit operator GetSectionByIdQueryResponse(Section entity)
     {
         return new()
         {
@@ -18,7 +20,6 @@ public class GetSectionByIdQueryResponse() : BaseResponse
             FormVersionId = entity.FormVersionId,
             Title = entity.Title,
             Key = entity.Key,
-            Description = entity.Description,
             Order = entity.Order,
             Pages = entity.Pages != null ? [.. entity.Pages] : new()
 
@@ -34,7 +35,7 @@ public class GetSectionByIdQueryResponse() : BaseResponse
         public int Order { get; set; }
         public string Title { get; set; }
 
-        public static implicit operator Page(Data.Entities.Page entity)
+        public static implicit operator Page(Data.Entities.FormBuilder.Page entity)
         {
             return new()
             {

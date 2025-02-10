@@ -1,5 +1,4 @@
-﻿
-namespace SFA.DAS.AODP.Data.Entities;
+﻿namespace SFA.DAS.AODP.Data.Entities.FormBuilder.Validators;
 
 public class DateValidator
 {
@@ -11,7 +10,7 @@ public class DateValidator
 
     public DateSpan? GreaterThanTimeInFuture { get; set; }
     public DateSpan? LessThanTimeInFuture { get; set; }
-    public DateSpan? GreaterThanTimeInPast{ get; set; }
+    public DateSpan? GreaterThanTimeInPast { get; set; }
     public DateSpan? LessThanTimeInPast { get; set; }
 }
 

@@ -1,30 +1,28 @@
 ﻿using AutoMapper;
-using MediatR;
-using SFA.DAS.AODP.Data.Repositories;
+using MediatR;using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Application.Exceptions;
 using Entities = SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 
-public class UpdatePageCommandHandler(IPageRepository pageRepository) : IRequestHandler<UpdatePageCommand, UpdatePageCommandResponse>
-{
-    private readonly IPageRepository PageRepository = pageRepository;
-    
+public class UpdatePageCommandHandler(IPageRepository _pageRepository) : IRequestHandler<UpdatePageCommand, BaseMediatrResponse<EmptyResponse>>
+{  
 
-    public async Task<UpdatePageCommandResponse> Handle(UpdatePageCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(UpdatePageCommand request, CancellationToken cancellationToken)
     {
-        var response = new UpdatePageCommandResponse();
-        response.Success = false;
+        var response = new BaseMediatrResponse<EmptyResponse>();
 
         try
         {
-            var section = await PageRepository.GetPageByIdAsync(request.Id);
+            if (!await _pageRepository.IsPageEditable(request.Id)) throw new RecordLockedException();
+
+            var section = await _pageRepository.GetPageByIdAsync(request.Id);
             section.Title = request.Title;
-            section.Description = request.Description;
 
 
-            await PageRepository.Update(section);
+            await _pageRepository.Update(section);
             response.Success = true;
         }
         catch (RecordLockedException)

@@ -1,6 +1,6 @@
 ﻿using SFA.DAS.Configuration.AzureTableStorage;
 using System.Diagnostics.CodeAnalysis;
-namespace SFA.DAS.AODP.Common.Extensions;
+namespace SFA.DAS.AODP.Api.Extensions;
 
 
 [ExcludeFromCodeCoverage]
@@ -19,19 +19,20 @@ public static class LoadConfigurationExtensions
             .AddJsonFile("appsettings.Development.json", true);
 #endif
 
-        if (!isDevelopment)
-        {
-
-            configBuilder.AddAzureTableStorage(options =>
-            {
-                options.ConfigurationKeys = configuration["ConfigNames"].Split(",");
-                options.StorageConnectionString = configuration["ConfigurationStorageConnectionString"];
-                options.EnvironmentName = configuration["EnvironmentName"];
-                options.PreFixConfigurationKeys = false;
-            }
-               );
-        }
-
+        //try
+        //{
+        //    configBuilder.AddAzureTableStorage(options =>
+        //    {
+        //        options.ConfigurationKeys = configuration["ConfigNames"].Split(",");
+        //        options.StorageConnectionString = configuration["ConfigurationStorageConnectionString"];
+        //        options.EnvironmentName = configuration["EnvironmentName"];
+        //        options.PreFixConfigurationKeys = false;
+        //    });
+        //}
+        //catch
+        //{
+        //    if (!isDevelopment) throw;
+        //}
         return configBuilder.Build();
 
     }

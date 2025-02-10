@@ -1,24 +1,25 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Exceptions;
-using SFA.DAS.AODP.Data.Repositories;
+using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
-public class GetSectionByIdQueryHandler(ISectionRepository sectionRepository) : IRequestHandler<GetSectionByIdQuery, GetSectionByIdQueryResponse>
+public class GetSectionByIdQueryHandler(ISectionRepository _sectionRepository, IFormVersionRepository _formVersionRepository)
+    : IRequestHandler<GetSectionByIdQuery, BaseMediatrResponse<GetSectionByIdQueryResponse>>
 {
-    private readonly ISectionRepository SectionRepository = sectionRepository;
-
-
-    public async Task<GetSectionByIdQueryResponse> Handle(GetSectionByIdQuery request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<GetSectionByIdQueryResponse>> Handle(GetSectionByIdQuery request, CancellationToken cancellationToken)
     {
-        var response = new GetSectionByIdQueryResponse();
-        response.Success = false;
+        var response = new BaseMediatrResponse<GetSectionByIdQueryResponse>
+        {
+            Success = false
+        };
         try
         {
-            var section = await SectionRepository.GetSectionByIdAsync(request.SectionId);
+            var section = await _sectionRepository.GetSectionByIdAsync(request.SectionId);
 
-            response = section;
+            response.Value = section;
+            response.Value.Editable = await _formVersionRepository.IsFormVersionEditable(request.FormVersionId);
             response.Success = true;
         }
         catch (RecordNotFoundException ex)
