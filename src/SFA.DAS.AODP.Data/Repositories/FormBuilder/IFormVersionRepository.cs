@@ -63,5 +63,20 @@ namespace SFA.DAS.AODP.Data.Repositories.FormBuilder
         Task<FormVersion?> GetPublishedFormVersionByFormId(Guid formId);
         Task<FormVersion> CreateDraftAsync(Guid publishedFormVersionId);
         Task<bool> IsFormVersionEditable(Guid formVersionId);
+        /// <summary>
+        /// Finds a form version with a given Id, and finds the next section with a higher Order (so will appear lower in the list) and switches them. 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="RecordNotFoundException"></exception>
+        Task<bool> MoveFormVersionOrderDown(Guid id);
+
+        /// <summary>
+        /// Finds a form version with a given Id, and finds the next section with a lower Order (so will appear higher in the list) and switches them. 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="RecordNotFoundException"></exception>
+        Task<bool> MoveFormVersionOrderUp(Guid id);
     }
 }
