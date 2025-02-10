@@ -127,12 +127,25 @@ public class SectionRepository : ISectionRepository
     /// <exception cref="RecordNotFoundException"></exception>
     public async Task<Section> DeleteSection(Guid sectionId)
     {
-        var sectionToUpdate = await _context.Sections.FirstOrDefaultAsync(v => v.Id == sectionId);
-        if (sectionToUpdate is null)
+        var sectionToDelete = await _context.Sections
+            .Include(s => s.Pages)
+                .ThenInclude(p => p.Questions)
+                    .ThenInclude(q => q.QuestionValidation)
+            .Include(s => s.Pages)
+                .ThenInclude(p => p.Questions)
+                    .ThenInclude(q => q.QuestionOptions)
+            .FirstOrDefaultAsync(s => s.Id == sectionId);
+
+        if (sectionToDelete is null)
             throw new RecordNotFoundException(sectionId);
-        _context.Sections.Remove(sectionToUpdate);
+
+        // should I do RemoveRange explicitly on Pages, Questions?
+        _context.Sections.Remove(sectionToDelete);
         await _context.SaveChangesAsync();
-        return sectionToUpdate;
+
+        await UpdateSectionOrdering(sectionToDelete.FormVersionId, sectionToDelete.Order);
+
+        return sectionToDelete;
     }
 
     public async Task<List<Section>> GetSectionsByIdAsync(List<Guid> sectionIds)
@@ -140,6 +153,13 @@ public class SectionRepository : ISectionRepository
         return await _context.Sections.Where(s => sectionIds.Contains(s.Id)).Include(s => s.Pages).ToListAsync();
     }
 
+    private async Task UpdateSectionOrdering(Guid formVersionId, int deletedSectionOrder)
+    {
+        await _context.Sections
+            .Where(sec => sec.FormVersionId == formVersionId && sec.Order > deletedSectionOrder)
+            .ExecuteUpdateAsync(s => s.SetProperty(sec => sec.Order, sec => sec.Order - 1));
+    }
+    
     /// <summary>
     /// Finds a section with a given Id, and finds the next section with a lower Order (so will appear higher in the list) and switches them. 
     /// </summary>

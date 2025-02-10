@@ -138,12 +138,24 @@ public class PageRepository : IPageRepository
     /// <exception cref="RecordLockedException"></exception>
     public async Task<Page> Archive(Guid pageId)
     {
-        var pageToUpdate = await _context.Pages.FirstOrDefaultAsync(v => v.Id == pageId);
+        var pageToUpdate = await _context.Pages
+            .Include(p => p.Questions)
+                .ThenInclude(q => q.QuestionValidation)
+            .Include(p => p.Questions)
+                .ThenInclude(q => q.QuestionOptions)
+            .FirstOrDefaultAsync(v => v.Id == pageId);
+
         if (pageToUpdate is null)
             throw new RecordNotFoundException(pageId);
 
+        if (await _context.Sections.AnyAsync(v => v.Id == pageToUpdate.SectionId && v.FormVersion.Status != FormVersionStatus.Draft.ToString()))
+            throw new RecordLockedException();
+
         _context.Pages.Remove(pageToUpdate);
         await _context.SaveChangesAsync();
+
+        await UpdatePageOrdering(pageToUpdate.SectionId, pageToUpdate.Order);
+
         return pageToUpdate;
     }
 
@@ -171,6 +183,12 @@ public class PageRepository : IPageRepository
             .FirstOrDefaultAsync() ?? throw new RecordNotFoundException(sectionId);
     }
 
+    private async Task UpdatePageOrdering(Guid sectionId, int deletedPageOrder)
+    {
+        await _context.Pages
+            .Where(p => p.SectionId == sectionId && p.Order > deletedPageOrder)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.Order, p => p.Order - 1));
+    }
 
     /// <summary>
     /// Finds a question with a given Id, and finds the next section with a lower Order (so will appear higher in the list) and switches them. 

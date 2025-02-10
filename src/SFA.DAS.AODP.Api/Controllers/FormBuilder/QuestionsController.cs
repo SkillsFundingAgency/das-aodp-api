@@ -9,6 +9,8 @@ using SFA.DAS.AODP.Application.Queries.FormBuilder.Questions;
 
 namespace SFA.DAS.AODP.Api.Controllers.FormBuilder;
 
+[ApiController]
+[Route("api/[controller]")]
 public class QuestionsController : Controller
 {
     private readonly IMediator _mediator;
@@ -169,6 +171,35 @@ public class QuestionsController : Controller
         if (response.Success)
         {
             return Ok(response.Value);
+        }
+
+        if (response.InnerException is NotFoundException)
+        {
+            _logger.LogError($"Request for question with question Id `{questionId}` and page Id `{pageId}` returned 404 (not found).");
+            return NotFound();
+        }
+
+        _logger.LogError(message: $"Error thrown getting question for Id `{questionId}` and page Id `{pageId}`.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpDelete("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/questions/{questionId}")]
+    [ProducesResponseType(typeof(DeleteQuestionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> DeleteByIdAsync([FromRoute] Guid formVersionId, [FromRoute] Guid sectionId, [FromRoute] Guid pageId, [FromRoute] Guid questionId)
+    {
+        var query = new DeleteQuestionCommand()
+        {
+            QuestionId = questionId
+        };
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success)
+        {
+            return NoContent();
         }
 
         if (response.InnerException is NotFoundException)

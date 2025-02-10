@@ -94,7 +94,10 @@ public class QuestionRepository : IQuestionRepository
     {
         if (!await IsQuestionEditable(questionId)) throw new RecordLockedException();
 
-        _context.Questions.Remove(await GetQuestionByIdAsync(questionId));
+        var question = await GetQuestionByIdAsync(questionId);
+
+        _context.Questions.Remove(question);
+
         await _context.SaveChangesAsync();
     }
 

@@ -178,8 +178,8 @@ public class SectionsController : ControllerBase
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
-    [HttpDelete("/api/sections/{sectionId}")]
-    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
+    [HttpDelete("/api/forms/{formVersionId}/sections/{sectionId}")]
+    [ProducesResponseType(typeof(DeleteSectionCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> RemoveAsync([FromRoute] Guid sectionId)
