@@ -25,7 +25,7 @@ public class GetApplicationFormsQueryResponse
             response.Forms.Add(new()
             {
                 Description = form.Description,
-                Order = form.Order,
+                Order = form.Form.Order,
                 Id = form.Id,
                 Title = form.Title,
             });

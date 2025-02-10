@@ -7,9 +7,9 @@ namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
 public class MoveFormDownCommandHandler : IRequestHandler<MoveFormDownCommand, BaseMediatrResponse<EmptyResponse>>
 {
-    private readonly IFormVersionRepository _formRepository;
+    private readonly IFormRepository _formRepository;
 
-    public MoveFormDownCommandHandler(IFormVersionRepository formRepository)
+    public MoveFormDownCommandHandler(IFormRepository formRepository)
     {
         _formRepository = formRepository;
     }
@@ -21,7 +21,7 @@ public class MoveFormDownCommandHandler : IRequestHandler<MoveFormDownCommand, B
 
         try
         {
-            var found = await _formRepository.MoveFormVersionOrderDown(request.FormVersionId);
+            var found = await _formRepository.MoveFormOrderDown(request.FormId);
             response.Success = true;
         }
         catch (RecordNotFoundException ex)

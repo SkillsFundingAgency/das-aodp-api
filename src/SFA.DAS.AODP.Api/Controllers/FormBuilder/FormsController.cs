@@ -146,13 +146,13 @@ public class FormsController : Controller
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
-    [HttpPut("/api/forms/{formVersionId}/MoveUp")]
+    [HttpPut("/api/forms/{formId}/MoveUp")]
     [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> MoveUpAsync(Guid formVersionId)
+    public async Task<IActionResult> MoveUpAsync(Guid formId)
     {
-        var command = new MoveFormUpCommand(formVersionId);
+        var command = new MoveFormUpCommand(formId);
 
         var response = await _mediator.Send(command);
 
@@ -161,21 +161,21 @@ public class FormsController : Controller
 
         if (response.InnerException is NotFoundException)
         {
-            _logger.LogWarning($"Request to move a form version up with Id `{formVersionId}` returned 404 (not found). ");
+            _logger.LogWarning($"Request to move a form up with Id `{formId}` returned 404 (not found). ");
             return NotFound();
         }
 
-        _logger.LogError(message: $"Error thrown moving a form verion up version with the Id `{formVersionId}`.", exception: response.InnerException);
+        _logger.LogError(message: $"Error thrown moving a form up with the Id `{formId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
-    [HttpPut("/api/forms/{formVersionId}/MoveDown")]
+    [HttpPut("/api/forms/{formId}/MoveDown")]
     [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> MoveDownAsync(Guid formVersionId)
+    public async Task<IActionResult> MoveDownAsync(Guid formId)
     {
-        var command = new MoveFormDownCommand(formVersionId);
+        var command = new MoveFormDownCommand(formId);
 
         var response = await _mediator.Send(command);
 
@@ -184,11 +184,11 @@ public class FormsController : Controller
 
         if (response.InnerException is NotFoundException)
         {
-            _logger.LogWarning($"Request to move form verion down with Id `{formVersionId}` returned 404 (not found). ");
+            _logger.LogWarning($"Request to move form down with Id `{formId}` returned 404 (not found). ");
             return NotFound();
         }
 
-        _logger.LogError(message: $"Error thrown moving a form version down with the Id `{formVersionId}`.", exception: response.InnerException);
+        _logger.LogError(message: $"Error thrown moving a form down with the Id `{formId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
