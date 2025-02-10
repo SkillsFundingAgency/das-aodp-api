@@ -1,21 +1,23 @@
 ﻿using MediatR;
-using SFA.DAS.AODP.Data.Repositories;
-using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Application.Exceptions;
+using SFA.DAS.AODP.Data.Exceptions;
+using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 
-public class DeleteSectionCommandHandler(ISectionRepository sectionRepository) : IRequestHandler<DeleteSectionCommand, DeleteSectionCommandResponse>
+public class DeleteSectionCommandHandler(ISectionRepository sectionRepository) : IRequestHandler<DeleteSectionCommand, BaseMediatrResponse<EmptyResponse>>
 {
-    private readonly ISectionRepository SectionRepository = sectionRepository;
+    private readonly ISectionRepository _sectionRepository = sectionRepository;
 
-    public async Task<DeleteSectionCommandResponse> Handle(DeleteSectionCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(DeleteSectionCommand request, CancellationToken cancellationToken)
     {
-        var response = new DeleteSectionCommandResponse();
+        var response = new BaseMediatrResponse<EmptyResponse>();
 
         try
         {
-            var res = await SectionRepository.DeleteSection(request.SectionId);
+            if (!await _sectionRepository.IsSectionEditable(request.SectionId)) throw new RecordLockedException();
+
+            var res = await _sectionRepository.DeleteSection(request.SectionId);
             response.Success = true;
         }
         catch (RecordNotFoundException ex)

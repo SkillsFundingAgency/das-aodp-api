@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
-public class GetAllFormVersionsQueryResponse : BaseResponse
+public class GetAllFormVersionsQueryResponse
 {
     public List<FormVersion> Data { get; set; }
 
@@ -18,7 +18,7 @@ public class GetAllFormVersionsQueryResponse : BaseResponse
         public int Order { get; set; }
         public DateTime DateCreated { get; set; }
 
-        public static implicit operator FormVersion(Data.Entities.FormVersion entity)
+        public static implicit operator FormVersion(Data.Entities.FormBuilder.FormVersion entity)
         {
             return (new()
             {

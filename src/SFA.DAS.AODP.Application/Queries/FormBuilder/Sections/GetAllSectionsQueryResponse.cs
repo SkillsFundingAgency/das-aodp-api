@@ -1,6 +1,6 @@
 ﻿namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
-public class GetAllSectionsQueryResponse() : BaseResponse
+public class GetAllSectionsQueryResponse()
 {
     public List<Section> Data { get; set; }
 
@@ -11,16 +11,14 @@ public class GetAllSectionsQueryResponse() : BaseResponse
         public Guid Key { get; set; }
         public int Order { get; set; }
         public string Title { get; set; }
-        public string Description { get; set; }
 
 
-        public static implicit operator Section(Data.Entities.Section entity)
+        public static implicit operator Section(Data.Entities.FormBuilder.Section entity)
         {
             return (new()
             {
                 Id = entity.Id,
                 Title = entity.Title,
-                Description = entity.Description,
                 Order = entity.Order,
                 FormVersionId = entity.FormVersionId,
                 Key = entity.Key

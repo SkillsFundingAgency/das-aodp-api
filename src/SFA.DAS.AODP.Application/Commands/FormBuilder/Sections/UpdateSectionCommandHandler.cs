@@ -1,25 +1,24 @@
-﻿using AutoMapper;
-using MediatR;
-using SFA.DAS.AODP.Data.Repositories;
-using SFA.DAS.AODP.Data.Exceptions;
-using Entities = SFA.DAS.AODP.Data.Entities;
+﻿using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
+using SFA.DAS.AODP.Data.Exceptions;
+using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 
-public class UpdateSectionCommandHandler(ISectionRepository _sectionRepository) : IRequestHandler<UpdateSectionCommand, UpdateSectionCommandResponse>
+public class UpdateSectionCommandHandler(ISectionRepository _sectionRepository) : IRequestHandler<UpdateSectionCommand, BaseMediatrResponse<EmptyResponse>>
 {
 
-    public async Task<UpdateSectionCommandResponse> Handle(UpdateSectionCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(UpdateSectionCommand request, CancellationToken cancellationToken)
     {
-        var response = new UpdateSectionCommandResponse();
+        var response = new BaseMediatrResponse<EmptyResponse>();
         response.Success = false;
 
         try
         {
+            if (!await _sectionRepository.IsSectionEditable(request.Id)) throw new RecordLockedException();
+
             var section = await _sectionRepository.GetSectionByIdAsync(request.Id);
             section.Title = request.Title;
-            section.Description = request.Description;
 
 
             await _sectionRepository.Update(section);

@@ -1,9 +1,9 @@
 ﻿using MediatR;
-using SFA.DAS.AODP.Data.Repositories;
+using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
-public class GetAllFormVersionsQueryHandler : IRequestHandler<GetAllFormVersionsQuery, GetAllFormVersionsQueryResponse>
+public class GetAllFormVersionsQueryHandler : IRequestHandler<GetAllFormVersionsQuery, BaseMediatrResponse<GetAllFormVersionsQueryResponse>>
 {
     private readonly IFormVersionRepository _formRepository;
 
@@ -14,17 +14,14 @@ public class GetAllFormVersionsQueryHandler : IRequestHandler<GetAllFormVersions
 
     }
 
-    public async Task<GetAllFormVersionsQueryResponse> Handle(GetAllFormVersionsQuery request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<GetAllFormVersionsQueryResponse>> Handle(GetAllFormVersionsQuery request, CancellationToken cancellationToken)
     {
-        var queryResponse = new GetAllFormVersionsQueryResponse()
-        {
-            Success = false
-        };
+        var queryResponse = new BaseMediatrResponse<GetAllFormVersionsQueryResponse>();
         try
         {
             var data = await _formRepository.GetLatestFormVersions();
 
-            queryResponse.Data = [.. data];
+            queryResponse.Value.Data = [.. data];
 
             queryResponse.Success = true;
         }

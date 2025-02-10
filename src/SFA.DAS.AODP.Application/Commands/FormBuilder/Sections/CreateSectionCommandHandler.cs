@@ -1,28 +1,30 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Exceptions;
-using SFA.DAS.AODP.Data.Repositories;
+using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 
-public class CreateSectionCommandHandler(ISectionRepository sectionRepository) : IRequestHandler<CreateSectionCommand, CreateSectionCommandResponse>
+public class CreateSectionCommandHandler(ISectionRepository _sectionRepository, IFormVersionRepository _formVersionRepository)
+    : IRequestHandler<CreateSectionCommand, BaseMediatrResponse<CreateSectionCommandResponse>>
 {
-    public async Task<CreateSectionCommandResponse> Handle(CreateSectionCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<CreateSectionCommandResponse>> Handle(CreateSectionCommand request, CancellationToken cancellationToken)
     {
-        var response = new CreateSectionCommandResponse();
+        var response = new BaseMediatrResponse<CreateSectionCommandResponse>();
         try
         {
-            var maxOrder = await sectionRepository.GetMaxOrderByFormVersionIdAsync(request.FormVersionId);
-            var createdSection = await sectionRepository.Create(new()
+            if (!await _formVersionRepository.IsFormVersionEditable(request.FormVersionId)) throw new RecordLockedException();
+
+            var maxOrder = _sectionRepository.GetMaxOrderByFormVersionId(request.FormVersionId);
+            var createdSection = await _sectionRepository.Create(new()
             {
-                Description = request.Description,
                 Title = request.Title,
                 FormVersionId = request.FormVersionId,
                 Order = ++maxOrder,
-          
+
             });
 
-            response.Id = createdSection.Id;
+            response.Value = new() { Id = createdSection.Id };
             response.Success = true;
         }
         catch (NoForeignKeyException ex)

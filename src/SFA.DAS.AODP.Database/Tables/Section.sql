@@ -3,8 +3,7 @@
 	[FormVersionId] [uniqueidentifier] NOT NULL,
 	[Key] [uniqueidentifier] NOT NULL,
 	[Order] [int] NOT NULL,
-	[Title] [nvarchar](max) NOT NULL,
-	[Description] [nvarchar](max) NOT NULL,
+	[Title] [nvarchar](max) NOT NULL
  CONSTRAINT [PK_Sections] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC

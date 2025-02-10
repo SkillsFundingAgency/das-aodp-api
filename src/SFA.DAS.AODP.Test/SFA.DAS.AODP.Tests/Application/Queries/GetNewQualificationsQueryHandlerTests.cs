@@ -1,6 +1,6 @@
 ﻿using Moq;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
-using SFA.DAS.AODP.Data.Repositories;
+using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Tests.Application.Queries

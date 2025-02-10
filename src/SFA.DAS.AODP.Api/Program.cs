@@ -1,9 +1,8 @@
 using Microsoft.OpenApi.Models;
 using SFA.DAS.AODP.Api.Extensions;
+using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
-using SFA.DAS.AODP.Application.Queries.Test;
 using SFA.DAS.AODP.Application.Swashbuckle;
-using SFA.DAS.AODP.Infrastructure.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,8 +19,8 @@ builder.Services
     .AddServiceRegistrations(configuration)
     .AddMediatR(cfg =>
         cfg.RegisterServicesFromAssemblies(
-            typeof(TestQueryHandler).Assembly,
-            typeof(GetNewQualificationsQueryHandler).Assembly))
+            typeof(GetNewQualificationsQueryHandler).Assembly,
+            typeof(CreateFormVersionCommandHandler).Assembly))
     .AddLogging()
     .AddDataProtectionKeys("das-aodp-api", configuration, builder.Environment.IsDevelopment())
     .AddHttpContextAccessor()
@@ -42,12 +41,6 @@ builder.Services
     });
 
 var app = builder.Build();
-
-#if DEBUG
-using (var scope = app.Services.CreateScope())
-using (var context = scope.ServiceProvider.GetService<ApplicationDbContext>())
-    await context!.Database.EnsureCreatedAsync();
-#endif
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

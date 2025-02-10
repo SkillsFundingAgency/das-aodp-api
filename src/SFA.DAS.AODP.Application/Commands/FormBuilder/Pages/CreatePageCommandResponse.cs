@@ -4,7 +4,7 @@ namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 
 /// <exception cref="LockedRecordException"></exception>
 /// <exception cref="DependantNotFoundException"></exception>
-public class CreatePageCommandResponse : BaseResponse
+public class CreatePageCommandResponse
 {
     public Guid Id { get; set; }
 
