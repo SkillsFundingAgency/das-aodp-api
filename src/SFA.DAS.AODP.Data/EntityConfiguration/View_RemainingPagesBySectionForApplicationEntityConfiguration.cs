@@ -15,9 +15,9 @@ namespace SFA.DAS.AODP.Data.EntityConfiguration
 
 
             builder
-           .HasOne(x => x.Application)
-           .WithMany()
-           .HasForeignKey(e => e.ApplicationId);
+               .HasOne(x => x.Application)
+               .WithMany()
+               .HasForeignKey(e => e.ApplicationId);
         }
     }
 }

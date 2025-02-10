@@ -25,14 +25,14 @@ public class FormRepository : IFormRepository
     /// <param name="id"></param>
     /// <returns></returns>
     /// <exception cref="RecordNotFoundException"></exception>
-    public async Task<bool> MoveFormVersionOrderUp(Guid id)
+    public async Task<bool> MoveFormOrderUp(Guid id)
     {
         var modelToUpdate = await _context.Forms.FirstOrDefaultAsync(v => v.Id == id);
         if (modelToUpdate is null)
             throw new RecordNotFoundException(id);
 
         var nextHigherModel = await _context.Forms
-            .OrderBy(v => v.Order)
+            .OrderByDescending(v => v.Order)
             .Where(v => v.Order < modelToUpdate.Order)
             .FirstOrDefaultAsync();
 
@@ -59,7 +59,7 @@ public class FormRepository : IFormRepository
             throw new RecordNotFoundException(id);
 
         var nextLowerModel = await _context.Forms
-            .OrderByDescending(v => v.Order)
+            .OrderBy(v => v.Order)
             .Where(v => v.Order > modelToUpdate.Order)
             .FirstOrDefaultAsync();
         if (nextLowerModel is null)

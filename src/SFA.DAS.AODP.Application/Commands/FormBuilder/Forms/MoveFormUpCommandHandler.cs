@@ -21,7 +21,7 @@ public class MoveFormUpCommandHandler : IRequestHandler<MoveFormUpCommand, BaseM
 
         try
         {
-            var found = await _formRepository.MoveFormVersionOrderUp(request.FormId);
+            var found = await _formRepository.MoveFormOrderUp(request.FormId);
             response.Success = true;
         }
         catch (RecordNotFoundException ex)

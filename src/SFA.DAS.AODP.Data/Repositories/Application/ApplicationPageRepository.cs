@@ -49,6 +49,11 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             return await _context.ApplicationPages.Where(a => a.ApplicationId == applicationId && pageIds.Contains(a.PageId)).ToListAsync();
         }
 
+        public async Task<List<ApplicationPage>> GetApplicationPagesByApplicationIdAsync(Guid applicationId)
+        {
+            return await _context.ApplicationPages.Where(a => a.ApplicationId == applicationId).ToListAsync();
+        }
+
         public async Task UpsertAsync(List<ApplicationPage> applicationPagesToUpsert)
         {
             foreach (var page in applicationPagesToUpsert)
