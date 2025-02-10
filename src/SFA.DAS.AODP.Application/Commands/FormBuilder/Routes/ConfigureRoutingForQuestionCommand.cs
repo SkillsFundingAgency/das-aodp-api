@@ -1,8 +1,7 @@
 ﻿using MediatR;
-
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Routes
 {
-    public class ConfigureRoutingForQuestionCommand : IRequest<ConfigureRoutingForQuestionCommandResponse>
+    public class ConfigureRoutingForQuestionCommand : IRequest<BaseMediatrResponse<EmptyResponse>>
     {
         public Guid FormVersionId { get; set; }
         public Guid SectionId { get; set; }

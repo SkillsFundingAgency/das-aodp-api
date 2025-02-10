@@ -13,7 +13,7 @@ namespace SFA.DAS.AODP.Data.Entities.Application
         public string Owner { get; set; }
         public bool? Submitted { get; set; }
         public string? Reference { get; set; }
-        public DateTime? CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         public virtual List<ApplicationPage> Pages { get; set; }
     }

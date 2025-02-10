@@ -9,6 +9,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
         Task<List<ApplicationPage>> GetApplicationPagesByPageIdsAsync(Guid applicationId, List<Guid> pageIds);
         Task<List<ApplicationPage>> GetBySectionIdAsync(Guid sectionId, Guid applicationId);
         Task<List<ApplicationPage>> GetSkippedApplicationPagesByQuestionIdAsync(Guid applicationId, Guid questionId, List<Guid> pageIdsToIgnore);
+        Task<bool> IsApplicationPageEditable(Guid id);
         Task<ApplicationPage> Update(ApplicationPage application);
         Task UpsertAsync(ApplicationPage page);
         Task UpsertAsync(List<ApplicationPage> applicationPagesToUpsert);

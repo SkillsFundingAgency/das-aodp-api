@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
-using SFA.DAS.AODP.Data.EntityConifguration;
+using SFA.DAS.AODP.Data.EntityConfiguration;
 using System.Reflection.Emit;
 
 namespace SFA.DAS.AODP.Data.Context
@@ -56,6 +57,11 @@ namespace SFA.DAS.AODP.Data.Context
         public async Task BulkInsertAsync<T>(IEnumerable<T> entities, CancellationToken cancellationToken = default) where T : class
         {
             await this.BulkInsertAsync(entities.ToList(), options => options.BatchSize = 1000, cancellationToken: cancellationToken);
+        }
+
+        public async Task<IDbContextTransaction> StartTransactionAsync()
+        {
+            return await Database.BeginTransactionAsync();
         }
 
     }

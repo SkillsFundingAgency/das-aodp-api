@@ -1,7 +1,6 @@
-﻿using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Data.Entities.Application;
+﻿using SFA.DAS.AODP.Data.Entities.Application;
 
-public class GetApplicationSectionStatusByApplicationIdQueryResponse : BaseResponse
+public class GetApplicationSectionStatusByApplicationIdQueryResponse
 {
     public List<Page> Pages { get; set; } = new();
 

@@ -1,6 +1,4 @@
-﻿using SFA.DAS.AODP.Application;
-
-public class CreateApplicationCommandResponse : BaseResponse
+﻿public class CreateApplicationCommandResponse
 {
     public Guid Id { get; set; }
 }

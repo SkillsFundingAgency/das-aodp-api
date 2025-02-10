@@ -1,7 +1,8 @@
 ﻿using MediatR;
+using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Repositories.Application;
 
-public class GetApplicationsByOrganisationIdQueryHandler : IRequestHandler<GetApplicationsByOrganisationIdQuery, GetApplicationsByOrganisationIdQueryResponse>
+public class GetApplicationsByOrganisationIdQueryHandler : IRequestHandler<GetApplicationsByOrganisationIdQuery, BaseMediatrResponse< GetApplicationsByOrganisationIdQueryResponse>>
 {
     private readonly IApplicationRepository _applicationRepository;
 
@@ -10,14 +11,14 @@ public class GetApplicationsByOrganisationIdQueryHandler : IRequestHandler<GetAp
         this._applicationRepository = applicationRepository;
     }
 
-    public async Task<GetApplicationsByOrganisationIdQueryResponse> Handle(GetApplicationsByOrganisationIdQuery request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<GetApplicationsByOrganisationIdQueryResponse>> Handle(GetApplicationsByOrganisationIdQuery request, CancellationToken cancellationToken)
     {
-        var response = new GetApplicationsByOrganisationIdQueryResponse();
+        var response = new BaseMediatrResponse<GetApplicationsByOrganisationIdQueryResponse>();
         response.Success = false;
         try
         {
             var result = await _applicationRepository.GetByOrganisationId(request.OrganisationId);
-            response = result;
+            response.Value = result;
             response.Success = true;
         }
         catch (Exception ex)

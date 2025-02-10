@@ -1,12 +1,11 @@
-﻿using AutoMapper;
-using MediatR;
-using SFA.DAS.AODP.Data.Exceptions;
+﻿using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
-public class GetFormVersionByIdQueryHandler : IRequestHandler<GetFormVersionByIdQuery, GetFormVersionByIdQueryResponse>
+public class GetFormVersionByIdQueryHandler : IRequestHandler<GetFormVersionByIdQuery, BaseMediatrResponse<GetFormVersionByIdQueryResponse>>
 {
     private readonly IFormVersionRepository _formRepository;
 
@@ -17,14 +16,14 @@ public class GetFormVersionByIdQueryHandler : IRequestHandler<GetFormVersionById
 
     }
 
-    public async Task<GetFormVersionByIdQueryResponse> Handle(GetFormVersionByIdQuery request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<GetFormVersionByIdQueryResponse>> Handle(GetFormVersionByIdQuery request, CancellationToken cancellationToken)
     {
-        var response = new GetFormVersionByIdQueryResponse();
+        var response = new BaseMediatrResponse<GetFormVersionByIdQueryResponse>();
 
         try
         {
             var formVersion = await _formRepository.GetFormVersionByIdAsync(request.FormVersionId);
-            response = formVersion;
+            response.Value = formVersion;
             response.Success = true;
         }
         catch (RecordNotFoundException ex)

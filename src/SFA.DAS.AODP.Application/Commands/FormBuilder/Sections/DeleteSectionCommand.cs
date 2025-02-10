@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 
-public class DeleteSectionCommand : IRequest<DeleteSectionCommandResponse>
+public class DeleteSectionCommand : IRequest<BaseMediatrResponse<EmptyResponse>>
 {
     public readonly Guid SectionId;
 

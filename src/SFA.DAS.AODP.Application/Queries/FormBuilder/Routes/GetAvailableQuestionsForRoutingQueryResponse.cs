@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Routes
 {
-    public class GetAvailableQuestionsForRoutingQueryResponse : BaseResponse
+    public class GetAvailableQuestionsForRoutingQueryResponse
     {
         public List<Question> Questions { get; set; } = new();
 

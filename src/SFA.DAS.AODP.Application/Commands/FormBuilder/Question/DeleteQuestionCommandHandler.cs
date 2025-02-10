@@ -1,20 +1,20 @@
-﻿using AutoMapper;
-using MediatR;
-using SFA.DAS.AODP.Data.Repositories;
-using SFA.DAS.AODP.Data.Exceptions;
+﻿using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
-public class DeleteQuestionCommandHandler(IQuestionRepository _questionRepository) : IRequestHandler<DeleteQuestionCommand, DeleteQuestionCommandResponse>
+public class DeleteQuestionCommandHandler(IQuestionRepository _questionRepository) : IRequestHandler<DeleteQuestionCommand, BaseMediatrResponse<EmptyResponse>>
 {
-    public async Task<DeleteQuestionCommandResponse> Handle(DeleteQuestionCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(DeleteQuestionCommand request, CancellationToken cancellationToken)
     {
-        var response = new DeleteQuestionCommandResponse();
+        var response = new BaseMediatrResponse<EmptyResponse>();
 
         try
         {
+            if (!await _questionRepository.IsQuestionEditable(request.QuestionId)) throw new RecordLockedException();
+
             await _questionRepository.Archive(request.QuestionId);
 
             response.Success = true;

@@ -1,11 +1,11 @@
-﻿using MediatR;
+﻿using MediatR;using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
-public class UnpublishFormVersionCommandHandler : IRequestHandler<UnpublishFormVersionCommand, UnpublishFormVersionCommandResponse>
+public class UnpublishFormVersionCommandHandler : IRequestHandler<UnpublishFormVersionCommand, BaseMediatrResponse<EmptyResponse>>
 {
     private readonly IFormVersionRepository _formRepository;
 
@@ -14,9 +14,9 @@ public class UnpublishFormVersionCommandHandler : IRequestHandler<UnpublishFormV
         _formRepository = formRepository;
     }
 
-    public async Task<UnpublishFormVersionCommandResponse> Handle(UnpublishFormVersionCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(UnpublishFormVersionCommand request, CancellationToken cancellationToken)
     {
-        var response = new UnpublishFormVersionCommandResponse();
+        var response = new BaseMediatrResponse<EmptyResponse>();
         response.Success = false;
 
         try

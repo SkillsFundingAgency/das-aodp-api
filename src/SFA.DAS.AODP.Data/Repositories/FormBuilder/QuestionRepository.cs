@@ -92,7 +92,7 @@ public class QuestionRepository : IQuestionRepository
     /// <exception cref="RecordLockedException"></exception>
     public async Task Archive(Guid questionId)
     {
-        await ValidateQuestionForChange(questionId);
+        if (!await IsQuestionEditable(questionId)) throw new RecordLockedException();
 
         var question = await GetQuestionByIdAsync(questionId);
 
@@ -112,18 +112,86 @@ public class QuestionRepository : IQuestionRepository
                         .FirstOrDefaultAsync(q => q.Id == questionId) ?? throw new RecordNotFoundException(questionId);
     }
 
-    public async Task ValidateQuestionForChange(Guid questionId)
+    public async Task<bool> IsQuestionEditable(Guid id)
     {
-        if (!await _context.Questions.AnyAsync(v => v.Id == questionId))
-            throw new RecordNotFoundException(questionId);
-
-        if (!await _context.Questions.AnyAsync(v => v.Id == questionId && v.Page.Section.FormVersion.Status == FormVersionStatus.Draft.ToString()))
-            throw new RecordLockedException();
+        return await _context.Questions.AnyAsync(v => v.Id == id && v.Page.Section.FormVersion.Status == FormVersionStatus.Draft.ToString());
     }
 
 
     public async Task<string?> GetQuestionTypeById(Guid questionid)
     {
         return await _context.Questions.Where(q => q.Id == questionid).Select(q => q.Type).FirstOrDefaultAsync() ?? throw new RecordNotFoundException(questionid);
+    }
+
+
+    public async Task<Dictionary<Guid, Guid>> CopyQuestionsForNewFormVersion(Dictionary<Guid, Guid> oldNewPageIds)
+    {
+        var oldNewIds = new Dictionary<Guid, Guid>();
+        var oldIds = oldNewPageIds.Keys.ToList();
+
+        var toMigrate = await _context.Questions.AsNoTracking().Where(v => oldIds.Contains(v.PageId)).ToListAsync();
+        foreach (var entity in toMigrate)
+        {
+            var oldId = entity.Id;
+            entity.PageId = oldNewPageIds[entity.PageId];
+            entity.Id = Guid.NewGuid();
+
+            oldNewIds.Add(oldId, entity.Id);
+        }
+        await _context.Questions.AddRangeAsync(toMigrate);
+        await _context.SaveChangesAsync();
+
+        return oldNewIds;
+     }
+    /// <summary>
+    /// Finds a question with a given Id, and finds the next section with a lower Order (so will appear higher in the list) and switches them. 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task<bool> MoveQuestionOrderUp(Guid id)
+    {
+        var modelToUpdate = await _context.Questions.FirstOrDefaultAsync(v => v.Id == id);
+        if (modelToUpdate is null)
+            throw new RecordNotFoundException(id);
+
+        var nextHigherModel = await _context.Questions
+            .OrderBy(v => v.Order)
+            .Where(v => v.Order < modelToUpdate.Order)
+            .FirstOrDefaultAsync();
+        if (nextHigherModel is null)
+            return true;
+        var nextHighest = nextHigherModel.Order;
+        nextHigherModel.Order = modelToUpdate.Order;
+        modelToUpdate.Order = nextHighest;
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+    /// <summary>
+    /// Finds a question with a given Id, and finds the next section with a higher Order (so will appear lower in the list) and switches them. 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task<bool> MoveQuestionOrderDown(Guid id)
+    {
+        var modelToUpdate = await _context.Questions.FirstOrDefaultAsync(v => v.Id == id);
+        if (modelToUpdate is null)
+            throw new RecordNotFoundException(id);
+
+        var nextLowerModel = await _context.Questions
+            .OrderByDescending(v => v.Order)
+            .Where(v => v.Order > modelToUpdate.Order)
+            .FirstOrDefaultAsync();
+        if (nextLowerModel is null)
+            return true;
+        var nextLowest = nextLowerModel.Order;
+        nextLowerModel.Order = modelToUpdate.Order;
+        modelToUpdate.Order = nextLowest;
+        await _context.SaveChangesAsync();
+
+        return true;
     }
 }

@@ -1,7 +1,7 @@
 ﻿using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
-public class GetApplicationFormByIdQueryResponse : BaseResponse
+public class GetApplicationFormByIdQueryResponse
 {
     public string FormTitle { get; set; }
 

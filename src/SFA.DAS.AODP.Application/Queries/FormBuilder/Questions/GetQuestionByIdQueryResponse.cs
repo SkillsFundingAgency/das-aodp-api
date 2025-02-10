@@ -3,7 +3,7 @@ using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Questions;
 
-public class GetQuestionByIdQueryResponse() : BaseResponse
+public class GetQuestionByIdQueryResponse()
 {
 
     public Guid Id { get; set; }
@@ -18,7 +18,7 @@ public class GetQuestionByIdQueryResponse() : BaseResponse
     public TextInputOptions TextInput { get; set; } = new();
     public List<RadioOptionItem> RadioOptions { get; set; } = new();
 
-
+    public bool Editable { get; set; }
     public class TextInputOptions
     {
         public int? MinLength { get; set; }
@@ -60,7 +60,7 @@ public class GetQuestionByIdQueryResponse() : BaseResponse
             foreach (var option in entity.QuestionOptions)
             {
                 question.RadioOptions.Add(new()
-        {
+                {
                     Id = option.Id,
                     Value = option.Value,
                     Order = option.Order,

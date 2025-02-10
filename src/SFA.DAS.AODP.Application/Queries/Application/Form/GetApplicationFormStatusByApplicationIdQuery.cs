@@ -1,6 +1,6 @@
-﻿using MediatR;
+﻿using MediatR;using SFA.DAS.AODP.Application;
 
-public class GetApplicationFormStatusByApplicationIdQuery : IRequest<GetApplicationFormStatusByApplicationIdQueryResponse>
+public class GetApplicationFormStatusByApplicationIdQuery : IRequest<BaseMediatrResponse<GetApplicationFormStatusByApplicationIdQueryResponse>>
 {
     public GetApplicationFormStatusByApplicationIdQuery(Guid formVersionId, Guid applicationId)
     {

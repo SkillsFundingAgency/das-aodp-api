@@ -1,31 +1,30 @@
-﻿using AutoMapper;
-using MediatR;
-using SFA.DAS.AODP.Data.Exceptions;
+﻿using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
-using Entities = SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
-public class UpdateFormVersionCommandHandler : IRequestHandler<UpdateFormVersionCommand, UpdateFormVersionCommandResponse>
+public class UpdateFormVersionCommandHandler : IRequestHandler<UpdateFormVersionCommand, BaseMediatrResponse<EmptyResponse>>
 {
     private readonly IFormVersionRepository _formRepository;
-    
+
 
     public UpdateFormVersionCommandHandler(IFormVersionRepository formRepository)
     {
         _formRepository = formRepository;
-        
+
     }
 
-    public async Task<UpdateFormVersionCommandResponse> Handle(UpdateFormVersionCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(UpdateFormVersionCommand request, CancellationToken cancellationToken)
     {
-        var response = new UpdateFormVersionCommandResponse();
+        var response = new BaseMediatrResponse<EmptyResponse>();
 
         try
         {
+            if (!await _formRepository.IsFormVersionEditable(request.FormVersionId)) throw new RecordLockedException();
+
             var formVersion = await _formRepository.GetFormVersionByIdAsync(request.FormVersionId);
-            formVersion.Order = request.Order;
             formVersion.Title = request.Name;
             formVersion.Description = request.Description;
 

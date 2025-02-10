@@ -5,17 +5,18 @@ using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Routes
 {
-    public class GetAvailableQuestionsForRoutingQueryHandler(IRouteRepository _routeRepository) : IRequestHandler<GetAvailableQuestionsForRoutingQuery, GetAvailableQuestionsForRoutingQueryResponse>
+    public class GetAvailableQuestionsForRoutingQueryHandler(IRouteRepository _routeRepository)
+        : IRequestHandler<GetAvailableQuestionsForRoutingQuery, BaseMediatrResponse<GetAvailableQuestionsForRoutingQueryResponse>>
     {
-        public async Task<GetAvailableQuestionsForRoutingQueryResponse> Handle(GetAvailableQuestionsForRoutingQuery request, CancellationToken cancellationToken)
+        public async Task<BaseMediatrResponse<GetAvailableQuestionsForRoutingQueryResponse>> Handle(GetAvailableQuestionsForRoutingQuery request, CancellationToken cancellationToken)
         {
-            var response = new GetAvailableQuestionsForRoutingQueryResponse();
+            var response = new BaseMediatrResponse<GetAvailableQuestionsForRoutingQueryResponse>();
             response.Success = false;
             try
             {
                 var question = await _routeRepository.GetAvailableQuestionsForRoutingByPageId(request.PageId);
 
-                response = question;
+                response.Value = question;
                 response.Success = true;
             }
             catch (RecordNotFoundException ex)

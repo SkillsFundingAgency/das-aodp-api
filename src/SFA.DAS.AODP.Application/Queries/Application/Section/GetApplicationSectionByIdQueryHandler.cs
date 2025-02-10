@@ -1,7 +1,7 @@
-﻿using MediatR;
+﻿using MediatR;using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
-public class GetApplicationSectionByIdQueryHandler : IRequestHandler<GetApplicationSectionByIdQuery, GetApplicationSectionByIdQueryResponse>
+public class GetApplicationSectionByIdQueryHandler : IRequestHandler<GetApplicationSectionByIdQuery, BaseMediatrResponse< GetApplicationSectionByIdQueryResponse>>
 {
     private readonly ISectionRepository _sectionRepository;
 
@@ -10,14 +10,13 @@ public class GetApplicationSectionByIdQueryHandler : IRequestHandler<GetApplicat
         _sectionRepository = sectionRepository;
     }
 
-    public async Task<GetApplicationSectionByIdQueryResponse> Handle(GetApplicationSectionByIdQuery request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<GetApplicationSectionByIdQueryResponse>> Handle(GetApplicationSectionByIdQuery request, CancellationToken cancellationToken)
     {
-        var response = new GetApplicationSectionByIdQueryResponse();
-        response.Success = false;
+        var response = new BaseMediatrResponse<GetApplicationSectionByIdQueryResponse>();
         try
         {
             var result = await _sectionRepository.GetSectionByIdAsync(request.SectionId);
-            response = result;
+            response.Value = result;
             response.Success = true;
         }
         catch (Exception ex)

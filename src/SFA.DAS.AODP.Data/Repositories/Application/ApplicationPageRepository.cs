@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Application;
-using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 namespace SFA.DAS.AODP.Data.Repositories.Application
 {
@@ -84,6 +83,11 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
         public async Task<List<ApplicationPage>> GetBySectionIdAsync(Guid sectionId, Guid applicationId)
         {
             return await _context.ApplicationPages.Where(a => a.ApplicationId == applicationId && a.Page.SectionId == sectionId).ToListAsync();
+        }
+
+        public async Task<bool> IsApplicationPageEditable(Guid id)
+        {
+            return await _context.ApplicationPages.AnyAsync(v => v.Id == id && v.Application.Submitted == false);
         }
     }
 }

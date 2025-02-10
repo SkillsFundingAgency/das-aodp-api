@@ -1,6 +1,7 @@
 ﻿using MediatR;
+using SFA.DAS.AODP.Application;
 
-public class UpdatePageAnswersCommand : IRequest<UpdatePageAnswersCommandResponse>
+public class UpdatePageAnswersCommand : IRequest<BaseMediatrResponse<EmptyResponse>>
 {
     public Guid ApplicationId { get; set; }
     public Guid PageId { get; set; }

@@ -1,8 +1,9 @@
 ﻿using MediatR;
+using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Repositories.Application;
 
-public class GetApplicationFormStatusByApplicationIdQueryHandler : IRequestHandler<GetApplicationFormStatusByApplicationIdQuery, GetApplicationFormStatusByApplicationIdQueryResponse>
+public class GetApplicationFormStatusByApplicationIdQueryHandler : IRequestHandler<GetApplicationFormStatusByApplicationIdQuery, BaseMediatrResponse<GetApplicationFormStatusByApplicationIdQueryResponse>>
 {
     private readonly IApplicationRepository _applicationRepository;
 
@@ -11,27 +12,26 @@ public class GetApplicationFormStatusByApplicationIdQueryHandler : IRequestHandl
         this._applicationRepository = applicationRepository;
     }
 
-    public async Task<GetApplicationFormStatusByApplicationIdQueryResponse> Handle(GetApplicationFormStatusByApplicationIdQuery request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<GetApplicationFormStatusByApplicationIdQueryResponse>> Handle(GetApplicationFormStatusByApplicationIdQuery request, CancellationToken cancellationToken)
     {
-        var response = new GetApplicationFormStatusByApplicationIdQueryResponse();
-        response.Success = false;
+        var response = new BaseMediatrResponse<GetApplicationFormStatusByApplicationIdQueryResponse>();
         try
         {
             Application result = await _applicationRepository.GetByIdAsync(request.ApplicationId);
 
             var remainingPagesBySections = await _applicationRepository.GetRemainingPagesBySectionForApplicationsAsync(request.ApplicationId);
 
-            response = result;
+            response.Value = result;
 
             foreach (var section in remainingPagesBySections ?? [])
             {
-                response.Sections.Add(new()
+                response.Value.Sections.Add(new()
                 {
                     SectionId = section.SectionId,
                     PagesRemaining = section.PageCount
                 });
             }
-            response.ReadyForSubmit = !response.Sections.Any(a => a.PagesRemaining > 0);
+            response.Value.ReadyForSubmit = !response.Value.Sections.Any(a => a.PagesRemaining > 0);
 
             response.Success = true;
         }

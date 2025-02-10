@@ -1,33 +1,36 @@
 ﻿using MediatR;
+using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
-public class UpdatePageAnswersCommandHandler : IRequestHandler<UpdatePageAnswersCommand, UpdatePageAnswersCommandResponse>
+public class UpdatePageAnswersCommandHandler : IRequestHandler<UpdatePageAnswersCommand, BaseMediatrResponse<EmptyResponse>>
 {
-    private readonly IQuestionRepository _questionRepository;
     private readonly IApplicationPageRepository _applicationPageRepository;
     private readonly IApplicationQuestionAnswerRepository _questionAnswerRepository;
     private readonly IPageRepository _pageRepository;
+    private readonly IApplicationRepository _applicationRepository;
 
-    public UpdatePageAnswersCommandHandler(IQuestionRepository questionRepository, IApplicationPageRepository applicationPageRepository, IApplicationQuestionAnswerRepository questionAnswerRepository, IPageRepository pageRepository)
+    public UpdatePageAnswersCommandHandler(IApplicationPageRepository applicationPageRepository, IApplicationQuestionAnswerRepository questionAnswerRepository, IPageRepository pageRepository, IApplicationRepository applicationRepository)
     {
-        _questionRepository = questionRepository;
         _applicationPageRepository = applicationPageRepository;
         _questionAnswerRepository = questionAnswerRepository;
         _pageRepository = pageRepository;
+        _applicationRepository = applicationRepository;
     }
 
-    public async Task<UpdatePageAnswersCommandResponse> Handle(UpdatePageAnswersCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(UpdatePageAnswersCommand request, CancellationToken cancellationToken)
     {
-        var response = new UpdatePageAnswersCommandResponse()
-        {
-            Success = false
-        };
+
+        var response = new BaseMediatrResponse<EmptyResponse>();
 
         try
         {
+            var application = await _applicationRepository.GetByIdAsync(request.ApplicationId);
+            if (application.Submitted ?? false) throw new RecordLockedException();
+
             var formPage = await _pageRepository.GetPageByIdAsync(request.PageId);
             var applicationPage = await _applicationPageRepository.GetApplicationPageByPageIdAsync(request.ApplicationId, request.PageId);
             applicationPage ??= new()

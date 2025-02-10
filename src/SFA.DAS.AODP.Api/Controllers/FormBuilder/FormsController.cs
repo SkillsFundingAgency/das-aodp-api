@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
@@ -27,7 +28,7 @@ public class FormsController : Controller
         var response = await _mediator.Send(query);
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         _logger.LogError(message: $"Error thrown getting all forms versions.", exception: response.InnerException);
@@ -46,7 +47,7 @@ public class FormsController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)
@@ -67,7 +68,7 @@ public class FormsController : Controller
         var response = await _mediator.Send(command);
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         _logger.LogError(message: $"Error thrown creating a form and form version.", exception: response.InnerException);
@@ -75,7 +76,7 @@ public class FormsController : Controller
     }
 
     [HttpPut("/api/forms/{formVersionId}")]
-    [ProducesResponseType(typeof(UpdateFormVersionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> UpdateAsync(Guid formVersionId, [FromBody] UpdateFormVersionCommand command)
@@ -86,7 +87,7 @@ public class FormsController : Controller
 
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)
@@ -100,7 +101,7 @@ public class FormsController : Controller
     }
 
     [HttpPut("/api/forms/{formVersionId}/publish")]
-    [ProducesResponseType(typeof(UpdateFormVersionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> PublishAsync(Guid formVersionId)
@@ -110,7 +111,7 @@ public class FormsController : Controller
         var response = await _mediator.Send(command);
 
         if (response.Success)
-            return Ok(response);
+            return Ok(response.Value);
 
         if (response.InnerException is NotFoundException)
         {
@@ -123,7 +124,7 @@ public class FormsController : Controller
     }
 
     [HttpPut("/api/forms/{formVersionId}/unpublish")]
-    [ProducesResponseType(typeof(UpdateFormVersionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> UnpublishAsync(Guid formVersionId)
@@ -133,7 +134,7 @@ public class FormsController : Controller
         var response = await _mediator.Send(command);
 
         if (response.Success)
-            return Ok(response);
+            return Ok(response.Value);
 
         if (response.InnerException is NotFoundException)
         {
@@ -145,8 +146,32 @@ public class FormsController : Controller
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
+
+    [HttpPut("/api/forms/{formId}/new-version")]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> CreateDraftAsync([FromRoute] Guid formId)
+    {
+        var command = new CreateDraftFormVersionCommand(formId);
+
+        var response = await _mediator.Send(command);
+
+        if (response.Success)
+            return Ok(response.Value);
+
+        if (response.InnerException is NotFoundException)
+        {
+            _logger.LogWarning($"Request to create draft form version with Id `{formId}` returned 404 (not found). ");
+            return NotFound();
+        }
+
+        _logger.LogError(message: $"Error thrown creating a draft form version with the Id `{formId}`.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
     [HttpDelete("/api/forms/{formVersionId}")]
-    [ProducesResponseType(typeof(DeleteFormVersionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> RemoveAsync(Guid formVersionId)
@@ -156,7 +181,7 @@ public class FormsController : Controller
         var response = await _mediator.Send(command);
         if (response.Success)
         {
-            return Ok(response);
+            return Ok(response.Value);
         }
 
         if (response.InnerException is NotFoundException)

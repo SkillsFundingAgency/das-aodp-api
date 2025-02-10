@@ -5,7 +5,6 @@
 	[Type] [nvarchar](100) NOT NULL,
 	[Required] [bit] NOT NULL,
 	[Order] [int] NOT NULL,
-	[Description] [nvarchar](max) NULL,
 	[Hint] [nvarchar](max) NULL,
 	[Key] [uniqueidentifier] NOT NULL,
  CONSTRAINT [PK_Questions] PRIMARY KEY CLUSTERED 
