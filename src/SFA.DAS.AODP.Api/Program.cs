@@ -1,5 +1,3 @@
-using Azure.Monitor.OpenTelemetry.AspNetCore;
-using Microsoft.Extensions.Logging.ApplicationInsights;
 using Microsoft.OpenApi.Models;
 using SFA.DAS.AODP.Api.Extensions;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;

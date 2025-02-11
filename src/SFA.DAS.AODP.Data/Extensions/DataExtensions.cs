@@ -13,11 +13,11 @@ namespace SFA.DAS.AODP.Data.Extensions
         {
             services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options =>
             {
-                var connectionString = configuration.GetConnectionString("SQLSeverConnectionString");
-                if (string.IsNullOrWhiteSpace(connectionString))
-                {
-                    connectionString = configuration["AodpApi:DatabaseConnectionString"];
-                }
+                //var connectionString = configuration.GetConnectionString("SQLSeverConnectionString");
+                //if (string.IsNullOrWhiteSpace(connectionString))
+                //{
+                //}
+                var connectionString = configuration["AodpApi:DatabaseConnectionString"];
 
                 if (string.IsNullOrWhiteSpace(connectionString))
                 {
