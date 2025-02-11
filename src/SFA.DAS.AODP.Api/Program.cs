@@ -1,3 +1,4 @@
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.Extensions.Logging.ApplicationInsights;
 using Microsoft.OpenApi.Models;
 using SFA.DAS.AODP.Api.Extensions;
@@ -29,6 +30,16 @@ builder.Services
         c.CustomSchemaIds(type => schemaHelper.GetSchemaId(type));
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "AODP Inner API", Version = "v1" });
     });
+
+
+var connectionString = configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
+
+if (!string.IsNullOrEmpty(connectionString))
+{
+    builder.Services
+        .AddOpenTelemetry()
+        .UseAzureMonitor(options => options.ConnectionString = connectionString);
+}
 
 builder.Logging.AddApplicationInsights();
 builder.Logging.AddFilter<ApplicationInsightsLoggerProvider>("SFA.DAS", LogLevel.Information);
