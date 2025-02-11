@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
@@ -6,6 +7,8 @@ using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
 namespace SFA.DAS.AODP.Api.Controllers.FormBuilder;
+
+[AllowAnonymous]
 [ApiController]
 [Route("api/[controller]")]
 public class FormsController : Controller
