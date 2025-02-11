@@ -12,8 +12,19 @@ namespace SFA.DAS.AODP.Data.Extensions
         public static IServiceCollection ConfigureDatabase(this IServiceCollection services, IConfigurationRoot configuration)
         {
             services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("SQLSeverConnectionString"))
-            );
+            {
+                var connectionString = configuration.GetConnectionString("SQLSeverConnectionString");
+                if (string.IsNullOrWhiteSpace(connectionString))
+                {
+                    connectionString = configuration["AodpApi:DatabaseConnectionString"];
+                }
+
+                if (string.IsNullOrWhiteSpace(connectionString))
+                {
+                    throw new Exception("Database connection string not found");
+                }
+                options.UseSqlServer();
+            });
             services.AddScoped<IFormVersionRepository, FormVersionRepository>();
             services.AddScoped<ISectionRepository, SectionRepository>();
             services.AddScoped<IPageRepository, PageRepository>();
