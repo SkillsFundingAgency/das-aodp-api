@@ -36,12 +36,11 @@ var connectionString = configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
 
 if (!string.IsNullOrEmpty(connectionString))
 {
-    builder.Services.AddOpenTelemetry().UseAzureMonitor();
-
+    builder.Services.AddApplicationInsightsTelemetry();
 }
 else
 {
-    //throw new Exception("No AI string found");
+    throw new Exception("No AI string found");
 }
 
 var app = builder.Build();
