@@ -23,7 +23,7 @@ namespace SFA.DAS.AODP.Data.Extensions
                 {
                     throw new Exception("Database connection string not found");
                 }
-                options.UseSqlServer();
+                options.UseSqlServer(connectionString);
             });
             services.AddScoped<IFormVersionRepository, FormVersionRepository>();
             services.AddScoped<ISectionRepository, SectionRepository>();
