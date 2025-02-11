@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
@@ -11,8 +13,12 @@ namespace SFA.DAS.AODP.Data.Context
 {
     public class ApplicationDbContext : DbContext, IApplicationDbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options) { }
+        private readonly IConfiguration _configuration;
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IConfiguration configuration)
+            : base(options)
+        {
+            this._configuration = configuration;
+        }
 
         public virtual DbSet<ApprovedQualificationsImport> ApprovedQualificationsImports { get; set; }
 
@@ -40,7 +46,17 @@ namespace SFA.DAS.AODP.Data.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            base.OnConfiguring(optionsBuilder);
+            var connection = new SqlConnection
+            {
+                ConnectionString = _configuration["AodpApi:DatabaseConnectionString"],
+            };
+
+            optionsBuilder.UseSqlServer(connection, options =>
+                options.EnableRetryOnFailure(
+                    5,
+                    TimeSpan.FromSeconds(20),
+                    null
+                ));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

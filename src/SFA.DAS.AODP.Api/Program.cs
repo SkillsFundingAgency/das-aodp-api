@@ -38,7 +38,7 @@ if (!string.IsNullOrEmpty(connectionString))
 }
 else
 {
-    throw new Exception("No AI string found");
+    //throw new Exception("No AI string found");
 }
 
 var app = builder.Build();
