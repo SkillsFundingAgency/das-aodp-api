@@ -15,6 +15,8 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "SFA.DAS.AODP.Database", "SF
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFA.DAS.AODP.Tests", "SFA.DAS.AODP.Test\SFA.DAS.AODP.Tests\SFA.DAS.AODP.Tests.csproj", "{B1A25FB4-BB68-4082-B434-73BAB37055BF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFA.DAS.AODP.Data.Tests", "SFA.DAS.AODP.Data.Tests\SFA.DAS.AODP.Data.Tests.csproj", "{8FD80294-2E24-41EE-AEF8-A68A2BE3B505}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{B1A25FB4-BB68-4082-B434-73BAB37055BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1A25FB4-BB68-4082-B434-73BAB37055BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1A25FB4-BB68-4082-B434-73BAB37055BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FD80294-2E24-41EE-AEF8-A68A2BE3B505}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FD80294-2E24-41EE-AEF8-A68A2BE3B505}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FD80294-2E24-41EE-AEF8-A68A2BE3B505}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FD80294-2E24-41EE-AEF8-A68A2BE3B505}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Application;
-using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 namespace SFA.DAS.AODP.Data.Repositories.Application
 {
@@ -14,9 +13,10 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             _context = context;
         }
 
-        public async Task<Data.Entities.Application.ApplicationPage> Create(Data.Entities.Application.ApplicationPage application)
+        public async Task<ApplicationPage> Create(ApplicationPage application)
         {
             application.Id = Guid.NewGuid();
+
             await _context.ApplicationPages.AddAsync(application);
             await _context.SaveChangesAsync();
 
@@ -24,7 +24,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
         }
 
 
-        public async Task<Data.Entities.Application.ApplicationPage> Update(Data.Entities.Application.ApplicationPage application)
+        public async Task<ApplicationPage> Update(ApplicationPage application)
         {
             _context.ApplicationPages.Update(application);
             await _context.SaveChangesAsync();
@@ -32,7 +32,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             return application;
         }
 
-        public async Task<Data.Entities.Application.ApplicationPage?> GetApplicationPageByPageIdAsync(Guid applicationId, Guid pageId)
+        public async Task<ApplicationPage?> GetApplicationPageByPageIdAsync(Guid applicationId, Guid pageId)
         {
             return await _context
                 .ApplicationPages
