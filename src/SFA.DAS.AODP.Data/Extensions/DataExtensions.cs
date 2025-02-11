@@ -26,14 +26,7 @@ namespace SFA.DAS.AODP.Data.Extensions
         {
             ArgumentNullException.ThrowIfNull(connectionString);
 
-            var connectionStringBuilder = new SqlConnectionStringBuilder(connectionString);
-            var useManagedIdentity = !connectionStringBuilder.IntegratedSecurity && string.IsNullOrEmpty(connectionStringBuilder.UserID);
-
-            if (!useManagedIdentity)
-            {
-                return new SqlConnection(connectionString);
-            }
-
+ 
             return new SqlConnection
             {
                 ConnectionString = connectionString,
@@ -58,7 +51,7 @@ namespace SFA.DAS.AODP.Data.Extensions
                 {
                     throw new Exception("Database connection string not found");
                 }
-
+                connectionString = connectionString.Replace("Authentication=Active Directory Default;", "");
 
                 var connection = DatabaseExtensions.GetSqlConnection(connectionString);
                 options.UseSqlServer(connection);
