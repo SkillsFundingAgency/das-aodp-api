@@ -72,6 +72,10 @@
         "logAnalyticsWorkspaceName": {
             "type": "string"
         },
+        "minimumTlsVersion": {
+            "type": "string",
+            "defaultValue": "TLS1_2"
+        },
         "utcValue": {
             "type": "string",
             "defaultValue": "[utcNow()]"
@@ -82,7 +86,8 @@
         "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
         "resourceGroupName": "[concat(variables('resourceNamePrefix'), '-rg')]",
         "appServiceName": "[concat(variables('resourceNamePrefix'), '-as')]",
-        "databaseName": "[concat(variables('resourceNamePrefix'), '-db')]",
+        "databaseName": "[concat(replace(variables('resourceNamePrefix'), 'api', ''), '-db')]",
+        "storageAccountName": "[concat(replace(replace(variables('resourceNamePrefix'), 'api', ''), '-', ''), 'str')]",
         "configNames": "SFA.DAS.AODP.Api"
     },
     "resources": [
@@ -253,6 +258,30 @@
                     },
                     "logAnalyticsWorkspaceName": {
                         "value": "[parameters('logAnalyticsWorkspaceName')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2020-06-01",
+            "name": "[concat('storage-account-', parameters('utcValue'))]",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'), 'storage-account-arm.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "storageAccountName": {
+                        "value": "[variables('storageAccountName')]"
+                    },
+                    "allowSharedKeyAccess": {
+                        "value": false
+                    },
+                    "minimumTlsVersion": {
+                        "value": "[parameters('minimumTlsVersion')]"
                     }
                 }
             }
