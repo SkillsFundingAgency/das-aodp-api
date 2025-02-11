@@ -283,6 +283,9 @@
                     "storageKind": {
                         "value": "BlobStorage"
                     },
+                    "accessTier":{
+                        "value": "Hot"
+                    },
                     "minimumTlsVersion": {
                         "value": "[parameters('minimumTlsVersion')]"
                     }
