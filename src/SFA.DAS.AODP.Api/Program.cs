@@ -40,10 +40,10 @@ if (!string.IsNullOrEmpty(connectionString))
         .AddOpenTelemetry()
         .UseAzureMonitor(options => options.ConnectionString = connectionString);
 }
-
-builder.Logging.AddApplicationInsights();
-builder.Logging.AddFilter<ApplicationInsightsLoggerProvider>("SFA.DAS", LogLevel.Information);
-builder.Logging.AddFilter<ApplicationInsightsLoggerProvider>("Microsoft", LogLevel.Warning);
+else
+{
+    throw new Exception("No AI string found");
+}
 
 var app = builder.Build();
 
