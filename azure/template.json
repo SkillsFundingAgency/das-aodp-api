@@ -328,7 +328,7 @@
         },
         {
             "apiVersion": "2022-12-01-preview",
-            "name": "[concat(variables('storageAccountName'), '-defender-profile-', parameters('utcValue'))]",
+            "name": "current",
             "type": "Microsoft.Security/DefenderForStorageSettings",
             "properties": {
                 "isEnabled": true,
@@ -343,7 +343,7 @@
                 },
                 "overrideSubscriptionLevelSettings": true
             },
-            "scope": "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName'))]",
+            "scope": "[resourceId(variables('resourceGroupName'), 'Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
             "dependsOn": [
                 "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]"
             ]
