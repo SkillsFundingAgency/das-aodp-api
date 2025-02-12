@@ -73,14 +73,19 @@
     <Build Include="Schemas\RegulatedSchema.sql" />
     <Build Include="Tables\ActionType.sql" />
     <Build Include="Tables\AwardingOrganisation.sql" />
+    <Build Include="Tables\LifecycleStage.sql" />
+    <Build Include="Tables\ProcessStatus.sql" />
     <Build Include="Tables\Qualification.sql" />
     <Build Include="Tables\QualificationDiscussionHistory.sql" />
     <Build Include="Tables\QualificationOffers.sql" />
     <Build Include="Tables\Qualifications.sql" />
-    <Build Include="Tables\LifecycleStage.sql" />
-    <Build Include="Tables\ProcessStatus.sql" />
     <Build Include="Tables\QualificationVersions.sql" />
     <Build Include="Tables\VersionFieldChanges.sql" />
+    <Build Include="Views\v_QualificationChangedReviewRequired.sql" />
+    <Build Include="Views\v_QualificationChangeSinceLastOutcome.sql" />
+    <Build Include="Views\v_QualificationLastestOutcome.sql" />
+    <Build Include="Views\v_QualificationLastestVersion.sql" />
+    <Build Include="Views\v_QualificationNewReviewRequired.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
