@@ -283,7 +283,7 @@
                     "storageKind": {
                         "value": "BlobStorage"
                     },
-                    "accessTier":{
+                    "accessTier": {
                         "value": "Hot"
                     },
                     "minimumTlsVersion": {
@@ -318,6 +318,25 @@
             "dependsOn": [
                 "[concat('storage-account-', parameters('utcValue'))]"
             ]
+        },
+        {
+            "apiVersion": "2022-12-01-preview",
+            "name": "[concat(variables('storageAccountName'), '-defender-profile-', parameters('utcValue'))]",
+            "type": "Microsoft.Security/DefenderForStorageSettings",
+            "properties": {
+                "isEnabled": true,
+                "malwareScanning": {
+                    "onUpload": {
+                        "isEnabled": true,
+                        "capGBPerMonth": 10
+                    }
+                },
+                "sensitiveDataDiscovery": {
+                    "isEnabled": true
+                },
+                "overrideSubscriptionLevelSettings": true
+            },
+            "scope": "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
         }
     ],
     "outputs": {
