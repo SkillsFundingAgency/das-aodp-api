@@ -343,7 +343,7 @@
                 },
                 "overrideSubscriptionLevelSettings": true
             },
-            "scope": "[resourceId(variables('resourceGroupName'), 'Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
+            "scope": "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
             "dependsOn": [
                 "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]"
             ]
