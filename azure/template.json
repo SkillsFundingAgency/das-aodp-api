@@ -76,6 +76,10 @@
             "type": "string",
             "defaultValue": "TLS1_2"
         },
+        "gbScanLimit": {
+            "type": "int",
+            "defaultValue" : 10
+        },
         "utcValue": {
             "type": "string",
             "defaultValue": "[utcNow()]"
@@ -264,7 +268,7 @@
         },
         {
             "apiVersion": "2020-06-01",
-            "name": "[concat('storage-account-', parameters('utcValue'))]",
+            "name": "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]",
             "resourceGroup": "[variables('resourceGroupName')]",
             "type": "Microsoft.Resources/deployments",
             "properties": {
@@ -316,7 +320,7 @@
                 }
             },
             "dependsOn": [
-                "[concat('storage-account-', parameters('utcValue'))]"
+                "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]"
             ]
         },
         {
@@ -328,7 +332,7 @@
                 "malwareScanning": {
                     "onUpload": {
                         "isEnabled": true,
-                        "capGBPerMonth": 10
+                        "capGBPerMonth": "[parameters('gbScanLimit')]"
                     }
                 },
                 "sensitiveDataDiscovery": {
@@ -336,7 +340,10 @@
                 },
                 "overrideSubscriptionLevelSettings": true
             },
-            "scope": "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]"
+            "scope": "[resourceId('Microsoft.Storage/storageAccounts', concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue')))]",
+            "dependsOn": [
+                "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]"
+            ]
         }
     ],
     "outputs": {
