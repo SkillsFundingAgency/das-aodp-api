@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 
-namespace SFA.DAS.AODP.Api.Controllers
+namespace SFA.DAS.AODP.Api.Controllers.Qualification
 {
     [ApiController]
     [Route("api/new-qualifications")]

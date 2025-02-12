@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using SFA.DAS.AODP.Api.Controllers;
+using SFA.DAS.AODP.Api.Controllers.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Models.Qualifications;
 
