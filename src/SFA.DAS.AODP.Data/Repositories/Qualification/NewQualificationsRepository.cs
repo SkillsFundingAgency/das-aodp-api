@@ -13,18 +13,15 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             _context = context;
         }
 
-  public async Task<List<NewQualification>> GetAllNewQualificationsAsync()
-        {
-            return await _context.QualificationNewReviewRequired
-                .Select(q => new NewQualification
-                {
-                    Title = q.QualificationTitle,
-                    Reference = q.QualificationReference,
-                    AwardingOrganisation = q.AwardingOrganisation,
-                    Status = "New"
-                })
-                .ToListAsync();
-        }
+        public async Task<List<NewQualification>> GetAllNewQualificationsAsync() => await _context.QualificationNewReviewRequired
+                      .Select(q => new NewQualification
+                      {
+                          Title = q.QualificationTitle,
+                          Reference = q.QualificationReference,
+                          AwardingOrganisation = q.AwardingOrganisation,
+                          Status = "New"
+                      })
+                      .ToListAsync();
 
         public async Task<QualificationDetails?> GetQualificationDetailsByIdAsync(string qualificationReference)
         {
