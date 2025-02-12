@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SFA.DAS.AODP.Application.Queries.FormBuilder.Routes;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Questions;
@@ -17,6 +18,7 @@ public class GetQuestionByIdQueryResponse()
 
     public TextInputOptions TextInput { get; set; } = new();
     public List<RadioOptionItem> RadioOptions { get; set; } = new();
+    public List<RouteInformation> Routes { get; set; } = new();
 
     public bool Editable { get; set; }
     public class TextInputOptions
@@ -31,7 +33,16 @@ public class GetQuestionByIdQueryResponse()
         public int Order { get; set; }
     }
 
-    public static implicit operator GetQuestionByIdQueryResponse(Question entity)
+    public class RouteInformation
+    {
+        public Page? NextPage { get; set; }
+        public Section? NextSection { get; set; }
+        public bool EndForm { get; set; }
+        public bool EndSection { get; set; }
+        public RadioOptionItem Option { get; set; }
+    }
+
+    public static GetQuestionByIdQueryResponse Map(Question entity, List<View_QuestionRoutingDetail> questionRoutes)
     {
         var question = new GetQuestionByIdQueryResponse()
         {
@@ -44,6 +55,36 @@ public class GetQuestionByIdQueryResponse()
             Required = entity.Required,
             Type = entity.Type,
         };
+
+        if (questionRoutes != null)
+        {
+            foreach (var option in questionRoutes)
+            {
+                question.Routes.Add(new()
+                {
+                    EndForm = option.EndForm,
+                    EndSection = option.EndSection,
+                    NextPage = new()
+                    {
+                        Id = option.NextPageId ?? default,
+                        Order = option.NextPageOrder ?? default,
+                        Title = option.NextPageTitle
+                    },
+                    NextSection = new()
+                    {
+                        Id = option.NextSectionId ?? default,
+                        Order = option.NextSectionOrder ?? default,
+                        Title = option.NextSectionTitle
+                    },
+                    Option = new()
+                    {
+                        Id = option.OptionId,
+                        Order = option.OptionOrder,
+                        Value = option.OptionValue
+                    }
+                });
+            }
+        }
 
         if (question.Type == QuestionType.Text.ToString() && entity.QuestionValidation != null)
         {
@@ -70,5 +111,4 @@ public class GetQuestionByIdQueryResponse()
 
         return question;
     }
-
 }

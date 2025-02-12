@@ -25,10 +25,16 @@ public class RouteRepository : IRouteRepository
         return await _context.View_AvailableQuestionsForRoutings.Where(v => v.PageId == pageId)
             .ToListAsync();
     }
-
+    
     public async Task<List<View_QuestionRoutingDetail>> GetQuestionRoutingDetailsByFormVersionId(Guid formVersionId)
     {
         return await _context.View_QuestionRoutingDetails.Where(v => v.FormVersionId == formVersionId)
+            .ToListAsync();
+    }
+
+    public async Task<List<View_QuestionRoutingDetail>> GetQuestionRoutingDetailsByQuestionId(Guid questionId)
+    {
+        return await _context.View_QuestionRoutingDetails.Where(v => v.QuestionId == questionId)
             .ToListAsync();
     }
 
