@@ -45,16 +45,16 @@ namespace SFA.DAS.AODP.Data.Extensions
                 //if (string.IsNullOrWhiteSpace(connectionString))
                 //{
                 //}
-                //var connectionString = configuration["AodpApi:DatabaseConnectionString"];
+                var connectionString = configuration["AodpApi:DatabaseConnectionString"];
 
-                //if (string.IsNullOrWhiteSpace(connectionString))
-                //{
-                //    throw new Exception("Database connection string not found");
-                //}
+                if (string.IsNullOrWhiteSpace(connectionString))
+                {
+                    throw new Exception("Database connection string not found");
+                }
                 //connectionString = connectionString.Replace("Authentication=Active Directory Default;", "");
 
                 //var connection = DatabaseExtensions.GetSqlConnection(connectionString);
-                //options.UseSqlServer(connection);
+                options.UseSqlServer(connectionString);
 
             });
             services.AddScoped<IFormVersionRepository, FormVersionRepository>();

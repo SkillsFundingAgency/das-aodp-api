@@ -46,17 +46,7 @@ namespace SFA.DAS.AODP.Data.Context
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var connection = new SqlConnection
-            {
-                ConnectionString = _configuration["AodpApi:DatabaseConnectionString"],
-            };
-
-            optionsBuilder.UseSqlServer(connection, options =>
-                options.EnableRetryOnFailure(
-                    5,
-                    TimeSpan.FromSeconds(20),
-                    null
-                ));
+            base.OnConfiguring(optionsBuilder);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
