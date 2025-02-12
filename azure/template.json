@@ -76,6 +76,9 @@
             "type": "string",
             "defaultValue": "TLS1_2"
         },
+        "storageAccountName": {
+            "type": "string"
+        },
         "gbScanLimit": {
             "type": "int",
             "defaultValue" : 10
@@ -340,7 +343,7 @@
                 },
                 "overrideSubscriptionLevelSettings": true
             },
-            "scope": "[subscriptionResourceId('resourceGroups/', variables('resourceGroupName'), '/providers/Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
+            "scope": "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName'))]",
             "dependsOn": [
                 "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]"
             ]
