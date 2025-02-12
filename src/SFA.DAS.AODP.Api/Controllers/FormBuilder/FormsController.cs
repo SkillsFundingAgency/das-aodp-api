@@ -8,7 +8,6 @@ using SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
 namespace SFA.DAS.AODP.Api.Controllers.FormBuilder;
 
-[AllowAnonymous]
 [ApiController]
 [Route("api/[controller]")]
 public class FormsController : Controller

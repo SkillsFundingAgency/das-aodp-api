@@ -11,49 +11,21 @@ using System.Data.Common;
 
 namespace SFA.DAS.AODP.Data.Extensions
 {
-    public static class DatabaseExtensions
-    {
-        private const string AzureResource = "https://database.windows.net/";
-
-        // Take advantage of ChainedTokenCredential's built-in caching
-        private static readonly ChainedTokenCredential AzureServiceTokenProvider = new(
-            new ManagedIdentityCredential(),
-            new AzureCliCredential(),
-            new VisualStudioCodeCredential(),
-            new VisualStudioCredential());
-
-        public static DbConnection GetSqlConnection(string? connectionString)
-        {
-            ArgumentNullException.ThrowIfNull(connectionString);
-
- 
-            return new SqlConnection
-            {
-                ConnectionString = connectionString,
-                AccessToken = AzureServiceTokenProvider.GetToken(new TokenRequestContext(scopes: [AzureResource])).Token
-            };
-        }
-    }
-
     public static class DataExtensions
     {
         public static IServiceCollection ConfigureDatabase(this IServiceCollection services, IConfigurationRoot configuration)
         {
             services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options =>
             {
-                //var connectionString = configuration.GetConnectionString("SQLSeverConnectionString");
-                //if (string.IsNullOrWhiteSpace(connectionString))
-                //{
-                //}
-                var connectionString = configuration["AodpApi:DatabaseConnectionString"];
-
+                var connectionString = configuration.GetConnectionString("SQLSeverConnectionString");
+                if (string.IsNullOrWhiteSpace(connectionString))
+                {
+                    connectionString = configuration["AodpApi:DatabaseConnectionString"];
+                }
                 if (string.IsNullOrWhiteSpace(connectionString))
                 {
                     throw new Exception("Database connection string not found");
                 }
-                //connectionString = connectionString.Replace("Authentication=Active Directory Default;", "");
-
-                //var connection = DatabaseExtensions.GetSqlConnection(connectionString);
                 options.UseSqlServer(connectionString);
 
             });
