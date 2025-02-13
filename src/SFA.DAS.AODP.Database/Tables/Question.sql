@@ -14,9 +14,6 @@
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 
-ALTER TABLE [dbo].[Questions] ADD  CONSTRAINT [DF_Questions_Id]  DEFAULT (newid()) FOR [Id]
-GO
-
 ALTER TABLE [dbo].[Questions]  WITH CHECK ADD  CONSTRAINT [FK_Questions_Pages] FOREIGN KEY([PageId])
 REFERENCES [dbo].[Pages] ([Id])
 GO
