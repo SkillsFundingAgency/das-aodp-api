@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using SFA.DAS.AODP.Data.Entities.FormBuilder;
+﻿using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Questions;
 
@@ -16,7 +15,10 @@ public class GetQuestionByIdQueryResponse()
     public string Type { get; set; }
 
     public TextInputOptions TextInput { get; set; } = new();
-    public List<RadioOptionItem> RadioOptions { get; set; } = new();
+    public NumberInputOptions NumberInput { get; set; } = new();
+    public CheckboxOptions Checkbox { get; set; } = new();
+
+    public List<Option> Options { get; set; } = new();
 
     public bool Editable { get; set; }
     public class TextInputOptions
@@ -24,11 +26,24 @@ public class GetQuestionByIdQueryResponse()
         public int? MinLength { get; set; }
         public int? MaxLength { get; set; }
     }
-    public class RadioOptionItem
+    public class Option
     {
         public Guid Id { get; set; }
         public string Value { get; set; }
         public int Order { get; set; }
+    }
+
+    public class CheckboxOptions
+    {
+        public int? MinNumberOfOptions { get; set; }
+        public int? MaxNumberOfOptions { get; set; }
+    }
+
+    public class NumberInputOptions
+    {
+        public int? GreaterThanOrEqualTo { get; set; }
+        public int? LessThanOrEqualTo { get; set; }
+        public int? NotEqualTo { get; set; }
     }
 
     public static implicit operator GetQuestionByIdQueryResponse(Question entity)
@@ -45,7 +60,7 @@ public class GetQuestionByIdQueryResponse()
             Type = entity.Type,
         };
 
-        if (question.Type == QuestionType.Text.ToString() && entity.QuestionValidation != null)
+        if ((question.Type == QuestionType.TextArea.ToString() || question.Type == QuestionType.Text.ToString()) && entity.QuestionValidation != null)
         {
             question.TextInput = new()
             {
@@ -54,18 +69,37 @@ public class GetQuestionByIdQueryResponse()
             };
         }
 
-        else if (question.Type == QuestionType.Radio.ToString() && entity.QuestionOptions != null)
+        else if ((question.Type == QuestionType.Radio.ToString() || question.Type == QuestionType.MultiChoice.ToString()) && entity.QuestionOptions != null)
         {
-            question.RadioOptions = new();
+            question.Options = new();
             foreach (var option in entity.QuestionOptions)
             {
-                question.RadioOptions.Add(new()
+                question.Options.Add(new()
                 {
                     Id = option.Id,
                     Value = option.Value,
                     Order = option.Order,
                 });
             }
+
+
+            if (question.Type == QuestionType.MultiChoice.ToString())
+            {
+                question.Checkbox = new()
+                {
+                    MaxNumberOfOptions = entity.QuestionValidation?.MaxNumberOfOptions ?? 0,
+                    MinNumberOfOptions = entity.QuestionValidation?.MinNumberOfOptions ?? 0,
+                };
+            }
+        }
+        else if (question.Type == QuestionType.Number.ToString())
+        {
+            question.NumberInput = new()
+            {
+                GreaterThanOrEqualTo = entity.QuestionValidation?.NumberGreaterThanOrEqualTo,
+                LessThanOrEqualTo = entity.QuestionValidation?.NumberLessThanOrEqualTo,
+                NotEqualTo = entity.QuestionValidation?.NumberNotEqualTo,
+            };
         }
 
         return question;

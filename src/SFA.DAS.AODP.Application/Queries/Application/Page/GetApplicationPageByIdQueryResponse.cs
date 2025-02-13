@@ -30,10 +30,12 @@ public class GetApplicationPageByIdQueryResponse
         public int Order { get; set; }
 
         public TextInputOptions TextInput { get; set; } = new();
-        public RadioOptions RadioButton { get; set; } = new();
+        public NumberInputOptions NumberInput { get; set; } = new();
+        public CheckboxOptions Checkbox { get; set; } = new();
+        public List<Option> Options { get; set; } = new();
+
 
         public List<RouteInformation> Routes { get; set; } = new();
-
 
 
         public static implicit operator Question(SFA.DAS.AODP.Data.Entities.FormBuilder.Question entity)
@@ -56,13 +58,22 @@ public class GetApplicationPageByIdQueryResponse
                     MaxLength = entity.QuestionValidation.MaxLength,
                 };
             }
-
-            else if (entity.Type == QuestionType.Radio.ToString() && entity.QuestionOptions != null)
+            else if (entity.Type == QuestionType.Number.ToString())
             {
-                model.RadioButton = new();
+                model.NumberInput = new()
+                {
+                    GreaterThanOrEqualTo = entity.QuestionValidation.NumberGreaterThanOrEqualTo,
+                    LessThanOrEqualTo = entity.QuestionValidation.NumberLessThanOrEqualTo,
+                    NotEqualTo = entity.QuestionValidation.NumberNotEqualTo
+                };
+            }
+
+            else if ((entity.Type == QuestionType.Radio.ToString() || entity.Type == QuestionType.MultiChoice.ToString()) && entity.QuestionOptions != null)
+            {
+                model.Options = new();
                 foreach (var option in entity.QuestionOptions)
                 {
-                    model.RadioButton.MultiChoice.Add(new()
+                    model.Options.Add(new()
                     {
                         Id = option.Id,
                         Value = option.Value,
@@ -70,19 +81,30 @@ public class GetApplicationPageByIdQueryResponse
                     });
                 }
 
-                if (entity.Routes != null && entity.Routes.Count > 0)
+
+                if (model.Type == QuestionType.MultiChoice.ToString())
                 {
-                    foreach (var route in entity.Routes)
+                    model.Checkbox = new()
                     {
-                        model.Routes.Add(new()
-                        {
-                            EndForm = route.EndForm,
-                            EndSection = route.EndSection,
-                            NextPageOrder = route.NextPage?.Order,
-                            NextSectionOrder = route.NextSection?.Order,
-                            OptionId = route.SourceOptionId
-                        });
-                    }
+                        MaxNumberOfOptions = entity.QuestionValidation?.MaxNumberOfOptions ?? 0,
+                        MinNumberOfOptions = entity.QuestionValidation?.MinNumberOfOptions ?? 0,
+                    };
+                }
+            }
+
+
+            if (entity.Routes != null && entity.Routes.Count > 0)
+            {
+                foreach (var route in entity.Routes)
+                {
+                    model.Routes.Add(new()
+                    {
+                        EndForm = route.EndForm,
+                        EndSection = route.EndSection,
+                        NextPageOrder = route.NextPage?.Order,
+                        NextSectionOrder = route.NextSection?.Order,
+                        OptionId = route.SourceOptionId
+                    });
                 }
             }
 
@@ -98,16 +120,25 @@ public class GetApplicationPageByIdQueryResponse
 
     }
 
-    public class RadioOptions
+    public class CheckboxOptions
     {
-        public List<RadioOptionItem> MultiChoice { get; set; } = new();
+        public int? MinNumberOfOptions { get; set; }
+        public int? MaxNumberOfOptions { get; set; }
+    }
 
-        public class RadioOptionItem
-        {
-            public Guid Id { get; set; }
-            public string Value { get; set; }
-            public int Order { get; set; }
-        }
+    public class NumberInputOptions
+    {
+        public int? GreaterThanOrEqualTo { get; set; }
+        public int? LessThanOrEqualTo { get; set; }
+        public int? NotEqualTo { get; set; }
+    }
+
+
+    public class Option
+    {
+        public Guid Id { get; set; }
+        public string Value { get; set; }
+        public int Order { get; set; }
     }
 
 
