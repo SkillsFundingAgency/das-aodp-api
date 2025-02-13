@@ -76,9 +76,6 @@
             "type": "string",
             "defaultValue": "TLS1_2"
         },
-        "storageAccountName": {
-            "type": "string"
-        },
         "gbScanLimit": {
             "type": "int",
             "defaultValue" : 10
@@ -89,7 +86,7 @@
         }
     },
     "variables": {
-        "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/DASD-12715/templates/",
+        "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
         "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
         "resourceGroupName": "[concat(variables('resourceNamePrefix'), '-rg')]",
         "appServiceName": "[concat(variables('resourceNamePrefix'), '-as')]",
@@ -326,7 +323,7 @@
                 "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]"
             ]
         },
-         {
+        {
             "apiVersion": "2023-07-01",
             "name": "[concat(variables('storageAccountName'), '-defender-', parameters('utcValue'))]",
             "resourceGroup": "[variables('resourceGroupName')]",
