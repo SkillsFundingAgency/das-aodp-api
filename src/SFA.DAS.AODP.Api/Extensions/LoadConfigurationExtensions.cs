@@ -1,39 +1,33 @@
 ﻿using SFA.DAS.Configuration.AzureTableStorage;
 using System.Diagnostics.CodeAnalysis;
-namespace SFA.DAS.AODP.Common.Extensions
-{
+namespace SFA.DAS.AODP.Api.Extensions;
 
-    [ExcludeFromCodeCoverage]
-    public static class LoadConfigurationExtensions
+
+[ExcludeFromCodeCoverage]
+public static class LoadConfigurationExtensions
+{
+    public static IConfigurationRoot LoadConfiguration(this IConfiguration configuration, IServiceCollection services, bool isDevelopment)
     {
-        public static IConfigurationRoot LoadConfiguration(this IConfiguration configuration, IServiceCollection services, bool isDevelopment)
-        {
-            var configBuilder = new ConfigurationBuilder()
-                .AddConfiguration(configuration)
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddEnvironmentVariables();
+        var configBuilder = new ConfigurationBuilder()
+            .AddConfiguration(configuration)
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddEnvironmentVariables();
 
 #if DEBUG
-            configBuilder
-                .AddJsonFile("appsettings.json", true)
-                .AddJsonFile("appsettings.Development.json", true);
+        configBuilder
+            .AddJsonFile("appsettings.json", true)
+            .AddJsonFile("appsettings.Development.json", true);
 #endif
 
-            if (!isDevelopment)
-            {
+        configBuilder.AddAzureTableStorage(options =>
+        {
+            options.ConfigurationKeys = configuration["ConfigNames"].Split(",");
+            options.StorageConnectionString = configuration["ConfigurationStorageConnectionString"];
+            options.EnvironmentName = configuration["EnvironmentName"];
+            options.PreFixConfigurationKeys = false;
+        });
 
-                configBuilder.AddAzureTableStorage(options =>
-                {
-                    options.ConfigurationKeys = configuration["ConfigNames"].Split(",");
-                    options.StorageConnectionString = configuration["ConfigurationStorageConnectionString"];
-                    options.EnvironmentName = configuration["EnvironmentName"];
-                    options.PreFixConfigurationKeys = false;
-                }
-                   );
-            }
+        return configBuilder.Build();
 
-            return configBuilder.Build();
-
-        }
     }
 }
