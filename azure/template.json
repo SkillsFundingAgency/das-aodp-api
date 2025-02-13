@@ -327,7 +327,7 @@
             ]
         },
          {
-            "apiVersion": "2022-12-01-preview",
+            "apiVersion": "2023-07-01",
             "name": "[concat(variables('storageAccountName'), '-defender-', parameters('utcValue'))]",
             "resourceGroup": "[variables('resourceGroupName')]",
             "type": "Microsoft.Resources/deployments",
