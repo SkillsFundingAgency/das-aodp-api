@@ -19,20 +19,14 @@ public static class LoadConfigurationExtensions
             .AddJsonFile("appsettings.Development.json", true);
 #endif
 
-        //try
-        //{
-        //    configBuilder.AddAzureTableStorage(options =>
-        //    {
-        //        options.ConfigurationKeys = configuration["ConfigNames"].Split(",");
-        //        options.StorageConnectionString = configuration["ConfigurationStorageConnectionString"];
-        //        options.EnvironmentName = configuration["EnvironmentName"];
-        //        options.PreFixConfigurationKeys = false;
-        //    });
-        //}
-        //catch
-        //{
-        //    if (!isDevelopment) throw;
-        //}
+        configBuilder.AddAzureTableStorage(options =>
+        {
+            options.ConfigurationKeys = configuration["ConfigNames"].Split(",");
+            options.StorageConnectionString = configuration["ConfigurationStorageConnectionString"];
+            options.EnvironmentName = configuration["EnvironmentName"];
+            options.PreFixConfigurationKeys = false;
+        });
+
         return configBuilder.Build();
 
     }

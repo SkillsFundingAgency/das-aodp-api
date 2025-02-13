@@ -8,6 +8,6 @@ public class Form
     public Guid Id { get; set; }
     public string Status { get; set; }
     public virtual List<FormVersion> Versions { get; set; }
-
+    public int Order { get; set; }
 
 }

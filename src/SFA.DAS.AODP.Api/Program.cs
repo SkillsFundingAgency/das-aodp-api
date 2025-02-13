@@ -29,6 +29,18 @@ builder.Services
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "AODP Inner API", Version = "v1" });
     });
 
+
+var connectionString = configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
+
+if (!string.IsNullOrEmpty(connectionString))
+{
+    builder.Services.AddApplicationInsightsTelemetry();
+}
+else
+{
+    //throw new Exception("No AI string found");
+}
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

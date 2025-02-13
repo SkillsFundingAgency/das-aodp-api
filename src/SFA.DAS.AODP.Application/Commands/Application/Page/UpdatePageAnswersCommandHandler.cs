@@ -98,7 +98,7 @@ public class UpdatePageAnswersCommandHandler : IRequestHandler<UpdatePageAnswers
 
             if (request.Routing.NextSectionOrder.HasValue || request.Routing.EndForm)
             {
-                var nextSectionsPagesToSkip = await _pageRepository.GetPagesIdInFormBySectionOrderAsync(request.SectionId, formPage.Section.Order + 1, request.Routing.NextSectionOrder);
+                var nextSectionsPagesToSkip = await _pageRepository.GetPagesIdInFormBySectionOrderAsync(request.FormVersionId, formPage.Section.Order + 1, request.Routing.NextSectionOrder);
                 pageIdsToSkip.AddRange(nextSectionsPagesToSkip);
 
             }

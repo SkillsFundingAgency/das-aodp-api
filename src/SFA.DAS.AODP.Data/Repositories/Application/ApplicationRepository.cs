@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Application;
+using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
 using System;
 
@@ -38,9 +39,9 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             return res is null ? throw new RecordNotFoundException(applicationId) : res;
         }
 
-        public async Task<List<View_RemainingPagesBySectionForApplication>> GetRemainingPagesBySectionForApplicationsAsync(Guid applicationId)
+        public async Task<List<View_SectionSummaryForApplication>> GetSectionSummaryByApplicationIdAsync(Guid applicationId)
         {
-            return await _context.View_RemainingPagesBySectionForApplication.Where(a => a.ApplicationId == applicationId).ToListAsync();
+            return await _context.View_SectionSummaryForApplications.Where(a => a.ApplicationId == applicationId).ToListAsync();
         }
     }
 }

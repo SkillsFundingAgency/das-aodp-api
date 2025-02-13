@@ -46,9 +46,9 @@ public class PageRepository : IPageRepository
         return await _context.Pages.Where(v => v.SectionId == sectionId && v.Order >= startOrderInclusive && (!endOrderExclusive.HasValue || v.Order < endOrderExclusive)).Select(p => p.Id).ToListAsync();
     }
 
-    public async Task<List<Guid>> GetPagesIdInFormBySectionOrderAsync(Guid formVersionId, int startSectionOrderInclusive, int? endSectionOrderInclusive)
+    public async Task<List<Guid>> GetPagesIdInFormBySectionOrderAsync(Guid formVersionId, int startSectionOrderInclusive, int? endSectionOrderExclusive)
     {
-        return await _context.Pages.Where(v => v.Section.FormVersionId == formVersionId && v.Section.Order >= startSectionOrderInclusive && (!endSectionOrderInclusive.HasValue || v.Section.Order <= endSectionOrderInclusive)).Select(p => p.Id).ToListAsync();
+        return await _context.Pages.Where(v => v.Section.FormVersionId == formVersionId && v.Section.Order >= startSectionOrderInclusive && (!endSectionOrderExclusive.HasValue || v.Section.Order < endSectionOrderExclusive)).Select(p => p.Id).ToListAsync();
     }
 
     /// <summary>
@@ -203,8 +203,8 @@ public class PageRepository : IPageRepository
             throw new RecordNotFoundException(id);
 
         var nextHigherModel = await _context.Pages
-            .OrderBy(v => v.Order)
-            .Where(v => v.Order < modelToUpdate.Order)
+            .OrderByDescending(v => v.Order)
+            .Where(v => v.Order < modelToUpdate.Order && v.SectionId == modelToUpdate.SectionId)
             .FirstOrDefaultAsync();
         if (nextHigherModel is null)
             return true;
@@ -229,14 +229,16 @@ public class PageRepository : IPageRepository
             throw new RecordNotFoundException(id);
 
         var nextLowerModel = await _context.Pages
-            .OrderByDescending(v => v.Order)
-            .Where(v => v.Order > modelToUpdate.Order)
+            .OrderBy(v => v.Order)
+            .Where(v => v.Order > modelToUpdate.Order && v.SectionId == modelToUpdate.SectionId)
             .FirstOrDefaultAsync();
         if (nextLowerModel is null)
             return true;
         var nextLowest = nextLowerModel.Order;
         nextLowerModel.Order = modelToUpdate.Order;
         modelToUpdate.Order = nextLowest;
+
+        _context.Pages.UpdateRange([nextLowerModel, modelToUpdate]);
         await _context.SaveChangesAsync();
 
         return true;

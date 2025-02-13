@@ -23,7 +23,7 @@ public class GetFormVersionByIdQueryResponse
             Id = formVersion.Id,
             FormId = formVersion.FormId,
             Description = formVersion.Description,
-            Order = formVersion.Order,
+            Order = formVersion.Form.Order,
             Title = formVersion.Title,
             Version = formVersion.Version,
             Status = formVersion.Status,
