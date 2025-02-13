@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
+using SFA.DAS.AODP.Data.Repositories.Qualification;
 using System.Data.Common;
 
 namespace SFA.DAS.AODP.Data.Extensions
@@ -41,6 +42,7 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IApplicationRepository, ApplicationRepository>();
             services.AddScoped<IApplicationPageRepository, ApplicationPageRepository>();
             services.AddScoped<IApplicationQuestionAnswerRepository, ApplicationQuestionAnswerRepository>();
+            services.AddScoped<INewQualificationsRepository, NewQualificationsRepository>();
 
             return services;
         }

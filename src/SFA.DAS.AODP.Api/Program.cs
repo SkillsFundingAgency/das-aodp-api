@@ -1,15 +1,20 @@
 using Microsoft.OpenApi.Models;
 using SFA.DAS.AODP.Api.Extensions;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
+using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Application.Swashbuckle;
 
 var builder = WebApplication.CreateBuilder(args);
+
 var configuration = builder.Configuration.LoadConfiguration(builder.Services, builder.Environment.IsDevelopment());
 
 // Add services to the container.
 builder.Services
     .AddServiceRegistrations(configuration)
-    .AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<CreateFormVersionCommandHandler>())
+    .AddMediatR(cfg =>
+        cfg.RegisterServicesFromAssemblies(
+            typeof(GetNewQualificationsQueryHandler).Assembly,
+            typeof(CreateFormVersionCommandHandler).Assembly))
     .AddLogging()
     .AddDataProtectionKeys("das-aodp-api", configuration, builder.Environment.IsDevelopment())
     .AddHttpContextAccessor()

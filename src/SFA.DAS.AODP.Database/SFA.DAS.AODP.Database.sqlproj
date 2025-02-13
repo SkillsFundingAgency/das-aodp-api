@@ -81,6 +81,7 @@
     <Build Include="Tables\ProcessStatus.sql" />
     <Build Include="Tables\QualificationVersions.sql" />
     <Build Include="Tables\VersionFieldChanges.sql" />
+    <Build Include="Views\v_QualificationNewReviewRequired.sql" />
     <Build Include="Tables\QualificationImportStaging.sql" />
     <Build Include="Tables\Route.sql" />
     <Build Include="Tables\QuestionOption.sql" />
