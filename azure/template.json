@@ -89,7 +89,7 @@
         }
     },
     "variables": {
-        "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/master/templates/",
+        "deploymentUrlBase": "https://raw.githubusercontent.com/SkillsFundingAgency/das-platform-building-blocks/DASD-12715/templates/",
         "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
         "resourceGroupName": "[concat(variables('resourceNamePrefix'), '-rg')]",
         "appServiceName": "[concat(variables('resourceNamePrefix'), '-as')]",
@@ -326,27 +326,35 @@
                 "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]"
             ]
         },
-        {
+         {
             "apiVersion": "2022-12-01-preview",
-            "name": "current",
-            "type": "Microsoft.Security/DefenderForStorageSettings",
+            "name": "[concat(variables('storageAccountName'), '-defender-', parameters('utcValue'))]",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "type": "Microsoft.Resources/deployments",
             "properties": {
-                "isEnabled": true,
-                "malwareScanning": {
-                    "onUpload": {
-                        "isEnabled": true,
-                        "capGBPerMonth": "[parameters('gbScanLimit')]"
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'), 'defender-for-storage')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "storageAccountName": {
+                        "value": "[variables('storageAccountName')]"
+                    },
+                    "enableOnUploadMalwareScanning": {
+                        "value": true
+                    },
+                    "capGBPerMonth": {
+                        "value": "[parameters('gbScanLimit')]"
+                    },
+                    "overrideSubscriptionLevelSettings": {
+                        "value": true
+                    },
+                    "enableSensitiveDataDiscovery": {
+                        "value": true
                     }
-                },
-                "sensitiveDataDiscovery": {
-                    "isEnabled": true
-                },
-                "overrideSubscriptionLevelSettings": true
-            },
-            "scope": "[resourceId('Microsoft.Storage/storageAccounts', variables('StorageAccountName'))]",
-            "dependsOn": [
-                "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]"
-            ]
+                }
+            }
         }
     ],
     "outputs": {
