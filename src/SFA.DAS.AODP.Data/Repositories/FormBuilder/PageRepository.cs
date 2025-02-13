@@ -46,9 +46,9 @@ public class PageRepository : IPageRepository
         return await _context.Pages.Where(v => v.SectionId == sectionId && v.Order >= startOrderInclusive && (!endOrderExclusive.HasValue || v.Order < endOrderExclusive)).Select(p => p.Id).ToListAsync();
     }
 
-    public async Task<List<Guid>> GetPagesIdInFormBySectionOrderAsync(Guid formVersionId, int startSectionOrderInclusive, int? endSectionOrderInclusive)
+    public async Task<List<Guid>> GetPagesIdInFormBySectionOrderAsync(Guid formVersionId, int startSectionOrderInclusive, int? endSectionOrderExclusive)
     {
-        return await _context.Pages.Where(v => v.Section.FormVersionId == formVersionId && v.Section.Order >= startSectionOrderInclusive && (!endSectionOrderInclusive.HasValue || v.Section.Order <= endSectionOrderInclusive)).Select(p => p.Id).ToListAsync();
+        return await _context.Pages.Where(v => v.Section.FormVersionId == formVersionId && v.Section.Order >= startSectionOrderInclusive && (!endSectionOrderExclusive.HasValue || v.Section.Order < endSectionOrderExclusive)).Select(p => p.Id).ToListAsync();
     }
 
     /// <summary>
@@ -79,9 +79,6 @@ public class PageRepository : IPageRepository
         if (!await _context.Sections.AnyAsync(v => v.Id == page.SectionId))
             throw new NoForeignKeyException(page.SectionId);
 
-        if (!await _context.Sections.AnyAsync(v => v.Id == page.SectionId && v.FormVersion.Status == FormVersionStatus.Draft.ToString()))
-            throw new RecordLockedException();
-
         page.Id = Guid.NewGuid();
         page.Key = Guid.NewGuid();
 
@@ -90,23 +87,26 @@ public class PageRepository : IPageRepository
         return page;
     }
 
-    /// <summary>
-    /// Copies all pages with a given section id, to a new section id. 
-    /// Used when creating a new form version from an old one. 
-    /// </summary>
-    /// <param name="oldSectionId"></param>
-    /// <param name="newSectionId"></param>
-    /// <returns></returns>
-    public async Task<List<Page>> CopyPagesForNewSection(Guid oldSectionId, Guid newSectionId)
+
+    public async Task<Dictionary<Guid, Guid>> CopyPagesForNewFormVersion(Dictionary<Guid, Guid> oldNewSectionIds)
     {
-        var pagesToMigrate = await GetPagesForSectionAsync(oldSectionId);
-        foreach (var p in pagesToMigrate)
+        var oldNewIds = new Dictionary<Guid, Guid>();
+
+        var oldIds = oldNewSectionIds.Keys.ToList();
+        var pagesToMigrate = await _context.Pages.AsNoTracking().Where(v => oldIds.Contains(v.SectionId)).ToListAsync();
+
+        foreach (var page in pagesToMigrate)
         {
-            p.SectionId = newSectionId;
+            var oldPageId = page.Id;
+            page.SectionId = oldNewSectionIds[page.SectionId];
+            page.Id = Guid.NewGuid();
+
+            oldNewIds.Add(oldPageId, page.Id);
         }
         await _context.Pages.AddRangeAsync(pagesToMigrate);
         await _context.SaveChangesAsync();
-        return pagesToMigrate;
+
+        return oldNewIds;
     }
 
     /// <summary>
@@ -123,9 +123,6 @@ public class PageRepository : IPageRepository
         if (pageToUpdate is null)
             throw new RecordNotFoundException(page.Id);
 
-        if (!await _context.Sections.AnyAsync(v => v.Id == page.SectionId && v.FormVersion.Status == FormVersionStatus.Draft.ToString()))
-            throw new RecordLockedException();
-
         pageToUpdate = page;
         await _context.SaveChangesAsync();
         return pageToUpdate;
@@ -141,15 +138,24 @@ public class PageRepository : IPageRepository
     /// <exception cref="RecordLockedException"></exception>
     public async Task<Page> Archive(Guid pageId)
     {
-        var pageToUpdate = await _context.Pages.FirstOrDefaultAsync(v => v.Id == pageId);
+        var pageToUpdate = await _context.Pages
+            .Include(p => p.Questions)
+                .ThenInclude(q => q.QuestionValidation)
+            .Include(p => p.Questions)
+                .ThenInclude(q => q.QuestionOptions)
+            .FirstOrDefaultAsync(v => v.Id == pageId);
+
         if (pageToUpdate is null)
             throw new RecordNotFoundException(pageId);
 
-        if (!await _context.Sections.AnyAsync(v => v.Id == pageToUpdate.SectionId && v.FormVersion.Status != FormVersionStatus.Draft.ToString()))
+        if (await _context.Sections.AnyAsync(v => v.Id == pageToUpdate.SectionId && v.FormVersion.Status != FormVersionStatus.Draft.ToString()))
             throw new RecordLockedException();
 
         _context.Pages.Remove(pageToUpdate);
         await _context.SaveChangesAsync();
+
+        await UpdatePageOrdering(pageToUpdate.SectionId, pageToUpdate.Order);
+
         return pageToUpdate;
     }
 
@@ -175,7 +181,71 @@ public class PageRepository : IPageRepository
             .ThenInclude(r => r.NextSection)
 
             .FirstOrDefaultAsync() ?? throw new RecordNotFoundException(sectionId);
+    }
 
+    private async Task UpdatePageOrdering(Guid sectionId, int deletedPageOrder)
+    {
+        await _context.Pages
+            .Where(p => p.SectionId == sectionId && p.Order > deletedPageOrder)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.Order, p => p.Order - 1));
+    }
 
+    /// <summary>
+    /// Finds a question with a given Id, and finds the next section with a lower Order (so will appear higher in the list) and switches them. 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task<bool> MovePageOrderUp(Guid id)
+    {
+        var modelToUpdate = await _context.Pages.FirstOrDefaultAsync(v => v.Id == id);
+        if (modelToUpdate is null)
+            throw new RecordNotFoundException(id);
+
+        var nextHigherModel = await _context.Pages
+            .OrderByDescending(v => v.Order)
+            .Where(v => v.Order < modelToUpdate.Order && v.SectionId == modelToUpdate.SectionId)
+            .FirstOrDefaultAsync();
+        if (nextHigherModel is null)
+            return true;
+        var nextHighest = nextHigherModel.Order;
+        nextHigherModel.Order = modelToUpdate.Order;
+        modelToUpdate.Order = nextHighest;
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+    /// <summary>
+    /// Finds a question with a given Id, and finds the next section with a higher Order (so will appear lower in the list) and switches them. 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task<bool> MovePageOrderDown(Guid id)
+    {
+        var modelToUpdate = await _context.Pages.FirstOrDefaultAsync(v => v.Id == id);
+        if (modelToUpdate is null)
+            throw new RecordNotFoundException(id);
+
+        var nextLowerModel = await _context.Pages
+            .OrderBy(v => v.Order)
+            .Where(v => v.Order > modelToUpdate.Order && v.SectionId == modelToUpdate.SectionId)
+            .FirstOrDefaultAsync();
+        if (nextLowerModel is null)
+            return true;
+        var nextLowest = nextLowerModel.Order;
+        nextLowerModel.Order = modelToUpdate.Order;
+        modelToUpdate.Order = nextLowest;
+
+        _context.Pages.UpdateRange([nextLowerModel, modelToUpdate]);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<bool> IsPageEditable(Guid id)
+    {
+        return await _context.Pages.AnyAsync(v => v.Id == id && v.Section.FormVersion.Status == FormVersionStatus.Draft.ToString());
     }
 }

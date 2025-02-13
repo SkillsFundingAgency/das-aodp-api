@@ -1,20 +1,21 @@
 ﻿using Moq;
+using Moq;
 using Moq.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Application;
 
 namespace SFA.DAS.AODP.Data.Tests.Repositories.Application.ApplicationPageRepository
 {
-    public class WhenUpdatingApplication
+    public class WhenUpdatingApplicationPage
     {
         private readonly Mock<IApplicationDbContext> _context = new();
 
         private readonly Data.Repositories.Application.ApplicationPageRepository _sut;
 
-        public WhenUpdatingApplication() => _sut = new(_context.Object);
+        public WhenUpdatingApplicationPage() => _sut = new(_context.Object);
 
         [Fact]
-        public async Task Then_The_Application_Is_Updated()
+        public async Task Then_The_ApplicationPage_Is_Updated()
         {
             // Arrange
             ApplicationPage page = new();

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
+using SFA.DAS.AODP.Models.Form;
 
 namespace SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
@@ -54,5 +55,32 @@ public class RouteRepository : IRouteRepository
         }
         await _context.SaveChangesAsync();
     }
-}
 
+
+    public async Task<bool> IsRouteEditable(Guid id)
+    {
+        return await _context.Routes.AnyAsync(v => v.Id == id && v.SourceQuestion.Page.Section.FormVersion.Status == FormVersionStatus.Draft.ToString());
+    }
+
+    public async Task CopyRoutesForNewFormVersion(Dictionary<Guid, Guid> oldNewQuestionIds,
+        Dictionary<Guid, Guid> oldNewPageIds,
+        Dictionary<Guid, Guid> oldNewSectionIds,
+        Dictionary<Guid, Guid> oldNewOptionIds)
+    {
+        var sourceQuestionOldIds = oldNewQuestionIds.Keys.ToList();
+        var toMigrate = await _context.Routes.AsNoTracking().Where(v => sourceQuestionOldIds.Contains(v.SourceQuestionId)).ToListAsync();
+        foreach (var entity in toMigrate)
+        {
+            entity.SourceQuestionId = oldNewQuestionIds[entity.SourceQuestionId];
+            entity.SourceOptionId = oldNewOptionIds[entity.SourceOptionId];
+
+            if (entity.NextPageId != null) entity.NextPageId = oldNewPageIds[entity.NextPageId.Value];
+            if (entity.NextSectionId != null) entity.NextSectionId = oldNewSectionIds[entity.NextSectionId.Value];
+
+
+            entity.Id = Guid.NewGuid();
+        }
+        await _context.Routes.AddRangeAsync(toMigrate);
+        await _context.SaveChangesAsync();
+    }
+}

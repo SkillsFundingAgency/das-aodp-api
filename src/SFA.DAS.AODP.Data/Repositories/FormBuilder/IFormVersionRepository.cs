@@ -14,13 +14,6 @@ namespace SFA.DAS.AODP.Data.Repositories.FormBuilder
         Task<bool> Archive(Guid formVersionId);
 
         /// <summary>
-        /// Creates a new form and a related form version from a passed in form version. 
-        /// </summary>
-        /// <param name="formVersionToAdd"></param>
-        /// <returns></returns>
-        Task<FormVersion> Create(FormVersion formVersionToAdd);
-
-        /// <summary>
         /// Gets a form version by its DB Id. 
         /// </summary>
         /// <param name="formVersionId"></param>
@@ -58,5 +51,10 @@ namespace SFA.DAS.AODP.Data.Repositories.FormBuilder
         /// <exception cref="RecordNotFoundException"></exception>
         Task<bool> Unpublish(Guid formVersionId);
         Task<List<FormVersion>> GetPublishedFormVersions();
+        Task<FormVersion?> GetDraftFormVersionByFormId(Guid formId);
+        Task<FormVersion?> GetPublishedFormVersionByFormId(Guid formId);
+        Task<FormVersion> CreateDraftAsync(Guid publishedFormVersionId);
+        Task<bool> IsFormVersionEditable(Guid formVersionId);
+        Task<FormVersion> Create(FormVersion formVersionToAdd, int order);
     }
 }

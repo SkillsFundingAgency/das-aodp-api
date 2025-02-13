@@ -5,16 +5,16 @@ using SFA.DAS.AODP.Data.Entities.Application;
 
 namespace SFA.DAS.AODP.Data.Tests.Repositories.Application.ApplicationPageRepository
 {
-    public class WhenGettingApplicationPageByPageId
+    public class WhenGettingApplicationPagesByPageId
     {
         private readonly Mock<IApplicationDbContext> _context = new();
 
         private readonly Data.Repositories.Application.ApplicationPageRepository _sut;
 
-        public WhenGettingApplicationPageByPageId() => _sut = new(_context.Object);
+        public WhenGettingApplicationPagesByPageId() => _sut = new(_context.Object);
 
         [Fact]
-        public async Task Then_Get_ApplicationPage_By_PageId()
+        public async Task Then_Get_ApplicationPages_By_PageId()
         {
             // Arrange
             Guid applicationId = Guid.NewGuid();

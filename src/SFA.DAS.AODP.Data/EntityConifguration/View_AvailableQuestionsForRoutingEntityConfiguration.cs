@@ -3,16 +3,15 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using System.Diagnostics.CodeAnalysis;
 
-namespace SFA.DAS.AODP.Data.EntityConifguration
+namespace SFA.DAS.AODP.Data.EntityConfiguration
 {
-
     [ExcludeFromCodeCoverage]
-    public class View_AvailableQuestionsForRoutingEntityConfiguration : IEntityTypeConfiguration<View_AvailableQuestionsForRouting>
+    public class View_QuestionRoutingDetailsEntityConfiguration : IEntityTypeConfiguration<View_QuestionRoutingDetail>
     {
-        public void Configure(EntityTypeBuilder<View_AvailableQuestionsForRouting> builder)
+        public void Configure(EntityTypeBuilder<View_QuestionRoutingDetail> builder)
         {
-            builder.HasKey(k => k.QuestionId);
-            builder.ToView("View_AvailableQuestionsForRouting");
+            builder.HasNoKey();
+            builder.ToView("View_QuestionRoutingDetails");
         }
     }
 }

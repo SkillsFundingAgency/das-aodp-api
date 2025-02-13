@@ -13,26 +13,36 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             _context = context;
         }
 
-        public async Task<Data.Entities.Application.ApplicationQuestionAnswer> Create(Data.Entities.Application.ApplicationQuestionAnswer application)
+        public async Task<ApplicationQuestionAnswer> Create(ApplicationQuestionAnswer questionAnswer)
         {
-            application.Id = Guid.NewGuid();
-            await _context.ApplicationQuestionAnswers.AddAsync(application);
+            questionAnswer.Id = Guid.NewGuid();
+
+            await _context
+            .ApplicationQuestionAnswers
+            .AddAsync(questionAnswer);
             await _context.SaveChangesAsync();
 
-            return application;
+            return questionAnswer;
         }
 
         public async Task<List<ApplicationQuestionAnswer>> GetAnswersByApplicationAndPageId(Guid applicationId, Guid pageId)
         {
-            return await _context.ApplicationQuestionAnswers.Where(a => a.ApplicationPage.PageId == pageId && a.ApplicationPage.ApplicationId == applicationId).ToListAsync();
+            return await _context
+            .ApplicationQuestionAnswers
+            .Where(
+                a => a.ApplicationPage.PageId == pageId &&
+                a.ApplicationPage.ApplicationId == applicationId
+            ).ToListAsync();
         }
 
-        public async Task<Data.Entities.Application.ApplicationQuestionAnswer> Update(Data.Entities.Application.ApplicationQuestionAnswer application)
+        public async Task<ApplicationQuestionAnswer> Update(ApplicationQuestionAnswer questionAnswer)
         {
-            _context.ApplicationQuestionAnswers.Update(application);
+            _context
+            .ApplicationQuestionAnswers
+            .Update(questionAnswer);
             await _context.SaveChangesAsync();
 
-            return application;
+            return questionAnswer;
         }
 
         public async Task UpsertAsync(List<ApplicationQuestionAnswer> questionAnswers)
@@ -42,14 +52,15 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
                 if (answer.Id == default)
                 {
                     answer.Id = Guid.NewGuid();
-                    _context.ApplicationQuestionAnswers.Add(answer);
 
+                    _context.ApplicationQuestionAnswers.Add(answer);
                 }
                 else
                 {
                     _context.ApplicationQuestionAnswers.Update(answer);
                 }
             }
+
             await _context.SaveChangesAsync();
         }
     }

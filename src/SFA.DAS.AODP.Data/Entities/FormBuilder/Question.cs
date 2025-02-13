@@ -8,7 +8,6 @@ public class Question
     public string Type { get; set; }
     public bool Required { get; set; }
     public int Order { get; set; }
-    public string Description { get; set; } = string.Empty;
     public string? Hint { get; set; } = string.Empty;
     public Guid Key { get; set; }
 

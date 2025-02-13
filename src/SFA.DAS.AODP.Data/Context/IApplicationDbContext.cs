@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
@@ -24,12 +26,12 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<Application> Applications { get; }
         DbSet<ApplicationPage> ApplicationPages { get; }
         DbSet<ApplicationQuestionAnswer> ApplicationQuestionAnswers { get; }
-        DbSet<View_SectionPageCount> View_SectionPageCount { get; set; }
-        DbSet<View_RemainingPagesBySectionForApplication> View_RemainingPagesBySectionForApplication { get; set; }
+        DbSet<View_SectionPageCount> View_SectionPageCounts { get; set; }
+        DbSet<View_RemainingPagesBySectionForApplication> View_RemainingPagesBySectionForApplications { get; set; }
+        DbSet<View_SectionSummaryForApplication> View_SectionSummaryForApplications { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BulkInsertAsync<T>(IEnumerable<T> entities, CancellationToken cancellationToken = default) where T : class;
-
-
+        Task<IDbContextTransaction> StartTransactionAsync();
     }
 }
