@@ -1,23 +1,24 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 using SFA.DAS.AODP.Api.Extensions;
-using SFA.DAS.AODP.Application.Queries.Test;
-using SFA.DAS.AODP.Common.Extensions;
-using SFA.DAS.Api.Common.Configuration;
-using SFA.DAS.Api.Common.Infrastructure;
+using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
+using SFA.DAS.AODP.Application.Queries.Qualifications;
+using SFA.DAS.AODP.Application.Swashbuckle;
 
 var builder = WebApplication.CreateBuilder(args);
+
 var configuration = builder.Configuration.LoadConfiguration(builder.Services, builder.Environment.IsDevelopment());
 
 // Add services to the container.
 builder.Services
     .AddServiceRegistrations(configuration)
-    .AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<TestQueryHandler>())
+    .AddMediatR(cfg =>
+        cfg.RegisterServicesFromAssemblies(
+            typeof(GetNewQualificationsQueryHandler).Assembly,
+            typeof(CreateFormVersionCommandHandler).Assembly))
     .AddLogging()
     .AddDataProtectionKeys("das-aodp-api", configuration, builder.Environment.IsDevelopment())
     .AddHttpContextAccessor()
     .AddHealthChecks();
-
 
 builder.Services.AddAuthentication(configuration);
 
@@ -27,9 +28,23 @@ builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen(c =>
     {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "AODP API", Version = "v1" });
+        //Helps with schema's of the same name by adding a number at the end
+        var schemaHelper = new SwashbuckleSchemaHelper();
+        c.CustomSchemaIds(type => schemaHelper.GetSchemaId(type));
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "AODP Inner API", Version = "v1" });
     });
 
+
+var connectionString = configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
+
+if (!string.IsNullOrEmpty(connectionString))
+{
+    builder.Services.AddApplicationInsightsTelemetry();
+}
+else
+{
+    //throw new Exception("No AI string found");
+}
 
 var app = builder.Build();
 
@@ -48,5 +63,3 @@ app
 app.MapControllers();
 
 app.Run();
-
-
