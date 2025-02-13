@@ -72,6 +72,14 @@
         "logAnalyticsWorkspaceName": {
             "type": "string"
         },
+        "minimumTlsVersion": {
+            "type": "string",
+            "defaultValue": "TLS1_2"
+        },
+        "gbScanLimit": {
+            "type": "int",
+            "defaultValue" : 10
+        },
         "utcValue": {
             "type": "string",
             "defaultValue": "[utcNow()]"
@@ -83,6 +91,7 @@
         "resourceGroupName": "[concat(variables('resourceNamePrefix'), '-rg')]",
         "appServiceName": "[concat(variables('resourceNamePrefix'), '-as')]",
         "databaseName": "[concat(replace(variables('resourceNamePrefix'), 'api', ''), '-db')]",
+        "storageAccountName": "[concat(replace(replace(variables('resourceNamePrefix'), 'api', ''), '-', ''), 'str')]",
         "configNames": "SFA.DAS.AODP.Api"
     },
     "resources": [
@@ -253,6 +262,93 @@
                     },
                     "logAnalyticsWorkspaceName": {
                         "value": "[parameters('logAnalyticsWorkspaceName')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2020-06-01",
+            "name": "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'), 'storage-account-arm.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "storageAccountName": {
+                        "value": "[variables('storageAccountName')]"
+                    },
+                    "allowSharedKeyAccess": {
+                        "value": false
+                    },
+                    "storageKind": {
+                        "value": "BlobStorage"
+                    },
+                    "accessTier": {
+                        "value": "Hot"
+                    },
+                    "minimumTlsVersion": {
+                        "value": "[parameters('minimumTlsVersion')]"
+                    }
+                }
+            }
+        },
+        {
+            "apiVersion": "2021-04-01",
+            "name": "[concat('role-assignment-', variables('appServiceName'), '-', parameters('utcValue'))]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'),'role-assignments/role-assignment-storage-account.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "principalId": {
+                        "value": "[reference(concat(variables('appServiceName'), '-', parameters('utcValue'))).outputs.managedServiceIdentityId.value]"
+                    },
+                    "assignmentType": {
+                        "value": "StorageBlobDataContributor"
+                    },
+                    "resourceName": {
+                        "value": "[variables('storageAccountName')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]"
+            ]
+        },
+        {
+            "apiVersion": "2023-07-01",
+            "name": "[concat(variables('storageAccountName'), '-defender-', parameters('utcValue'))]",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'), 'defender-for-storage.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "storageAccountName": {
+                        "value": "[variables('storageAccountName')]"
+                    },
+                    "enableOnUploadMalwareScanning": {
+                        "value": true
+                    },
+                    "capGBPerMonth": {
+                        "value": "[parameters('gbScanLimit')]"
+                    },
+                    "overrideSubscriptionLevelSettings": {
+                        "value": true
+                    },
+                    "enableSensitiveDataDiscovery": {
+                        "value": true
                     }
                 }
             }
