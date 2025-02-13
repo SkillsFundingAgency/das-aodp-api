@@ -334,7 +334,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[concat(variables('deploymentUrlBase'), 'defender-for-storage')]",
+                    "uri": "[concat(variables('deploymentUrlBase'), 'defender-for-storage.json')]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
