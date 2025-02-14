@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualifications
 {
-    public class GetNewQualificationsQueryHandler : IRequestHandler<GetNewQualificationsQuery, GetNewQualificationsQueryResponse>
+    public class GetNewQualificationsQueryHandler : IRequestHandler<GetNewQualificationsQuery, BaseMediatrResponse<GetNewQualificationsQueryResponse>>
     {
         private readonly INewQualificationsRepository _repository;
 
@@ -17,10 +12,35 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
             _repository = repository;
         }
 
-        public async Task<GetNewQualificationsQueryResponse> Handle(GetNewQualificationsQuery request, CancellationToken cancellationToken)
+        public async Task<BaseMediatrResponse<GetNewQualificationsQueryResponse>> Handle(GetNewQualificationsQuery request, CancellationToken cancellationToken)
         {
-            var qualifications = await _repository.GetAllNewQualificationsAsync();
-            return new GetNewQualificationsQueryResponse { Success = true, NewQualifications = qualifications };
+            var response = new BaseMediatrResponse<GetNewQualificationsQueryResponse>();
+            try
+            {
+                var qualifications = await _repository.GetAllNewQualificationsAsync();
+                if (qualifications != null && qualifications.Any())
+                {
+                    response.Value = new GetNewQualificationsQueryResponse
+                    {
+                        NewQualifications = qualifications
+                    };
+                    response.Success = true;
+                }
+                else
+                {
+                    response.Success = false;
+                    response.ErrorMessage = "No new qualifications found.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.ErrorMessage = "An error occurred while retrieving new qualifications.";
+                response.InnerException = ex;
+            }
+            return response;
         }
     }
 }
+
+
