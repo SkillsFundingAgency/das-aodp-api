@@ -51,7 +51,7 @@ public class GetApplicationPageByIdQueryResponse
                 Type = entity.Type,
             };
 
-            if (entity.Type == QuestionType.Text.ToString() && entity.QuestionValidation != null)
+            if ((entity.Type == QuestionType.TextArea.ToString() || entity.Type == QuestionType.Text.ToString()) && entity.QuestionValidation != null)
             {
                 model.TextInput = new()
                 {
