@@ -31,8 +31,8 @@ public class UpdatePageAnswersCommand : IRequest<BaseMediatrResponse<EmptyRespon
     public class Answer
     {
         public string? TextValue { get; set; }
-        public double? NumberValue { get; set; }
-        public DateTime? DateValue { get; set; }
+        public decimal? NumberValue { get; set; }
+        public DateOnly? DateValue { get; set; }
         public List<string>? MultipleChoiceValue { get; set; }
         public string? RadioChoiceValue { get; set; }
     }

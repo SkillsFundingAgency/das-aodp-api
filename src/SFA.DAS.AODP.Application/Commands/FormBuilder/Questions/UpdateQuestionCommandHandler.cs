@@ -1,6 +1,4 @@
 ﻿using MediatR;
-using SFA.DAS.AODP.Application;
-using Newtonsoft.Json;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
@@ -35,41 +33,60 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
                 };
             }
 
-            if (question.Type == QuestionType.Text.ToString())
+            if (question.Type == QuestionType.Text.ToString() || question.Type == QuestionType.TextArea.ToString())
             {
                 question.QuestionValidation.MinLength = request.TextInput.MinLength;
                 question.QuestionValidation.MaxLength = request.TextInput.MaxLength;
 
             }
-            else if (question.Type == QuestionType.Radio.ToString() && request.RadioOptions != null)
+            else if (question.Type == QuestionType.Number.ToString())
+            {
+                question.QuestionValidation.NumberGreaterThanOrEqualTo = request.NumberInput.GreaterThanOrEqualTo;
+                question.QuestionValidation.NumberLessThanOrEqualTo = request.NumberInput.LessThanOrEqualTo;
+                question.QuestionValidation.NumberNotEqualTo = request.NumberInput.NotEqualTo;
+            }
+            else if (question.Type == QuestionType.Date.ToString())
+            {
+                question.QuestionValidation.DateGreaterThanOrEqualTo = request.DateInput.GreaterThanOrEqualTo;
+                question.QuestionValidation.DateLessThanOrEqualTo = request.DateInput.LessThanOrEqualTo;
+                question.QuestionValidation.DateMustBeInFuture = request.DateInput.MustBeInFuture;
+                question.QuestionValidation.DateMustBeInPast = request.DateInput.MustBeInPast;
+            }
+            else if ((question.Type == QuestionType.MultiChoice.ToString() || question.Type == QuestionType.Radio.ToString()))
             {
                 question.QuestionOptions ??= new();
 
-                var optionsToRemove = question.QuestionOptions.Where(q => !request.RadioOptions.Any(o => o.Id == q.Id)).ToList();
+                request.Options ??= [];
+
+                var optionsToRemove = question.QuestionOptions.Where(q => !request.Options.Any(o => o.Id == q.Id)).ToList();
                 await _questionOptionRepository.RemoveAsync(optionsToRemove);
 
-                for (int i = 0; i < request.RadioOptions.Count; i++)
+                for (int i = 0; i < request.Options.Count; i++)
                 {
-                    if (request.RadioOptions[i].Id == default)
+                    if (request.Options[i].Id == default)
                     {
                         question.QuestionOptions.Add(new()
                         {
                             QuestionId = request.Id,
                             Order = i + 1,
-                            Value = request.RadioOptions[i].Value
+                            Value = request.Options[i].Value
                         });
                     }
                     else
                     {
-                        var option = question.QuestionOptions.First(q => q.Id == request.RadioOptions[i].Id);
-                        option.Value = request.RadioOptions[i].Value;
+                        var option = question.QuestionOptions.First(q => q.Id == request.Options[i].Id);
+                        option.Value = request.Options[i].Value;
                         option.Order = i + 1;
                     }
 
                 }
                 await _questionOptionRepository.UpsertAsync(question.QuestionOptions);
 
-
+                if (question.Type == QuestionType.MultiChoice.ToString())
+                {
+                    question.QuestionValidation.MinNumberOfOptions = request.Checkbox.MinNumberOfOptions;
+                    question.QuestionValidation.MaxNumberOfOptions = request.Checkbox.MaxNumberOfOptions;
+                }
             }
 
             await _questionValidationRepository.UpsertAsync(question.QuestionValidation);
