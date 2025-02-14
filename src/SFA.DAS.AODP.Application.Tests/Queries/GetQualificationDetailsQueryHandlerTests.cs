@@ -1,18 +1,25 @@
-﻿using Moq;
+﻿using AutoFixture;
+using AutoFixture.AutoMoq;
+using Moq;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
+using Xunit;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SFA.DAS.AODP.Tests.Application.Queries
 {
     public class GetQualificationDetailsQueryHandlerTests
     {
+        private readonly IFixture _fixture;
         private readonly Mock<INewQualificationsRepository> _repositoryMock;
         private readonly GetQualificationDetailsQueryHandler _handler;
 
         public GetQualificationDetailsQueryHandlerTests()
         {
-            _repositoryMock = new Mock<INewQualificationsRepository>();
+            _fixture = new Fixture().Customize(new AutoMoqCustomization());
+            _repositoryMock = _fixture.Freeze<Mock<INewQualificationsRepository>>();
             _handler = new GetQualificationDetailsQueryHandler(_repositoryMock.Object);
         }
 
@@ -20,69 +27,58 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
         public async Task Then_The_Api_Is_Called_With_The_Request_And_QualificationDetailsData_Is_Returned()
         {
             // Arrange
-            var qualificationReference = "QUAL123";
-            var qualificationDetails = new QualificationDetails
-            {
-                Id = 1,
-                Status = "Active",
-                Priority = "High",
-                Changes = "None",
-                QualificationReference = qualificationReference,
-                AwardingOrganisation = "Org1",
-                Title = "Qualification Title",
-                QualificationType = "Type1",
-                Level = "Level1",
-                ProposedChanges = "None",
-                AgeGroup = "16-18",
-                Category = "Category1",
-                Subject = "Subject1",
-                SectorSubjectArea = "Area1",
-                Comments = "No comments"
-            };
+            var qualificationDetails = _fixture.Create<QualificationDetails>();
+            var qualificationReference = qualificationDetails.QualificationReference;
 
             _repositoryMock.Setup(repo => repo.GetQualificationDetailsByIdAsync(qualificationReference))
                 .ReturnsAsync(qualificationDetails);
 
-            var request = new GetQualificationDetailsQuery { QualificationReference = qualificationReference };
+            var request = _fixture.Build<GetQualificationDetailsQuery>()
+                .With(q => q.QualificationReference, qualificationReference)
+                .Create();
 
             // Act
             var response = await _handler.Handle(request, CancellationToken.None);
 
             // Assert
             Assert.True(response.Success);
-            Assert.Equal(qualificationDetails.Id, response.Id);
-            Assert.Equal(qualificationDetails.Status, response.Status);
-            Assert.Equal(qualificationDetails.Priority, response.Priority);
-            Assert.Equal(qualificationDetails.Changes, response.Changes);
-            Assert.Equal(qualificationDetails.QualificationReference, response.QualificationReference);
-            Assert.Equal(qualificationDetails.AwardingOrganisation, response.AwardingOrganisation);
-            Assert.Equal(qualificationDetails.Title, response.Title);
-            Assert.Equal(qualificationDetails.QualificationType, response.QualificationType);
-            Assert.Equal(qualificationDetails.Level, response.Level);
-            Assert.Equal(qualificationDetails.ProposedChanges, response.ProposedChanges);
-            Assert.Equal(qualificationDetails.AgeGroup, response.AgeGroup);
-            Assert.Equal(qualificationDetails.Category, response.Category);
-            Assert.Equal(qualificationDetails.Subject, response.Subject);
-            Assert.Equal(qualificationDetails.SectorSubjectArea, response.SectorSubjectArea);
-            Assert.Equal(qualificationDetails.Comments, response.Comments);
+            Assert.Equal(qualificationDetails.Id, response.Value.Id);
+            Assert.Equal(qualificationDetails.Status, response.Value.Status);
+            Assert.Equal(qualificationDetails.Priority, response.Value.Priority);
+            Assert.Equal(qualificationDetails.Changes, response.Value.Changes);
+            Assert.Equal(qualificationDetails.QualificationReference, response.Value.QualificationReference);
+            Assert.Equal(qualificationDetails.AwardingOrganisation, response.Value.AwardingOrganisation);
+            Assert.Equal(qualificationDetails.Title, response.Value.Title);
+            Assert.Equal(qualificationDetails.QualificationType, response.Value.QualificationType);
+            Assert.Equal(qualificationDetails.Level, response.Value.Level);
+            Assert.Equal(qualificationDetails.ProposedChanges, response.Value.ProposedChanges);
+            Assert.Equal(qualificationDetails.AgeGroup, response.Value.AgeGroup);
+            Assert.Equal(qualificationDetails.Category, response.Value.Category);
+            Assert.Equal(qualificationDetails.Subject, response.Value.Subject);
+            Assert.Equal(qualificationDetails.SectorSubjectArea, response.Value.SectorSubjectArea);
+            Assert.Equal(qualificationDetails.Comments, response.Value.Comments);
         }
 
         [Fact]
         public async Task Then_The_Api_Is_Called_With_The_Request_And_No_QualificationDetailsData_Is_Returned()
         {
             // Arrange
-            var qualificationReference = "QUAL123";
+            var qualificationReference = _fixture.Create<string>();
 
             _repositoryMock.Setup(repo => repo.GetQualificationDetailsByIdAsync(qualificationReference))
                 .ReturnsAsync((QualificationDetails?)null);
 
-            var request = new GetQualificationDetailsQuery { QualificationReference = qualificationReference };
+            var request = _fixture.Build<GetQualificationDetailsQuery>()
+                .With(q => q.QualificationReference, qualificationReference)
+                .Create();
 
             // Act
             var response = await _handler.Handle(request, CancellationToken.None);
 
             // Assert
             Assert.False(response.Success);
+            Assert.Equal("Qualification not found", response.ErrorMessage);
         }
     }
 }
+

@@ -8,7 +8,7 @@ using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualifications
 {
-    public class GetNewQualificationsQuery : IRequest<GetNewQualificationsQueryResponse>
+    public class GetNewQualificationsQuery : IRequest<BaseMediatrResponse<GetNewQualificationsQueryResponse>>
     {
     }
 
