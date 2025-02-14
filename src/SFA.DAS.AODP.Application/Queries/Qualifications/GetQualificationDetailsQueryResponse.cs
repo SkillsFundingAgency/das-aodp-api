@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SFA.DAS.AODP.Application.Queries.Qualifications
+﻿namespace SFA.DAS.AODP.Application.Queries.Qualifications
 {
     public class GetQualificationDetailsQueryResponse
     {
-        public bool Success { get; set; }
         public int Id { get; set; }
         public string? Status { get; set; }
         public string? Priority { get; set; }
