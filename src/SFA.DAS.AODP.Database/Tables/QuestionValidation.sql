@@ -8,6 +8,10 @@
     [NumberGreaterThanOrEqualTo] INT NULL, 
     [NumberLessThanOrEqualTo] INT NULL, 
     [NumberNotEqualTo] INT NULL, 
+    [DateGreaterThanOrEqualTo] DATE NULL, 
+    [DateLessThanOrEqualTo] DATE NULL, 
+    [DateMustBeInFuture] BIT NULL, 
+    [DateMustBeInPast] BIT NULL, 
     CONSTRAINT [PK_QuestionValidations] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC

@@ -1,6 +1,4 @@
 ﻿using MediatR;
-using SFA.DAS.AODP.Application;
-using Newtonsoft.Json;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
@@ -46,6 +44,13 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
                 question.QuestionValidation.NumberGreaterThanOrEqualTo = request.NumberInput.GreaterThanOrEqualTo;
                 question.QuestionValidation.NumberLessThanOrEqualTo = request.NumberInput.LessThanOrEqualTo;
                 question.QuestionValidation.NumberNotEqualTo = request.NumberInput.NotEqualTo;
+            }
+            else if (question.Type == QuestionType.Date.ToString())
+            {
+                question.QuestionValidation.DateGreaterThanOrEqualTo = request.DateInput.GreaterThanOrEqualTo;
+                question.QuestionValidation.DateLessThanOrEqualTo = request.DateInput.LessThanOrEqualTo;
+                question.QuestionValidation.DateMustBeInFuture = request.DateInput.MustBeInFuture;
+                question.QuestionValidation.DateMustBeInPast = request.DateInput.MustBeInPast;
             }
             else if ((question.Type == QuestionType.MultiChoice.ToString() || question.Type == QuestionType.Radio.ToString()))
             {

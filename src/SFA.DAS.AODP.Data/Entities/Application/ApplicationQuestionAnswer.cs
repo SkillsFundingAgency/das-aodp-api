@@ -6,7 +6,7 @@
         public Guid QuestionId { get; set; }
         public Guid ApplicationPageId { get; set; }
         public string? TextValue { get; set; }
-        public DateTime? DateTimeValue { get; set; }
+        public DateOnly? DateValue { get; set; }
         public string? OptionsValue { get; set; }
         public decimal? NumberValue { get; set; }
 

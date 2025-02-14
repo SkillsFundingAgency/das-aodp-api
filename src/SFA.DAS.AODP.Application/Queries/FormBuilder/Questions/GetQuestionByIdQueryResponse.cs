@@ -17,6 +17,8 @@ public class GetQuestionByIdQueryResponse()
     public TextInputOptions TextInput { get; set; } = new();
     public NumberInputOptions NumberInput { get; set; } = new();
     public CheckboxOptions Checkbox { get; set; } = new();
+    public DateInputOptions DateInput { get; set; } = new();
+
 
     public List<Option> Options { get; set; } = new();
 
@@ -44,6 +46,14 @@ public class GetQuestionByIdQueryResponse()
         public int? GreaterThanOrEqualTo { get; set; }
         public int? LessThanOrEqualTo { get; set; }
         public int? NotEqualTo { get; set; }
+    }
+
+    public class DateInputOptions
+    {
+        public DateOnly? GreaterThanOrEqualTo { get; set; }
+        public DateOnly? LessThanOrEqualTo { get; set; }
+        public bool? MustBeInFuture { get; set; }
+        public bool? MustBeInPast { get; set; }
     }
 
     public static implicit operator GetQuestionByIdQueryResponse(Question entity)
@@ -99,6 +109,16 @@ public class GetQuestionByIdQueryResponse()
                 GreaterThanOrEqualTo = entity.QuestionValidation?.NumberGreaterThanOrEqualTo,
                 LessThanOrEqualTo = entity.QuestionValidation?.NumberLessThanOrEqualTo,
                 NotEqualTo = entity.QuestionValidation?.NumberNotEqualTo,
+            };
+        }
+        else if (question.Type == QuestionType.Date.ToString())
+        {
+            question.DateInput = new()
+            {
+                GreaterThanOrEqualTo = entity.QuestionValidation?.DateGreaterThanOrEqualTo,
+                LessThanOrEqualTo = entity.QuestionValidation?.DateLessThanOrEqualTo,
+                MustBeInFuture = entity.QuestionValidation?.DateMustBeInFuture,
+                MustBeInPast = entity.QuestionValidation?.DateMustBeInPast,
             };
         }
 

@@ -74,6 +74,10 @@ public class UpdatePageAnswersCommandHandler : IRequestHandler<UpdatePageAnswers
                 {
                     answer.NumberValue = requestQuestion?.Answer?.NumberValue;
                 }
+                else if (requestQuestion.QuestionType == QuestionType.Date.ToString())
+                {
+                    answer.DateValue = requestQuestion?.Answer?.DateValue;
+                }
             }
             await _questionAnswerRepository.UpsertAsync(applicationPage.QuestionAnswers);
 

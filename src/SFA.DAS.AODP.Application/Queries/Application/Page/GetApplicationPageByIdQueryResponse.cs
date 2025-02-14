@@ -34,6 +34,7 @@ public class GetApplicationPageByIdQueryResponse
         public CheckboxOptions Checkbox { get; set; } = new();
         public List<Option> Options { get; set; } = new();
 
+        public DateInputOptions DateInput { get; set; } = new();
 
         public List<RouteInformation> Routes { get; set; } = new();
 
@@ -91,6 +92,16 @@ public class GetApplicationPageByIdQueryResponse
                     };
                 }
             }
+            else if (entity.Type == QuestionType.Date.ToString())
+            {
+                model.DateInput = new()
+                {
+                    GreaterThanOrEqualTo = entity.QuestionValidation?.DateGreaterThanOrEqualTo,
+                    LessThanOrEqualTo = entity.QuestionValidation?.DateLessThanOrEqualTo,
+                    MustBeInFuture = entity.QuestionValidation?.DateMustBeInFuture,
+                    MustBeInPast = entity.QuestionValidation?.DateMustBeInPast,
+                };
+            }
 
 
             if (entity.Routes != null && entity.Routes.Count > 0)
@@ -140,6 +151,16 @@ public class GetApplicationPageByIdQueryResponse
         public string Value { get; set; }
         public int Order { get; set; }
     }
+
+    public class DateInputOptions
+    {
+        public DateOnly? GreaterThanOrEqualTo { get; set; }
+        public DateOnly? LessThanOrEqualTo { get; set; }
+        public bool? MustBeInFuture { get; set; }
+        public bool? MustBeInPast { get; set; }
+    }
+
+
 
 
     public static implicit operator GetApplicationPageByIdQueryResponse(Page entity)
