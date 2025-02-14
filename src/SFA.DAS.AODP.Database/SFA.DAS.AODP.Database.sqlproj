@@ -96,6 +96,10 @@
     <Build Include="Tables\Question.sql" />
     <Build Include="Views\View_SkippedPagesBySectionForApplication.sql" />
     <Build Include="Views\View_SectionSummaryForApplication.sql" />
+    <Build Include="Views\v_QualificationChangedReviewRequired.sql" />
+    <Build Include="Views\v_QualificationChangeSinceLastOutcome.sql" />
+    <Build Include="Views\v_QualificationLastestOutcome.sql" />
+    <Build Include="Views\v_QualificationLastestVersion.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
