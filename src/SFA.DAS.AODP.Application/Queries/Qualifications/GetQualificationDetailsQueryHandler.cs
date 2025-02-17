@@ -18,32 +18,33 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
             try
             {
                 var qualification = await _repository.GetQualificationDetailsByIdAsync(request.QualificationReference);
-                if (qualification == null)
+                if (qualification != null)
+                {
+                    response.Value = new GetQualificationDetailsQueryResponse
+                    {
+                        Id = qualification.Id,
+                        Status = qualification.Status,
+                        Priority = qualification.Priority,
+                        Changes = qualification.Changes,
+                        QualificationReference = qualification.QualificationReference,
+                        AwardingOrganisation = qualification.AwardingOrganisation,
+                        Title = qualification.Title,
+                        QualificationType = qualification.QualificationType,
+                        Level = qualification.Level,
+                        ProposedChanges = qualification.ProposedChanges,
+                        AgeGroup = qualification.AgeGroup,
+                        Category = qualification.Category,
+                        Subject = qualification.Subject,
+                        SectorSubjectArea = qualification.SectorSubjectArea,
+                        Comments = qualification.Comments
+                    };
+                    response.Success = true;
+                }
+                else
                 {
                     response.Success = false;
-                    response.ErrorMessage = "Qualification not found";
-                    return response;
+                    response.ErrorMessage = $"No details found for qualification reference: {request.QualificationReference}";
                 }
-
-                response.Success = true;
-                response.Value = new GetQualificationDetailsQueryResponse
-                {
-                    Id = qualification.Id,
-                    Status = qualification.Status,
-                    Priority = qualification.Priority,
-                    Changes = qualification.Changes,
-                    QualificationReference = qualification.QualificationReference,
-                    AwardingOrganisation = qualification.AwardingOrganisation,
-                    Title = qualification.Title,
-                    QualificationType = qualification.QualificationType,
-                    Level = qualification.Level,
-                    ProposedChanges = qualification.ProposedChanges,
-                    AgeGroup = qualification.AgeGroup,
-                    Category = qualification.Category,
-                    Subject = qualification.Subject,
-                    SectorSubjectArea = qualification.SectorSubjectArea,
-                    Comments = qualification.Comments
-                };
             }
             catch (Exception ex)
             {
@@ -55,3 +56,5 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
         }
     }
 }
+
+
