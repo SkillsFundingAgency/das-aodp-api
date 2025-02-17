@@ -35,7 +35,7 @@ public class GetApplicationPageByIdQueryResponse
         public List<Option> Options { get; set; } = new();
 
         public DateInputOptions DateInput { get; set; } = new();
-
+        public FileUploadOptions FileUpload { get; set; } = new();
         public List<RouteInformation> Routes { get; set; } = new();
 
 
@@ -102,6 +102,15 @@ public class GetApplicationPageByIdQueryResponse
                     MustBeInPast = entity.QuestionValidation?.DateMustBeInPast,
                 };
             }
+            else if(entity.Type == QuestionType.File.ToString())
+            {
+                model.FileUpload = new()
+                {
+                    NumberOfFiles = entity.QuestionValidation?.NumberOfFiles,
+                    FileNamePrefix = entity.QuestionValidation?.FileNamePrefix,
+                    MaxSize = entity.QuestionValidation?.FileMaxSize,
+                };
+            }
 
 
             if (entity.Routes != null && entity.Routes.Count > 0)
@@ -158,6 +167,13 @@ public class GetApplicationPageByIdQueryResponse
         public DateOnly? LessThanOrEqualTo { get; set; }
         public bool? MustBeInFuture { get; set; }
         public bool? MustBeInPast { get; set; }
+    }
+
+    public class FileUploadOptions
+    {
+        public int? MaxSize { get; set; }
+        public string? FileNamePrefix { get; set; }
+        public int? NumberOfFiles { get; set; }
     }
 
 
