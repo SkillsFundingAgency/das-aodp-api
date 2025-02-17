@@ -9,6 +9,7 @@ using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.EntityConfiguration;
 using System.Reflection.Emit;
 using SFA.DAS.AODP.Models.Qualifications;
+using SFA.DAS.AODP.Data.Entities.Jobs;
 
 namespace SFA.DAS.AODP.Data.Context
 {
@@ -46,6 +47,10 @@ namespace SFA.DAS.AODP.Data.Context
         public DbSet<View_SectionSummaryForApplication> View_SectionSummaryForApplications { get; set; }
 
         public DbSet<QualificationNewReviewRequired> QualificationNewReviewRequired { get; set; }
+
+        public virtual DbSet<Job> Jobs { get; set; }
+        public virtual DbSet<JobConfiguration> JobConfigurations { get; set; }
+        public virtual DbSet<JobRun> JobRuns { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
