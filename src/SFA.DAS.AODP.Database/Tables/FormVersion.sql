@@ -5,7 +5,6 @@
 	[Version] DATETIME NOT NULL,
 	[Status] [nvarchar](100) NOT NULL,
 	[Description] [nvarchar](max) NULL,
-	[Order] [int] NOT NULL,
 	[DateCreated] [datetime] NOT NULL, 
     CONSTRAINT [PK_FormVersions] PRIMARY KEY ([Id])
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]

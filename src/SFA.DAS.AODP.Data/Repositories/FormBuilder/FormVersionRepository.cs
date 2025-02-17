@@ -27,11 +27,7 @@ public class FormVersionRepository : IFormVersionRepository
         _routeRepository = routeRepository;
     }
 
-    public int GetMaxOrder()
-    {
-        var res = _context.FormVersions.Max(s => (int?)s.Order) ?? 0;
-        return res;
-    }
+
 
     /// <summary>
     /// Returns all the latest form versions for all given forms. 
@@ -41,6 +37,7 @@ public class FormVersionRepository : IFormVersionRepository
     {
         var top =
             await _context.FormVersions
+            .Include(f => f.Form)
             .Where(f => f.Form.Status != FormStatus.Deleted.ToString())
             .Where(f => f.Status != FormVersionStatus.Archived.ToString())
             .ToListAsync();
@@ -78,6 +75,7 @@ public class FormVersionRepository : IFormVersionRepository
     {
         var top =
             await _context.FormVersions
+            .Include(f => f.Form)
             .Where(f => f.Form.Status == FormStatus.Active.ToString())
             .Where(f => f.Status == FormVersionStatus.Published.ToString())
             .ToListAsync();
@@ -93,7 +91,10 @@ public class FormVersionRepository : IFormVersionRepository
     /// <exception cref="RecordNotFoundException"></exception>
     public async Task<FormVersion> GetFormVersionByIdAsync(Guid formVersionId)
     {
-        var res = await _context.FormVersions.Include(f => f.Sections).FirstOrDefaultAsync(v => v.Id == formVersionId);
+        var res = await _context.FormVersions
+            .Include(f => f.Sections)
+            .Include(f => f.Form)
+            .FirstOrDefaultAsync(v => v.Id == formVersionId);
         return res is null ? throw new RecordNotFoundException(formVersionId) : res;
     }
 
@@ -102,12 +103,13 @@ public class FormVersionRepository : IFormVersionRepository
     /// </summary>
     /// <param name="formVersionToAdd"></param>
     /// <returns></returns>
-    public async Task<FormVersion> Create(FormVersion formVersionToAdd)
+    public async Task<FormVersion> Create(FormVersion formVersionToAdd, int order)
     {
         var form = new Form()
         {
             Id = Guid.NewGuid(),
-            Status = FormStatus.Active.ToString()
+            Status = FormStatus.Active.ToString(),
+            Order = order
         };
         _context.Forms.Add(form);
 
@@ -239,4 +241,6 @@ public class FormVersionRepository : IFormVersionRepository
             throw;
         }
     }
+
+
 }

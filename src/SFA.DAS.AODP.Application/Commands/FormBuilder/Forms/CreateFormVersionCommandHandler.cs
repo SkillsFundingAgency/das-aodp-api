@@ -6,12 +6,12 @@ namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersionCommand, BaseMediatrResponse<CreateFormVersionCommandResponse>>
 {
     private readonly IFormVersionRepository _formVersionRepository;
+    private readonly IFormRepository _formRepository;
 
-
-    public CreateFormVersionCommandHandler(IFormVersionRepository formVersionRepository)
+    public CreateFormVersionCommandHandler(IFormVersionRepository formVersionRepository, IFormRepository formRepository)
     {
         _formVersionRepository = formVersionRepository;
-
+        _formRepository = formRepository;
     }
 
     public async Task<BaseMediatrResponse<CreateFormVersionCommandResponse>> Handle(CreateFormVersionCommand request, CancellationToken cancellationToken)
@@ -20,13 +20,12 @@ public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersion
 
         try
         {
-            var order = _formVersionRepository.GetMaxOrder();
+            var order = _formRepository.GetMaxOrder();
             var form = await _formVersionRepository.Create(new()
             {
                 Title = request.Title,
                 Description = request.Description,
-                Order = order + 1,
-            });
+            }, order + 1);
 
             response.Value = new() { Id = form.Id };
             response.Success = true;

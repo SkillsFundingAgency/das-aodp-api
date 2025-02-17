@@ -156,8 +156,8 @@ public class QuestionRepository : IQuestionRepository
             throw new RecordNotFoundException(id);
 
         var nextHigherModel = await _context.Questions
-            .OrderBy(v => v.Order)
-            .Where(v => v.Order < modelToUpdate.Order)
+            .OrderByDescending(v => v.Order)
+            .Where(v => v.Order < modelToUpdate.Order && v.PageId == modelToUpdate.PageId)
             .FirstOrDefaultAsync();
         if (nextHigherModel is null)
             return true;
@@ -182,8 +182,8 @@ public class QuestionRepository : IQuestionRepository
             throw new RecordNotFoundException(id);
 
         var nextLowerModel = await _context.Questions
-            .OrderByDescending(v => v.Order)
-            .Where(v => v.Order > modelToUpdate.Order)
+            .OrderBy(v => v.Order)
+            .Where(v => v.Order > modelToUpdate.Order && v.PageId == modelToUpdate.PageId)
             .FirstOrDefaultAsync();
         if (nextLowerModel is null)
             return true;

@@ -173,8 +173,8 @@ public class SectionRepository : ISectionRepository
             throw new RecordNotFoundException(id);
 
         var nextHigherModel = await _context.Sections
-            .OrderBy(v => v.Order)
-            .Where(v => v.Order < modelToUpdate.Order)
+            .OrderByDescending(v => v.Order)
+            .Where(v => v.Order < modelToUpdate.Order && v.FormVersionId == modelToUpdate.FormVersionId)
             .FirstOrDefaultAsync();
         if (nextHigherModel is null)
             return true;
@@ -199,8 +199,8 @@ public class SectionRepository : ISectionRepository
             throw new RecordNotFoundException(id);
 
         var nextLowerModel = await _context.Sections
-            .OrderByDescending(v => v.Order)
-            .Where(v => v.Order > modelToUpdate.Order)
+            .OrderBy(v => v.Order)
+            .Where(v => v.Order > modelToUpdate.Order && v.FormVersionId == modelToUpdate.FormVersionId)
             .FirstOrDefaultAsync();
         if (nextLowerModel is null)
             return true;

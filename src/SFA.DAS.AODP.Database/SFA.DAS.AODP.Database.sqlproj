@@ -81,6 +81,7 @@
     <Build Include="Tables\ProcessStatus.sql" />
     <Build Include="Tables\QualificationVersions.sql" />
     <Build Include="Tables\VersionFieldChanges.sql" />
+    <Build Include="Views\v_QualificationNewReviewRequired.sql" />
     <Build Include="Tables\QualificationImportStaging.sql" />
     <Build Include="Tables\Route.sql" />
     <Build Include="Tables\QuestionOption.sql" />
@@ -93,6 +94,8 @@
     <Build Include="Views\View_SectionPageCount.sql" />
     <Build Include="Views\View_RemainingPagesBySectionForApplication.sql" />
     <Build Include="Tables\Question.sql" />
+    <Build Include="Views\View_SkippedPagesBySectionForApplication.sql" />
+    <Build Include="Views\View_SectionSummaryForApplication.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />

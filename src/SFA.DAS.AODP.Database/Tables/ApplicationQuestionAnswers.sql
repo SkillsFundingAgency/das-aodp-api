@@ -3,7 +3,7 @@
 	[ApplicationPageId] [uniqueidentifier] NOT NULL,
 	[QuestionId] [uniqueidentifier] NOT NULL,
 	[TextValue] [nvarchar](max) NULL,
-	[DateTimeValue] [datetime] NULL,
+	[DateValue] DATE NULL,
 	[OptionsValue] [nvarchar](max) NULL,
 	[NumberValue] decimal(18, 2) NULL
  CONSTRAINT [PK_ApplicationQuestionAnswers] PRIMARY KEY CLUSTERED 

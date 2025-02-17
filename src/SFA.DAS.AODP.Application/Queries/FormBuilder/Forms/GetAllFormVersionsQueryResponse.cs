@@ -1,6 +1,4 @@
-﻿using Azure;
-
-namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
+﻿namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
 public class GetAllFormVersionsQueryResponse
 {
@@ -28,7 +26,7 @@ public class GetAllFormVersionsQueryResponse
                 Version = entity.Version,
                 Status = entity.Status,
                 Description = entity.Description,
-                Order = entity.Order,
+                Order = entity.Form.Order,
                 DateCreated = entity.DateCreated,
             });
         }

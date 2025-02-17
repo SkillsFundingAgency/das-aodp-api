@@ -82,7 +82,7 @@
         "resourceNamePrefix": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-', parameters('serviceName')))]",
         "resourceGroupName": "[concat(variables('resourceNamePrefix'), '-rg')]",
         "appServiceName": "[concat(variables('resourceNamePrefix'), '-as')]",
-        "databaseName": "[concat(variables('resourceNamePrefix'), '-db')]",
+        "databaseName": "[concat(replace(variables('resourceNamePrefix'), 'api', ''), '-db')]",
         "configNames": "SFA.DAS.AODP.Api"
     },
     "resources": [
