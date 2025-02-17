@@ -11,7 +11,10 @@
     [DateGreaterThanOrEqualTo] DATE NULL, 
     [DateLessThanOrEqualTo] DATE NULL, 
     [DateMustBeInFuture] BIT NULL, 
-    [DateMustBeInPast] BIT NULL, 
+    [DateMustBeInPast] BIT NULL,
+    [FileMaxSize] INT NULL,
+    [FileNamePrefix] [nvarchar](100) NULL,
+    [NumberOfFiles] INT NULL
     CONSTRAINT [PK_QuestionValidations] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
