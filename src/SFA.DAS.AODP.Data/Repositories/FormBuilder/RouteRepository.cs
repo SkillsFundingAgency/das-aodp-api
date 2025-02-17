@@ -44,6 +44,12 @@ public class RouteRepository : IRouteRepository
                 .ToListAsync();
     }
 
+    public async Task<List<Route>> GetRoutesByPageId(Guid pageId)
+    {
+        return await _context.Routes.Where(v => v.NextPage.Id == pageId)
+                .ToListAsync();
+    }
+
     public async Task UpsertAsync(List<Route> dbRoutes)
     {
         foreach (var route in dbRoutes)
