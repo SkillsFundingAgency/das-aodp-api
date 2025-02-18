@@ -225,5 +225,18 @@ public class SectionRepository : ISectionRepository
 
         return true;
     }
+
+    /// <summary>
+    /// Checks if a section has any associated routes directly or indirectly via related Pages or Questions
+    /// </summary>
+    /// <param name="sectionId">The unique identifier of the section.</param>
+    /// <returns>A boolean value indicating whether the section has associated routes.</returns>
+    public async Task<bool> HasRoutesForSectionAsync(Guid sectionId)
+    {
+        return await _context.View_PagesSectionsAssociatedWithRoutings
+            .AnyAsync(v => v.SourceSectionId == sectionId
+                        || v.NextPageSectionId == sectionId
+                        || v.NextSectionId == sectionId);
+    }
 }
 

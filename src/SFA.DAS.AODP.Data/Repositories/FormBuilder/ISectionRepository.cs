@@ -75,4 +75,11 @@ public interface ISectionRepository
     /// <exception cref="RecordNotFoundException"></exception>
     Task<bool> MoveSectionOrderDown(Guid id);
     Task<bool> IsSectionEditable(Guid id);
+
+    /// <summary>
+    /// Checks if a section has any associated routes directly or indirectly via related Pages or Questions
+    /// </summary>
+    /// <param name="sectionId">The unique identifier of the section.</param>
+    /// <returns>A boolean value indicating whether the section has associated routes.</returns>
+    Task<bool> HasRoutesForSectionAsync(Guid sectionId);
 }
