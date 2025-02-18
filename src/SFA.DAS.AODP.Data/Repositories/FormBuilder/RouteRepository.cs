@@ -32,9 +32,21 @@ public class RouteRepository : IRouteRepository
             .ToListAsync();
     }
 
+    public async Task<List<View_QuestionRoutingDetail>> GetQuestionRoutingDetailsByQuestionId(Guid questionId)
+    {
+        return await _context.View_QuestionRoutingDetails.Where(v => v.QuestionId == questionId)
+            .ToListAsync();
+    }
+
     public async Task<List<Route>> GetRoutesByQuestionId(Guid questionId)
     {
         return await _context.Routes.Where(v => v.SourceQuestionId == questionId)
+                .ToListAsync();
+    }
+
+    public async Task<List<Route>> GetRoutesByPageId(Guid pageId)
+    {
+        return await _context.Routes.Where(v => v.NextPage.Id == pageId)
                 .ToListAsync();
     }
 
