@@ -52,6 +52,12 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
                 question.QuestionValidation.DateMustBeInFuture = request.DateInput.MustBeInFuture;
                 question.QuestionValidation.DateMustBeInPast = request.DateInput.MustBeInPast;
             }
+            else if (question.Type == QuestionType.File.ToString())
+            {
+                question.QuestionValidation.FileMaxSize = request.FileUpload.MaxSize;
+                question.QuestionValidation.FileNamePrefix = request.FileUpload.FileNamePrefix;
+                question.QuestionValidation.NumberOfFiles = request.FileUpload.NumberOfFiles;
+            }
             else if ((question.Type == QuestionType.MultiChoice.ToString() || question.Type == QuestionType.Radio.ToString()))
             {
                 question.QuestionOptions ??= new();

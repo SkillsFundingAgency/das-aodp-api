@@ -1,4 +1,5 @@
 ﻿using SFA.DAS.AODP.Data.Entities.FormBuilder;
+using static SFA.DAS.AODP.Application.Commands.FormBuilder.Question.UpdateQuestionCommand;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Questions;
 
@@ -18,7 +19,7 @@ public class GetQuestionByIdQueryResponse()
     public NumberInputOptions NumberInput { get; set; } = new();
     public CheckboxOptions Checkbox { get; set; } = new();
     public DateInputOptions DateInput { get; set; } = new();
-
+    public FileUploadOptions FileUpload { get; set; } = new();
 
     public List<Option> Options { get; set; } = new();
     public List<RouteInformation> Routes { get; set; } = new();
@@ -73,6 +74,13 @@ public class GetQuestionByIdQueryResponse()
         public DateOnly? LessThanOrEqualTo { get; set; }
         public bool? MustBeInFuture { get; set; }
         public bool? MustBeInPast { get; set; }
+    }
+
+    public class FileUploadOptions
+    {
+        public int? MaxSize { get; set; }
+        public string? FileNamePrefix { get; set; }
+        public int? NumberOfFiles { get; set; }
     }
 
     public static implicit operator GetQuestionByIdQueryResponse(Question entity)
@@ -138,6 +146,15 @@ public class GetQuestionByIdQueryResponse()
                 LessThanOrEqualTo = entity.QuestionValidation?.DateLessThanOrEqualTo,
                 MustBeInFuture = entity.QuestionValidation?.DateMustBeInFuture,
                 MustBeInPast = entity.QuestionValidation?.DateMustBeInPast,
+            };
+        }
+        else if (question.Type == QuestionType.File.ToString())
+        {
+            question.FileUpload = new()
+            {
+                NumberOfFiles = entity.QuestionValidation?.NumberOfFiles,
+                FileNamePrefix = entity.QuestionValidation?.FileNamePrefix,
+                MaxSize = entity.QuestionValidation?.FileMaxSize,
             };
         }
 

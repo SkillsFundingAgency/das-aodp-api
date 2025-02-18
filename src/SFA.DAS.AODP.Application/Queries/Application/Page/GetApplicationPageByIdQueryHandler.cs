@@ -14,7 +14,7 @@ public class GetApplicationPageByIdQueryHandler : IRequestHandler<GetApplication
         response.Success = false;
         try
         {
-            var result = await _pageRepository.GetPageForApplicationAsync(request.PageOrder, request.SectionId);
+            var result = await _pageRepository.GetPageForApplicationAsync(request.PageOrder, request.SectionId, request.FormVersionId);
             response.Value = result;
             response.Success = true;
         }
