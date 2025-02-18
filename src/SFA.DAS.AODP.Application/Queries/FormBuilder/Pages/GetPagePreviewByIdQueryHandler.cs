@@ -1,9 +1,10 @@
-﻿using MediatR;using SFA.DAS.AODP.Application;
+﻿using MediatR;
+using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
-public class GetPagePreviewByIdQueryHandler : IRequestHandler<GetPagePreviewByIdQuery, BaseMediatrResponse< GetPagePreviewByIdQueryResponse>>
+public class GetPagePreviewByIdQueryHandler : IRequestHandler<GetPagePreviewByIdQuery, BaseMediatrResponse<GetPagePreviewByIdQueryResponse>>
 {
     private readonly IPageRepository _pageRepository;
 
@@ -15,7 +16,7 @@ public class GetPagePreviewByIdQueryHandler : IRequestHandler<GetPagePreviewById
         try
         {
             var page = await _pageRepository.GetPageByIdAsync(request.PageId);
-            var result = await _pageRepository.GetPageForApplicationAsync(page.Order, request.SectionId);
+            var result = await _pageRepository.GetPageForApplicationAsync(page.Order, request.SectionId, request.FormVersionId);
             response.Value = result;
             response.Success = true;
         }

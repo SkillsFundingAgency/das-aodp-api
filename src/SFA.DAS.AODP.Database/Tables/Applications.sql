@@ -7,8 +7,10 @@ CREATE TABLE [dbo].[Applications](
     [Owner] NVARCHAR(4000) NOT NULL, 
     [Submitted] BIT NULL, 
     [SubmittedAt] DATE NULL, 
-    [Reference] NVARCHAR(400) NULL, 
     [CreatedAt] DATETIME NULL, 
+    [QualificationNumber] NVARCHAR(100) NULL, 
+    [ReferenceId] INT NOT NULL IDENTITY(1,1),
+    [UpdatedAt] DATETIME NOT NULL, 
     CONSTRAINT [PK_Applications] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
