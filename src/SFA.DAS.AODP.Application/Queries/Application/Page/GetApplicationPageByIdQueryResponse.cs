@@ -1,5 +1,4 @@
-﻿using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Data.Entities.FormBuilder;
+﻿using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 public class GetApplicationPageByIdQueryResponse
 {
@@ -55,17 +54,17 @@ public class GetApplicationPageByIdQueryResponse
             {
                 model.TextInput = new()
                 {
-                    MinLength = entity.QuestionValidation.MinLength,
-                    MaxLength = entity.QuestionValidation.MaxLength,
+                    MinLength = entity.QuestionValidation?.MinLength,
+                    MaxLength = entity.QuestionValidation?.MaxLength,
                 };
             }
             else if (entity.Type == QuestionType.Number.ToString())
             {
                 model.NumberInput = new()
                 {
-                    GreaterThanOrEqualTo = entity.QuestionValidation.NumberGreaterThanOrEqualTo,
-                    LessThanOrEqualTo = entity.QuestionValidation.NumberLessThanOrEqualTo,
-                    NotEqualTo = entity.QuestionValidation.NumberNotEqualTo
+                    GreaterThanOrEqualTo = entity.QuestionValidation?.NumberGreaterThanOrEqualTo,
+                    LessThanOrEqualTo = entity.QuestionValidation?.NumberLessThanOrEqualTo,
+                    NotEqualTo = entity.QuestionValidation?.NumberNotEqualTo
                 };
             }
 
