@@ -34,10 +34,9 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
             }
             catch (Exception ex)
             {
-                response.Success = false;
-                response.ErrorMessage = "An error occurred while retrieving new qualifications.";
-                response.InnerException = ex;
+                response.ErrorMessage = ex.Message;
             }
+
             return response;
         }
     }
