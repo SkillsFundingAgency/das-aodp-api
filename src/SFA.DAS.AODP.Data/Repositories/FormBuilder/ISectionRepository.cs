@@ -56,6 +56,7 @@ public interface ISectionRepository
     /// <returns></returns>
     int GetMaxOrderByFormVersionId(Guid formVersionId);
     Task<List<Section>> GetSectionsByIdAsync(List<Guid> sectionIds);
+    Task<Section> GetSectionByIdWithPagesAndQuestionsAsync(Guid sectionId);
     Task<List<Section>> GetNextSectionsByOrderAsync(Guid formVersionId, int order);
     Task<Dictionary<Guid,Guid>> CopySectionsForNewFormVersion(Guid oldFormVersionId, Guid newFormVersionId);
     /// <summary>

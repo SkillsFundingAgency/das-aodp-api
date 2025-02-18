@@ -11,6 +11,7 @@ public class GetSectionByIdQueryResponse()
     public string Title { get; set; }
     public List<Page> Pages { get; set; }
     public bool Editable { get; set; }
+    public bool HasAssociatedRoutes { get; set; }
 
     public static implicit operator GetSectionByIdQueryResponse(Section entity)
     {

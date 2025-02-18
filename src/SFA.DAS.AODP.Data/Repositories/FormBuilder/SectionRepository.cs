@@ -41,6 +41,20 @@ public class SectionRepository : ISectionRepository
         return res;
     }
 
+    /// <summary>
+    /// Gets a section and its related Pages and Questions with a given Id. 
+    /// </summary>
+    /// <param name="sectionId"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task<Section> GetSectionByIdWithPagesAndQuestionsAsync(Guid sectionId)
+    {
+        var res = await _context.Sections.Include(s => s.Pages).ThenInclude(p => p.Questions).FirstOrDefaultAsync(v => v.Id == sectionId);
+        if (res is null)
+            throw new RecordNotFoundException(sectionId);
+
+        return res;
+    }
 
     public int GetMaxOrderByFormVersionId(Guid formVersionId)
     {
