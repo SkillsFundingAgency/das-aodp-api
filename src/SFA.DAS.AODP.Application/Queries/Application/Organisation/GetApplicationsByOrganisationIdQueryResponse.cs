@@ -29,7 +29,7 @@ public class GetApplicationsByOrganisationIdQueryResponse
                 Id = app.Id,
                 Name = app.Name,
                 Owner = app.Owner,
-                Reference = app.Reference,
+                Reference = app.ReferenceId.ToString(),
                 CreatedDate = app.CreatedAt,
                 Submitted = app.Submitted ?? false,
                 SubmittedDate = app.SubmittedAt,
