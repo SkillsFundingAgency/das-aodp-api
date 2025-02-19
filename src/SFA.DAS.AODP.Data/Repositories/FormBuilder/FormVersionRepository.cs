@@ -149,7 +149,8 @@ public class FormVersionRepository : IFormVersionRepository
     /// <exception cref="RecordNotFoundException"></exception>
     public async Task<bool> Archive(Guid formVersionId)
     {
-        var found = await _context.FormVersions.FirstOrDefaultAsync(v => v.Id == formVersionId) ?? throw new RecordNotFoundException(formVersionId);
+        var found = await _context.FormVersions
+        .FirstOrDefaultAsync(v => v.Id == formVersionId) ?? throw new RecordNotFoundException(formVersionId);
         found.Status = FormVersionStatus.Archived.ToString();
         await _context.SaveChangesAsync();
         return true;
@@ -164,9 +165,7 @@ public class FormVersionRepository : IFormVersionRepository
     public async Task<bool> Publish(Guid formVersionId)
     {
         var newPublishedForm = await _context.FormVersions
-            .FirstOrDefaultAsync(v => v.Id == formVersionId);
-        if (newPublishedForm is null)
-            throw new RecordNotFoundException(formVersionId);
+        .FirstOrDefaultAsync(v => v.Id == formVersionId) ?? throw new RecordNotFoundException(formVersionId);;            
 
         var oldPublishedForms = await _context.FormVersions
             .Where(v => v.Status == FormVersionStatus.Published.ToString() && v.FormId == newPublishedForm.FormId)
