@@ -1,14 +1,11 @@
-﻿using Azure.Core;
-using Azure.Identity;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
+using SFA.DAS.AODP.Data.Repositories.Jobs;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
-using System.Data.Common;
 
 namespace SFA.DAS.AODP.Data.Extensions
 {
@@ -43,6 +40,7 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IApplicationPageRepository, ApplicationPageRepository>();
             services.AddScoped<IApplicationQuestionAnswerRepository, ApplicationQuestionAnswerRepository>();
             services.AddScoped<INewQualificationsRepository, NewQualificationsRepository>();
+            services.AddScoped<IJobsRepository, JobsRepository>();
 
             return services;
         }
