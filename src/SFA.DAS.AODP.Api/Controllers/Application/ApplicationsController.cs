@@ -286,4 +286,20 @@ public class ApplicationsController : Controller
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
+    [HttpDelete("/api/applications/{applicationId}")]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> DeleteApplicationByIdAsync(Guid applicationId)
+    {
+        var query = new DeleteApplicationCommand(applicationId);
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success)
+        {
+            return Ok(response.Value);
+        }
+        _logger.LogError(message: $"Error thrown deleting a application.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
 }

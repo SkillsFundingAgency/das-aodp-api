@@ -5,6 +5,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
     public interface IApplicationPageRepository
     {
         Task<ApplicationPage> Create(ApplicationPage application);
+        Task DeleteAsync(List<ApplicationPage> applicationPages);
         Task<ApplicationPage?> GetApplicationPageByPageIdAsync(Guid applicationId, Guid pageId);
         Task<List<ApplicationPage>> GetApplicationPagesByApplicationIdAsync(Guid applicationId);
         Task<List<ApplicationPage>> GetApplicationPagesByPageIdsAsync(Guid applicationId, List<Guid> pageIds);

@@ -39,6 +39,15 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             return application;
         }
 
+        public async Task DeleteAsync(Entities.Application.Application application)
+        {
+            await _context.ApplicationQuestionAnswers.Where(t => t.ApplicationPage.ApplicationId == application.Id).ExecuteDeleteAsync();
+            await _context.ApplicationPages.Where(t => t.ApplicationId == application.Id).ExecuteDeleteAsync();
+
+            _context.Applications.Remove(application);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<Entities.Application.Application> GetByIdAsync(Guid applicationId)
         {
             var res = await _context.Applications.FirstOrDefaultAsync(v => v.Id == applicationId);
