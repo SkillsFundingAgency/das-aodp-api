@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Markdig;
+using MediatR;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
@@ -25,6 +26,8 @@ public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersion
             {
                 Title = request.Title,
                 Description = request.Description,
+                DescriptionHTML = Markdown.ToHtml(request.Description)
+                    .Replace("<a", "<a class=\"govuk-link\""),
             }, order + 1);
 
             response.Value = new() { Id = form.Id };

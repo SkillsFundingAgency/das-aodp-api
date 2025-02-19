@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Markdig;
+using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
@@ -24,6 +25,11 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
             question.Title = request.Title;
             question.Hint = request.Hint;
             question.Required = request.Required;
+            question.Helper = request.Helper;
+            if (!string.IsNullOrEmpty(request.Helper))
+            {
+                question.HelperHTML = HTMLGenerator.FromMarkdown(request.Helper);
+            }
 
             if (question.QuestionValidation == null)
             {
@@ -87,6 +93,10 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
                     question.QuestionValidation.MinNumberOfOptions = request.Checkbox.MinNumberOfOptions;
                     question.QuestionValidation.MaxNumberOfOptions = request.Checkbox.MaxNumberOfOptions;
                 }
+            }
+            if (!string.IsNullOrEmpty(question.Helper))
+            {
+                question.HelperHTML = HTMLGenerator.FromMarkdown(question.Helper);
             }
 
             await _questionValidationRepository.UpsertAsync(question.QuestionValidation);

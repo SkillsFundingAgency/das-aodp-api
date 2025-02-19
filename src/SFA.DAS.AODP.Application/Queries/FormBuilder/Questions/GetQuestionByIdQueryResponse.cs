@@ -10,6 +10,8 @@ public class GetQuestionByIdQueryResponse()
     public string Title { get; set; }
     public Guid Key { get; set; }
     public string Hint { get; set; }
+    public string? Helper { get; set; }
+    public string? HelperHTML { get; set; }
     public int Order { get; set; }
     public bool Required { get; set; }
     public string Type { get; set; }
@@ -65,6 +67,8 @@ public class GetQuestionByIdQueryResponse()
             Title = entity.Title,
             Key = entity.Key,
             Hint = entity.Hint,
+            Helper = entity.Helper,
+            HelperHTML = entity.HelperHTML,
             Order = entity.Order,
             Required = entity.Required,
             Type = entity.Type,
