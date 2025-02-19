@@ -26,7 +26,7 @@ public class GetApplicationFormStatusByApplicationIdQueryResponse
         GetApplicationFormStatusByApplicationIdQueryResponse response = new()
         {
             ApplicationName = application.Name,
-            Reference = application.Reference,
+            Reference = application.ReferenceId.ToString(),
             Owner = application.Owner,
             Submitted = application.Submitted ?? false,
             SubmittedDate = application.SubmittedAt

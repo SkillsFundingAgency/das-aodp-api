@@ -5,7 +5,7 @@ using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Queries.FormBuilder.Questions;
 
-public class GetQuestionByIdQueryHandler(IQuestionRepository _QuestionRepository, IFormVersionRepository _formVersionRepository)
+public class GetQuestionByIdQueryHandler(IQuestionRepository _QuestionRepository, IFormVersionRepository _formVersionRepository, IRouteRepository _routeRepository)
     : IRequestHandler<GetQuestionByIdQuery, BaseMediatrResponse<GetQuestionByIdQueryResponse>>
 {
     public async Task<BaseMediatrResponse<GetQuestionByIdQueryResponse>> Handle(GetQuestionByIdQuery request, CancellationToken cancellationToken)
@@ -14,9 +14,10 @@ public class GetQuestionByIdQueryHandler(IQuestionRepository _QuestionRepository
         response.Success = false;
         try
         {
+            var routes = await _routeRepository.GetQuestionRoutingDetailsByQuestionId(request.QuestionId);
             var question = await _QuestionRepository.GetQuestionByIdAsync(request.QuestionId);
 
-            response.Value = question;
+            response.Value = GetQuestionByIdQueryResponse.Map(question, routes);
             response.Value.Editable = await _formVersionRepository.IsFormVersionEditable(request.FormVersionId);
             response.Success = true;
         }

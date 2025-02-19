@@ -159,9 +159,9 @@ public class PageRepository : IPageRepository
         return pageToUpdate;
     }
 
-    public async Task<Page> GetPageForApplicationAsync(int pageOrder, Guid sectionId)
+    public async Task<Page> GetPageForApplicationAsync(int pageOrder, Guid sectionId, Guid formVersionId)
     {
-        return await _context.Pages.Where(p => p.Order == pageOrder && p.SectionId == sectionId)
+        return await _context.Pages.Where(p => p.Order == pageOrder && p.SectionId == sectionId && p.Section.FormVersionId == formVersionId)
 
             .Include(p => p.Questions)
             .ThenInclude(q => q.QuestionValidation)
