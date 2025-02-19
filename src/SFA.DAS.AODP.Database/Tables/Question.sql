@@ -7,6 +7,8 @@
 	[Order] [int] NOT NULL,
 	[Hint] [nvarchar](max) NULL,
 	[Key] [uniqueidentifier] NOT NULL,
+ 	[Helper] NVARCHAR(MAX) NULL, 
+    [HelperHTML] NVARCHAR(MAX) NULL, 
     CONSTRAINT [PK_Questions] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC

@@ -9,6 +9,8 @@ public class Question
     public bool Required { get; set; }
     public int Order { get; set; }
     public string? Hint { get; set; } = string.Empty;
+    public string? Helper { get; set; } = string.Empty;
+    public string? HelperHTML { get; set; } = string.Empty;
     public Guid Key { get; set; }
 
     public virtual Page Page { get; set; }

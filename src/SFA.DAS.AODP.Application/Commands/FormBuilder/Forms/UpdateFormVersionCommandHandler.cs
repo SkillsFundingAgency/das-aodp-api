@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Markdig;
+using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
@@ -27,7 +28,8 @@ public class UpdateFormVersionCommandHandler : IRequestHandler<UpdateFormVersion
             var formVersion = await _formRepository.GetFormVersionByIdAsync(request.FormVersionId);
             formVersion.Title = request.Name;
             formVersion.Description = request.Description;
-
+            formVersion.DescriptionHTML = Markdown.ToHtml(request.Description)
+                    .Replace("<a", "<a class=\"govuk-link\"");
 
             await _formRepository.Update(formVersion);
             response.Success = true;
