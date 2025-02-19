@@ -21,7 +21,7 @@ public class When_Upsert_Route
 
         Route newRoute = new()
         {
-            Id = routeId,
+            //Id = routeId,
         };
 
         var dbSet = new List<Route>() { newRoute };
@@ -32,7 +32,7 @@ public class When_Upsert_Route
         await _sut.UpsertAsync(dbSet);
 
         // Assert
-        _context.Verify(c => c.Routes.AddAsync(newRoute, default), Times.Once());
+        _context.Verify(c => c.Routes.Add(newRoute), Times.Once());
         _context.Verify(c => c.SaveChangesAsync(default), Times.Once());
     }
 }

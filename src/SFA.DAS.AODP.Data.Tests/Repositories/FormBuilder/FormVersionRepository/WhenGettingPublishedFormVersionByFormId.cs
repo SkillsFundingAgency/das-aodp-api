@@ -37,8 +37,9 @@ public class WhenGettingPublishedFormVersionByFormId
 
             FormVersion form = new()
             {
-                Id = formId,
-                Status = FormVersionStatus.Published.ToString()
+                Id = Guid.NewGuid(),
+                FormId = formId,
+                Status = FormVersionStatus.Draft.ToString()
             };
 
             var dbSet = new List<FormVersion>() { form };

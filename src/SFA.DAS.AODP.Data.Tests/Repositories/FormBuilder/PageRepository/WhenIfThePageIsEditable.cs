@@ -2,6 +2,7 @@ using Moq;
 using Moq.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
+using SFA.DAS.AODP.Models.Form;
 
 namespace SFA.DAS.AODP.Data.Tests.Repositories.FormBuilder.PageRepository;
 
@@ -22,8 +23,13 @@ public class WhenPageIsEditable
         Page page = new()
         {
             Id = pageId,
-            
-            // No status?
+            Section = new()
+            {
+                FormVersion = new()
+                {
+                    Status = FormVersionStatus.Draft.ToString()
+                }
+            }
         };
 
         var dbSet = new List<Page>() { page };

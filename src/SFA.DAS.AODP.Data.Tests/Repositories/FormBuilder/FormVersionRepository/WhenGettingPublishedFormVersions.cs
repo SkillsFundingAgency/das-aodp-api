@@ -3,6 +3,7 @@ using Moq.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
+using SFA.DAS.AODP.Models.Form;
 
 namespace SFA.DAS.AODP.Data.Tests.Repositories.FormBuilder.FormVersionRepository;
 
@@ -35,7 +36,13 @@ public class WhenGettingPublishedFormVersions
 
         FormVersion form = new()
         {
-            Id = formId
+            Id = Guid.NewGuid(),
+            FormId = formId,
+            Status = FormVersionStatus.Published.ToString(),
+            Form = new()
+            {
+                Status = FormStatus.Active.ToString(),
+            }
         };
 
         var dbSet = new List<FormVersion>() { form };

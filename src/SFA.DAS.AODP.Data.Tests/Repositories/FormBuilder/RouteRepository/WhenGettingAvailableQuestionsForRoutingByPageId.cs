@@ -41,6 +41,7 @@ public class WhenGettingAvailableQuestionsForRoutingByPageId
         var dbSet = new List<Route>() { validRoute, invalidRoute };
 
         _context.SetupGet(c => c.Routes).ReturnsDbSet(dbSet);
+        _context.SetupGet(c => c.View_AvailableQuestionsForRoutings).ReturnsDbSet(solution);
 
         // Act
         await _sut.GetAvailableQuestionsForRoutingByPageId(pageId);

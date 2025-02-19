@@ -35,6 +35,7 @@ namespace SFA.DAS.AODP.Data.Tests.Repositories.Application.ApplicationRepository
             var dbSet = new List<Entities.Application.Application>() { application };
 
             _context.SetupGet(c => c.Applications).ReturnsDbSet(dbSet);
+            _context.SetupGet(c => c.View_SectionSummaryForApplications).ReturnsDbSet(sectionSummaries);
 
             // Act
             var result = await _sut.GetSectionSummaryByApplicationIdAsync(applicationId);

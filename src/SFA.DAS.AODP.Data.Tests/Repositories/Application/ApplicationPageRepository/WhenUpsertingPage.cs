@@ -38,7 +38,7 @@ namespace SFA.DAS.AODP.Data.Tests.Repositories.Application.ApplicationPageReposi
         public async Task Then_Page_Is_Updated()
         {
             // Arrange
-            ApplicationPage page = new();
+            ApplicationPage page = new() { Id = Guid.NewGuid() };
 
             var dbSet = new List<ApplicationPage>();
 

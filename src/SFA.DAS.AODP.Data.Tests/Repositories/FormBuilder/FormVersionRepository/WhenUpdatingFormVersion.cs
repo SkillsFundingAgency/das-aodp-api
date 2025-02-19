@@ -31,8 +31,8 @@ public class WhenUpdatingFormVersion
     public async Task Then_Update_FormVersion()
     {
         // Arrange
-        FormVersion form = new();
-        var dbSet = new List<FormVersion>();
+        FormVersion form = new() { Id = Guid.NewGuid() };
+        var dbSet = new List<FormVersion>() { form };
  
         _context.SetupGet(c => c.FormVersions).ReturnsDbSet(dbSet);
 

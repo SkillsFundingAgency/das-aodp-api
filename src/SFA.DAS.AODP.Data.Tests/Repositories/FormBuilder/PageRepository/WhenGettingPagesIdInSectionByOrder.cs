@@ -25,20 +25,25 @@ public class WhenGettingPagesIdInSectionByOrder
         Page newPage1 = new()
         {
             Id = pageId1,
-            Order = 0
+            Order = 0,
+            SectionId = sectionId
         };
 
         Page newPage2 = new()
         {
             Id = pageId2,
-            Order = 0
+            Order = 0,
+            SectionId = sectionId
         };
 
         Page newPage3 = new()
         {
             Id = pageId2,
-            Order = 0
+            Order = 1,
+            SectionId = sectionId
         };
+
+        var pages = new List<Page>() { newPage1, newPage2, newPage3 };
 
         Section newSection = new()
         {
@@ -56,6 +61,7 @@ public class WhenGettingPagesIdInSectionByOrder
         var dbSet = new List<Section>() { newSection };
 
         _context.SetupGet(c => c.Sections).ReturnsDbSet(dbSet);
+        _context.SetupGet(c => c.Pages).ReturnsDbSet(pages);
 
         // Act
         var result = await _sut.GetPagesIdInSectionByOrderAsync(sectionId, 0, 1);

@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore.Storage;
 using Moq;
 using Moq.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
@@ -43,13 +44,15 @@ public class WhenCreatingDraft
 
         var dbSet = new List<FormVersion>() { form };
 
+        var mockIDbContextTransaction = new Mock<IDbContextTransaction>();
         _context.SetupGet(c => c.FormVersions).ReturnsDbSet(dbSet);
+        _context.Setup(c => c.StartTransactionAsync()).Returns(Task.FromResult(mockIDbContextTransaction.Object));
 
         // Act
         var result = await _sut.CreateDraftAsync(formId);
 
         // Assert
-        _context.Verify(c => c.FormVersions.AddAsync(form, default), Times.Once());
+        _context.Verify(c => c.FormVersions.Add(form), Times.Once());
         _context.Verify(c => c.SaveChangesAsync(default), Times.Once());
 
         Assert.True(result.Id != Guid.Empty);    

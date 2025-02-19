@@ -22,7 +22,7 @@ public class WhenUpsertingQuestionOption
 
         QuestionOption newQuestionOption = new()
         {
-            Id = questionOptionId,
+            //Id = questionOptionId,
             QuestionId = questionId
         };
 
@@ -34,7 +34,7 @@ public class WhenUpsertingQuestionOption
         await _sut.UpsertAsync(dbSet);
 
         // Assert
-        _context.Verify(c => c.QuestionOptions.AddAsync(newQuestionOption, default), Times.Once());
+        _context.Verify(c => c.QuestionOptions.Add(newQuestionOption), Times.Once());
         _context.Verify(c => c.SaveChangesAsync(default), Times.Once());
     }
 }

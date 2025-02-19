@@ -20,6 +20,12 @@ public class WhenGettingMaxOrderByPageId
         Guid pageId = Guid.NewGuid();
         Guid questionId = Guid.NewGuid();
 
+        var question = new Question()
+        {
+            Id = questionId,
+            PageId = pageId,
+        };
+
         Page page = new()
         {
             Id = pageId,
@@ -35,6 +41,7 @@ public class WhenGettingMaxOrderByPageId
         var dbSet = new List<Page>() { page };
 
         _context.SetupGet(c => c.Pages).ReturnsDbSet(dbSet);
+        _context.SetupGet(c => c.Questions).ReturnsDbSet(new List<Question>() { question });
 
         // Act
         var result = _sut.GetMaxOrderByPageId(pageId);

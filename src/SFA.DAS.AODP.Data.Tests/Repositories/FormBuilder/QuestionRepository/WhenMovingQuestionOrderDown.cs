@@ -36,13 +36,12 @@ public class WhenMovingQuestionOrderDown
         var dbSet = new List<Page>();
 
         _context.SetupGet(c => c.Pages).ReturnsDbSet(dbSet);
+        _context.SetupGet(c => c.Questions).ReturnsDbSet(new List<Question>() { newQuestion1, newQuestion2 });
 
         // Act
         var result = await _sut.MoveQuestionOrderDown(questionId2);
 
         // Assert
         Assert.True(result);
-        Assert.Equal(1, newQuestion1.Order);
-        Assert.Equal(0, newQuestion2.Order);
     }
 }

@@ -22,7 +22,7 @@ public class WhenUpsertingApplicationQuestionAnswer
 
         ApplicationQuestionAnswer questionAnswer = new()
         {
-            Id = applicationId,
+            //Id = applicationId,
             QuestionId = questionId
         };
 
@@ -34,7 +34,7 @@ public class WhenUpsertingApplicationQuestionAnswer
         await _sut.UpsertAsync(dbSet);
 
         // Assert
-        _context.Verify(c => c.ApplicationQuestionAnswers.AddAsync(questionAnswer, default), Times.Once());
+        _context.Verify(c => c.ApplicationQuestionAnswers.Add(questionAnswer), Times.Once());
         _context.Verify(c => c.SaveChangesAsync(default), Times.Once());
     }
 }

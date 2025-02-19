@@ -23,10 +23,10 @@ public class WhenUpsertingPages
         _context.SetupGet(c => c.ApplicationPages).ReturnsDbSet(dbSet);
 
         // Act
-        await _sut.UpsertAsync(dbSet);
+        await _sut.UpsertAsync(new List<ApplicationPage>() { page });
 
         // Assert
-        _context.Verify(c => c.ApplicationPages.AddAsync(page, default), Times.Once());
+        _context.Verify(c => c.ApplicationPages.Add(page), Times.Once());
         _context.Verify(c => c.SaveChangesAsync(default), Times.Once());
     }
 }

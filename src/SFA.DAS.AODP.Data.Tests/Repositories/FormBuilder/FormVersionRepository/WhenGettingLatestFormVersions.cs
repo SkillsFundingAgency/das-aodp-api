@@ -34,7 +34,12 @@ public class WhenGettingLatestFormVersions
 
         FormVersion form = new()
         {
-            Id = formId
+            Id = Guid.NewGuid(),
+            FormId = formId,
+            Form = new()
+            {
+                Id = formId
+            }
         };
 
         var dbSet = new List<FormVersion>() { form };

@@ -22,7 +22,7 @@ public class WhenUpsertingQuestionValidation
 
         QuestionValidation newQuestionValidation = new()
         {
-            Id = questionValidationId,
+            //Id = questionValidationId,
             QuestionId = questionId
         };
 
@@ -34,7 +34,7 @@ public class WhenUpsertingQuestionValidation
         await _sut.UpsertAsync(newQuestionValidation);
 
         // Assert
-        _context.Verify(c => c.QuestionValidations.AddAsync(newQuestionValidation, default), Times.Once());
+        _context.Verify(c => c.QuestionValidations.Add(newQuestionValidation), Times.Once());
         _context.Verify(c => c.SaveChangesAsync(default), Times.Once());
     }
 }

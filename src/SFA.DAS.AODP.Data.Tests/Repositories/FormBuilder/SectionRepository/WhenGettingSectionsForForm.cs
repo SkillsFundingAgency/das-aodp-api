@@ -30,12 +30,14 @@ public class WhenGettingSectionsForForm
         Section newSection1 = new()
         {
             Id = sectionId1,
+            FormVersionId = formVersionId,
             Order = 0
         };
 
         Section newSection2 = new()
         {
             Id = sectionId2,
+            FormVersionId = formVersionId,
             Order = 1
         };
 
@@ -51,8 +53,10 @@ public class WhenGettingSectionsForForm
         var solution = new List<Section>() { newSection1, newSection2 };
 
         var dbSet = new List<FormVersion>() { newFormVersion };
+        var sections = new List<Section>() { newSection1, newSection2 };
 
         _context.SetupGet(c => c.FormVersions).ReturnsDbSet(dbSet);
+        _context.SetupGet(c => c.Sections).ReturnsDbSet(sections);
 
         // Act
         var result = await _sut.GetSectionsForFormAsync(formVersionId);

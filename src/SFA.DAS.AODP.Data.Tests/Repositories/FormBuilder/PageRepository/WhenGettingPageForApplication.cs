@@ -23,6 +23,8 @@ public class WhenGettingPageForApplication
         Page newPage = new()
         {
             Id = pageId,
+            SectionId = sectionId,
+            Order = 0
         };
 
         var dbSet = new List<Page>() { newPage };

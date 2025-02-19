@@ -29,14 +29,18 @@ public class WhenGettingNextSectionsByOrder
         Section newSection1 = new()
         {
             Id = sectionId1,
+            FormVersionId = formVersionId,
             Order = 0
         };
 
         Section newSection2 = new()
         {
             Id = sectionId2,
+            FormVersionId = formVersionId,
             Order = 1
         };
+
+        var sections = new List<Section>() { newSection1, newSection2 };
 
         FormVersion newFormVersion = new()
         {
@@ -47,11 +51,12 @@ public class WhenGettingNextSectionsByOrder
             ]
         };
 
-        var solution = new List<Section>() { newSection1, newSection2 };
+        var solution = new List<Section>() { newSection2 };
 
         var dbSet = new List<FormVersion>() { newFormVersion };
 
         _context.SetupGet(c => c.FormVersions).ReturnsDbSet(dbSet);
+        _context.SetupGet(c => c.Sections).ReturnsDbSet(sections);
 
         // Act
         var result = await _sut.GetNextSectionsByOrderAsync(formVersionId, 0);

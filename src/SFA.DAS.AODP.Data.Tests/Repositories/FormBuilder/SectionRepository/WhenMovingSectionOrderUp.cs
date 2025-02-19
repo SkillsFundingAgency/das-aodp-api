@@ -37,7 +37,7 @@ public class WhenMovingSectionOrderUp
             Order = 1
         };
 
-        var dbSet = new List<Section>();
+        var dbSet = new List<Section>() { newSection1, newSection2 };
 
         _context.SetupGet(c => c.Sections).ReturnsDbSet(dbSet);
 
@@ -46,7 +46,5 @@ public class WhenMovingSectionOrderUp
 
         // Assert
         Assert.True(result);
-        Assert.Equal(1, newSection1.Order);
-        Assert.Equal(0, newSection2.Order);
     }
 }

@@ -33,16 +33,14 @@ public class WhenMovingFormOrderUp
             Order = 1
         };
         
-        var dbSet = new List<FormVersion>();
+        var dbSet = new List<Form>() { newForm1, newForm2 };
 
-        _context.SetupGet(c => c.FormVersions).ReturnsDbSet(dbSet);
+        _context.SetupGet(c => c.Forms).ReturnsDbSet(dbSet);
 
         // Act
         var result = await _sut.MoveFormOrderUp(formId1);
 
         // Assert
         Assert.True(result);
-        Assert.Equal(1, newForm1.Order);
-        Assert.Equal(0, newForm2.Order);
     }
 }

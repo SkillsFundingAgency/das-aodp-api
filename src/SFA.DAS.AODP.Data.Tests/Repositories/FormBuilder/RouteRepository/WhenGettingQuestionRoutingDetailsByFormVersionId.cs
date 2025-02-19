@@ -29,6 +29,7 @@ public class WhenGettingQuestionRoutingDetailsByFormVersionId
         var dbSet = new List<Route>() { newRoute };
 
         _context.SetupGet(c => c.Routes).ReturnsDbSet(dbSet);
+        _context.SetupGet(c => c.View_QuestionRoutingDetails).ReturnsDbSet(new List<View_QuestionRoutingDetail>());
 
         // Act
         var result = await _sut.GetQuestionRoutingDetailsByFormVersionId(routeId);

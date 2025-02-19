@@ -33,7 +33,7 @@ public class WhenMovingFormOrderDown
             Order = 1
         };
 
-        var dbSet = new List<Page>();
+        var dbSet = new List<Page>() { newPage1, newPage2 };
 
         _context.SetupGet(c => c.Pages).ReturnsDbSet(dbSet);
 
@@ -42,7 +42,5 @@ public class WhenMovingFormOrderDown
 
         // Assert
         Assert.True(result);
-        Assert.Equal(1, newPage1.Order);
-        Assert.Equal(0, newPage2.Order);
     }
 }

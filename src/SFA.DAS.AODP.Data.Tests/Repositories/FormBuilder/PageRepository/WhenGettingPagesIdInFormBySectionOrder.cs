@@ -29,20 +29,40 @@ public class WhenGettingPagesIdInFormBySectionOrder
         Page newPage1 = new()
         {
             Id = pageId1,
-            Order = 0
+            Order = 0,
+            Section = new()
+            {
+                Id = sectionId1,
+                FormVersionId = formVersionId,
+                Order = 0
+            }
         };
 
         Page newPage2 = new()
         {
             Id = pageId2,
-            Order = 0
+            Order = 0,
+            Section = new()
+            {
+                Id = sectionId1,
+                FormVersionId = formVersionId,
+                Order = 0
+            }
         };
 
         Page newPage3 = new()
         {
             Id = pageId2,
-            Order = 0
+            Order = 0,
+            Section = new()
+            {
+                Id = sectionId2,
+                FormVersionId = formVersionId,
+                Order = 1
+            }
         };
+
+        var pages = new List<Page>() { newPage1, newPage2, newPage3 };
 
         Section newSection1 = new()
         {
@@ -93,9 +113,10 @@ public class WhenGettingPagesIdInFormBySectionOrder
         var dbSet = new List<Form>() { newForm };
 
         _context.SetupGet(c => c.Forms).ReturnsDbSet(dbSet);
+        _context.SetupGet(c => c.Pages).ReturnsDbSet(pages);
 
         // Act
-        var result = await _sut.GetPagesIdInFormBySectionOrderAsync(formId, 0, 1);
+        var result = await _sut.GetPagesIdInFormBySectionOrderAsync(formVersionId, 0, 1);
 
         // Assert
         Assert.NotNull(result);

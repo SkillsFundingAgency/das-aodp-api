@@ -3,6 +3,7 @@ using Moq.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
+using SFA.DAS.AODP.Models.Form;
 
 namespace SFA.DAS.AODP.Data.Tests.Repositories.FormBuilder.SectionRepository;
 
@@ -27,7 +28,10 @@ public class WhenIfSectionIsEditable
         Section newSection = new()
         {
             Id = sectionId,
-            
+            FormVersion = new()
+            {
+                Status = FormVersionStatus.Draft.ToString()
+            }
         };
 
         var dbSet = new List<Section>() { newSection };

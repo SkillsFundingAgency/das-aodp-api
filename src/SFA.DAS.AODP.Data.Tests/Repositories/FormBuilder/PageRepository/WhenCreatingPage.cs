@@ -17,10 +17,13 @@ public class WhenCreatingPage
     public async Task Then_The_Page_Is_Created()
     {
         // Arrange
-        Page newPage = new();
+        Page newPage = new() { SectionId = Guid.NewGuid() };
+        Section newSection = new() { Id = newPage.SectionId };
         var dbSet = new List<Page>();
+        var sections = new List<Section>() { newSection };
 
         _context.SetupGet(c => c.Pages).ReturnsDbSet(dbSet);
+        _context.SetupGet(c => c.Sections).ReturnsDbSet(sections);
 
         // Act
         var result = await _sut.Create(newPage);

@@ -29,7 +29,7 @@ public class WhenDeletingSection
         {
             Id = sectionId
         };
-        var dbSet = new List<Section>{ newSection};
+        var dbSet = new List<Section>{ newSection };
 
         _context.SetupGet(c => c.Sections).ReturnsDbSet(dbSet);
 

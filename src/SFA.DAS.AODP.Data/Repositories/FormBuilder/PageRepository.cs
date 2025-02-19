@@ -47,7 +47,9 @@ public class PageRepository : IPageRepository
 
     public async Task<List<Guid>> GetPagesIdInFormBySectionOrderAsync(Guid formVersionId, int startSectionOrderInclusive, int? endSectionOrderExclusive)
     {
-        return await _context.Pages.Where(v => v.Section.FormVersionId == formVersionId && v.Section.Order >= startSectionOrderInclusive && (!endSectionOrderExclusive.HasValue || v.Section.Order < endSectionOrderExclusive)).Select(p => p.Id).ToListAsync();
+        return await _context.Pages
+            .Where(v => v.Section.FormVersionId == formVersionId && v.Section.Order >= startSectionOrderInclusive && (!endSectionOrderExclusive.HasValue || v.Section.Order < endSectionOrderExclusive))
+            .Select(p => p.Id).ToListAsync();
     }
 
     /// <summary>

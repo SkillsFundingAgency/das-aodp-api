@@ -3,6 +3,7 @@ using Moq;
 using Moq.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
+using SFA.DAS.AODP.Models.Form;
 
 namespace SFA.DAS.AODP.Data.Tests.Repositories.FormBuilder.PageRepository;
 
@@ -23,12 +24,23 @@ public class WhenArchivingPage
         Page page = new()
         {
             Id = pageId,
+
             // No status?
+        };
+        Section section = new()
+        {
+            Id = Guid.NewGuid(),
+            FormVersion = new()
+            {
+                Status = FormVersionStatus.Draft.ToString(),
+            }
         };
 
         var dbSet = new List<Page>() { page };
+        var dbSetSections = new List<Section>() { section };
 
         _context.SetupGet(c => c.Pages).ReturnsDbSet(dbSet);
+        _context.SetupGet(c => c.Sections).ReturnsDbSet(dbSetSections);
 
         // Act
         var result = await _sut.Archive(pageId);

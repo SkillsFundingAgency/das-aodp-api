@@ -23,7 +23,12 @@ public class WhenGettingApplicationQuestionAnswerByApplicationIdAndPageId
         ApplicationQuestionAnswer questionAnswer = new()
         {
             ApplicationPageId = pageId,
-            Id = applicationId
+            Id = applicationId,
+            ApplicationPage = new()
+            {
+                PageId = pageId,
+                ApplicationId = applicationId
+            }
         };
 
         var dbSet = new List<ApplicationQuestionAnswer>() { questionAnswer };

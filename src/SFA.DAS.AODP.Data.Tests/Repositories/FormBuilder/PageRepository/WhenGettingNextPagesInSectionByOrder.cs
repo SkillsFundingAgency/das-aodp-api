@@ -24,12 +24,14 @@ public class WhenGettingNextPagesInSectionByOrder
         Page newPage1 = new()
         {
             Id = pageId1,
+            SectionId = sectionId,
             Order = 0
         };
 
         Page newPage2 = new()
         {
             Id = pageId2,
+            SectionId = sectionId,
             Order = 1
         };
 
@@ -45,8 +47,10 @@ public class WhenGettingNextPagesInSectionByOrder
         var solution = new List<Page>() { newPage2 };
 
         var dbSet = new List<Section>() { newSection };
+        var pages = new List<Page>() { newPage1, newPage2 };
 
         _context.SetupGet(c => c.Sections).ReturnsDbSet(dbSet);
+        _context.SetupGet(c => c.Pages).ReturnsDbSet(pages);
 
         // Act
         var result = await _sut.GetNextPagesInSectionByOrderAsync(sectionId, 0);

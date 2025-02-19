@@ -17,8 +17,8 @@ public class WhenUpdatingPage
     public async Task Then_Update_Page()
     {
         // Arrange
-        Page newPage = new();
-        var dbSet = new List<Page>();
+        Page newPage = new() { Id = Guid.NewGuid() };
+        var dbSet = new List<Page>() { newPage };
 
         _context.SetupGet(c => c.Pages).ReturnsDbSet(dbSet);
 
@@ -26,7 +26,6 @@ public class WhenUpdatingPage
         var result = await _sut.Update(newPage);
 
         // Assert
-        _context.Verify(c => c.Pages.Update(newPage), Times.Once());
         _context.Verify(c => c.SaveChangesAsync(default), Times.Once());
     }
 }

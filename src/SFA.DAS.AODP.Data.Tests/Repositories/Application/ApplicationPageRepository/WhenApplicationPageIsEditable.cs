@@ -21,7 +21,8 @@ namespace SFA.DAS.AODP.Data.Tests.Repositories.Application.ApplicationPageReposi
             ApplicationPage page = new()
             {
                 ApplicationId = applicationId,
-                Id = pageId
+                Id = pageId,
+                Application = new() { Submitted = false }
             };
 
             var dbSet = new List<ApplicationPage>() { page };

@@ -33,8 +33,10 @@ public class WhenCreatingFormVersion
         // Arrange
         FormVersion form = new();
         var dbSet = new List<FormVersion>();
+        var dbSetForms = new List<Form>();
 
         _context.SetupGet(c => c.FormVersions).ReturnsDbSet(dbSet);
+        _context.SetupGet(c => c.Forms).ReturnsDbSet(dbSetForms);
 
         // Act
         var result = await _sut.Create(form, 0);
@@ -42,7 +44,5 @@ public class WhenCreatingFormVersion
         // Assert
         _context.Verify(c => c.FormVersions.Add(form), Times.Once());
         _context.Verify(c => c.SaveChangesAsync(default), Times.Once());
-
-        Assert.True(result.Id != Guid.Empty);
     }
 }

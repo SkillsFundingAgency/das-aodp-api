@@ -2,6 +2,7 @@ using Moq;
 using Moq.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
+using SFA.DAS.AODP.Models.Form;
 
 namespace SFA.DAS.AODP.Data.Tests.Repositories.FormBuilder.QuestionRepository;
 
@@ -22,7 +23,16 @@ public class WhenIfTheQuestionIsEditable
         Question newQuestion = new()
         {
             Id = questionId,
-            
+            Page = new()
+            {
+                Section = new()
+                {
+                    FormVersion = new()
+                    {
+                        Status = FormVersionStatus.Draft.ToString()
+                    }
+                }
+            }
         };
 
         var dbSet = new List<Question>() { newQuestion };

@@ -37,7 +37,8 @@ public class WhenGettingDraftFormVersionByFormId
 
             FormVersion form = new()
             {
-                Id = formId,
+                Id = Guid.NewGuid(),
+                FormId = formId,
                 Status = FormVersionStatus.Draft.ToString()
             };
 

@@ -24,12 +24,14 @@ public class WhenGettingPagesForSection
         Page newPage1 = new()
         {
             Id = pageId1,
+            SectionId = sectionId,
             Order = 0
         };
 
         Page newPage2 = new()
         {
             Id = pageId2,
+            SectionId = sectionId,
             Order = 1
         };
 
