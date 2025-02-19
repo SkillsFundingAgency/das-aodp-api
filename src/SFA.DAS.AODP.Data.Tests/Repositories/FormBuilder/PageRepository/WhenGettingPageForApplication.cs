@@ -17,14 +17,22 @@ public class WhenGettingPageForApplication
     public async Task Then_Get_Page_For_Application()
     {
         // Arrange
+        Guid formVersionId = Guid.NewGuid();
         Guid sectionId = Guid.NewGuid();
         Guid pageId = Guid.NewGuid();
+
+        Section newSection = new()
+        {
+            Id = sectionId,
+            FormVersionId = formVersionId
+        };
 
         Page newPage = new()
         {
             Id = pageId,
             SectionId = sectionId,
-            Order = 0
+            Order = 0,
+            Section = newSection
         };
 
         var dbSet = new List<Page>() { newPage };
@@ -32,7 +40,7 @@ public class WhenGettingPageForApplication
         _context.SetupGet(c => c.Pages).ReturnsDbSet(dbSet);
 
         // Act
-        var result = await _sut.GetPageForApplicationAsync(0, sectionId);
+        var result = await _sut.GetPageForApplicationAsync(0, sectionId, formVersionId);
 
         // Assert
         Assert.NotNull(result);
