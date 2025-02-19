@@ -5,12 +5,7 @@ SELECT DISTINCT
     sourcePage.SectionId AS SourceSectionId, 
     r.NextPageId, 
     nextPage.SectionId AS nextPageSectionId, 
-    nextSections.Id AS nextSectionId, 
-    (
-        SELECT MIN(p.Id) 
-        FROM Pages AS p 
-        WHERE p.SectionId = nextSections.Id
-    ) AS nextSectionPageId
+    nextSections.Id AS nextSectionId
 FROM Routes AS r
 INNER JOIN Questions AS sourceQuestions ON sourceQuestions.Id = r.SourceQuestionId
 INNER JOIN Pages AS sourcePage ON sourcePage.Id = sourceQuestions.PageId
