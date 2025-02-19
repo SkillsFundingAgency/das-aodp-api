@@ -8,6 +8,5 @@
         public Guid? NextPageId { get; set; }
         public Guid? NextPageSectionId { get; set; }
         public Guid? NextSectionId { get; set; }
-        public Guid? NextSectionPageId { get; set; }
     }
 }
