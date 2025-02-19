@@ -155,9 +155,13 @@ public class SectionRepository : ISectionRepository
 
     private async Task UpdateSectionOrdering(Guid formVersionId, int deletedSectionOrder)
     {
-        await _context.Sections
+        var propsToUpdate = await _context.Sections
             .Where(sec => sec.FormVersionId == formVersionId && sec.Order > deletedSectionOrder)
-            .ExecuteUpdateAsync(s => s.SetProperty(sec => sec.Order, sec => sec.Order - 1));
+            .ToListAsync();
+
+        foreach (var sec in propsToUpdate)
+            sec.Order--;
+        await _context.SaveChangesAsync();
     }
     
     /// <summary>

@@ -184,11 +184,15 @@ public class PageRepository : IPageRepository
             .FirstOrDefaultAsync() ?? throw new RecordNotFoundException(sectionId);
     }
 
-    private async Task UpdatePageOrdering(Guid sectionId, int deletedPageOrder)
+    public async Task UpdatePageOrdering(Guid sectionId, int deletedPageOrder)
     {
-        await _context.Pages
+        var pagesToUpdate = await _context.Pages
             .Where(p => p.SectionId == sectionId && p.Order > deletedPageOrder)
-            .ExecuteUpdateAsync(s => s.SetProperty(p => p.Order, p => p.Order - 1));
+            .ToListAsync();
+
+        foreach (var page in pagesToUpdate)
+            page.Order--;
+        await _context.SaveChangesAsync();
     }
 
     /// <summary>

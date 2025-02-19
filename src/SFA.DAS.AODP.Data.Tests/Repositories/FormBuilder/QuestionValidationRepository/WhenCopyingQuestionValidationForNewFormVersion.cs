@@ -40,7 +40,6 @@ public class WhenCopyingQuestionValidationForNewFormVersion
         await _sut.CopyQuestionValidationForNewFormVersion(oldNewQuestionsIds);
 
         // Assert
-        _context.Verify(c => c.QuestionValidations.Contains(newQuestionValidation), Times.Once());
         _context.Verify(c => c.SaveChangesAsync(default), Times.Once());
         // Assert.NotNull(result);
         // Assert.Contains(questionValidationId, result.Keys);

@@ -36,20 +36,30 @@ public class WhenGettingAvailableQuestionsForRoutingByPageId
             SourceQuestionId = invalidQuestionId,
         };
 
-        var solution = new List<View_AvailableQuestionsForRouting>() {};
+        var availableQuestionsForRoutings = new View_AvailableQuestionsForRouting()
+        {
+            PageId = pageId
+        };
+
+        var availableQuestionsForRoutingsView = new List<View_AvailableQuestionsForRouting>() 
+        {
+            availableQuestionsForRoutings
+        };
+        var solution = new List<View_AvailableQuestionsForRouting>() 
+        {
+            availableQuestionsForRoutings
+        };
 
         var dbSet = new List<Route>() { validRoute, invalidRoute };
 
         _context.SetupGet(c => c.Routes).ReturnsDbSet(dbSet);
-        _context.SetupGet(c => c.View_AvailableQuestionsForRoutings).ReturnsDbSet(solution);
+        _context.SetupGet(c => c.View_AvailableQuestionsForRoutings).ReturnsDbSet(availableQuestionsForRoutingsView);
 
         // Act
-        await _sut.GetAvailableQuestionsForRoutingByPageId(pageId);
+        var result = await _sut.GetAvailableQuestionsForRoutingByPageId(pageId);
 
         // Assert
-        _context.Verify(c => c.Routes.Contains(validRoute), Times.Once());
-        _context.Verify(c => c.SaveChangesAsync(default), Times.Once());
-        // Assert.NotNull(result);
-        // Assert.Equal(dbSet, result);
+        Assert.NotNull(result);
+        Assert.Equal(result, solution);
     }
 }

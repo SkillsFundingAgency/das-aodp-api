@@ -13,7 +13,10 @@ public class WhenArchivingPage
 
     private readonly Data.Repositories.FormBuilder.PageRepository _sut;
 
-    public WhenArchivingPage() => _sut = new(_context.Object);
+    public WhenArchivingPage()
+    {
+        _sut = new(_context.Object);
+    }
 
     [Fact]
     public async Task When_The_Page_Is_Archived()

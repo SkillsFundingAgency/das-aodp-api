@@ -11,7 +11,10 @@ public class WhenGettingNextPagesInSectionByOrder
 
     private readonly Data.Repositories.FormBuilder.PageRepository _sut;
 
-    public WhenGettingNextPagesInSectionByOrder() => _sut = new(_context.Object);
+    public WhenGettingNextPagesInSectionByOrder()
+    {
+        _sut = new(_context.Object);
+    }
 
     [Fact]
     public async Task Then_Get_Next_Pages_In_Section_By_Order()
