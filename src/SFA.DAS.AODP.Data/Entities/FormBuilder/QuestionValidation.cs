@@ -24,6 +24,11 @@ public class QuestionValidation
     public bool? DateMustBeInFuture { get; set; }
     public bool? DateMustBeInPast { get; set; }
 
+    // File
+    public int? FileMaxSize { get; set; }
+    public string? FileNamePrefix { get; set; }
+    public int? NumberOfFiles { get; set; }
+
 
     public Question Question { get; set; }
 }

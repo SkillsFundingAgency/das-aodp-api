@@ -1,5 +1,4 @@
-﻿using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Data.Entities.FormBuilder;
+﻿using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 public class GetApplicationPageByIdQueryResponse
 {
@@ -35,7 +34,7 @@ public class GetApplicationPageByIdQueryResponse
         public List<Option> Options { get; set; } = new();
 
         public DateInputOptions DateInput { get; set; } = new();
-
+        public FileUploadOptions FileUpload { get; set; } = new();
         public List<RouteInformation> Routes { get; set; } = new();
 
 
@@ -51,21 +50,21 @@ public class GetApplicationPageByIdQueryResponse
                 Type = entity.Type,
             };
 
-            if (entity.Type == QuestionType.Text.ToString() && entity.QuestionValidation != null)
+            if ((entity.Type == QuestionType.TextArea.ToString() || entity.Type == QuestionType.Text.ToString()) && entity.QuestionValidation != null)
             {
                 model.TextInput = new()
                 {
-                    MinLength = entity.QuestionValidation.MinLength,
-                    MaxLength = entity.QuestionValidation.MaxLength,
+                    MinLength = entity.QuestionValidation?.MinLength,
+                    MaxLength = entity.QuestionValidation?.MaxLength,
                 };
             }
             else if (entity.Type == QuestionType.Number.ToString())
             {
                 model.NumberInput = new()
                 {
-                    GreaterThanOrEqualTo = entity.QuestionValidation.NumberGreaterThanOrEqualTo,
-                    LessThanOrEqualTo = entity.QuestionValidation.NumberLessThanOrEqualTo,
-                    NotEqualTo = entity.QuestionValidation.NumberNotEqualTo
+                    GreaterThanOrEqualTo = entity.QuestionValidation?.NumberGreaterThanOrEqualTo,
+                    LessThanOrEqualTo = entity.QuestionValidation?.NumberLessThanOrEqualTo,
+                    NotEqualTo = entity.QuestionValidation?.NumberNotEqualTo
                 };
             }
 
@@ -100,6 +99,15 @@ public class GetApplicationPageByIdQueryResponse
                     LessThanOrEqualTo = entity.QuestionValidation?.DateLessThanOrEqualTo,
                     MustBeInFuture = entity.QuestionValidation?.DateMustBeInFuture,
                     MustBeInPast = entity.QuestionValidation?.DateMustBeInPast,
+                };
+            }
+            else if(entity.Type == QuestionType.File.ToString())
+            {
+                model.FileUpload = new()
+                {
+                    NumberOfFiles = entity.QuestionValidation?.NumberOfFiles,
+                    FileNamePrefix = entity.QuestionValidation?.FileNamePrefix,
+                    MaxSize = entity.QuestionValidation?.FileMaxSize,
                 };
             }
 
@@ -158,6 +166,13 @@ public class GetApplicationPageByIdQueryResponse
         public DateOnly? LessThanOrEqualTo { get; set; }
         public bool? MustBeInFuture { get; set; }
         public bool? MustBeInPast { get; set; }
+    }
+
+    public class FileUploadOptions
+    {
+        public int? MaxSize { get; set; }
+        public string? FileNamePrefix { get; set; }
+        public int? NumberOfFiles { get; set; }
     }
 
 

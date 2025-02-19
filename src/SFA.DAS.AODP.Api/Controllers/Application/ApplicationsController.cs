@@ -1,10 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 using SFA.DAS.AODP.Application.Exceptions;
-using SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
-using SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 
 namespace SFA.DAS.AODP.Api.Controllers.Application;
 
@@ -20,8 +17,8 @@ public class ApplicationsController : Controller
         _mediator = mediator;
         _logger = logger;
     }
-   
-    
+
+
     [HttpGet("/api/applications/forms")]
     [ProducesResponseType(typeof(GetApplicationFormsQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -38,12 +35,30 @@ public class ApplicationsController : Controller
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
+    [HttpGet("/api/applications/{applicationId}/metadata")]
+    [ProducesResponseType(typeof(GetApplicationMetadataByIdQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetApplicationMetadataByIdAsync(Guid applicationId)
+    {
+        var query = new GetApplicationMetadataByIdQuery(applicationId);
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success)
+        {
+            return Ok(response.Value);
+        }
+        _logger.LogError(message: $"Error thrown getting application metadata for application Id `{applicationId}`.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
 
     [HttpGet("/api/applications/forms/{formVersionId}/sections/{sectionId}/pages/{pageOrder}")]
     [ProducesResponseType(typeof(GetApplicationPageByIdQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetByIdAsync(int pageOrder, Guid sectionId, Guid formVersionId)
+    public async Task<IActionResult> GetApplicationPageByIdAsync(int pageOrder, Guid sectionId, Guid formVersionId)
     {
         var query = new GetApplicationPageByIdQuery(pageOrder, sectionId, formVersionId);
 
@@ -271,4 +286,20 @@ public class ApplicationsController : Controller
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
+    [HttpDelete("/api/applications/{applicationId}")]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> DeleteApplicationByIdAsync(Guid applicationId)
+    {
+        var query = new DeleteApplicationCommand(applicationId);
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success)
+        {
+            return Ok(response.Value);
+        }
+        _logger.LogError(message: $"Error thrown deleting a application.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
 }
