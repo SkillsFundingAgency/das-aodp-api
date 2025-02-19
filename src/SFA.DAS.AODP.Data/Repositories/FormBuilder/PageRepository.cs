@@ -32,8 +32,7 @@ public class PageRepository : IPageRepository
     /// <exception cref="RecordNotFoundException"></exception>
     public int GetMaxOrderBySectionId(Guid sectionId)
     {
-        var res = _context.Pages.Where(v => v.SectionId == sectionId).Max(s => (int?)s.Order) ?? 0;
-        return res;
+        return _context.Pages.Where(v => v.SectionId == sectionId).Max(s => (int?)s.Order) ?? 0;
     }
 
     public async Task<List<Page>> GetNextPagesInSectionByOrderAsync(Guid sectionId, int order)
