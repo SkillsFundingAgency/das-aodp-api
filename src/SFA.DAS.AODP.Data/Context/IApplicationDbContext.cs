@@ -29,6 +29,7 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<View_SectionPageCount> View_SectionPageCounts { get; set; }
         DbSet<View_RemainingPagesBySectionForApplication> View_RemainingPagesBySectionForApplications { get; set; }
         DbSet<View_SectionSummaryForApplication> View_SectionSummaryForApplications { get; set; }
+        DbSet<View_PagesSectionsAssociatedWithRouting> View_PagesSectionsAssociatedWithRoutings { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BulkInsertAsync<T>(IEnumerable<T> entities, CancellationToken cancellationToken = default) where T : class;

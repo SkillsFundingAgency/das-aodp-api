@@ -11,6 +11,7 @@ namespace SFA.DAS.AODP.Data.Repositories.FormBuilder
         Task<List<View_QuestionRoutingDetail>> GetQuestionRoutingDetailsByQuestionId(Guid questionId);
         Task<List<Route>> GetRoutesByQuestionId(Guid questionId);
         Task<List<Route>> GetRoutesByPageId(Guid pageId);
+        Task<List<Route>> GetRoutesBySectionId(Guid sectionId);
         Task<bool> IsRouteEditable(Guid id);
         Task UpsertAsync(List<Route> dbRoutes);
     }

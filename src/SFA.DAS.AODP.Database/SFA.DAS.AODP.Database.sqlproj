@@ -96,6 +96,7 @@
     <Build Include="Tables\Question.sql" />
     <Build Include="Views\View_SkippedPagesBySectionForApplication.sql" />
     <Build Include="Views\View_SectionSummaryForApplication.sql" />
+    <Build Include="Views\View_PagesSectionsAssociatedWithRouting.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />

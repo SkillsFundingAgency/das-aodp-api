@@ -14,11 +14,13 @@ public class GetSectionByIdQueryHandler(ISectionRepository _sectionRepository, I
         {
             Success = false
         };
+
         try
         {
             var section = await _sectionRepository.GetSectionByIdAsync(request.SectionId);
 
             response.Value = section;
+            response.Value.HasAssociatedRoutes = await _sectionRepository.HasRoutesForSectionAsync(request.SectionId);
             response.Value.Editable = await _formVersionRepository.IsFormVersionEditable(request.FormVersionId);
             response.Success = true;
         }

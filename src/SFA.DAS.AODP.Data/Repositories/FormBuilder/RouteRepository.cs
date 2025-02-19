@@ -50,6 +50,12 @@ public class RouteRepository : IRouteRepository
                 .ToListAsync();
     }
 
+    public async Task<List<Route>> GetRoutesBySectionId(Guid sectionId)
+    {
+        return await _context.Routes.Where(route => route.NextSectionId == sectionId)
+                .ToListAsync();
+    }
+
     public async Task UpsertAsync(List<Route> dbRoutes)
     {
         foreach (var route in dbRoutes)
