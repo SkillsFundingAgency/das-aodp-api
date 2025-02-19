@@ -51,7 +51,6 @@ namespace SFA.DAS.AODP.Data.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<QualificationNewReviewRequired>().ToView("v_QualificationNewReviewRequired", "regulated").HasNoKey();
-            modelBuilder.Entity<View_PagesSectionsAssociatedWithRouting>().ToView("View_PagesSectionsAssociatedWithRoutings").HasNoKey();
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 
             base.OnModelCreating(modelBuilder);
