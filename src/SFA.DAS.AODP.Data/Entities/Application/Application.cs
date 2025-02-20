@@ -12,7 +12,7 @@ namespace SFA.DAS.AODP.Data.Entities.Application
         public DateTime? SubmittedAt { get; set; }
         public string Owner { get; set; }
         public bool? Submitted { get; set; }
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)] 
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)] 
         public int ReferenceId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
