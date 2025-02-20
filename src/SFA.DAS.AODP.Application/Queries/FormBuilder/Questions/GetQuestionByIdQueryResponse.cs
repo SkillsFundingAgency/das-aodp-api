@@ -174,6 +174,8 @@ public class GetQuestionByIdQueryResponse()
             Title = entity.Title,
             Key = entity.Key,
             Hint = entity.Hint,
+            Helper = entity.Helper,
+            HelperHTML = entity.HelperHTML,
             Order = entity.Order,
             Required = entity.Required,
             Type = entity.Type,
