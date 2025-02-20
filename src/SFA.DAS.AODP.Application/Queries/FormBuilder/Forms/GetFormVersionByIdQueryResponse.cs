@@ -13,6 +13,7 @@ public class GetFormVersionByIdQueryResponse
     public DateTime Version { get; set; }
     public string Status { get; set; }
     public string Description { get; set; }
+    public string DescriptionHTML { get; set; }
     public int Order { get; set; }
     public List<Section> Sections { get; set; }
 
@@ -23,6 +24,7 @@ public class GetFormVersionByIdQueryResponse
             Id = formVersion.Id,
             FormId = formVersion.FormId,
             Description = formVersion.Description,
+            DescriptionHTML = formVersion.DescriptionHTML,
             Order = formVersion.Form.Order,
             Title = formVersion.Title,
             Version = formVersion.Version,
