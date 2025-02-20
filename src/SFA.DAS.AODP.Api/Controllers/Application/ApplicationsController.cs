@@ -54,6 +54,25 @@ public class ApplicationsController : Controller
     }
 
 
+    [HttpGet("/api/applications/{applicationId}")]
+    [ProducesResponseType(typeof(GetApplicationMetadataByIdQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetApplicationByIdAsync(Guid applicationId)
+    {
+        var query = new GetApplicationByIdQuery(applicationId);
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success)
+        {
+            return Ok(response.Value);
+        }
+        _logger.LogError(message: $"Error thrown getting application for application Id `{applicationId}`.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+
     [HttpGet("/api/applications/forms/{formVersionId}/sections/{sectionId}/pages/{pageOrder}")]
     [ProducesResponseType(typeof(GetApplicationPageByIdQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -283,6 +302,24 @@ public class ApplicationsController : Controller
         }
 
         _logger.LogError(message: $"Error thrown creating a application.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpPut("/api/applications/{applicationId}")]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> EditAsync([FromBody] EditApplicationCommand command, [FromRoute] Guid applicationId)
+    {
+        command.ApplicationId = applicationId;
+
+        var response = await _mediator.Send(command);
+        if (response.Success)
+        {
+            return Ok(response.Value);
+        }
+
+        _logger.LogError(message: $"Error thrown updating a application.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
