@@ -161,6 +161,8 @@ public class SectionRepository : ISectionRepository
 
         foreach (var sec in propsToUpdate)
             sec.Order--;
+
+        _context.Sections.UpdateRange(propsToUpdate);
         await _context.SaveChangesAsync();
     }
     

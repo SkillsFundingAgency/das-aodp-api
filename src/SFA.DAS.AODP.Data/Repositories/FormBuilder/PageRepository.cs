@@ -192,6 +192,8 @@ public class PageRepository : IPageRepository
 
         foreach (var page in pagesToUpdate)
             page.Order--;
+
+        _context.Pages.UpdateRange(pagesToUpdate);
         await _context.SaveChangesAsync();
     }
 
