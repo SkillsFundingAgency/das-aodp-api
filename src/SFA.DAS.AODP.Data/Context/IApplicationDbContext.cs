@@ -30,6 +30,7 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<View_SectionPageCount> View_SectionPageCounts { get; set; }
         DbSet<View_RemainingPagesBySectionForApplication> View_RemainingPagesBySectionForApplications { get; set; }
         DbSet<View_SectionSummaryForApplication> View_SectionSummaryForApplications { get; set; }
+        DbSet<View_PagesSectionsAssociatedWithRouting> View_PagesSectionsAssociatedWithRoutings { get; set; }
         DbSet<Job> Jobs { get; set; }
         DbSet<JobConfiguration> JobConfigurations { get; set; }
         DbSet<JobRun> JobRuns { get; set; }

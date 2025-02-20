@@ -39,14 +39,15 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<View_AvailableQuestionsForRouting> View_AvailableQuestionsForRoutings { get; set; }
         public virtual DbSet<View_QuestionRoutingDetail> View_QuestionRoutingDetails { get; set; }
         public virtual DbSet<View_SectionPageCount> View_SectionPageCounts { get; set; }
+        public DbSet<View_PagesSectionsAssociatedWithRouting> View_PagesSectionsAssociatedWithRoutings { get; set; }
 
         public DbSet<Application> Applications { get; set; }
         public DbSet<ApplicationPage> ApplicationPages { get; set; }
         public DbSet<ApplicationQuestionAnswer> ApplicationQuestionAnswers { get; set; }
         public DbSet<View_RemainingPagesBySectionForApplication> View_RemainingPagesBySectionForApplications { get; set; }
         public DbSet<View_SectionSummaryForApplication> View_SectionSummaryForApplications { get; set; }
-
         public DbSet<QualificationNewReviewRequired> QualificationNewReviewRequired { get; set; }
+        
 
         public virtual DbSet<Job> Jobs { get; set; }
         public virtual DbSet<JobConfiguration> JobConfigurations { get; set; }

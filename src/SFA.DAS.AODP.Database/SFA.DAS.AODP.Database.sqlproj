@@ -97,6 +97,7 @@
     <Build Include="Tables\Question.sql" />
     <Build Include="Views\View_SkippedPagesBySectionForApplication.sql" />
     <Build Include="Views\View_SectionSummaryForApplication.sql" />
+    <Build Include="Views\View_PagesSectionsAssociatedWithRouting.sql" />
     <Build Include="Tables\Jobs.sql" />
     <Build Include="Tables\JobRuns.sql" />
     <Build Include="Tables\JobConfigurations.sql" />

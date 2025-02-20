@@ -22,7 +22,8 @@ public class GetApplicationMetadataByIdQueryHandler : IRequestHandler<GetApplica
             {
                 ApplicationId = result.Id,
                 FormVersionId = result.FormVersionId,
-                OrganisationId = result.OrganisationId
+                OrganisationId = result.OrganisationId,
+                Reference = result.ReferenceId,
             };
             response.Success = true;
         }

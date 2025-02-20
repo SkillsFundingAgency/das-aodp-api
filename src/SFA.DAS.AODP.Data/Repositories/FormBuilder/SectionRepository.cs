@@ -41,6 +41,20 @@ public class SectionRepository : ISectionRepository
         return res;
     }
 
+    /// <summary>
+    /// Gets a section and its related Pages and Questions with a given Id. 
+    /// </summary>
+    /// <param name="sectionId"></param>
+    /// <returns></returns>
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task<Section> GetSectionByIdWithPagesAndQuestionsAsync(Guid sectionId)
+    {
+        var res = await _context.Sections.Include(s => s.Pages).ThenInclude(p => p.Questions).FirstOrDefaultAsync(v => v.Id == sectionId);
+        if (res is null)
+            throw new RecordNotFoundException(sectionId);
+
+        return res;
+    }
 
     public int GetMaxOrderByFormVersionId(Guid formVersionId)
     {
@@ -155,9 +169,15 @@ public class SectionRepository : ISectionRepository
 
     private async Task UpdateSectionOrdering(Guid formVersionId, int deletedSectionOrder)
     {
-        await _context.Sections
+        var propsToUpdate = await _context.Sections
             .Where(sec => sec.FormVersionId == formVersionId && sec.Order > deletedSectionOrder)
-            .ExecuteUpdateAsync(s => s.SetProperty(sec => sec.Order, sec => sec.Order - 1));
+            .ToListAsync();
+
+        foreach (var sec in propsToUpdate)
+            sec.Order--;
+
+        _context.Sections.UpdateRange(propsToUpdate);
+        await _context.SaveChangesAsync();
     }
     
     /// <summary>
@@ -210,6 +230,19 @@ public class SectionRepository : ISectionRepository
         await _context.SaveChangesAsync();
 
         return true;
+    }
+
+    /// <summary>
+    /// Checks if a section has any associated routes directly or indirectly via related Pages or Questions
+    /// </summary>
+    /// <param name="sectionId">The unique identifier of the section.</param>
+    /// <returns>A boolean value indicating whether the section has associated routes.</returns>
+    public async Task<bool> HasRoutesForSectionAsync(Guid sectionId)
+    {
+        return await _context.View_PagesSectionsAssociatedWithRoutings
+            .AnyAsync(v => v.SourceSectionId == sectionId
+                        || v.NextPageSectionId == sectionId
+                        || v.NextSectionId == sectionId);
     }
 }
 
