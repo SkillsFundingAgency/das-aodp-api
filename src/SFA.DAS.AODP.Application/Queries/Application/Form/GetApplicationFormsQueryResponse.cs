@@ -10,6 +10,7 @@ public class GetApplicationFormsQueryResponse
         public Guid Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        public string DescriptionHTML { get; set; }
         public int Order { get; set; }
     }
 
@@ -25,6 +26,7 @@ public class GetApplicationFormsQueryResponse
             response.Forms.Add(new()
             {
                 Description = form.Description,
+                DescriptionHTML = form.DescriptionHTML,
                 Order = form.Form.Order,
                 Id = form.Id,
                 Title = form.Title,

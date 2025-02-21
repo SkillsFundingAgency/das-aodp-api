@@ -28,6 +28,7 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
             question.Helper = request.Helper;
             if (!string.IsNullOrEmpty(request.Helper))
             {
+                question.Helper = request.Helper;
                 question.HelperHTML = HTMLGenerator.FromMarkdown(request.Helper);
             }
 

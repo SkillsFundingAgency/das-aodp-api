@@ -26,6 +26,8 @@ public class GetApplicationPageByIdQueryResponse
         public string Type { get; set; }
         public bool Required { get; set; }
         public string? Hint { get; set; } = string.Empty;
+        public string? Helper { get; set; }
+        public string? HelperHTML { get; set; }
         public int Order { get; set; }
 
         public TextInputOptions TextInput { get; set; } = new();
@@ -45,6 +47,8 @@ public class GetApplicationPageByIdQueryResponse
                 Id = entity.Id,
                 Title = entity.Title,
                 Hint = entity.Hint,
+                Helper = entity.Helper,
+                HelperHTML = entity.HelperHTML,
                 Order = entity.Order,
                 Required = entity.Required,
                 Type = entity.Type,
