@@ -22,13 +22,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
 
         }
 
-        public async Task<Data.Entities.Application.Application> GetApplicationMetadataById(Guid applicationId)
-        {
-            return await _context.Applications
-                .Where(v => v.Id == applicationId)
-                .FirstOrDefaultAsync() ?? throw new RecordNotFoundException(applicationId);
-
-        }
 
         public async Task<Data.Entities.Application.Application> Create(Data.Entities.Application.Application application)
         {
@@ -57,6 +50,12 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
         public async Task<List<View_SectionSummaryForApplication>> GetSectionSummaryByApplicationIdAsync(Guid applicationId)
         {
             return await _context.View_SectionSummaryForApplications.Where(a => a.ApplicationId == applicationId).ToListAsync();
+        }
+
+        public async Task UpdateAsync(Entities.Application.Application application)
+        {
+            _context.Applications.Update(application);
+            await _context.SaveChangesAsync();
         }
     }
 }

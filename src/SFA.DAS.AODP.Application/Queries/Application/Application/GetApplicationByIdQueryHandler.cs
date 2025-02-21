@@ -2,33 +2,37 @@
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Repositories.Application;
 
-public class GetApplicationMetadataByIdQueryHandler : IRequestHandler<GetApplicationMetadataByIdQuery, BaseMediatrResponse<GetApplicationMetadataByIdQueryResponse>>
+public class GetApplicationByIdQueryHandler : IRequestHandler<GetApplicationByIdQuery, BaseMediatrResponse<GetApplicationByIdQueryResponse>>
 {
     private readonly IApplicationRepository _applicationRepository;
 
-    public GetApplicationMetadataByIdQueryHandler(IApplicationRepository applicationRepository)
+    public GetApplicationByIdQueryHandler(IApplicationRepository applicationRepository)
     {
         _applicationRepository = applicationRepository;
     }
 
-    public async Task<BaseMediatrResponse<GetApplicationMetadataByIdQueryResponse>> Handle(GetApplicationMetadataByIdQuery request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<GetApplicationByIdQueryResponse>> Handle(GetApplicationByIdQuery request, CancellationToken cancellationToken)
     {
-        var response = new BaseMediatrResponse<GetApplicationMetadataByIdQueryResponse>();
+        var response = new BaseMediatrResponse<GetApplicationByIdQueryResponse>();
         response.Success = false;
         try
         {
-            var result = await _applicationRepository.GetApplicationMetadataById(request.ApplicationId);
+            var result = await _applicationRepository.GetByIdAsync(request.ApplicationId);
             response.Value = new()
             {
                 ApplicationId = result.Id,
                 FormVersionId = result.FormVersionId,
                 OrganisationId = result.OrganisationId,
                 Reference = result.ReferenceId,
+                Name = result.Name,
+                Owner = result.Owner,
+                QualificationNumber = result.QualificationNumber
             };
             response.Success = true;
         }
         catch (Exception ex)
         {
+            response.InnerException = ex;
             response.ErrorMessage = ex.Message;
         }
 

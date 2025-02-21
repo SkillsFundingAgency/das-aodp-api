@@ -26,6 +26,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Application
             }
             catch (Exception ex)
             {
+                response.InnerException = ex;
                 response.Success = false;
                 response.ErrorMessage = ex.Message;
             }

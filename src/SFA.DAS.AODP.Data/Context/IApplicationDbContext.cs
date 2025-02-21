@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
+using SFA.DAS.AODP.Data.Entities.Jobs;
 using System.Collections.Generic;
 
 namespace SFA.DAS.AODP.Data.Context
@@ -30,6 +31,9 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<View_RemainingPagesBySectionForApplication> View_RemainingPagesBySectionForApplications { get; set; }
         DbSet<View_SectionSummaryForApplication> View_SectionSummaryForApplications { get; set; }
         DbSet<View_PagesSectionsAssociatedWithRouting> View_PagesSectionsAssociatedWithRoutings { get; set; }
+        DbSet<Job> Jobs { get; set; }
+        DbSet<JobConfiguration> JobConfigurations { get; set; }
+        DbSet<JobRun> JobRuns { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BulkInsertAsync<T>(IEnumerable<T> entities, CancellationToken cancellationToken = default) where T : class;

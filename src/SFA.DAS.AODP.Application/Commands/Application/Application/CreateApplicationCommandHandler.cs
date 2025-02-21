@@ -40,6 +40,7 @@ public class CreateApplicationCommandHandler : IRequestHandler<CreateApplication
         }
         catch (Exception ex)
         {
+            response.InnerException = ex;
             response.Success = false;
             response.ErrorMessage = ex.Message;
         }
