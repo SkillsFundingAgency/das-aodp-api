@@ -29,5 +29,6 @@ namespace SFA.DAS.AODP.Data.Repositories.FormBuilder
         Task<bool> MoveQuestionOrderUp(Guid id);
         Task<bool> IsQuestionEditable(Guid id);
         Task<Question> Update(Question question);
+        Task<List<Question>> GetQuestionsByFormVersionIdAsync(Guid formVersionId);
     }
 }

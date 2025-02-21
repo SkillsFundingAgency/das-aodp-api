@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Exceptions;
+using SFA.DAS.AODP.Application.Queries.Application.Application;
 
 namespace SFA.DAS.AODP.Api.Controllers.Application;
 
@@ -61,6 +62,24 @@ public class ApplicationsController : Controller
     public async Task<IActionResult> GetApplicationByIdAsync(Guid applicationId)
     {
         var query = new GetApplicationByIdQuery(applicationId);
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success)
+        {
+            return Ok(response.Value);
+        }
+        _logger.LogError(message: $"Error thrown getting application for application Id `{applicationId}`.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpGet("/api/applications/{applicationId}/form-preview")]
+    [ProducesResponseType(typeof(GetApplicationFormPreviewByIdQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetApplicationFormPreviewByIdAsync(Guid applicationId)
+    {
+        var query = new GetApplicationFormPreviewByIdQuery(applicationId);
 
         var response = await _mediator.Send(query);
 

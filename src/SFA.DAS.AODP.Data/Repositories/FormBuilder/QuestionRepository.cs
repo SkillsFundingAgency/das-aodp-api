@@ -213,4 +213,10 @@ public class QuestionRepository : IQuestionRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task<List<Question>> GetQuestionsByFormVersionIdAsync(Guid formVersionId)
+    {
+        return await _context.Questions
+            .Where(q => q.Page.Section.FormVersionId == formVersionId)
+            .ToListAsync();
+    }
 }
