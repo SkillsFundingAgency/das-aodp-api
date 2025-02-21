@@ -1,4 +1,4 @@
-﻿CREATE VIEW [funded].[v_NewQualificationsExport] AS
+﻿CREATE VIEW [regulated].[v_NewQualificationsExport] AS
 
 /*##################################################################################################
 	-Name:				New Qualifications Export
