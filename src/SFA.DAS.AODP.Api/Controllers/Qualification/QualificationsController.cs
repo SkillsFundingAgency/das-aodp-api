@@ -67,7 +67,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             return Ok(result);
         }
 
-        [HttpGet("qualifications/export")]
+        [HttpGet("export")]
         [ProducesResponseType(typeof(BaseMediatrResponse<List<QualificationExport>>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
