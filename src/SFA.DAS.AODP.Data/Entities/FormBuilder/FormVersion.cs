@@ -1,7 +1,4 @@
-﻿using SFA.DAS.AODP.Models.Form;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace SFA.DAS.AODP.Data.Entities.FormBuilder;
+﻿namespace SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 public class FormVersion
 {
