@@ -117,5 +117,8 @@
     <None Include="MigrationScripts\MVS1_Jobs_Data_Seed.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="MigrationScripts\MVS1_Qual_Ref_Data.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
