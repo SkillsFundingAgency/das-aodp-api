@@ -5,6 +5,7 @@ using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Entities.Jobs;
+using SFA.DAS.AODP.Data.Entities.Qualification;
 using System.Collections.Generic;
 
 namespace SFA.DAS.AODP.Data.Context

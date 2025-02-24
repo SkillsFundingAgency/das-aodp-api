@@ -1,4 +1,5 @@
-﻿using SFA.DAS.AODP.Models.Qualifications;
+﻿using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification
 {
@@ -6,5 +7,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
     {
         Task<List<NewQualification>> GetAllNewQualificationsAsync();
         Task<QualificationDetails?> GetQualificationDetailsByIdAsync(string qualificationReference);
+        Task<List<QualificationExport>> GetNewQualificationsCSVExport();
     }
 }

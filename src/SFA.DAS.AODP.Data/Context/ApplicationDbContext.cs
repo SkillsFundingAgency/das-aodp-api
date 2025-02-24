@@ -1,15 +1,12 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
-using SFA.DAS.AODP.Data.EntityConfiguration;
-using System.Reflection.Emit;
-using SFA.DAS.AODP.Models.Qualifications;
 using SFA.DAS.AODP.Data.Entities.Jobs;
+using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.EntityConfiguration;
 
 namespace SFA.DAS.AODP.Data.Context
 {
@@ -47,7 +44,8 @@ namespace SFA.DAS.AODP.Data.Context
         public DbSet<View_RemainingPagesBySectionForApplication> View_RemainingPagesBySectionForApplications { get; set; }
         public DbSet<View_SectionSummaryForApplication> View_SectionSummaryForApplications { get; set; }
         public DbSet<QualificationNewReviewRequired> QualificationNewReviewRequired { get; set; }
-        
+        public DbSet<QualificationExport> NewQualificationCSVExport { get; set; }
+
 
         public virtual DbSet<Job> Jobs { get; set; }
         public virtual DbSet<JobConfiguration> JobConfigurations { get; set; }
@@ -56,6 +54,11 @@ namespace SFA.DAS.AODP.Data.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<QualificationNewReviewRequired>().ToView("v_QualificationNewReviewRequired", "regulated").HasNoKey();
+            
+            modelBuilder.Entity<QualificationExport>().ToView("v_NewQualificationsExport", "regulated").HasNoKey();
+            modelBuilder.Entity<QualificationExport>().Property(q => q.QANText).HasColumnName("QAN Text");
+            modelBuilder.Entity<QualificationExport>().Property(q => q.DateOfDownload).HasColumnName("Date of download");
+
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 
             base.OnModelCreating(modelBuilder);
