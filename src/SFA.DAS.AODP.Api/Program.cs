@@ -41,10 +41,7 @@ if (!string.IsNullOrEmpty(connectionString))
 {
     builder.Services.AddApplicationInsightsTelemetry();
 }
-else
-{
-    //throw new Exception("No AI string found");
-}
+
 
 var app = builder.Build();
 
