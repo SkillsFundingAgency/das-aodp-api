@@ -6,12 +6,12 @@ namespace SFA.DAS.AODP.Application.Queries.Application.Application;
 
 public class GetApplicationFormPreviewByIdQueryHandler : IRequestHandler<GetApplicationFormPreviewByIdQuery, BaseMediatrResponse<GetApplicationFormPreviewByIdQueryResponse>>
 {
-    private readonly IQuestionRepository _questionRepository;
+    private readonly ISectionRepository _sectionRepository;
     private readonly IApplicationRepository _applicationRepository;
 
-    public GetApplicationFormPreviewByIdQueryHandler(IQuestionRepository questionRepository, IApplicationRepository applicationRepository)
+    public GetApplicationFormPreviewByIdQueryHandler(ISectionRepository sectionRepository, IApplicationRepository applicationRepository)
     {
-        _questionRepository = questionRepository;
+        _sectionRepository = sectionRepository;
         _applicationRepository = applicationRepository;
     }
 
@@ -22,7 +22,7 @@ public class GetApplicationFormPreviewByIdQueryHandler : IRequestHandler<GetAppl
         try
         {
             var formVersionId = await _applicationRepository.GetFormVersionIdForApplicationAsync(request.ApplicationId);
-            var sections = await _questionRepository.GetSectionsWithPagesAndQuestionsByFormVersionIdAsync(formVersionId);
+            var sections = await _sectionRepository.GetSectionsWithPagesAndQuestionsByFormVersionIdAsync(formVersionId);
 
             response.Value = GetApplicationFormPreviewByIdQueryResponse.Map(request.ApplicationId, formVersionId, sections);
             response.Success = true;

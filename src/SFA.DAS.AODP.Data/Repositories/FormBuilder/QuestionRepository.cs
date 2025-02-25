@@ -212,14 +212,4 @@ public class QuestionRepository : IQuestionRepository
         _context.Questions.UpdateRange(toUpdate);
         await _context.SaveChangesAsync();
     }
-
-    public async Task<List<Section>> GetSectionsWithPagesAndQuestionsByFormVersionIdAsync(Guid formVersionId)
-    {
-        return await _context.Sections
-            .Where(s => s.FormVersionId == formVersionId)
-            .Include(s => s.Pages)
-                .ThenInclude(p => p.Questions)
-                    .ThenInclude(q => q.QuestionOptions)
-            .ToListAsync();
-    }
 }

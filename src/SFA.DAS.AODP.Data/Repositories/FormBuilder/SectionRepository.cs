@@ -244,5 +244,20 @@ public class SectionRepository : ISectionRepository
                         || v.NextPageSectionId == sectionId
                         || v.NextSectionId == sectionId);
     }
+
+    /// <summary>
+    /// Returns Sections with associated Pages, Questions and Question Options (aimed at Form Preview)
+    /// </summary>
+    /// <param name="formVersionId">The unique identifier of the Form Version.</param>
+    /// <returns></returns>
+    public async Task<List<Section>> GetSectionsWithPagesAndQuestionsByFormVersionIdAsync(Guid formVersionId)
+    {
+        return await _context.Sections
+            .Where(s => s.FormVersionId == formVersionId)
+            .Include(s => s.Pages)
+                .ThenInclude(p => p.Questions)
+                    .ThenInclude(q => q.QuestionOptions)
+            .ToListAsync();
+    }
 }
 

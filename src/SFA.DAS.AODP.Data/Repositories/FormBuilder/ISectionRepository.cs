@@ -82,4 +82,11 @@ public interface ISectionRepository
     /// <param name="sectionId">The unique identifier of the section.</param>
     /// <returns>A boolean value indicating whether the section has associated routes.</returns>
     Task<bool> HasRoutesForSectionAsync(Guid sectionId);
+
+    /// <summary>
+    /// Returns Sections with associated Pages, Questions and Question Options (aimed at Form Preview)
+    /// </summary>
+    /// <param name="formVersionId">The unique identifier of the Form Version.</param>
+    /// <returns></returns>
+    Task<List<Section>> GetSectionsWithPagesAndQuestionsByFormVersionIdAsync(Guid formVersionId);
 }
