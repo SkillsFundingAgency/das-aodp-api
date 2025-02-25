@@ -28,8 +28,7 @@ public class UpdateFormVersionCommandHandler : IRequestHandler<UpdateFormVersion
             var formVersion = await _formRepository.GetFormVersionByIdAsync(request.FormVersionId);
             formVersion.Title = request.Name;
             formVersion.Description = request.Description;
-            formVersion.DescriptionHTML = Markdown.ToHtml(request.Description)
-                    .Replace("<a", "<a class=\"govuk-link\"");
+            formVersion.DescriptionHTML = HTMLGenerator.FromMarkdown(request.Description);
 
             await _formRepository.Update(formVersion);
             response.Success = true;
