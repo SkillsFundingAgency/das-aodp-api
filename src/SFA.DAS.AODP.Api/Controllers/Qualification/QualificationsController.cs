@@ -6,12 +6,12 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
 {
     [ApiController]
     [Route("api/qualifications")]
-    public class QualificationsController : ControllerBase
+    public class QualificationsController : BaseController
     {
         private readonly IMediator _mediator;
         private readonly ILogger<QualificationsController> _logger;
 
-        public QualificationsController(IMediator mediator, ILogger<QualificationsController> logger)
+        public QualificationsController(IMediator mediator, ILogger<QualificationsController> logger) : base(mediator, logger)
         {
             _mediator = mediator;
             _logger = logger;

@@ -1,4 +1,4 @@
-﻿CREATE VIEW [funded].[v_NewQualificationsExport] AS
+﻿CREATE VIEW [regulated].[v_NewQualificationsExport] AS
 
 /*##################################################################################################
 	-Name:				New Qualifications Export
@@ -27,7 +27,7 @@ SELECT
     -- Qualification Details
     qf.QualificationName AS Title,
     q.QualificationType,
-    q.Level AS QualificationLevelCode,
+    q.[Level] AS QualificationLevelCode,
     q.SectorSubjectArea AS QualSSADescription,
     q.SubCategory AS QualSSACode,
     

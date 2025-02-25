@@ -25,7 +25,6 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
             question.Title = request.Title;
             question.Hint = request.Hint;
             question.Required = request.Required;
-            question.Helper = request.Helper;
             if (!string.IsNullOrEmpty(request.Helper))
             {
                 question.HelperHTML = HTMLGenerator.FromMarkdown(request.Helper);
@@ -99,10 +98,6 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
                     question.QuestionValidation.MinNumberOfOptions = request.Checkbox.MinNumberOfOptions;
                     question.QuestionValidation.MaxNumberOfOptions = request.Checkbox.MaxNumberOfOptions;
                 }
-            }
-            if (!string.IsNullOrEmpty(question.Helper))
-            {
-                question.HelperHTML = HTMLGenerator.FromMarkdown(question.Helper);
             }
 
             await _questionValidationRepository.UpsertAsync(question.QuestionValidation);
