@@ -2,17 +2,19 @@
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Routes;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Routes;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace SFA.DAS.AODP.Api.Controllers.FormBuilder;
 
 [ApiController]
 [Route("api/[controller]")]
-public class RoutesController : Controller
+public class RoutesController : BaseController
 {
     private readonly IMediator _mediator;
     private readonly ILogger<RoutesController> _logger;
 
-    public RoutesController(IMediator mediator, ILogger<RoutesController> logger)
+    public RoutesController(IMediator mediator, ILogger<RoutesController> logger) : base(mediator, logger)
     {
         _mediator = mediator;
         _logger = logger;
@@ -27,14 +29,8 @@ public class RoutesController : Controller
         {
             FormVersionId = formVersionId
         };
-        var response = await _mediator.Send(query);
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
 
-        _logger.LogError(message: $"Error thrown getting available sections for form version.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
     [HttpGet("/api/routes/forms/{formVersionId}")]
@@ -46,14 +42,8 @@ public class RoutesController : Controller
         {
             FormVersionId = formVersionId
         };
-        var response = await _mediator.Send(query);
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
 
-        _logger.LogError(message: $"Error thrown getting routes for form version.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
     [HttpGet("/api/routes/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/available-questions")]
@@ -65,14 +55,8 @@ public class RoutesController : Controller
         {
             PageId = pageId
         };
-        var response = await _mediator.Send(query);
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
 
-        _logger.LogError(message: $"Error thrown getting available questions for page.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
     [HttpGet("/api/routes/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/questions/{questionId}")]
@@ -86,14 +70,7 @@ public class RoutesController : Controller
             FormVersionId = formVersionId
         };
 
-        var response = await _mediator.Send(query);
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        _logger.LogError(message: $"Error thrown getting question routing information.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
     [HttpPut("/api/routes/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/questions/{questionId}")]
@@ -101,13 +78,6 @@ public class RoutesController : Controller
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> ConfigureRoutingForQuestion(ConfigureRoutingForQuestionCommand command)
     {
-        var response = await _mediator.Send(command);
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        _logger.LogError(message: $"Error thrown configuring question routing information.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(command);
     }
 }
