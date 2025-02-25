@@ -26,7 +26,7 @@ public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersion
             {
                 Title = request.Title,
                 Description = request.Description,
-                DescriptionHTML = HTMLGenerator.FromMarkdown(request.Description),
+                DescriptionHTML = HTMLGenerator.FromMarkdown(request.Description)
             }, order + 1);
 
             response.Value = new() { Id = form.Id };
