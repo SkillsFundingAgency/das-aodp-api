@@ -36,6 +36,7 @@ public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersion
         {
             response.Success = false;
             response.ErrorMessage = ex.Message;
+            response.InnerException = ex;
         }
 
         return response;
