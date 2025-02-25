@@ -4,7 +4,7 @@ using SFA.DAS.AODP.Data.Repositories.Qualification;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualification
 {
-    public class GetNewQualificationsCSVExportHandler : IRequestHandler<GetNewQualificationsCSVExportQuery, BaseMediatrResponse<GetNewQualificationsCSVExportResponse>>
+    public class GetNewQualificationsCSVExportHandler : IRequestHandler<GetNewQualificationsCsvExportQuery, BaseMediatrResponse<GetNewQualificationsCsvExportResponse>>
     {
         private readonly INewQualificationsRepository _repository;
 
@@ -13,9 +13,9 @@ namespace SFA.DAS.AODP.Application.Queries.Qualification
             _repository = repository;
         }
 
-        public async Task<BaseMediatrResponse<GetNewQualificationsCSVExportResponse>> Handle(GetNewQualificationsCSVExportQuery request, CancellationToken cancellationToken)
+        public async Task<BaseMediatrResponse<GetNewQualificationsCsvExportResponse>> Handle(GetNewQualificationsCsvExportQuery request, CancellationToken cancellationToken)
         {
-            var response = new BaseMediatrResponse<GetNewQualificationsCSVExportResponse>();
+            var response = new BaseMediatrResponse<GetNewQualificationsCsvExportResponse>();
 
             try
             {
@@ -27,7 +27,7 @@ namespace SFA.DAS.AODP.Application.Queries.Qualification
                 }
                 else if (qualifications.Any())
                 {
-                    response.Value = new GetNewQualificationsCSVExportResponse
+                    response.Value = new GetNewQualificationsCsvExportResponse
                     {
                         QualificationExports = qualifications
                     };
@@ -35,7 +35,7 @@ namespace SFA.DAS.AODP.Application.Queries.Qualification
                 }
                 else
                 {
-                    response.Value = new GetNewQualificationsCSVExportResponse
+                    response.Value = new GetNewQualificationsCsvExportResponse
                     {
                         QualificationExports = new List<QualificationExport>()
                     };

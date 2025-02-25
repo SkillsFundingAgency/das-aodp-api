@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.AODP.Application.Queries.Qualification
 {
-    public class GetNewQualificationsCSVExportResponse
+    public class GetNewQualificationsCsvExportResponse
     {
         public List<QualificationExport> QualificationExports { get; set; } = new();
     }
