@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
-using SFA.DAS.AODP.Data.Entities.Qualification;
 
 namespace SFA.DAS.AODP.Api.Controllers.Qualification
 {
@@ -36,7 +35,6 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             IActionResult response = validationResult.ProcessedStatus switch
             {
                 "new" => await HandleNewQualifications(),
-
                 _ => BadRequest(new { message = $"Invalid status: {validationResult.ProcessedStatus}" })
             };
 
@@ -68,7 +66,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
         }
 
         [HttpGet("export")]
-        [ProducesResponseType(typeof(BaseMediatrResponse<List<QualificationExport>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseMediatrResponse<GetNewQualificationsCsvExportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -80,19 +78,13 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
                 return BadRequest(new { message = validationResult.ErrorMessage });
             }
 
-            var result = validationResult.ProcessedStatus switch
+            IActionResult response = validationResult.ProcessedStatus switch
             {
                 "new" => await HandleNewQualificationCSVExport(),
-                // Add more cases for other statuses
-                _ => new CsvExportResult { Success = false, ErrorMessage = $"Invalid status: {validationResult.ProcessedStatus}" }
+                _ => BadRequest(new { message = $"Invalid status: {validationResult.ProcessedStatus}" })
             };
 
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-
-            return NotFound(new { message = result.ErrorMessage });
+            return response;
         }
 
         private async Task<IActionResult> HandleNewQualifications()
@@ -108,25 +100,17 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             return Ok(result);
         }
 
-        private async Task<CsvExportResult> HandleNewQualificationCSVExport()
+        private async Task<IActionResult> HandleNewQualificationCSVExport()
         {
             var result = await _mediator.Send(new GetNewQualificationsCsvExportQuery());
 
-            if (!result.Success || result.Value == null)
+            if (result == null || !result.Success || result.Value == null)
             {
                 _logger.LogWarning(result.ErrorMessage);
-                return new CsvExportResult
-                {
-                    Success = false,
-                    ErrorMessage = result.ErrorMessage
-                };
+                return NotFound(new { message = result.ErrorMessage });
             }
 
-            return new CsvExportResult
-            {
-                Success = true,
-                QualificationExports = result.Value.QualificationExports
-            };
+            return Ok(result);
         }
 
         private StatusValidationResult ProcessAndValidateStatus(string? status)
@@ -150,13 +134,6 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             };
         }
 
-        private class CsvExportResult
-        {
-            public bool Success { get; set; }
-            public string? ErrorMessage { get; set; }
-            public List<QualificationExport> QualificationExports { get; set; } = new List<QualificationExport>();
-        }
-
         private class StatusValidationResult
         {
             public bool IsValid { get; set; }
@@ -165,6 +142,4 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
         }
     }
 }
-
-
 
