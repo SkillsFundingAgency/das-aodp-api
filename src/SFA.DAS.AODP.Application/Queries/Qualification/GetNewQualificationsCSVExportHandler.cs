@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualification
@@ -11,14 +12,20 @@ namespace SFA.DAS.AODP.Application.Queries.Qualification
         {
             _repository = repository;
         }
+
         public async Task<BaseMediatrResponse<GetNewQualificationsCSVExportResponse>> Handle(GetNewQualificationsCSVExportQuery request, CancellationToken cancellationToken)
         {
             var response = new BaseMediatrResponse<GetNewQualificationsCSVExportResponse>();
-            
+
             try
             {
                 var qualifications = await _repository.GetNewQualificationsCSVExport();
-                if (qualifications != null && qualifications.Any())
+                if (qualifications == null)
+                {
+                    response.Success = false;
+                    response.ErrorMessage = "No new qualifications found.";
+                }
+                else if (qualifications.Any())
                 {
                     response.Value = new GetNewQualificationsCSVExportResponse
                     {
@@ -28,12 +35,16 @@ namespace SFA.DAS.AODP.Application.Queries.Qualification
                 }
                 else
                 {
-                    response.Success = false;
-                    response.ErrorMessage = "No new qualifications found.";
+                    response.Value = new GetNewQualificationsCSVExportResponse
+                    {
+                        QualificationExports = new List<QualificationExport>()
+                    };
+                    response.Success = true;
                 }
             }
             catch (Exception ex)
             {
+                response.Success = false;
                 response.ErrorMessage = ex.Message;
             }
 
