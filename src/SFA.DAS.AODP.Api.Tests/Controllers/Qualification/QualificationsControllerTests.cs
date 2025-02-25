@@ -9,7 +9,7 @@ using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Models.Qualifications;
 
-namespace SFA.DAS.AODP.Api.Tests.Controllers
+namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
 {
     public class QualificationsControllerTests
     {
