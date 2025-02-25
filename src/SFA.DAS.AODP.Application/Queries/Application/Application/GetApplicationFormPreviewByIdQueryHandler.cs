@@ -22,13 +22,9 @@ public class GetApplicationFormPreviewByIdQueryHandler : IRequestHandler<GetAppl
         try
         {
             var formVersionId = await _applicationRepository.GetFormVersionIdForApplicationAsync(request.ApplicationId);
-            var questions = await _questionRepository.GetQuestionsByFormVersionIdAsync(formVersionId);
-            response.Value = new()
-            {
-                ApplicationId = request.ApplicationId,
-                FormVersionId = formVersionId
-            };
-            response.Value.Data = [.. questions];
+            var sections = await _questionRepository.GetSectionsWithPagesAndQuestionsByFormVersionIdAsync(formVersionId);
+
+            response.Value = GetApplicationFormPreviewByIdQueryResponse.Map(request.ApplicationId, formVersionId, sections);
             response.Success = true;
         }
         catch (Exception ex)
