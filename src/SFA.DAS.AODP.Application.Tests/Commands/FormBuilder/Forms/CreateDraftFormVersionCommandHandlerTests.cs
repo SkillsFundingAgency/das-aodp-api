@@ -5,61 +5,64 @@ using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Tests.Commands.FormBuilder.Forms;
 
-public class UpdateFormVersionCommandHandlerTest
+public class CreateDraftFormVersionCommandHandlerTests
 {
     private readonly Mock<IFormVersionRepository> _formVersionRepository = new Mock<IFormVersionRepository>();
-    public UpdateFormVersionCommandHandler _updateFormVersionCommandHandler;
+    public CreateDraftFormVersionCommandHandler _createDraftFormVersionCommandHandler;
 
-    public UpdateFormVersionCommandHandlerTest()
+    public CreateDraftFormVersionCommandHandlerTests()
     {
-        _updateFormVersionCommandHandler = new(_formVersionRepository.Object);
+        _createDraftFormVersionCommandHandler = new(_formVersionRepository.Object);
     }
 
     [Fact]
     public async Task Test_Create_Draft_Form_Version()
     {
-        var formVersion = new FormVersion() 
-        { 
-            Id = Guid.NewGuid()
-        };
-        var request = new UpdateFormVersionCommand() 
-        {
-            FormVersionId = formVersion.Id,
-            Name = "Test",
-            Description = "Test"
-        };
-        _formVersionRepository.Setup(v => v.IsFormVersionEditable(It.Is<Guid>(v => v == request.FormVersionId)))
-            .Returns(Task.FromResult(true));
+        var formVersion = new FormVersion() { Id = Guid.NewGuid() };
+        var newFormVersion = new FormVersion() { Id = Guid.NewGuid() };
+        var request = new CreateDraftFormVersionCommand(Guid.NewGuid());
+        _formVersionRepository.Setup(v => v.GetDraftFormVersionByFormId(It.Is<Guid>(v => v == request.FormId)))
+            .Returns(Task.FromResult<FormVersion?>(null));
 
-        _formVersionRepository.Setup(v => v.GetFormVersionByIdAsync(It.Is<Guid>(v => v == request.FormVersionId)))
-            .Returns(Task.FromResult<FormVersion>(formVersion));
+        _formVersionRepository.Setup(v => v.GetPublishedFormVersionByFormId(It.Is<Guid>(v => v == request.FormId)))
+            .Returns(Task.FromResult<FormVersion?>(formVersion));
+        _formVersionRepository.Setup(v => v.CreateDraftAsync(It.Is<Guid>(v => v == formVersion.Id)))
+            .Returns(Task.FromResult<FormVersion>(newFormVersion));
 
-        _formVersionRepository.Setup(v => v.Update(It.Is<FormVersion>(v => v.Title == request.Name && v.Description == request.Description)))
-            .Returns(Task.FromResult<FormVersion>(formVersion));
-
-        var result = await _updateFormVersionCommandHandler.Handle(request, default);
+        var result = await _createDraftFormVersionCommandHandler.Handle(request, default);
 
         Assert.True(result.Success);
+        Assert.Equal(result.Value.FormVersionId, newFormVersion.Id);
     }
 
     [Fact]
-    public async Task Test_Create_Draft_Form_Throws_When_Record_Locked()
+    public async Task Test_Create_Draft_Form_Throws_When_Draft_Exists()
     {
-        var formVersion = new FormVersion()
-        {
-            Id = Guid.NewGuid()
-        };
-        var request = new UpdateFormVersionCommand()
-        {
-            FormVersionId = Guid.NewGuid(),
-            Name = "Test",
-            Description = "Test"
-        };
-        _formVersionRepository.Setup(v => v.IsFormVersionEditable(It.Is<Guid>(v => v == request.FormVersionId)))
-            .Returns(Task.FromResult(false));
+        var formVersion = new FormVersion() { Id = Guid.NewGuid() };
+        var request = new CreateDraftFormVersionCommand(Guid.NewGuid());
 
-        var result = await _updateFormVersionCommandHandler.Handle(request, default);
+        _formVersionRepository.Setup(v => v.GetDraftFormVersionByFormId(It.Is<Guid>(v => v == request.FormId)))
+            .Returns(Task.FromResult<FormVersion?>(formVersion));
+
+        var result = await _createDraftFormVersionCommandHandler.Handle(request, default);
 
         Assert.False(result.Success);
+        Assert.Equal("A draft version already exists", result.ErrorMessage);
+    }
+
+    [Fact]
+    public async Task Test_Create_Draft_Form_Throws_When_No_Published_Version()
+    {
+        var request = new CreateDraftFormVersionCommand(Guid.NewGuid());
+        _formVersionRepository.Setup(v => v.GetDraftFormVersionByFormId(It.Is<Guid>(v => v == request.FormId)))
+            .Returns(Task.FromResult<FormVersion?>(null));
+
+        _formVersionRepository.Setup(v => v.GetPublishedFormVersionByFormId(It.Is<Guid>(v => v == request.FormId)))
+            .Returns(Task.FromResult<FormVersion?>(null));
+
+        var result = await _createDraftFormVersionCommandHandler.Handle(request, default);
+
+        Assert.False(result.Success);
+        Assert.Equal("No published version to clone", result.ErrorMessage);
     }
 }
