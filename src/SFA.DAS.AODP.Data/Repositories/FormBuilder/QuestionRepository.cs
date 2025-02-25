@@ -219,6 +219,7 @@ public class QuestionRepository : IQuestionRepository
             .Where(s => s.FormVersionId == formVersionId)
             .Include(s => s.Pages)
                 .ThenInclude(p => p.Questions)
+                    .ThenInclude(q => q.QuestionOptions)
             .ToListAsync();
     }
 }
