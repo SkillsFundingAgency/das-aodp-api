@@ -26,8 +26,7 @@ public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersion
             {
                 Title = request.Title,
                 Description = request.Description,
-                DescriptionHTML = Markdown.ToHtml(request.Description)
-                    .Replace("<a", "<a class=\"govuk-link\""),
+                DescriptionHTML = HTMLGenerator.FromMarkdown(request.Description),
             }, order + 1);
 
             response.Value = new() { Id = form.Id };
@@ -37,6 +36,7 @@ public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersion
         {
             response.Success = false;
             response.ErrorMessage = ex.Message;
+            response.InnerException = ex;
         }
 
         return response;

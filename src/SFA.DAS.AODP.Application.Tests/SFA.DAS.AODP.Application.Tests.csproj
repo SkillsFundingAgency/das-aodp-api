@@ -27,13 +27,4 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Commands\Application\Page\" />
-    <Folder Include="Commands\FormBuilder\Forms\" />
-    <Folder Include="Commands\FormBuilder\Sections\" />
-    <Folder Include="Commands\FormBuilder\Routes\" />
-    <Folder Include="Commands\FormBuilder\Questions\" />
-    <Folder Include="Commands\FormBuilder\Pages\" />
-  </ItemGroup>
-
 </Project>
