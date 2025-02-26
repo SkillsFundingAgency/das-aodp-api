@@ -97,6 +97,10 @@
     <Build Include="Tables\Question.sql" />
     <Build Include="Views\View_SkippedPagesBySectionForApplication.sql" />
     <Build Include="Views\View_SectionSummaryForApplication.sql" />
+    <Build Include="Views\v_QualificationChangedReviewRequired.sql" />
+    <Build Include="Views\v_QualificationChangeSinceLastOutcome.sql" />
+    <Build Include="Views\v_QualificationLastestOutcome.sql" />
+    <Build Include="Views\v_QualificationLastestVersion.sql" />
     <Build Include="Views\View_PagesSectionsAssociatedWithRouting.sql" />
     <Build Include="Views\v_NewQualificationsExport.sql" />
     <Build Include="Tables\Jobs.sql" />
