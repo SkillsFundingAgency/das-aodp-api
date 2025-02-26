@@ -32,8 +32,7 @@ public class PageRepository : IPageRepository
     /// <exception cref="RecordNotFoundException"></exception>
     public int GetMaxOrderBySectionId(Guid sectionId)
     {
-        var res = _context.Pages.Where(v => v.SectionId == sectionId).Max(s => (int?)s.Order) ?? 0;
-        return res;
+        return _context.Pages.Where(v => v.SectionId == sectionId).Max(s => (int?)s.Order) ?? 0;
     }
 
     public async Task<List<Page>> GetNextPagesInSectionByOrderAsync(Guid sectionId, int order)
@@ -48,7 +47,9 @@ public class PageRepository : IPageRepository
 
     public async Task<List<Guid>> GetPagesIdInFormBySectionOrderAsync(Guid formVersionId, int startSectionOrderInclusive, int? endSectionOrderExclusive)
     {
-        return await _context.Pages.Where(v => v.Section.FormVersionId == formVersionId && v.Section.Order >= startSectionOrderInclusive && (!endSectionOrderExclusive.HasValue || v.Section.Order < endSectionOrderExclusive)).Select(p => p.Id).ToListAsync();
+        return await _context.Pages
+            .Where(v => v.Section.FormVersionId == formVersionId && v.Section.Order >= startSectionOrderInclusive && (!endSectionOrderExclusive.HasValue || v.Section.Order < endSectionOrderExclusive))
+            .Select(p => p.Id).ToListAsync();
     }
 
     /// <summary>
@@ -159,9 +160,9 @@ public class PageRepository : IPageRepository
         return pageToUpdate;
     }
 
-    public async Task<Page> GetPageForApplicationAsync(int pageOrder, Guid sectionId)
+    public async Task<Page> GetPageForApplicationAsync(int pageOrder, Guid sectionId, Guid formVersionId)
     {
-        return await _context.Pages.Where(p => p.Order == pageOrder && p.SectionId == sectionId)
+        return await _context.Pages.Where(p => p.Order == pageOrder && p.SectionId == sectionId && p.Section.FormVersionId == formVersionId)
 
             .Include(p => p.Questions)
             .ThenInclude(q => q.QuestionValidation)
@@ -183,11 +184,17 @@ public class PageRepository : IPageRepository
             .FirstOrDefaultAsync() ?? throw new RecordNotFoundException(sectionId);
     }
 
-    private async Task UpdatePageOrdering(Guid sectionId, int deletedPageOrder)
+    public async Task UpdatePageOrdering(Guid sectionId, int deletedPageOrder)
     {
-        await _context.Pages
+        var pagesToUpdate = await _context.Pages
             .Where(p => p.SectionId == sectionId && p.Order > deletedPageOrder)
-            .ExecuteUpdateAsync(s => s.SetProperty(p => p.Order, p => p.Order - 1));
+            .ToListAsync();
+
+        foreach (var page in pagesToUpdate)
+            page.Order--;
+
+        _context.Pages.UpdateRange(pagesToUpdate);
+        await _context.SaveChangesAsync();
     }
 
     /// <summary>

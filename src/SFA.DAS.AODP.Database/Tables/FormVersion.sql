@@ -6,6 +6,7 @@
 	[Status] [nvarchar](100) NOT NULL,
 	[Description] [nvarchar](max) NULL,
 	[DateCreated] [datetime] NOT NULL, 
+    [DescriptionHTML] NVARCHAR(MAX) NULL, 
     CONSTRAINT [PK_FormVersions] PRIMARY KEY ([Id])
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO

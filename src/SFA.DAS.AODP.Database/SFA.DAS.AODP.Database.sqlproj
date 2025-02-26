@@ -62,6 +62,7 @@
     <Folder Include="Tables" />
     <Folder Include="Views" />
     <Folder Include="Schemas" />
+    <Folder Include="MigrationScripts" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Form.sql" />
@@ -96,8 +97,32 @@
     <Build Include="Tables\Question.sql" />
     <Build Include="Views\View_SkippedPagesBySectionForApplication.sql" />
     <Build Include="Views\View_SectionSummaryForApplication.sql" />
+    <Build Include="Views\v_QualificationChangedReviewRequired.sql" />
+    <Build Include="Views\v_QualificationChangeSinceLastOutcome.sql" />
+    <Build Include="Views\v_QualificationLastestOutcome.sql" />
+    <Build Include="Views\v_QualificationLastestVersion.sql" />
+    <Build Include="Views\View_PagesSectionsAssociatedWithRouting.sql" />
+    <Build Include="Views\v_NewQualificationsExport.sql" />
+    <Build Include="Tables\Jobs.sql" />
+    <Build Include="Tables\JobRuns.sql" />
+    <Build Include="Tables\JobConfigurations.sql" />
+    <Build Include="Tables\MigrationScripts.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
+  </ItemGroup>
+  <ItemGroup>
+    <PreDeploy Include="Script.PreDeployment.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="Script.PostDeployment.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MigrationScripts\MVS1_Jobs_Data_Seed.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="MigrationScripts\MVS1_Qual_Ref_Data.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

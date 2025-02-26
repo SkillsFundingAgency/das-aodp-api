@@ -14,4 +14,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="FundedQualificationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="e25122b7-1072-43ce-aef9-cb36e9bae5df" ChangeDateTime="02/14/2025 15:15:11">
+    <Property Name="ElementName" Value="[dbo].[ApplicationQuestionAnswers].[DateTimeValue]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[ApplicationQuestionAnswers]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="DateValue" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="3461ced2-dea7-4ce1-a93f-6ec600566494" ChangeDateTime="02/18/2025 11:56:33">
+    <Property Name="ElementName" Value="[dbo].[Questions].[HintHTML]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Questions]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Helper" />
+  </Operation>
 </Operations>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
+using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification
@@ -37,7 +38,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
 
             return new QualificationDetails
             {
-                Success = true,
                 QualificationReference = qualification.QualificationReference,
                 AwardingOrganisation = qualification.AwardingOrganisation,
                 Title = qualification.QualificationTitle,
@@ -50,7 +50,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
 
                 // Placeholder values for missing properties
                 Id = 1,
-                Status = "Pending Review",
+                Status = "New",
                 Priority = "Medium",
                 Changes = "No recent changes",
                 ProposedChanges = "None",
@@ -58,7 +58,8 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             };
         }
 
-
+        public async Task<List<QualificationExport>> GetNewQualificationsCSVExport() =>
+            await _context.NewQualificationCSVExport.ToListAsync();
     }
 }
 

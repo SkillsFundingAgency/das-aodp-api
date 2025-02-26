@@ -1,40 +1,78 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 using SFA.DAS.AODP.Application.Exceptions;
-using SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
-using SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
+using SFA.DAS.AODP.Application.Queries.Application.Application;
 
 namespace SFA.DAS.AODP.Api.Controllers.Application;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ApplicationsController : Controller
+public class ApplicationsController : BaseController
 {
     private readonly IMediator _mediator;
     private readonly ILogger<ApplicationsController> _logger;
 
-    public ApplicationsController(IMediator mediator, ILogger<ApplicationsController> logger)
+    public ApplicationsController(IMediator mediator, ILogger<ApplicationsController> logger) : base(mediator, logger) 
     {
         _mediator = mediator;
         _logger = logger;
     }
-   
-    
+
+
     [HttpGet("/api/applications/forms")]
     [ProducesResponseType(typeof(GetApplicationFormsQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetAllAsync()
     {
         var query = new GetApplicationFormsQuery();
+        return await SendRequestAsync(query);
+    }
+
+    [HttpGet("/api/applications/{applicationId}/metadata")]
+    [ProducesResponseType(typeof(GetApplicationMetadataByIdQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetApplicationMetadataByIdAsync(Guid applicationId)
+    {
+        var query = new GetApplicationMetadataByIdQuery(applicationId);
+        return await SendRequestAsync(query);
+    }
+
+
+    [HttpGet("/api/applications/{applicationId}")]
+    [ProducesResponseType(typeof(GetApplicationMetadataByIdQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetApplicationByIdAsync(Guid applicationId)
+    {
+        var query = new GetApplicationByIdQuery(applicationId);
+
         var response = await _mediator.Send(query);
+
         if (response.Success)
         {
             return Ok(response.Value);
         }
+        _logger.LogError(message: $"Error thrown getting application for application Id `{applicationId}`.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
 
-        _logger.LogError(message: $"Error thrown getting published forms.", exception: response.InnerException);
+    [HttpGet("/api/applications/{applicationId}/form-preview")]
+    [ProducesResponseType(typeof(GetApplicationFormPreviewByIdQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetApplicationFormPreviewByIdAsync(Guid applicationId)
+    {
+        var query = new GetApplicationFormPreviewByIdQuery(applicationId);
+
+        var response = await _mediator.Send(query);
+
+        if (response.Success)
+        {
+            return Ok(response.Value);
+        }
+        _logger.LogError(message: $"Error thrown getting application for application Id `{applicationId}`.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
@@ -43,25 +81,11 @@ public class ApplicationsController : Controller
     [ProducesResponseType(typeof(GetApplicationPageByIdQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetByIdAsync(int pageOrder, Guid sectionId, Guid formVersionId)
+    public async Task<IActionResult> GetApplicationPageByIdAsync(int pageOrder, Guid sectionId, Guid formVersionId)
     {
         var query = new GetApplicationPageByIdQuery(pageOrder, sectionId, formVersionId);
 
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is NotFoundException)
-        {
-            _logger.LogError($"Request for page with section Id `{sectionId}` and page order `{pageOrder}` returned 404 (not found).");
-            return NotFound();
-        }
-
-        _logger.LogError(message: $"Error thrown getting page for section Id `{sectionId}` and page order `{pageOrder}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
 
@@ -73,21 +97,7 @@ public class ApplicationsController : Controller
     {
         var query = new GetApplicationFormByIdQuery(formVersionId);
 
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is NotFoundException)
-        {
-            _logger.LogError($"Request for form Id `{formVersionId}` returned 404 (not found).");
-            return NotFound();
-        }
-
-        _logger.LogError(message: $"Error thrown getting section for form Id `{formVersionId}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
     [HttpGet("/api/applications/organisations/{organisationId}")]
@@ -98,21 +108,7 @@ public class ApplicationsController : Controller
     {
         var query = new GetApplicationsByOrganisationIdQuery(organisationId);
 
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is NotFoundException)
-        {
-            _logger.LogError($"Request for applications for Id `{organisationId}` returned 404 (not found).");
-            return NotFound();
-        }
-
-        _logger.LogError(message: $"Error thrown getting applications for Id `{organisationId}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
 
@@ -125,21 +121,7 @@ public class ApplicationsController : Controller
     {
         var query = new GetApplicationSectionByIdQuery(sectionId, formVersionId);
 
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is NotFoundException)
-        {
-            _logger.LogError($"Request for section Id `{sectionId}` returned 404 (not found).");
-            return NotFound();
-        }
-
-        _logger.LogError(message: $"Error thrown getting section for section Id `{sectionId}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
 
@@ -152,21 +134,7 @@ public class ApplicationsController : Controller
     {
         var query = new GetApplicationSectionStatusByApplicationIdQuery(sectionId, formVersionId, applicationId);
 
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is NotFoundException)
-        {
-            _logger.LogError($"Request for page answers with section Id `{sectionId}` returned 404 (not found).");
-            return NotFound();
-        }
-
-        _logger.LogError(message: $"Error thrown getting page for section Id `{sectionId}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
 
@@ -178,21 +146,7 @@ public class ApplicationsController : Controller
     {
         var query = new GetApplicationFormStatusByApplicationIdQuery(formVersionId, applicationId);
 
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is NotFoundException)
-        {
-            _logger.LogError($"Request for application sections with form Id `{formVersionId}` returned 404 (not found).");
-            return NotFound();
-        }
-
-        _logger.LogError(message: $"Error thrown getting page for section Id `{formVersionId}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
 
@@ -205,21 +159,7 @@ public class ApplicationsController : Controller
     {
         var query = new GetApplicationPageAnswersByPageIdQuery(applicationId, pageId, sectionId, formVersionId);
 
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is NotFoundException)
-        {
-            _logger.LogError($"Request for page answers with section Id `{sectionId}` and page id `{pageId}` returned 404 (not found).");
-            return NotFound();
-        }
-
-        _logger.LogError(message: $"Error thrown getting page for section Id `{sectionId}` and page id `{pageId}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
     [HttpPut("/api/applications/{applicationId}/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}")]
@@ -234,26 +174,8 @@ public class ApplicationsController : Controller
         command.ApplicationId = applicationId;
         command.PageId = pageId;
 
-        var response = await _mediator.Send(command);
+        return await SendRequestAsync(command);
 
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is LockedRecordException)
-        {
-            _logger.LogError($"Request to update page with page Id `{pageId}` but application is locked. ");
-            return Forbid();
-        }
-
-        if (response.InnerException is NotFoundException)
-        {
-            _logger.LogError($"Request to update page with page Id `{pageId}` but page could not be found. ");
-            return NotFound();
-        }
-
-        return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
     [HttpPost("/api/applications")]
@@ -261,14 +183,34 @@ public class ApplicationsController : Controller
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CreateAsync([FromBody] CreateApplicationCommand command)
     {
+        return await SendRequestAsync(command);
+    }
+
+    [HttpPut("/api/applications/{applicationId}")]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> EditAsync([FromBody] EditApplicationCommand command, [FromRoute] Guid applicationId)
+    {
+        command.ApplicationId = applicationId;
+
         var response = await _mediator.Send(command);
         if (response.Success)
         {
             return Ok(response.Value);
         }
 
-        _logger.LogError(message: $"Error thrown creating a application.", exception: response.InnerException);
+        _logger.LogError(message: $"Error thrown updating a application.", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 
+    [HttpDelete("/api/applications/{applicationId}")]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> DeleteApplicationByIdAsync(Guid applicationId)
+    {
+        var query = new DeleteApplicationCommand(applicationId);
+
+        return await SendRequestAsync(query);
+    }
 }

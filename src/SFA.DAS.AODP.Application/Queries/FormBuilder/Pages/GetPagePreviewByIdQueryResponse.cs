@@ -18,9 +18,9 @@ public class GetPagePreviewByIdQueryResponse
         public bool Required { get; set; }
         public string? Hint { get; set; } = string.Empty;
         public int Order { get; set; }
+        public string? HelperHTML { get; set; }
 
-        public TextInputOptions TextInput { get; set; } = new();
-        public RadioOptions RadioButton { get; set; } = new();
+        public List<Option> Options { get; set; } = new();
 
 
 
@@ -34,29 +34,23 @@ public class GetPagePreviewByIdQueryResponse
                 Order = entity.Order,
                 Required = entity.Required,
                 Type = entity.Type,
+                HelperHTML = entity.HelperHTML,
             };
 
-            if (entity.Type == QuestionType.Text.ToString() && entity.QuestionValidation != null)
-            {
-                model.TextInput = new()
-                {
-                    MinLength = entity.QuestionValidation.MinLength,
-                    MaxLength = entity.QuestionValidation.MaxLength,
-                };
-            }
 
-            else if (entity.Type == QuestionType.Radio.ToString() && entity.QuestionOptions != null)
+            if ((entity.Type == QuestionType.Radio.ToString() || entity.Type == QuestionType.MultiChoice.ToString()) && entity.QuestionOptions != null)
             {
-                model.RadioButton = new();
+                model.Options = new();
                 foreach (var option in entity.QuestionOptions)
                 {
-                    model.RadioButton.MultiChoice.Add(new()
+                    model.Options.Add(new()
                     {
                         Id = option.Id,
                         Value = option.Value,
                         Order = option.Order,
                     });
                 }
+
             }
 
             return model;
@@ -64,25 +58,13 @@ public class GetPagePreviewByIdQueryResponse
 
     }
 
-    public class TextInputOptions
+
+    public class Option
     {
-        public int? MinLength { get; set; }
-        public int? MaxLength { get; set; }
-
+        public Guid Id { get; set; }
+        public string Value { get; set; }
+        public int Order { get; set; }
     }
-
-    public class RadioOptions
-    {
-        public List<RadioOptionItem> MultiChoice { get; set; } = new();
-
-        public class RadioOptionItem
-        {
-            public Guid Id { get; set; }
-            public string Value { get; set; }
-            public int Order { get; set; }
-        }
-    }
-
 
     public static implicit operator GetPagePreviewByIdQueryResponse(Page entity)
     {

@@ -1,14 +1,12 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
+using SFA.DAS.AODP.Data.Entities.Jobs;
+using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.EntityConfiguration;
-using System.Reflection.Emit;
-using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Data.Context
 {
@@ -38,18 +36,29 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<View_AvailableQuestionsForRouting> View_AvailableQuestionsForRoutings { get; set; }
         public virtual DbSet<View_QuestionRoutingDetail> View_QuestionRoutingDetails { get; set; }
         public virtual DbSet<View_SectionPageCount> View_SectionPageCounts { get; set; }
+        public DbSet<View_PagesSectionsAssociatedWithRouting> View_PagesSectionsAssociatedWithRoutings { get; set; }
 
         public DbSet<Application> Applications { get; set; }
         public DbSet<ApplicationPage> ApplicationPages { get; set; }
         public DbSet<ApplicationQuestionAnswer> ApplicationQuestionAnswers { get; set; }
         public DbSet<View_RemainingPagesBySectionForApplication> View_RemainingPagesBySectionForApplications { get; set; }
         public DbSet<View_SectionSummaryForApplication> View_SectionSummaryForApplications { get; set; }
-
         public DbSet<QualificationNewReviewRequired> QualificationNewReviewRequired { get; set; }
+        public DbSet<QualificationExport> NewQualificationCSVExport { get; set; }
+
+
+        public virtual DbSet<Job> Jobs { get; set; }
+        public virtual DbSet<JobConfiguration> JobConfigurations { get; set; }
+        public virtual DbSet<JobRun> JobRuns { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<QualificationNewReviewRequired>().ToView("v_QualificationNewReviewRequired", "regulated").HasNoKey();
+            
+            modelBuilder.Entity<QualificationExport>().ToView("v_NewQualificationsExport", "regulated").HasNoKey();
+            modelBuilder.Entity<QualificationExport>().Property(q => q.QANText).HasColumnName("QAN Text");
+            modelBuilder.Entity<QualificationExport>().Property(q => q.DateOfDownload).HasColumnName("Date of download");
+
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 
             base.OnModelCreating(modelBuilder);

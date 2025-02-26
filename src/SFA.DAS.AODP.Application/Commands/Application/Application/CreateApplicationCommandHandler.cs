@@ -30,6 +30,9 @@ public class CreateApplicationCommandHandler : IRequestHandler<CreateApplication
                 Name = request.Title,
                 Owner = request.Owner,
                 CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                OrganisationId = request.OrganisationId,
+                QualificationNumber = request.QualificationNumber
             });
 
             response.Value = new() { Id = form.Id };
@@ -37,6 +40,7 @@ public class CreateApplicationCommandHandler : IRequestHandler<CreateApplication
         }
         catch (Exception ex)
         {
+            response.InnerException = ex;
             response.Success = false;
             response.ErrorMessage = ex.Message;
         }

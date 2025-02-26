@@ -11,7 +11,7 @@ namespace SFA.DAS.AODP.Data.Repositories.FormBuilder
         Task<Page?> Archive(Guid pageId);
         int GetMaxOrderBySectionId(Guid sectionId);
         Task<List<Page>> GetNextPagesInSectionByOrderAsync(Guid sectionId, int order);
-        Task<Page> GetPageForApplicationAsync(int pageOrder, Guid sectionId);
+        Task<Page> GetPageForApplicationAsync(int pageOrder, Guid sectionId, Guid formVersionId);
         Task<List<Guid>> GetPagesIdInSectionByOrderAsync(Guid sectionId, int startOrder, int? endOrder);
         Task<List<Guid>> GetPagesIdInFormBySectionOrderAsync(Guid formVersionId, int startSectionOrder, int? endSectionOrder);
         Task<Dictionary<Guid, Guid>> CopyPagesForNewFormVersion(Dictionary<Guid, Guid> oldNewSectionIds);
