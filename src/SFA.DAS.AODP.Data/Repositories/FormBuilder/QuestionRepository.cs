@@ -212,5 +212,4 @@ public class QuestionRepository : IQuestionRepository
         _context.Questions.UpdateRange(toUpdate);
         await _context.SaveChangesAsync();
     }
-
 }

@@ -57,5 +57,13 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             _context.Applications.Update(application);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Guid> GetFormVersionIdForApplicationAsync(Guid applicationId)
+        {
+            return await _context.Applications
+                .Where(a => a.Id == applicationId)
+                .Select(a => a.FormVersionId)
+                .FirstOrDefaultAsync();
+        }
     }
 }
