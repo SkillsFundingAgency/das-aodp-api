@@ -9,7 +9,6 @@ public static class LoadConfigurationExtensions
     public static IConfigurationRoot LoadConfiguration(this IConfiguration configuration, IServiceCollection services, bool isDevelopment)
     {
         var configBuilder = new ConfigurationBuilder()
-            .AddConfiguration(configuration)
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddEnvironmentVariables();
 

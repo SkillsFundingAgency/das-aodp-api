@@ -41,19 +41,14 @@ if (!string.IsNullOrEmpty(connectionString))
 {
     builder.Services.AddApplicationInsightsTelemetry();
 }
-else
-{
-    //throw new Exception("No AI string found");
-}
+
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
+
 
 app
     .UseHealthChecks("/ping")

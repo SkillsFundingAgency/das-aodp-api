@@ -5,16 +5,17 @@ using SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SFA.DAS.AODP.Api.Controllers.FormBuilder;
 [ApiController]
 [Route("api/[controller]")]
-public class PagesController : Controller
+public class PagesController : BaseController
 {
     private readonly IMediator _mediator;
-    private readonly ILogger<FormsController> _logger;
+    private readonly ILogger<PagesController> _logger;
 
-    public PagesController(IMediator mediator, ILogger<FormsController> logger)
+    public PagesController(IMediator mediator, ILogger<PagesController> logger) : base(mediator, logger)
     {
         _mediator = mediator;
         _logger = logger;
@@ -26,15 +27,7 @@ public class PagesController : Controller
     public async Task<IActionResult> GetAllAsync(Guid sectionId)
     {
         var query = new GetAllPagesQuery(sectionId);
-
-        var response = await _mediator.Send(query);
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        _logger.LogError(message: $"Error thrown getting all pages for section Id `{sectionId}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
     [HttpGet("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}")]
@@ -44,22 +37,7 @@ public class PagesController : Controller
     public async Task<IActionResult> GetByIdAsync(Guid formVersionId, Guid pageId, Guid sectionId)
     {
         var query = new GetPageByIdQuery(pageId, sectionId, formVersionId);
-
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is NotFoundException)
-        {
-            _logger.LogError($"Request for page with section Id `{sectionId}` and page Id `{pageId}` returned 404 (not found).");
-            return NotFound();
-        }
-
-        _logger.LogError(message: $"Error thrown getting page for section Id `{sectionId}` and page Id `{pageId}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
     [HttpGet("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/preview")]
@@ -69,22 +47,7 @@ public class PagesController : Controller
     public async Task<IActionResult> GetPagePreviewByIdAsync(Guid formVersionId, Guid pageId, Guid sectionId)
     {
         var query = new GetPagePreviewByIdQuery(pageId, sectionId, formVersionId);
-
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is NotFoundException)
-        {
-            _logger.LogError($"Request for page preview with section Id `{sectionId}` and page Id `{pageId}` returned 404 (not found).");
-            return NotFound();
-        }
-
-        _logger.LogError(message: $"Error thrown getting page preview for section Id `{sectionId}` and page Id `{pageId}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
     [HttpPost("/api/forms/{formVersionId}/sections/{sectionId}/pages")]
@@ -96,26 +59,7 @@ public class PagesController : Controller
     {
         command.FormVersionId = formVersionId;
         command.SectionId = sectionId;
-
-        var response = await _mediator.Send(command);
-        if (response.Success && response.Value.Id != default)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is LockedRecordException)
-        {
-            _logger.LogError($"Request to add page with section Id `{command.SectionId}` but form version is locked. ");
-            return Forbid();
-        }
-
-        if (response.InnerException is DependantNotFoundException)
-        {
-            _logger.LogError(message: $"Request to add page with section Id `{command.SectionId}` but no section with this Id can be found. ", exception: response.InnerException);
-            return NotFound();
-        }
-
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(command);
     }
 
     [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}")]
@@ -128,27 +72,7 @@ public class PagesController : Controller
         command.FormVersionId = formVersionId;
         command.SectionId = sectionId;
         command.Id = pageId;
-
-        var response = await _mediator.Send(command);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is LockedRecordException)
-        {
-            _logger.LogError($"Request to update page with section Id `{sectionId}` and page Id `{pageId}` but form version is locked. ");
-            return Forbid();
-        }
-
-        if (response.InnerException is NotFoundException)
-        {
-            _logger.LogError($"Request to edit page with page Id `{pageId}` but no page with this Id can be found. ");
-            return NotFound();
-        }
-
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(command);
     }
 
     [HttpPut("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/MoveUp")]
@@ -164,21 +88,7 @@ public class PagesController : Controller
             PageId = pageId
         };
 
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is NotFoundException)
-        {
-            _logger.LogError($"Request to move page up with section Id `{sectionId}` and form page Id `{pageId}` returned 404 (not found).");
-            return NotFound();
-        }
-
-        _logger.LogError(message: $"Error thrown getting section to move up with section Id `{sectionId}` and page Id `{pageId}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
 
@@ -195,21 +105,7 @@ public class PagesController : Controller
             PageId = pageId
         };
 
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is NotFoundException)
-        {
-            _logger.LogError($"Request to move page down with section Id `{sectionId}` and form page Id `{pageId}` returned 404 (not found).");
-            return NotFound();
-        }
-
-        _logger.LogError(message: $"Error thrown getting section to move down with section Id `{sectionId}` and page Id `{pageId}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
     [HttpDelete("/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}")]
@@ -221,24 +117,6 @@ public class PagesController : Controller
     {
         var command = new DeletePageCommand(pageId);
 
-        var response = await _mediator.Send(command);
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is LockedRecordException)
-        {
-            _logger.LogError($"Request to delete page with page Id `{pageId}` but form version is locked. ");
-            return Forbid();
-        }
-
-        if (response.InnerException is NotFoundException)
-        {
-            _logger.LogError($"Request to delete page with page Id `{pageId}` but no page with this Id can be found. ");
-            return NotFound();
-        }
-
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(command);
     }
 }

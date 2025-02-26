@@ -4,6 +4,7 @@ public class GetApplicationFormStatusByApplicationIdQueryResponse
 {
     public string ApplicationName { get; set; }
     public string? Reference { get; set; }
+    public string? QualificationNumber { get; set; }
 
     public bool ReadyForSubmit { get; set; }
     public DateTime? SubmittedDate { get; set; }
@@ -26,10 +27,11 @@ public class GetApplicationFormStatusByApplicationIdQueryResponse
         GetApplicationFormStatusByApplicationIdQueryResponse response = new()
         {
             ApplicationName = application.Name,
-            Reference = application.Reference,
+            Reference = application.ReferenceId.ToString(),
             Owner = application.Owner,
             Submitted = application.Submitted ?? false,
-            SubmittedDate = application.SubmittedAt
+            SubmittedDate = application.SubmittedAt,
+            QualificationNumber = application.QualificationNumber
         };
 
         return response;

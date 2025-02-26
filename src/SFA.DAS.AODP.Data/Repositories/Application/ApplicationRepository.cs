@@ -1,9 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
-using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
-using System;
 
 namespace SFA.DAS.AODP.Data.Repositories.Application
 {
@@ -19,10 +17,11 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
         public async Task<List<Data.Entities.Application.Application>> GetByOrganisationId(Guid organisationId)
         {
             return await _context.Applications
-                //.Where(v => v.OrganisationId == organisationId) //TODO: add filter back when org code setup
+                .Where(v => v.OrganisationId == organisationId)
                 .ToListAsync();
 
         }
+
 
         public async Task<Data.Entities.Application.Application> Create(Data.Entities.Application.Application application)
         {
@@ -31,6 +30,15 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             await _context.SaveChangesAsync();
 
             return application;
+        }
+
+        public async Task DeleteAsync(Entities.Application.Application application)
+        {
+            await _context.ApplicationQuestionAnswers.Where(t => t.ApplicationPage.ApplicationId == application.Id).ExecuteDeleteAsync();
+            await _context.ApplicationPages.Where(t => t.ApplicationId == application.Id).ExecuteDeleteAsync();
+
+            _context.Applications.Remove(application);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<Entities.Application.Application> GetByIdAsync(Guid applicationId)
@@ -42,6 +50,20 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
         public async Task<List<View_SectionSummaryForApplication>> GetSectionSummaryByApplicationIdAsync(Guid applicationId)
         {
             return await _context.View_SectionSummaryForApplications.Where(a => a.ApplicationId == applicationId).ToListAsync();
+        }
+
+        public async Task UpdateAsync(Entities.Application.Application application)
+        {
+            _context.Applications.Update(application);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Guid> GetFormVersionIdForApplicationAsync(Guid applicationId)
+        {
+            return await _context.Applications
+                .Where(a => a.Id == applicationId)
+                .Select(a => a.FormVersionId)
+                .FirstOrDefaultAsync();
         }
     }
 }

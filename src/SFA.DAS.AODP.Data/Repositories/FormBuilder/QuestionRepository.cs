@@ -96,7 +96,12 @@ public class QuestionRepository : IQuestionRepository
 
         var question = await GetQuestionByIdAsync(questionId);
 
+        await _context.QuestionValidations.Where(t => t.QuestionId == question.Id).ExecuteDeleteAsync();
+        await _context.QuestionOptions.Where(t => t.QuestionId == question.Id).ExecuteDeleteAsync();
+
         _context.Questions.Remove(question);
+
+        await UpdateQuestionOrdering(questionId, question.Order);
 
         await _context.SaveChangesAsync();
     }
@@ -193,5 +198,18 @@ public class QuestionRepository : IQuestionRepository
         await _context.SaveChangesAsync();
 
         return true;
+    }
+
+    public async Task UpdateQuestionOrdering(Guid questionId, int deletedQuestionOrder)
+    {
+        var toUpdate = await _context.Questions
+            .Where(p => p.Id == questionId && p.Order > deletedQuestionOrder)
+            .ToListAsync();
+
+        foreach (var question in toUpdate)
+            question.Order--;
+
+        _context.Questions.UpdateRange(toUpdate);
+        await _context.SaveChangesAsync();
     }
 }

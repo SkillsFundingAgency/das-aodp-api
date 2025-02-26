@@ -94,5 +94,11 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
         {
             return await _context.ApplicationPages.AnyAsync(v => v.Id == id && v.Application.Submitted == false);
         }
+
+        public async Task DeleteAsync(List<ApplicationPage> applicationPages)
+        {
+            _context.ApplicationPages.RemoveRange(applicationPages);
+            await _context.SaveChangesAsync();
+        }
     }
 }

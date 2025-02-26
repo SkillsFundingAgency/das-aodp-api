@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Markdig;
+using MediatR;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
@@ -25,6 +26,7 @@ public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersion
             {
                 Title = request.Title,
                 Description = request.Description,
+                DescriptionHTML = HTMLGenerator.FromMarkdown(request.Description)
             }, order + 1);
 
             response.Value = new() { Id = form.Id };
@@ -34,6 +36,7 @@ public class CreateFormVersionCommandHandler : IRequestHandler<CreateFormVersion
         {
             response.Success = false;
             response.ErrorMessage = ex.Message;
+            response.InnerException = ex;
         }
 
         return response;

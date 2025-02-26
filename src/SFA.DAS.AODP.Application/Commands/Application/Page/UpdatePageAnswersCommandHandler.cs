@@ -58,13 +58,25 @@ public class UpdatePageAnswersCommandHandler : IRequestHandler<UpdatePageAnswers
                     applicationPage.QuestionAnswers?.Add(answer);
                 }
 
-                if (requestQuestion.QuestionType == QuestionType.Text.ToString())
+                if (requestQuestion.QuestionType == QuestionType.Text.ToString() || requestQuestion.QuestionType == QuestionType.TextArea.ToString())
                 {
                     answer.TextValue = requestQuestion?.Answer?.TextValue;
                 }
                 else if (requestQuestion.QuestionType == QuestionType.Radio.ToString())
                 {
                     answer.OptionsValue = requestQuestion?.Answer?.RadioChoiceValue;
+                }
+                else if (requestQuestion.QuestionType == QuestionType.MultiChoice.ToString())
+                {
+                    answer.OptionsValue = string.Join(",", requestQuestion?.Answer?.MultipleChoiceValue ?? []);
+                }
+                else if (requestQuestion.QuestionType == QuestionType.Number.ToString())
+                {
+                    answer.NumberValue = requestQuestion?.Answer?.NumberValue;
+                }
+                else if (requestQuestion.QuestionType == QuestionType.Date.ToString())
+                {
+                    answer.DateValue = requestQuestion?.Answer?.DateValue;
                 }
             }
             await _questionAnswerRepository.UpsertAsync(applicationPage.QuestionAnswers);
