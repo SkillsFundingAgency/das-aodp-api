@@ -28,6 +28,7 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<Application> Applications { get; }
         DbSet<ApplicationPage> ApplicationPages { get; }
         DbSet<ApplicationQuestionAnswer> ApplicationQuestionAnswers { get; }
+        DbSet<Message> ApplicationMessages { get; set; }
         DbSet<View_SectionPageCount> View_SectionPageCounts { get; set; }
         DbSet<View_RemainingPagesBySectionForApplication> View_RemainingPagesBySectionForApplications { get; set; }
         DbSet<View_SectionSummaryForApplication> View_SectionSummaryForApplications { get; set; }
