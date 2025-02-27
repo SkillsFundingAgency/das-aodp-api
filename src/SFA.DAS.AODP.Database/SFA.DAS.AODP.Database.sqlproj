@@ -107,6 +107,7 @@
     <Build Include="Tables\JobRuns.sql" />
     <Build Include="Tables\JobConfigurations.sql" />
     <Build Include="Tables\MigrationScripts.sql" />
+    <Build Include="Tables\Message.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
