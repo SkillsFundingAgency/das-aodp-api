@@ -87,6 +87,15 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             return response;
         }
 
+        [HttpGet("changed")]
+        [ProducesResponseType(typeof(GetChangedQualificationsQueryResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetChangedQualifications()
+        {
+            var query = new GetChangedQualificationsQuery();
+            return await SendRequestAsync(query);
+        }
+
         private async Task<IActionResult> HandleNewQualifications()
         {
             var result = await _mediator.Send(new GetNewQualificationsQuery());
