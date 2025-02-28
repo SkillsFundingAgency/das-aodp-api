@@ -15,7 +15,7 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<ApprovedQualificationsImport> ApprovedQualificationsImports { get; set; }
         DbSet<ProcessedRegisteredQualification> ProcessedRegisteredQualifications { get; set; }
         DbSet<RegisteredQualificationsImport> RegisteredQualificationsImports { get; set; }
-        DbSet<Qualification> Qualifications { get; set; }
+        DbSet<ChangedQualification> ChangedQualifications { get; set; }
         DbSet<QualificationVersion> QualificationVersions { get; set; }
         DbSet<Form> Forms { get; set; }
         DbSet<FormVersion> FormVersions { get; set; }

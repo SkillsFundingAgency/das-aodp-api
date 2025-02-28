@@ -26,7 +26,7 @@ public class GetChangedQualificationsQueryHandlerTests
     [Fact]
     public async Task Test_Get_Changed_Qualification()
     {
-        var qualifications = _fixture.CreateMany<Data.Entities.Qualification.Qualification>().ToList();
+        var qualifications = _fixture.CreateMany<Data.Entities.Qualification.ChangedQualification>().ToList();
         _qualificationsRepository.Setup(v => v.GetChangedQualificationsAsync())
             .ReturnsAsync(qualifications);
 
@@ -41,7 +41,7 @@ public class GetChangedQualificationsQueryHandlerTests
     [Fact]
     public async Task Test_Get_Changed_Qualification_Throws_Returns_Error()
     {
-        var qualifications = _fixture.CreateMany<Data.Entities.Qualification.Qualification>().ToList();
+        var qualifications = _fixture.CreateMany<Data.Entities.Qualification.ChangedQualification>().ToList();
         _qualificationsRepository.Setup(v => v.GetChangedQualificationsAsync())
             .Throws(new Exception());
 

@@ -2,9 +2,9 @@
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification;
 
-using Qualification = Entities.Qualification.Qualification;
+using ChangedQualification = Entities.Qualification.ChangedQualification;
 
 public interface IQualificationsRepository
 {
-    Task<List<Qualification>> GetChangedQualificationsAsync();
+    Task<List<ChangedQualification>> GetChangedQualificationsAsync();
 }

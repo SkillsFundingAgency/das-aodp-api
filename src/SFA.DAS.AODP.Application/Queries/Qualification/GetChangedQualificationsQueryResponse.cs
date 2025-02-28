@@ -9,32 +9,16 @@ public class GetChangedQualificationsQueryResponse
     public class Qualification
     {
         public Guid Id { get; set; }
-        public DateTime DateOfOfqualDataSnapshot { get; set; }
-        public Guid QualificationId { get; set; }
-        public Guid AwardingOrganisationId { get; set; }
-        public string Level { get; set; } = string.Empty;
-        public string QualificationType { get; set; } = string.Empty;
-        public string SubCategory { get; set; } = string.Empty;
-        public string SectorSubjectArea { get; set; } = string.Empty;
-        public string Status { get; set; } = string.Empty;
-        public string AwardingOrganisationUrl { get; set; } = string.Empty;
-        public DateTime ImportDate { get; set; }
+        public Guid Qan { get; set; }
+        public string QualificationName { get; set; } = string.Empty;
 
-        public static implicit operator Qualification(Data.Entities.Qualification.Qualification qualification)
+        public static implicit operator Qualification(Data.Entities.Qualification.ChangedQualification qualification)
         {
             return (new()
             {
                 Id = qualification.Id,
-                DateOfOfqualDataSnapshot = qualification.DateOfOfqualDataSnapshot,
-                QualificationId = qualification.QualificationId,
-                AwardingOrganisationId = qualification.AwardingOrganisationId,
-                Level = qualification.Level,
-                QualificationType = qualification.QualificationType,
-                SubCategory = qualification.SubCategory,
-                SectorSubjectArea = qualification.SectorSubjectArea,
-                Status = qualification.Status,
-                AwardingOrganisationUrl = qualification.AwardingOrganisationUrl,
-                ImportDate = qualification.ImportDate,
+                Qan = qualification.Qan,
+                QualificationName = qualification.QualificationName,
             });
         }
     }
