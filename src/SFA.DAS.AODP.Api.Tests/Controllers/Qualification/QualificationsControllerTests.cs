@@ -2,10 +2,12 @@
 using AutoFixture.AutoMoq;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.AODP.Api.Controllers.Qualification;
 using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Models.Qualifications;
 
@@ -139,6 +141,25 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
             var badRequestValue = badRequestResult.Value?.GetType().GetProperty("message")?.GetValue(badRequestResult.Value, null);
             Assert.Equal("Qualification reference cannot be empty", badRequestValue);
+        }
+
+        [Fact]
+        public async Task GetChangedQualifications_ReturnsOkResult_WithChangedQualifications()
+        {
+            // Arrange
+            var queryResponse = _fixture.Create<BaseMediatrResponse<GetChangedQualificationsQueryResponse>>();
+            queryResponse.Success = true;
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetChangedQualificationsQuery>(), default))
+                         .ReturnsAsync(queryResponse);
+
+            // Act
+            var result = await _controller.GetChangedQualifications();
+
+            // Assert
+            Assert.IsAssignableFrom<OkObjectResult>(result);
+            var okResult = (OkObjectResult)result;
+            Assert.IsAssignableFrom<GetChangedQualificationsQueryResponse>(okResult.Value);
         }
     }
 }
