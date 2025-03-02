@@ -55,7 +55,8 @@ namespace SFA.DAS.AODP.Data.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<QualificationNewReviewRequired>().ToView("v_QualificationNewReviewRequired", "regulated").HasNoKey();
-            
+            modelBuilder.Entity<QualificationChangedReviewRequired>().ToView("v_QualificationChangedReviewRequired", "regulated").HasNoKey();
+
             modelBuilder.Entity<QualificationExport>().ToView("v_NewQualificationsExport", "regulated").HasNoKey();
             modelBuilder.Entity<QualificationExport>().Property(q => q.QANText).HasColumnName("QAN Text");
             modelBuilder.Entity<QualificationExport>().Property(q => q.DateOfDownload).HasColumnName("Date of download");
