@@ -3,26 +3,26 @@ using SFA.DAS.AODP.Data.Repositories.Qualification;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualifications
 {
-    public class GetNewQualificationsQueryHandler : IRequestHandler<GetNewQualificationsQuery, BaseMediatrResponse<GetNewQualificationsQueryResponse>>
+    public class GetChangedQualificationsQueryHandler : IRequestHandler<GetChangedQualificationsQuery, BaseMediatrResponse<GetChangedQualificationsQueryResponse>>
     {
         private readonly IQualificationsRepository _repository;
 
-        public GetNewQualificationsQueryHandler(IQualificationsRepository repository)
+        public GetChangedQualificationsQueryHandler(IQualificationsRepository repository)
         {
             _repository = repository;
         }
 
-        public async Task<BaseMediatrResponse<GetNewQualificationsQueryResponse>> Handle(GetNewQualificationsQuery request, CancellationToken cancellationToken)
+        public async Task<BaseMediatrResponse<GetChangedQualificationsQueryResponse>> Handle(GetChangedQualificationsQuery request, CancellationToken cancellationToken)
         {
-            var response = new BaseMediatrResponse<GetNewQualificationsQueryResponse>();
+            var response = new BaseMediatrResponse<GetChangedQualificationsQueryResponse>();
             try
             {
-                var qualifications = await _repository.GetAllNewQualificationsAsync();
+                var qualifications = await _repository.GetAllChangedQualificationsAsync();
                 if (qualifications != null && qualifications.Any())
                 {
-                    response.Value = new GetNewQualificationsQueryResponse
+                    response.Value = new GetChangedQualificationsQueryResponse
                     {
-                        NewQualifications = qualifications
+                        ChangedQualifications = qualifications
                     };
                     response.Success = true;
                 }

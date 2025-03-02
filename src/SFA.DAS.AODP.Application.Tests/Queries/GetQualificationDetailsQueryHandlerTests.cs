@@ -14,13 +14,13 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
     public class GetQualificationDetailsQueryHandlerTests
     {
         private readonly IFixture _fixture;
-        private readonly Mock<INewQualificationsRepository> _repositoryMock;
+        private readonly Mock<IQualificationsRepository> _repositoryMock;
         private readonly GetQualificationDetailsQueryHandler _handler;
 
         public GetQualificationDetailsQueryHandlerTests()
         {
             _fixture = new Fixture().Customize(new AutoMoqCustomization());
-            _repositoryMock = _fixture.Freeze<Mock<INewQualificationsRepository>>();
+            _repositoryMock = _fixture.Freeze<Mock<IQualificationsRepository>>();
             _handler = _fixture.Create<GetQualificationDetailsQueryHandler>();
         }
 

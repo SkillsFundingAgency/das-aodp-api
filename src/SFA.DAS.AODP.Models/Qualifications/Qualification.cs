@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SFA.DAS.AODP.Models.Qualifications
 {
-    public class NewQualification
+    public class Qualification
     {
         public int Id { get; set; }
         public string? Title { get; set; }

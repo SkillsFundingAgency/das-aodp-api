@@ -5,17 +5,17 @@ using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification
 {
-    public class NewQualificationsRepository : INewQualificationsRepository
+    public class QualificationsRepository : IQualificationsRepository
     {
         private readonly ApplicationDbContext _context;
 
-        public NewQualificationsRepository(ApplicationDbContext context)
+        public QualificationsRepository(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        public async Task<List<NewQualification>> GetAllNewQualificationsAsync() => await _context.QualificationNewReviewRequired
-                      .Select(q => new NewQualification
+        public async Task<List<Models.Qualifications.Qualification>> GetAllNewQualificationsAsync() => await _context.QualificationNewReviewRequired
+                      .Select(q => new Models.Qualifications.Qualification
                       {
                           Title = q.QualificationTitle,
                           Reference = q.QualificationReference,
@@ -60,6 +60,19 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
 
         public async Task<List<QualificationExport>> GetNewQualificationsCSVExport() =>
             await _context.NewQualificationCSVExport.ToListAsync();
+
+        public async Task<List<Models.Qualifications.Qualification>> GetAllChangedQualificationsAsync()
+        {
+           return await _context.QualificationChangedReviewRequired
+                      .Select(q => new Models.Qualifications.Qualification
+                      {
+                          Title = q.QualificationTitle,
+                          Reference = q.QualificationReference,
+                          AwardingOrganisation = q.AwardingOrganisation,
+                          Status = "Changed"
+                      })
+                      .ToListAsync();
+        }
     }
 }
 

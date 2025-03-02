@@ -44,6 +44,7 @@ namespace SFA.DAS.AODP.Data.Context
         public DbSet<View_RemainingPagesBySectionForApplication> View_RemainingPagesBySectionForApplications { get; set; }
         public DbSet<View_SectionSummaryForApplication> View_SectionSummaryForApplications { get; set; }
         public DbSet<QualificationNewReviewRequired> QualificationNewReviewRequired { get; set; }
+        public DbSet<QualificationChangedReviewRequired> QualificationChangedReviewRequired { get; set; }
         public DbSet<QualificationExport> NewQualificationCSVExport { get; set; }
 
 

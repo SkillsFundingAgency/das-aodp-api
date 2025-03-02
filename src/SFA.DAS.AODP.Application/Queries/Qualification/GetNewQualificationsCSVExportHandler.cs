@@ -6,9 +6,9 @@ namespace SFA.DAS.AODP.Application.Queries.Qualification
 {
     public class GetNewQualificationsCSVExportHandler : IRequestHandler<GetNewQualificationsCsvExportQuery, BaseMediatrResponse<GetNewQualificationsCsvExportResponse>>
     {
-        private readonly INewQualificationsRepository _repository;
+        private readonly IQualificationsRepository _repository;
 
-        public GetNewQualificationsCSVExportHandler(INewQualificationsRepository repository)
+        public GetNewQualificationsCSVExportHandler(IQualificationsRepository repository)
         {
             _repository = repository;
         }

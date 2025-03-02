@@ -39,7 +39,7 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IApplicationRepository, ApplicationRepository>();
             services.AddScoped<IApplicationPageRepository, ApplicationPageRepository>();
             services.AddScoped<IApplicationQuestionAnswerRepository, ApplicationQuestionAnswerRepository>();
-            services.AddScoped<INewQualificationsRepository, NewQualificationsRepository>();
+            services.AddScoped<IQualificationsRepository, QualificationsRepository>();
             services.AddScoped<IJobsRepository, JobsRepository>();
 
             return services;

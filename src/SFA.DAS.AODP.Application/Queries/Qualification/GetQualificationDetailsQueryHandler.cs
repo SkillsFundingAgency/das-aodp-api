@@ -5,9 +5,9 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
 {
     public class GetQualificationDetailsQueryHandler : IRequestHandler<GetQualificationDetailsQuery, BaseMediatrResponse<GetQualificationDetailsQueryResponse>>
     {
-        private readonly INewQualificationsRepository _repository;
+        private readonly IQualificationsRepository _repository;
 
-        public GetQualificationDetailsQueryHandler(INewQualificationsRepository repository)
+        public GetQualificationDetailsQueryHandler(IQualificationsRepository repository)
         {
             _repository = repository;
         }
