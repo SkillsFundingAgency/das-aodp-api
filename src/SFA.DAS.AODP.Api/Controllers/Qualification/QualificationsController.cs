@@ -35,6 +35,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             IActionResult response = validationResult.ProcessedStatus switch
             {
                 "new" => await HandleNewQualifications(),
+                "changed"=> await HandleChangedQualifications(),
                 _ => BadRequest(new { message = $"Invalid status: {validationResult.ProcessedStatus}" })
             };
 
@@ -95,6 +96,19 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             {
                 _logger.LogWarning("No new qualifications found.");
                 return NotFound(new { message = "No new qualifications found" });
+            }
+
+            return Ok(result);
+        }
+
+        private async Task<IActionResult> HandleChangedQualifications()
+        {
+            var result = await _mediator.Send(new GetChangedQualificationsQuery());
+
+            if (result == null || !result.Success || result.Value == null)
+            {
+                _logger.LogWarning("No changed qualifications found.");
+                return NotFound(new { message = "No changed qualifications found" });
             }
 
             return Ok(result);
