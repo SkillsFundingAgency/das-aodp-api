@@ -35,6 +35,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             IActionResult response = validationResult.ProcessedStatus switch
             {
                 "new" => await HandleNewQualifications(),
+                "changed" => await HandleChangedQualification(),
                 _ => BadRequest(new { message = $"Invalid status: {validationResult.ProcessedStatus}" })
             };
 
@@ -87,15 +88,6 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             return response;
         }
 
-        [HttpGet("changed")]
-        [ProducesResponseType(typeof(GetChangedQualificationsQueryResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetChangedQualifications()
-        {
-            var query = new GetChangedQualificationsQuery();
-            return await SendRequestAsync(query);
-        }
-
         private async Task<IActionResult> HandleNewQualifications()
         {
             var result = await _mediator.Send(new GetNewQualificationsQuery());
@@ -107,6 +99,12 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             }
 
             return Ok(result);
+        }
+
+        private async Task<IActionResult> HandleChangedQualification()
+        {
+            var query = new GetChangedQualificationsQuery();
+            return await SendRequestAsync(query);
         }
 
         private async Task<IActionResult> HandleNewQualificationCSVExport()

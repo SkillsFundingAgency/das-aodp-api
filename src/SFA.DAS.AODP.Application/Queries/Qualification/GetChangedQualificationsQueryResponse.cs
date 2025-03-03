@@ -4,15 +4,15 @@ namespace SFA.DAS.AODP.Application.Queries.Qualification;
 
 public class GetChangedQualificationsQueryResponse
 {
-    public List<Qualification> Data { get; set; } = new();
+    public List<ChangedQualification> Data { get; set; } = new();
 
-    public class Qualification
+    public class ChangedQualification
     {
         public Guid Id { get; set; }
         public Guid Qan { get; set; }
         public string QualificationName { get; set; } = string.Empty;
 
-        public static implicit operator Qualification(Data.Entities.Qualification.ChangedQualification qualification)
+        public static implicit operator ChangedQualification(Data.Entities.Qualification.ChangedQualification qualification)
         {
             return (new()
             {

@@ -9,6 +9,7 @@ using SFA.DAS.AODP.Api.Controllers.Qualification;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
+using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
@@ -50,6 +51,29 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             Assert.Equal(queryResponse.Value.NewQualifications[0].Reference, model.Value.NewQualifications[0].Reference);
             Assert.Equal(queryResponse.Value.NewQualifications[0].AwardingOrganisation, model.Value.NewQualifications[0].AwardingOrganisation);
             Assert.Equal(queryResponse.Value.NewQualifications[0].Status, model.Value.NewQualifications[0].Status);
+        }
+
+        [Fact]
+        public async Task GetQualifications_ReturnsOkResult_WithListOfChangedQualifications()
+        {
+            // Arrange
+            var queryResponse = _fixture.Create<BaseMediatrResponse<GetChangedQualificationsQueryResponse>>();
+            queryResponse.Success = true;
+            queryResponse.Value.Data = _fixture.CreateMany<GetChangedQualificationsQueryResponse.ChangedQualification>(2).ToList();
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetChangedQualificationsQuery>(), default))
+                         .ReturnsAsync(queryResponse);
+
+            // Act
+            var result = await _controller.GetQualifications("changed");
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var model = Assert.IsAssignableFrom<GetChangedQualificationsQueryResponse>(okResult.Value);
+            Assert.Equal(2, model.Data.Count);
+            Assert.Equal(queryResponse.Value.Data[0].QualificationName, model.Data[0].QualificationName);
+            Assert.Equal(queryResponse.Value.Data[0].Qan, model.Data[0].Qan);
+            Assert.Equal(queryResponse.Value.Data[0].Id, model.Data[0].Id);
         }
 
         [Fact]
@@ -141,25 +165,6 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
             var badRequestValue = badRequestResult.Value?.GetType().GetProperty("message")?.GetValue(badRequestResult.Value, null);
             Assert.Equal("Qualification reference cannot be empty", badRequestValue);
-        }
-
-        [Fact]
-        public async Task GetChangedQualifications_ReturnsOkResult_WithChangedQualifications()
-        {
-            // Arrange
-            var queryResponse = _fixture.Create<BaseMediatrResponse<GetChangedQualificationsQueryResponse>>();
-            queryResponse.Success = true;
-
-            _mediatorMock.Setup(m => m.Send(It.IsAny<GetChangedQualificationsQuery>(), default))
-                         .ReturnsAsync(queryResponse);
-
-            // Act
-            var result = await _controller.GetChangedQualifications();
-
-            // Assert
-            Assert.IsAssignableFrom<OkObjectResult>(result);
-            var okResult = (OkObjectResult)result;
-            Assert.IsAssignableFrom<GetChangedQualificationsQueryResponse>(okResult.Value);
         }
     }
 }
