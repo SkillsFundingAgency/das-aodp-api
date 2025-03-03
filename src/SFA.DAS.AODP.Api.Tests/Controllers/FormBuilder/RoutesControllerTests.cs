@@ -10,6 +10,8 @@ using SFA.DAS.AODP.Application.Commands.FormBuilder.Pages;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Routes;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Routes;
+using SFA.DAS.AODP.Application.Queries.FormBuilder.Questions;
+using SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
 namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder.RoutesControllerTests
 {
@@ -48,7 +50,12 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder.RoutesControllerTests
             var result = await _controller.GetAvailableSectionsAndPagesForRouting(request.FormVersionId);
 
             // Assert
-            _mediatorMock.Verify(m => m.Send(request, default), Times.Never());
+            _mediatorMock.Verify(m => m.Send(It.IsAny<GetAvailableSectionsAndPagesForRoutingQuery>(), default), Times.Once());
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<GetAvailableSectionsAndPagesForRoutingQuery>(q =>
+                        q.FormVersionId == request.FormVersionId
+            ), default), Times.Once());
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<GetAvailableSectionsAndPagesForRoutingQueryResponse>(okResult.Value);
             Assert.Equal(response, model);
@@ -79,7 +86,12 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder.RoutesControllerTests
             var result = await _controller.GetRoutesByFormVersionId(request.FormVersionId);
 
             // Assert
-            _mediatorMock.Verify(m => m.Send(request, default), Times.Never());
+            _mediatorMock.Verify(m => m.Send(It.IsAny<GetRoutingInformationForFormQuery>(), default), Times.Once());
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<GetRoutingInformationForFormQuery>(q =>
+                        q.FormVersionId == request.FormVersionId
+            ), default), Times.Once());
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<GetRoutingInformationForFormQueryResponse>(okResult.Value);
             Assert.Equal(response, model);
@@ -105,7 +117,12 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder.RoutesControllerTests
             var result = await _controller.GetAvailableQuestionsForRouting(request.PageId);
 
             // Assert
-            _mediatorMock.Verify(m => m.Send(request, default), Times.Never());
+            _mediatorMock.Verify(m => m.Send(It.IsAny<GetAvailableQuestionsForRoutingQuery>(), default), Times.Once());
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<GetAvailableQuestionsForRoutingQuery>(q =>
+                        q.PageId == request.PageId
+            ), default), Times.Once());
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<GetAvailableQuestionsForRoutingQueryResponse>(okResult.Value);
             Assert.Equal(response, model);
@@ -131,7 +148,13 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder.RoutesControllerTests
             var result = await _controller.GetQuestionRoutingInformation(request.QuestionId, request.FormVersionId);
 
             // Assert
-            _mediatorMock.Verify(m => m.Send(request, default), Times.Never());
+            _mediatorMock.Verify(m => m.Send(It.IsAny<GetRoutingInformationForQuestionQuery>(), default), Times.Once());
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<GetRoutingInformationForQuestionQuery>(q =>
+                        q.QuestionId == request.QuestionId
+                        && q.FormVersionId == request.FormVersionId
+            ), default), Times.Once());
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<GetRoutingInformationForQuestionQueryResponse>(okResult.Value);
             Assert.Equal(response, model);

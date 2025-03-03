@@ -46,7 +46,10 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder
             var result = await _controller.GetAllAsync();
 
             // Assert
-            _mediatorMock.Verify(m => m.Send(request, default), Times.Never());
+            _mediatorMock.Verify(m => m.Send(It.IsAny<GetAllFormVersionsQuery>(), default), Times.Once());
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.IsAny<GetAllFormVersionsQuery>(), default), Times.Once());
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<GetAllFormVersionsQueryResponse>(okResult.Value);
             Assert.Equal(response, model);
@@ -72,7 +75,12 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder
             var result = await _controller.GetByIdAsync(request.FormVersionId);
 
             // Assert
-            _mediatorMock.Verify(m => m.Send(request, default), Times.Never());
+            _mediatorMock.Verify(m => m.Send(It.IsAny<GetFormVersionByIdQuery>(), default), Times.Once());
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<GetFormVersionByIdQuery>(q =>
+                        q.FormVersionId == request.FormVersionId
+            ), default), Times.Once());
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<GetFormVersionByIdQueryResponse>(okResult.Value);
             Assert.Equal(response, model);
@@ -280,7 +288,12 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder
             var result = await _controller.RemoveAsync(request.FormVersionId);
 
             // Assert
-            _mediatorMock.Verify(m => m.Send(request, default), Times.Never());
+            _mediatorMock.Verify(m => m.Send(It.IsAny<DeleteFormVersionCommand>(), default), Times.Once());
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<DeleteFormVersionCommand>(q =>
+                        q.FormVersionId == request.FormVersionId
+            ), default), Times.Once());
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<EmptyResponse>(okResult.Value);
             Assert.Equal(response, model);
