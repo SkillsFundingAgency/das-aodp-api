@@ -14,8 +14,8 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             _context = context;
         }
 
-        public async Task<List<Models.Qualifications.Qualification>> GetAllNewQualificationsAsync() => await _context.QualificationNewReviewRequired
-                      .Select(q => new Models.Qualifications.Qualification
+        public async Task<List<Models.Qualifications.NewQualification>> GetAllNewQualificationsAsync() => await _context.QualificationNewReviewRequired
+                      .Select(q => new Models.Qualifications.NewQualification
                       {
                           Title = q.QualificationTitle,
                           Reference = q.QualificationReference,
@@ -61,14 +61,15 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
         public async Task<List<QualificationExport>> GetNewQualificationsCSVExport() =>
             await _context.NewQualificationCSVExport.ToListAsync();
 
-        public async Task<List<Models.Qualifications.Qualification>> GetAllChangedQualificationsAsync()
+        public async Task<List<Models.Qualifications.ChangedQualification>> GetAllChangedQualificationsAsync()
         {
            return await _context.QualificationChangedReviewRequired
-                      .Select(q => new Models.Qualifications.Qualification
+                      .Select(q => new Models.Qualifications.ChangedQualification
                       {
                           Title = q.QualificationTitle,
                           Reference = q.QualificationReference,
                           AwardingOrganisation = q.AwardingOrganisation,
+                          ChangedFieldNames=q.ChangedFieldNames,
                           Status = "Changed"
                       })
                       .ToListAsync();

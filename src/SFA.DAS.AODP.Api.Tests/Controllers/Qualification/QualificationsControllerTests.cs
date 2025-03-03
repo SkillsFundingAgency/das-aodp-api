@@ -32,7 +32,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             // Arrange
             var queryResponse = _fixture.Create<BaseMediatrResponse<GetNewQualificationsQueryResponse>>();
             queryResponse.Success = true;
-            queryResponse.Value.NewQualifications = _fixture.CreateMany<SFA.DAS.AODP.Models.Qualifications.Qualification>(2).ToList();
+            queryResponse.Value.NewQualifications = _fixture.CreateMany<SFA.DAS.AODP.Models.Qualifications.NewQualification>(2).ToList();
 
             _mediatorMock.Setup(m => m.Send(It.IsAny<GetNewQualificationsQuery>(), default))
                          .ReturnsAsync(queryResponse);

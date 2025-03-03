@@ -5,10 +5,10 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
 {
     public interface IQualificationsRepository
     {
-        Task<List<Models.Qualifications.Qualification>> GetAllNewQualificationsAsync();
+        Task<List<Models.Qualifications.NewQualification>> GetAllNewQualificationsAsync();
         Task<QualificationDetails?> GetQualificationDetailsByIdAsync(string qualificationReference);
         Task<List<QualificationExport>> GetNewQualificationsCSVExport();
-        Task<List<Models.Qualifications.Qualification>> GetAllChangedQualificationsAsync();
+        Task<List<Models.Qualifications.ChangedQualification>> GetAllChangedQualificationsAsync();
 
     }
 }

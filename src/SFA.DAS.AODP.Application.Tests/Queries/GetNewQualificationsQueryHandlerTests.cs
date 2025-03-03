@@ -28,7 +28,7 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
             var query = _fixture.Create<GetNewQualificationsQuery>();
             var response = _fixture.Create<BaseMediatrResponse<GetNewQualificationsQueryResponse>>();
             response.Success = true;
-            response.Value.NewQualifications = _fixture.CreateMany<Qualification>(2).ToList();
+            response.Value.NewQualifications = _fixture.CreateMany<NewQualification>(2).ToList();
 
             _repositoryMock.Setup(x => x.GetAllNewQualificationsAsync())
                            .ReturnsAsync(response.Value.NewQualifications);
@@ -52,7 +52,7 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
             response.Value = null;
 
             _repositoryMock.Setup(x => x.GetAllNewQualificationsAsync())
-                           .ReturnsAsync(new List<Qualification>());
+                           .ReturnsAsync(new List<NewQualification>());
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
