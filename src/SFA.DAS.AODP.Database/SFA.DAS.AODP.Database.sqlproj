@@ -63,6 +63,7 @@
     <Folder Include="Views" />
     <Folder Include="Schemas" />
     <Folder Include="MigrationScripts" />
+    <Folder Include="Tables\Application" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Form.sql" />
@@ -90,7 +91,6 @@
     <Build Include="Views\View_AvailableQuestionsForRouting.sql" />
     <Build Include="Views\View_QuestionRoutingDetails.sql" />
     <Build Include="Tables\ApplicationQuestionAnswers.sql" />
-    <Build Include="Tables\Applications.sql" />
     <Build Include="Tables\ApplicationPages.sql" />
     <Build Include="Views\View_SectionPageCount.sql" />
     <Build Include="Views\View_RemainingPagesBySectionForApplication.sql" />
@@ -107,6 +107,10 @@
     <Build Include="Tables\JobRuns.sql" />
     <Build Include="Tables\JobConfigurations.sql" />
     <Build Include="Tables\MigrationScripts.sql" />
+    <Build Include="Tables\Application\ApplicationReviews.sql" />
+    <Build Include="Tables\Application\Applications.sql" />
+    <Build Include="Tables\Application\ApplicationReviewFeedbacks.sql" />
+    <Build Include="Tables\Application\ApplicationReviewDecisions.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />

@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.Application.Application;
 
 namespace SFA.DAS.AODP.Api.Controllers.Application;
@@ -13,7 +12,7 @@ public class ApplicationsController : BaseController
     private readonly IMediator _mediator;
     private readonly ILogger<ApplicationsController> _logger;
 
-    public ApplicationsController(IMediator mediator, ILogger<ApplicationsController> logger) : base(mediator, logger) 
+    public ApplicationsController(IMediator mediator, ILogger<ApplicationsController> logger) : base(mediator, logger)
     {
         _mediator = mediator;
         _logger = logger;
@@ -205,6 +204,7 @@ public class ApplicationsController : BaseController
     }
 
     [HttpDelete("/api/applications/{applicationId}")]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> DeleteApplicationByIdAsync(Guid applicationId)
@@ -212,5 +212,15 @@ public class ApplicationsController : BaseController
         var query = new DeleteApplicationCommand(applicationId);
 
         return await SendRequestAsync(query);
+    }
+
+    [HttpPut("/api/applications/{applicationId}/submit")]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> SubmitApplicationByIdAsync(Guid applicationId, SubmitApplicationCommand submitApplicationCommand)
+    {
+        submitApplicationCommand.ApplicationId = applicationId;
+        return await SendRequestAsync(submitApplicationCommand);
     }
 }
