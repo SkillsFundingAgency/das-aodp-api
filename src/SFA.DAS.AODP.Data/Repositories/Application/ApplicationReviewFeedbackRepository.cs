@@ -21,9 +21,9 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             int offset,
             int limit,
             bool includeApplicationWithNewMessages,
-            List<string>? applicationStatuses,
-            string? applicationSearch,
-            string? awardingOrganisationSearch
+            List<string>? applicationStatuses = null,
+            string? applicationSearch = null,
+            string? awardingOrganisationSearch = null
         )
         {
             var query = _context
