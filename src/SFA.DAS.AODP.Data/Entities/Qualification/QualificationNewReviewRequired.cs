@@ -8,7 +8,7 @@
         public string QualificationType { get; set; }
         public string Level { get; set; }
         public string AgeGroup { get; set; }
-        public string Subject { get; set; }
+        public string? Subject { get; set; }
         public string SectorSubjectArea { get; set; }
     }
 }
