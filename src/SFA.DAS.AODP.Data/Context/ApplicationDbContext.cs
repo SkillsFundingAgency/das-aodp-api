@@ -60,7 +60,8 @@ namespace SFA.DAS.AODP.Data.Context
             modelBuilder.Entity<QualificationExport>().ToView("v_NewQualificationsExport", "regulated").HasNoKey();
             modelBuilder.Entity<QualificationExport>().Property(q => q.QANText).HasColumnName("QAN Text");
             modelBuilder.Entity<QualificationExport>().Property(q => q.DateOfDownload).HasColumnName("Date of download");
-            modelBuilder.Entity<ChangedQualification>().ToTable("v_ChangedQualification");
+            modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
+                .HasKey(v => v.QualificationReference);
             modelBuilder.Entity<QualificationVersion>().ToTable("QualificationVersions", "regulated");
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);

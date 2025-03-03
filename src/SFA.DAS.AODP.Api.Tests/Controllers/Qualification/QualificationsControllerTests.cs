@@ -71,9 +71,14 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<GetChangedQualificationsQueryResponse>(okResult.Value);
             Assert.Equal(2, model.Data.Count);
-            Assert.Equal(queryResponse.Value.Data[0].QualificationName, model.Data[0].QualificationName);
-            Assert.Equal(queryResponse.Value.Data[0].Qan, model.Data[0].Qan);
-            Assert.Equal(queryResponse.Value.Data[0].Id, model.Data[0].Id);
+            Assert.Equal(queryResponse.Value.Data[0].QualificationReference, model.Data[0].QualificationReference);
+            Assert.Equal(queryResponse.Value.Data[0].AwardingOrganisation, model.Data[0].AwardingOrganisation);
+            Assert.Equal(queryResponse.Value.Data[0].QualificationTitle, model.Data[0].QualificationTitle);
+            Assert.Equal(queryResponse.Value.Data[0].QualificationType, model.Data[0].QualificationType);
+            Assert.Equal(queryResponse.Value.Data[0].Level, model.Data[0].Level);
+            Assert.Equal(queryResponse.Value.Data[0].AgeGroup, model.Data[0].AgeGroup);
+            Assert.Equal(queryResponse.Value.Data[0].Subject, model.Data[0].Subject);
+            Assert.Equal(queryResponse.Value.Data[0].SectorSubjectArea, model.Data[0].SectorSubjectArea);
         }
 
         [Fact]

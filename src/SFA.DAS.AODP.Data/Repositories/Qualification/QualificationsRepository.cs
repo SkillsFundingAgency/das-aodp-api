@@ -11,7 +11,7 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
 
     public async Task<List<ChangedQualification>> GetChangedQualificationsAsync()
     {
-        return await _context.ChangedQualifications.Where(q => q.QualificationVersions.Any())
+        return await _context.ChangedQualifications
             .ToListAsync();
     }
 }
