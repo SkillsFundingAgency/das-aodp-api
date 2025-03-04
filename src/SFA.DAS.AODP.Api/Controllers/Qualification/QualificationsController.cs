@@ -35,6 +35,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             IActionResult response = validationResult.ProcessedStatus switch
             {
                 "new" => await HandleNewQualifications(),
+                "changed" => await HandleChangedQualification(),
                 _ => BadRequest(new { message = $"Invalid status: {validationResult.ProcessedStatus}" })
             };
 
@@ -98,6 +99,12 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             }
 
             return Ok(result);
+        }
+
+        private async Task<IActionResult> HandleChangedQualification()
+        {
+            var query = new GetChangedQualificationsQuery();
+            return await SendRequestAsync(query);
         }
 
         private async Task<IActionResult> HandleNewQualificationCSVExport()
