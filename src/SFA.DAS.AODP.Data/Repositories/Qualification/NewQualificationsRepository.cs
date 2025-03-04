@@ -22,7 +22,8 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                           AwardingOrganisation = q.AwardingOrganisation,
                           Status = "New"
                       })
-                      .ToListAsync();
+                        .AsNoTracking()
+                        .ToListAsync();
 
         public async Task<QualificationDetails?> GetQualificationDetailsByIdAsync(string qualificationReference)
         {
