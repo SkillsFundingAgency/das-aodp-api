@@ -13,6 +13,7 @@ namespace SFA.DAS.AODP.Application.Queries.Application.Review
             public DateTime LastUpdated { get; set; }
             public int Reference { get; set; }
             public string? Qan { get; set; }
+            public string? AwardingOrganisation { get; set; }
 
             public string? Owner { get; set; }
             public string Status { get; set; }
@@ -37,7 +38,8 @@ namespace SFA.DAS.AODP.Application.Queries.Application.Review
                     Qan = review.ApplicationReview.Application.QualificationNumber,
                     Status = review.Status,
                     NewMessage = review.NewMessage,
-                    Owner = review.Owner
+                    Owner = review.Owner,
+                    AwardingOrganisation = review.ApplicationReview.Application.AwardingOrganisationName
                 };
 
 

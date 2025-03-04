@@ -40,21 +40,13 @@ public class ApplicationsController : BaseController
 
 
     [HttpGet("/api/applications/{applicationId}")]
-    [ProducesResponseType(typeof(GetApplicationMetadataByIdQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetApplicationByIdQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetApplicationByIdAsync(Guid applicationId)
     {
         var query = new GetApplicationByIdQuery(applicationId);
-
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-        _logger.LogError(message: $"Error thrown getting application for application Id `{applicationId}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
     [HttpGet("/api/applications/{applicationId}/form-preview")]
@@ -64,15 +56,7 @@ public class ApplicationsController : BaseController
     public async Task<IActionResult> GetApplicationFormPreviewByIdAsync(Guid applicationId)
     {
         var query = new GetApplicationFormPreviewByIdQuery(applicationId);
-
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-        _logger.LogError(message: $"Error thrown getting application for application Id `{applicationId}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
 
@@ -193,14 +177,7 @@ public class ApplicationsController : BaseController
     {
         command.ApplicationId = applicationId;
 
-        var response = await _mediator.Send(command);
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        _logger.LogError(message: $"Error thrown updating a application.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(command);
     }
 
     [HttpDelete("/api/applications/{applicationId}")]

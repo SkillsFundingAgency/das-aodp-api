@@ -35,7 +35,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             if (!string.IsNullOrWhiteSpace(applicationSearch))
             {
                 query = query.Where(q =>
-                    q.ApplicationReview.Application.ReferenceId.ToString().Contains(applicationSearch)
+                    q.ApplicationReview.Application.ReferenceId.ToString().Contains(applicationSearch.TrimStart('0'))
                     || q.ApplicationReview.Application.Name.Contains(applicationSearch)
                     || q.ApplicationReview.Application.QualificationNumber.Contains(applicationSearch)
 
@@ -75,7 +75,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             }
 
 
-            return (await query.OrderByDescending(o => o.ApplicationReview.Application.UpdatedAt).Take(limit).Skip(offset).ToListAsync(), await query.CountAsync());
+            return (await query.OrderByDescending(o => o.ApplicationReview.Application.UpdatedAt).Skip(offset).Take(limit).ToListAsync(), await query.CountAsync());
 
         }
 
