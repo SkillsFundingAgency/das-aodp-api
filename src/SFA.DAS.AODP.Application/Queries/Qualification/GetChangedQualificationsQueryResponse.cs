@@ -16,6 +16,7 @@ public class GetChangedQualificationsQueryResponse
         public string AgeGroup { get; set; } = string.Empty;
         public string Subject { get; set; } = string.Empty;
         public string SectorSubjectArea { get; set; } = string.Empty;
+        public string ChangedFieldNames { get; set; } = string.Empty;
 
         public static implicit operator ChangedQualification(Data.Entities.Qualification.ChangedQualification qualification)
         {
@@ -29,6 +30,7 @@ public class GetChangedQualificationsQueryResponse
                 AgeGroup = qualification.AgeGroup,
                 Subject = qualification.Subject,
                 SectorSubjectArea = qualification.SectorSubjectArea,
+                ChangedFieldNames= qualification.ChangedFieldNames
             });
         }
     }
