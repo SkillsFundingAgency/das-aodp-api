@@ -31,20 +31,32 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             [FromQuery] string? organisation,
             [FromQuery] string? qan)
         {
-            var validationResult = ValidateQualificationParams(status, skip, take, name, organisation, qan);            
+            var validationResult = ValidateQualificationParams(status, skip, take, name, organisation, qan);
 
-            if (validationResult.IsValid && validationResult.ProcessedStatus == "new")
-            {
-                var query = new GetNewQualificationsQuery()
+            if (validationResult.IsValid)
+            { 
+                if (validationResult.ProcessedStatus == "new")
                 {
-                    Name = name,
-                    Organisation = organisation,
-                    QAN = qan,
-                    Skip = skip,
-                    Take = take
-                };
+                    var query = new GetNewQualificationsQuery()
+                    {
+                        Name = name,
+                        Organisation = organisation,
+                        QAN = qan,
+                        Skip = skip,
+                        Take = take
+                    };
 
-                return await SendRequestAsync(query);
+                    return await SendRequestAsync(query);
+                }
+                else if (validationResult.ProcessedStatus == "changed")
+                {
+                    var query = new GetChangedQualificationsQuery();
+                    return await SendRequestAsync(query);
+                }
+                else
+                {
+                    return BadRequest(new { message = $"status '{status}' parameter is not valid" });
+                }
             }
             else
             {
@@ -90,26 +102,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             };
 
             return response;
-        }      
-
-        private async Task<IActionResult> HandleNewQualifications()
-        {
-            var result = await _mediator.Send(new GetNewQualificationsQuery());
-
-            if (result == null || !result.Success || result.Value == null)
-            {
-                _logger.LogWarning("No new qualifications found.");
-                return NotFound(new { message = "No new qualifications found" });
-            }
-
-            return Ok(result);
-        }
-
-        private async Task<IActionResult> HandleChangedQualification()
-        {
-            var query = new GetChangedQualificationsQuery();
-            return await SendRequestAsync(query);
-        }
+        }              
 
         private async Task<IActionResult> HandleNewQualificationCSVExport()
         {
