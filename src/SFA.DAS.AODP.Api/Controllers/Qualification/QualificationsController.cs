@@ -51,7 +51,14 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
                 }
                 else if (validationResult.ProcessedStatus == "changed")
                 {
-                    var query = new GetChangedQualificationsQuery();
+                    var query = new GetChangedQualificationsQuery()
+                    {
+                        Name = name,
+                        Organisation = organisation,
+                        QAN = qan,
+                        Skip = skip,
+                        Take = take
+                    };
                     return await SendRequestAsync(query);
                 }
                 else
