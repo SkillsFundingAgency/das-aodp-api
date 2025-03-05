@@ -1,5 +1,8 @@
-﻿namespace SFA.DAS.AODP.Data.Entities.Qualification;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
+namespace SFA.DAS.AODP.Data.Entities.Qualification;
+
+[Table("QualificationOffers", Schema = "funded")]
 public partial class QualificationOffer
 {
     public int Id { get; set; }
@@ -16,5 +19,5 @@ public partial class QualificationOffer
 
     public DateTime? FundingApprovalEndDate { get; set; }
 
-    public virtual Qualifications? Qualification { get; set; }
+    public virtual FundedQualification? Qualification { get; set; }
 }

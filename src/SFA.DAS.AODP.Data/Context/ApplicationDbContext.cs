@@ -25,7 +25,7 @@ namespace SFA.DAS.AODP.Data.Context
 
         public virtual DbSet<RegisteredQualificationsImport> RegisteredQualificationsImports { get; set; }
         public virtual DbSet<ChangedQualification> ChangedQualifications { get; set; }
-        public virtual DbSet<QualificationVersion> QualificationVersions { get; set; }
+        public virtual DbSet<QualificationVersions> QualificationVersions { get; set; }
         public virtual DbSet<Form> Forms { get; set; }
         public virtual DbSet<FormVersion> FormVersions { get; set; }
         public virtual DbSet<Section> Sections { get; set; }
@@ -58,7 +58,7 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<AwardingOrganisation> AwardingOrganisation { get; set; }
         public virtual DbSet<ProcessStatus> ProcessStatus { get; set; }
         public virtual DbSet<Qualification> Qualification { get; set; }
-        public virtual DbSet<Qualifications> FundedQualifications { get; set; }
+        public virtual DbSet<FundedQualification> FundedQualifications { get; set; }
         public virtual DbSet<QualificationDiscussionHistory> QualificationDiscussionHistory { get; set; }
         public virtual DbSet<QualificationOffer> QualificationOffers { get; set; }        
         public virtual DbSet<VersionFieldChange> VersionFieldChanges { get; set; }
@@ -71,8 +71,7 @@ namespace SFA.DAS.AODP.Data.Context
             modelBuilder.Entity<QualificationExport>().Property(q => q.QANText).HasColumnName("QAN Text");
             modelBuilder.Entity<QualificationExport>().Property(q => q.DateOfDownload).HasColumnName("Date of download");
             modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
-                .HasKey(v => v.QualificationReference);
-            modelBuilder.Entity<QualificationVersion>().ToTable("QualificationVersions", "regulated");
+                .HasKey(v => v.QualificationReference);            
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 

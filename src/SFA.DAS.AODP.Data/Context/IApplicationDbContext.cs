@@ -16,7 +16,7 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<ProcessedRegisteredQualification> ProcessedRegisteredQualifications { get; set; }
         DbSet<RegisteredQualificationsImport> RegisteredQualificationsImports { get; set; }
         DbSet<ChangedQualification> ChangedQualifications { get; set; }
-        DbSet<QualificationVersion> QualificationVersions { get; set; }
+        DbSet<QualificationVersions> QualificationVersions { get; set; }
         DbSet<Form> Forms { get; set; }
         DbSet<FormVersion> FormVersions { get; set; }
         DbSet<Section> Sections { get; set; }
@@ -42,7 +42,7 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<AwardingOrganisation> AwardingOrganisation { get; set; }
         DbSet<ProcessStatus> ProcessStatus { get; set; }
         DbSet<Qualification> Qualification { get; set; }
-        DbSet<Qualifications> FundedQualifications { get; set; }
+        DbSet<FundedQualification> FundedQualifications { get; set; }
         DbSet<QualificationDiscussionHistory> QualificationDiscussionHistory { get; set; }
         DbSet<QualificationOffer> QualificationOffers { get; set; }       
         DbSet<VersionFieldChange> VersionFieldChanges { get; set; }

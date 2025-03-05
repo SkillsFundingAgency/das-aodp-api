@@ -18,7 +18,7 @@ public partial class AwardingOrganisation
 
     public string? Acronym { get; set; }
 
-    public virtual ICollection<Qualifications> Qualifications { get; set; } = new List<Qualifications>();
+    public virtual ICollection<FundedQualification> Qualifications { get; set; } = new List<FundedQualification>();
 
     public virtual ICollection<QualificationVersions> QualificationVersions { get; set; } = new List<QualificationVersions>();
 }
