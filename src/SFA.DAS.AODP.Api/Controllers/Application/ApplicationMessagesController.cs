@@ -1,5 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Commands.Application.Message;
 using SFA.DAS.AODP.Application.Queries.Application.Message;
 
 namespace SFA.DAS.AODP.Api.Controllers.Application;
@@ -25,5 +27,23 @@ public class ApplicationMessagesController : BaseController
     {
         var query = new GetApplicationMessagesByIdQuery(applicationId);
         return await SendRequestAsync(query);
+    }
+
+    [HttpPost("/api/applications/{applicationId}/messages")]
+    [ProducesResponseType(typeof(CreateApplicationMessageCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> CreateApplicationMessageAsync([FromBody] CreateApplicationMessageCommand command, [FromRoute] Guid applicationId)
+    {
+        command.ApplicationId = applicationId;
+
+        var response = await _mediator.Send(command);
+        if (response.Success)
+        {
+            return Ok(response.Value);
+        }
+
+        _logger.LogError(message: $"Error thrown updating a application.", exception: response.InnerException);
+        return StatusCode(StatusCodes.Status500InternalServerError);
     }
 }

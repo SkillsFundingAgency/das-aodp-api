@@ -19,4 +19,14 @@ public class ApplicationMessagesRepository : IApplicationMessagesRepository
                 .Where(m => m.ApplicationId == applicationId)
                 .ToListAsync();
     }
+
+    public async Task<Guid> CreateAsync(Message message)
+    {
+        message.Id = Guid.NewGuid();
+        message.SentAt = DateTime.UtcNow;
+        await _context.ApplicationMessages.AddAsync(message);
+        await _context.SaveChangesAsync();
+
+        return message.Id;
+    }
 }
