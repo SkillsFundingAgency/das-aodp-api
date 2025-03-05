@@ -11,8 +11,8 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
 
     public async Task<ChangedQualificationsResult> GetChangedQualificationsAsync(int? skip = 0, int? take = 0, NewQualificationsFilter? filter = default)
     {
-        var query = _context.ChangedQualificationsReviewRequired.AsQueryable();
-        var countQuery = _context.ChangedQualificationsReviewRequired.AsQueryable();
+        var query = _context.ChangedQualifications.AsQueryable();
+        var countQuery = _context.ChangedQualifications.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(filter?.Name))
         {

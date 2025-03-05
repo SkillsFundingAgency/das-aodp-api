@@ -10,7 +10,7 @@ public partial class Qualification
 
     public string? QualificationName { get; set; }
 
-    public virtual ICollection<Qualifications> Qualifications { get; set; } = new List<Qualifications>();
+    public virtual ICollection<FundedQualification> Qualifications { get; set; } = new List<FundedQualification>();
 
     public virtual ICollection<QualificationDiscussionHistory> QualificationDiscussionHistories { get; set; } = new List<QualificationDiscussionHistory>();
 

@@ -35,22 +35,22 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             // Arrange
             var queryResponse = _fixture.Create<BaseMediatrResponse<GetNewQualificationsQueryResponse>>();
             queryResponse.Success = true;
-            queryResponse.Value.NewQualifications = _fixture.CreateMany<NewQualification>(2).ToList();
+            queryResponse.Value.Data = _fixture.CreateMany<NewQualification>(2).ToList();
 
             _mediatorMock.Setup(m => m.Send(It.IsAny<GetNewQualificationsQuery>(), default))
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications("new");
+            var result = await _controller.GetQualifications(status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var model = Assert.IsAssignableFrom<BaseMediatrResponse<GetNewQualificationsQueryResponse>>(okResult.Value);
-            Assert.Equal(2, model.Value.NewQualifications.Count);
-            Assert.Equal(queryResponse.Value.NewQualifications[0].Title, model.Value.NewQualifications[0].Title);
-            Assert.Equal(queryResponse.Value.NewQualifications[0].Reference, model.Value.NewQualifications[0].Reference);
-            Assert.Equal(queryResponse.Value.NewQualifications[0].AwardingOrganisation, model.Value.NewQualifications[0].AwardingOrganisation);
-            Assert.Equal(queryResponse.Value.NewQualifications[0].Status, model.Value.NewQualifications[0].Status);
+            var model = Assert.IsAssignableFrom<GetNewQualificationsQueryResponse>(okResult.Value);
+            Assert.Equal(2, model.Data.Count);
+            Assert.Equal(queryResponse.Value.Data[0].Title, model.Data[0].Title);
+            Assert.Equal(queryResponse.Value.Data[0].Reference, model.Data[0].Reference);
+            Assert.Equal(queryResponse.Value.Data[0].AwardingOrganisation, model.Data[0].AwardingOrganisation);
+            Assert.Equal(queryResponse.Value.Data[0].Status, model.Data[0].Status);
         }
 
         [Fact]
@@ -65,7 +65,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications("changed");
+            var result = await _controller.GetQualifications(status: "changed", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -81,8 +81,8 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             Assert.Equal(queryResponse.Value.Data[0].SectorSubjectArea, model.Data[0].SectorSubjectArea);
         }
 
-        [Fact]
-        public async Task GetQualifications_ReturnsNotFound_WhenQueryFails()
+        [Fact]        
+        public async Task GetQualifications_ReturnsStatusCode_WhenQueryFails()
         {
             // Arrange
             var queryResponse = _fixture.Create<BaseMediatrResponse<GetNewQualificationsQueryResponse>>();
@@ -92,16 +92,14 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications("new");
+            var result = await _controller.GetQualifications(status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            var notFoundValue = notFoundResult.Value?.GetType().GetProperty("message")?.GetValue(notFoundResult.Value, null);
-            Assert.Equal("No new qualifications found", notFoundValue);
+            var notFoundResult = Assert.IsType<StatusCodeResult>(result);                   
         }
 
         [Fact]
-        public async Task GetQualifications_ReturnsNotFound_WhenMediatorReturnsNull()
+        public async Task GetQualifications_ReturnsOk_WhenMediatorReturnsNull()
         {
             // Arrange
             var queryResponse = _fixture.Create<BaseMediatrResponse<GetNewQualificationsQueryResponse>>();
@@ -112,12 +110,10 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications("new");
+            var result = await _controller.GetQualifications(status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
-            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-            var notFoundValue = notFoundResult.Value?.GetType().GetProperty("message")?.GetValue(notFoundResult.Value, null);
-            Assert.Equal("No new qualifications found", notFoundValue);
+            var notFoundResult = Assert.IsType<OkObjectResult>(result);            
         }
 
         [Fact]

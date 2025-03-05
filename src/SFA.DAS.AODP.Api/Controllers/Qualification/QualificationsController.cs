@@ -34,32 +34,35 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
         {
             var validationResult = ValidateQualificationParams(status, skip, take, name, organisation, qan);
 
-            if (validationResult.IsValid && validationResult.ProcessedStatus == "changed")
-            {
-                var query = new GetChangedQualificationsQuery()
-                {
-                    Name = name,
-                    Organisation = organisation,
-                    QAN = qan,
-                    Skip = skip,
-                    Take = take
-                };
-                return await SendRequestAsync(query);
-            }
-            else if (validationResult.IsValid && validationResult.ProcessedStatus == "new")
+            if (validationResult.IsValid)
             { 
-                var query = new GetNewQualificationsQuery()
+                if (validationResult.ProcessedStatus == "new")
                 {
-                    Name = name,
-                    Organisation = organisation,
-                    QAN = qan,
-                    Skip = skip,
-                    Take = take
-                };
+                    var query = new GetNewQualificationsQuery()
+                    {
+                        Name = name,
+                        Organisation = organisation,
+                        QAN = qan,
+                        Skip = skip,
+                        Take = take
+                    };
 
-                return await SendRequestAsync(query);
+                    return await SendRequestAsync(query);
+                }
+                else if (validationResult.ProcessedStatus == "changed")
+                {
+                    var query = new GetChangedQualificationsQuery();
+                    return await SendRequestAsync(query);
+                }
+                else
+                {
+                    return BadRequest(new { message = $"status '{status}' parameter is not valid" });
+                }
             }
+            else
+            {
                 return BadRequest(new { message = validationResult.ErrorMessage });
+            }
         }
 
         [HttpGet("{qualificationReference}")]
@@ -100,7 +103,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             };
 
             return response;
-        }
+        }              
 
         private async Task<IActionResult> HandleNewQualificationCSVExport()
         {
