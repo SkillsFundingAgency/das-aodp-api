@@ -62,6 +62,7 @@ namespace SFA.DAS.AODP.Data.Context
             modelBuilder.Entity<QualificationExport>().ToView("v_NewQualificationsExport", "regulated").HasNoKey();
             modelBuilder.Entity<QualificationExport>().Property(q => q.QANText).HasColumnName("QAN Text");
             modelBuilder.Entity<QualificationExport>().Property(q => q.DateOfDownload).HasColumnName("Date of download");
+            modelBuilder.Entity<Message>().Property(m => m.Type).HasConversion<string>();
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 

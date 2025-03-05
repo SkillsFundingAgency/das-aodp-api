@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Data.Repositories.Application;
-using SFA.DAS.AODP.Data.Repositories.FormBuilder;
-using SFA.DAS.AODP.Models.Form;
+using SFA.DAS.AODP.Models.Application;
 
 namespace SFA.DAS.AODP.Application.Commands.Application.Message;
+
 public class CreateApplicationMessageCommandHandler : IRequestHandler<CreateApplicationMessageCommand, BaseMediatrResponse<CreateApplicationMessageCommandResponse>>
 {
     private readonly IApplicationMessagesRepository _messageRepository;
@@ -21,15 +21,24 @@ public class CreateApplicationMessageCommandHandler : IRequestHandler<CreateAppl
         {
             // any check on the application status here?
 
+            if (!Enum.TryParse(request.UserType, true, out UserType userType))
+                throw new ArgumentException($"Invalid User Type: {request.UserType}");
+
+            if (!Enum.TryParse(request.MessageType, true, out MessageType messageType))
+                throw new ArgumentException($"Invalid Message Type: {request.MessageType}");
+
+            var messageTypeConfiguration = MessageTypeConfigurationRules.GetMessageSharingSettings(messageType);
+
             var messageId = await _messageRepository.CreateAsync(new()
             {
                 ApplicationId = request.ApplicationId,
                 Text = request.MessageText,
-                Type = request.MessageType,
-                SharedWithAwardingOrganisation = request.SharedWithAwardingOrganisation,
-                SharedWithDfe = request.SharedWithDfe,
-                SharedWithOfqual = request.SharedWithOfqual,
-                SharedWithSkillsEngland = request.SharedWithSkillsEngland,
+                Type = messageType,
+                Status = messageTypeConfiguration.DisplayName,
+                SharedWithDfe = messageTypeConfiguration.SharedWithDfe,
+                SharedWithOfqual = messageTypeConfiguration.SharedWithOfqual,
+                SharedWithSkillsEngland = messageTypeConfiguration.SharedWithSkillsEngland,
+                SharedWithAwardingOrganisation = messageTypeConfiguration.SharedWithAwardingOrganisation,
                 SentByName = request.SentByName,
                 SentByEmail = request.SentByEmail
             });
