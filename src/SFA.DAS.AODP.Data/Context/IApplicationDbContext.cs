@@ -36,6 +36,8 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<Job> Jobs { get; set; }
         DbSet<JobConfiguration> JobConfigurations { get; set; }
         DbSet<JobRun> JobRuns { get; set; }
+        DbSet<ApplicationReview> ApplicationReviews { get; set; }
+        DbSet<ApplicationReviewFeedback> ApplicationReviewFeedbacks { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BulkInsertAsync<T>(IEnumerable<T> entities, CancellationToken cancellationToken = default) where T : class;
