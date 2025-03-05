@@ -21,25 +21,37 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
 
         [HttpGet]
         [ProducesResponseType(typeof(BaseMediatrResponse<GetNewQualificationsQueryResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseMediatrResponse<GetChangedQualificationsQueryResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetQualifications([FromQuery] string? status)
+        public async Task<IActionResult> GetQualifications([FromQuery] string? status,
+            [FromQuery] int? skip,
+            [FromQuery] int? take,
+            [FromQuery] string? name,
+            [FromQuery] string? organisation,
+            [FromQuery] string? qan)
         {
-            var validationResult = ProcessAndValidateStatus(status);
-            if (!validationResult.IsValid)
+            var validationResult = ValidateQualificationParams(status, skip, take, name, organisation, qan);
+            
+            if (validationResult.IsValid && validationResult.ProcessedStatus == "changed")
+            {
+                var query = new GetChangedQualificationsQuery()
+                {
+                    Name = name,
+                    Organisation = organisation,
+                    QAN = qan,
+                    Skip = skip,
+                    Take = take
+                };
+
+                return await SendRequestAsync(query);
+            }
+            else
             {
                 return BadRequest(new { message = validationResult.ErrorMessage });
             }
-
-            IActionResult response = validationResult.ProcessedStatus switch
-            {
-                "new" => await HandleNewQualifications(),
-                "changed" => await HandleChangedQualification(),
-                _ => BadRequest(new { message = $"Invalid status: {validationResult.ProcessedStatus}" })
-            };
-
-            return response;
+;
         }
 
         [HttpGet("{qualificationReference}")]
@@ -142,6 +154,48 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
         }
 
         private class StatusValidationResult
+        {
+            public bool IsValid { get; set; }
+            public string? ErrorMessage { get; set; }
+            public string? ProcessedStatus { get; set; }
+        }
+
+        private ParamValidationResult ValidateQualificationParams(string? status, int? skip, int? take, string? name, string? organisation, string? qan)
+        {
+            var result = new ParamValidationResult() { IsValid = true };
+            status = status?.Trim().ToLower();
+
+            if (string.IsNullOrEmpty(status))
+            {
+                result.IsValid = false;
+                result.ErrorMessage = "Qualification status cannot be empty.";
+            }
+            else
+            {
+                result.ProcessedStatus = status;
+            }
+
+            if (skip < 0)
+            {
+                result.IsValid = false;
+                result.ErrorMessage = "Skip param is invalid.";
+            }
+
+            if (take < 0)
+            {
+                result.IsValid = false;
+                result.ErrorMessage = "Take param is invalid.";
+            }
+
+            if (!result.IsValid)
+            {
+                _logger.LogWarning(result.ErrorMessage);
+            }
+
+            return result;
+        }
+
+        private class ParamValidationResult
         {
             public bool IsValid { get; set; }
             public string? ErrorMessage { get; set; }

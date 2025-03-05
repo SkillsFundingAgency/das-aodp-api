@@ -14,7 +14,7 @@ namespace SFA.DAS.AODP.Application.Tests.Queries;
 public class GetChangedQualificationsQueryHandlerTests
 {
     private readonly IFixture _fixture;
-    private readonly Mock<IQualificationsRepository> _qualificationsRepository = new();
+    private readonly Mock<IChangedQualificationsRepository> _qualificationsRepository = new();
     public GetChangedQualificationsQueryHandler _getChangedQualificationsQueryHandler { get; set; }
 
     public GetChangedQualificationsQueryHandlerTests()
