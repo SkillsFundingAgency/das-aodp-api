@@ -92,6 +92,25 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             return response;
         }      
 
+        private async Task<IActionResult> HandleNewQualifications()
+        {
+            var result = await _mediator.Send(new GetNewQualificationsQuery());
+
+            if (result == null || !result.Success || result.Value == null)
+            {
+                _logger.LogWarning("No new qualifications found.");
+                return NotFound(new { message = "No new qualifications found" });
+            }
+
+            return Ok(result);
+        }
+
+        private async Task<IActionResult> HandleChangedQualification()
+        {
+            var query = new GetChangedQualificationsQuery();
+            return await SendRequestAsync(query);
+        }
+
         private async Task<IActionResult> HandleNewQualificationCSVExport()
         {
             var result = await _mediator.Send(new GetNewQualificationsCsvExportQuery());
