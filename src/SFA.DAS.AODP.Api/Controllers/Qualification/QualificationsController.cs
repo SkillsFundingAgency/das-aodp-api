@@ -35,7 +35,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             var validationResult = ValidateQualificationParams(status, skip, take, name, organisation, qan);
 
             if (validationResult.IsValid)
-            { 
+            {
                 if (validationResult.ProcessedStatus == "new")
                 {
                     var query = new GetNewQualificationsQuery()
@@ -110,7 +110,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             };
 
             return response;
-        }              
+        }
 
         private async Task<IActionResult> HandleNewQualificationCSVExport()
         {

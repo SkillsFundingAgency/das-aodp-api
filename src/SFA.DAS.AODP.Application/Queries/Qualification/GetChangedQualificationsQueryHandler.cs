@@ -14,10 +14,10 @@ public class GetChangedQualificationsQueryHandler(IChangedQualificationsReposito
         var response = new BaseMediatrResponse<GetChangedQualificationsQueryResponse>();
         try
         {
-            var result = await _changedQualificationsRepository.GetChangedQualificationsAsync(
+            var result = await _changedQualificationsRepository.GetAllChangedQualificationsAsync(
                 request.Skip,
                 request.Take,
-                new NewQualificationsFilter()
+                new QualificationsFilter()
                 {
                     Name = request.Name,
                     Organisation = request.Organisation,

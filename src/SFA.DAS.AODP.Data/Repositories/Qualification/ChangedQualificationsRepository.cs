@@ -9,7 +9,7 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
 {
     private readonly ApplicationDbContext _context = context;
 
-    public async Task<ChangedQualificationsResult> GetChangedQualificationsAsync(int? skip = 0, int? take = 0, NewQualificationsFilter? filter = default)
+    public async Task<ChangedQualificationsResult> GetAllChangedQualificationsAsync(int? skip = 0, int? take = 0, QualificationsFilter? filter = default)
     {
         var query = _context.ChangedQualifications.AsQueryable();
         var countQuery = _context.ChangedQualifications.AsQueryable();

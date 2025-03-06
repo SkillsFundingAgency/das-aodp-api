@@ -1,53 +1,91 @@
-﻿using Moq;
-using SFA.DAS.AODP.Data.Repositories.Qualification;
-using SFA.DAS.AODP.Application.Queries.Qualification;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoFixture;
+﻿using AutoFixture;
 using AutoFixture.AutoMoq;
+using Moq;
+using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Queries.Qualification;
+using SFA.DAS.AODP.Application.Queries.Qualifications;
+using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
 
-namespace SFA.DAS.AODP.Application.Tests.Queries;
-
-public class GetChangedQualificationsQueryHandlerTests
+namespace SFA.DAS.AODP.Tests.Application.Queries
 {
-    private readonly IFixture _fixture;
-    private readonly Mock<IChangedQualificationsRepository> _qualificationsRepository = new();
-    public GetChangedQualificationsQueryHandler _getChangedQualificationsQueryHandler { get; set; }
-
-    public GetChangedQualificationsQueryHandlerTests()
+    public class GetChangedQualificationsQueryHandlerTests
     {
-        _fixture = new Fixture().Customize(new AutoMoqCustomization());
-        _getChangedQualificationsQueryHandler = new(_qualificationsRepository.Object);
-    }
+        private readonly IFixture _fixture;
+        private readonly Mock<IChangedQualificationsRepository> _repositoryMock;
+        private readonly GetChangedQualificationsQueryHandler _handler;
+        public GetChangedQualificationsQueryHandlerTests()
+        {
+            _fixture = new Fixture().Customize(new AutoMoqCustomization());
+            _repositoryMock = _fixture.Freeze<Mock<IChangedQualificationsRepository>>();
+            _handler = _fixture.Create<GetChangedQualificationsQueryHandler>();
+        }
 
-    [Fact]
-    public async Task Test_Get_Changed_Qualification()
-    {
-        //var qualifications = _fixture.Create<Data.Entities.Qualification.ChangedQualification>();
-        //_qualificationsRepository.Setup(v => v.GetChangedQualificationsAsync(0,0,new NewQualificationsFilter() { Name="" }))
-        //    .ReturnsAsync(qualifications).Single();
+        [Fact]
+        public async Task Then_The_Api_Is_Called_With_The_Request_And_NewQualificationsData_Is_Returned()
+        {
+            // Arrange
+            var query = _fixture.Create<GetChangedQualificationsQuery>();
+            var response = _fixture.Create<BaseMediatrResponse<GetChangedQualificationsQueryResponse>>();
+            response.Success = true;
+            response.Value = new GetChangedQualificationsQueryResponse()
+            {
+                TotalRecords = 2,
+                Data = _fixture.CreateMany<ChangedQualification>(2).ToList(),
+                Skip = 10,
+                Take = 20
+            };
 
-        //var response = await _getChangedQualificationsQueryHandler.Handle(new GetChangedQualificationsQuery(), default);
+            _repositoryMock.Setup(x => x.GetAllChangedQualificationsAsync(query.Skip, query.Take, It.IsAny<QualificationsFilter>()))
+                           .ReturnsAsync(new ChangedQualificationsResult() { Data = response.Value.Data, TotalRecords = response.Value.TotalRecords });
 
-        //Assert.True(response.Success);
-        //Assert.NotNull(response.Value);
-        //Assert.NotNull(response.Value.Data);
-        //Assert.NotEmpty(response.Value.Data);
-    }
+            // Act
+            var result = await _handler.Handle(query, CancellationToken.None);
 
-    [Fact]
-    public async Task Test_Get_Changed_Qualification_Throws_Returns_Error()
-    {
-        var qualifications = _fixture.CreateMany<Data.Entities.Qualification.ChangedQualification>().ToList();
-        _qualificationsRepository.Setup(v => v.GetChangedQualificationsAsync(0,0,new NewQualificationsFilter() { Name="" }))
-            .Throws(new Exception());
+            // Assert
+            _repositoryMock.Verify(x => x.GetAllChangedQualificationsAsync(query.Skip, query.Take, It.IsAny<QualificationsFilter>()), Times.Once);
+            Assert.True(result.Success);
+            Assert.Equal(2, result.Value.Data.Count);
+        }
 
-        var response = await _getChangedQualificationsQueryHandler.Handle(new GetChangedQualificationsQuery(), default);
+        [Fact]
+        public async Task Then_The_Api_Is_Called_With_The_Request_And_Empty_Is_Returned()
+        {
+            // Arrange
+            var query = _fixture.Create<GetChangedQualificationsQuery>();
+            var response = _fixture.Create<BaseMediatrResponse<GetChangedQualificationsQueryResponse>>();
+            response.Success = false;
+            response.Value = null;
 
-        Assert.False(response.Success);
+            _repositoryMock.Setup(x => x.GetAllChangedQualificationsAsync(query.Skip, query.Take, It.IsAny<QualificationsFilter>()))
+                           .ReturnsAsync(new ChangedQualificationsResult());
+
+            // Act
+            var result = await _handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            _repositoryMock.Verify(x => x.GetAllChangedQualificationsAsync(query.Skip, query.Take, It.IsAny<QualificationsFilter>()), Times.Once);
+            Assert.True(result.Success);
+        }
+
+        [Fact]
+        public async Task Then_The_Api_Is_Called_With_The_Request_And_Exception_Is_Handled()
+        {
+            // Arrange
+            var query = _fixture.Create<GetChangedQualificationsQuery>();
+            var exceptionMessage = "An error occurred";
+            _repositoryMock.Setup(x => x.GetAllChangedQualificationsAsync(query.Skip, query.Take, It.IsAny<QualificationsFilter>()))
+                           .ThrowsAsync(new Exception(exceptionMessage));
+
+            // Act
+            var result = await _handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            _repositoryMock.Verify(x => x.GetAllChangedQualificationsAsync(query.Skip, query.Take, It.IsAny<QualificationsFilter>()), Times.Once);
+            Assert.False(result.Success);
+            Assert.Equal(exceptionMessage, result.ErrorMessage);
+        }
     }
 }
+
+

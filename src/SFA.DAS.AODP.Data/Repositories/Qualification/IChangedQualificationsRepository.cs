@@ -7,5 +7,5 @@ using ChangedQualification = Entities.Qualification.ChangedQualification;
 
 public interface IChangedQualificationsRepository
 {
-    Task<ChangedQualificationsResult> GetChangedQualificationsAsync(int? skip = 0, int? take = 0, NewQualificationsFilter? filter = default);
+    Task<ChangedQualificationsResult> GetAllChangedQualificationsAsync(int? skip = 0, int? take = 0, QualificationsFilter? filter = default);
 }

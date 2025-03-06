@@ -14,7 +14,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             _context = context;
         }
 
-        public async Task<NewQualificationsResult> GetAllNewQualificationsAsync(int? skip = 0, int? take = 0, NewQualificationsFilter? filter = default)
+        public async Task<NewQualificationsResult> GetAllNewQualificationsAsync(int? skip = 0, int? take = 0, QualificationsFilter? filter = default)
         {
             var query = _context.QualificationNewReviewRequired.AsQueryable();
             var countQuery = _context.QualificationNewReviewRequired.AsQueryable();
