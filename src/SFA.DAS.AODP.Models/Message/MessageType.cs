@@ -27,7 +27,7 @@ public static class MessageTypeConfigurationRules
             // DfE
             { MessageType.UnlockApplication, () => new MessageTypeConfiguration
             {
-                DisplayName = "Unlock Application", // only for the UI - textual representaton
+                DisplayName = "Unlock Application",
                 MessageHeader = "Application Unlocked",
                 SharedWithDfe = true,
                 SharedWithOfqual = false,
@@ -45,7 +45,7 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.RequestInformationFromAOByQfau, () => new MessageTypeConfiguration
             {
-                DisplayName = "Request Information From AO",
+                DisplayName = "Request Information",
                 MessageHeader = "Information Requested From Awarding Organisation",
                 SharedWithDfe = true,
                 SharedWithOfqual = false,
@@ -54,7 +54,7 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.RequestInformationFromAOByOfqaul, () => new MessageTypeConfiguration
             {
-                DisplayName = "Request Information From AO",
+                DisplayName = "Request Information",
                 MessageHeader = "Information Requested From Awarding Organisation",
                 SharedWithDfe = false,
                 SharedWithOfqual = true,
@@ -99,7 +99,7 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.InternalNotesForPartners, () => new MessageTypeConfiguration
             {
-                DisplayName = "Internal Notes For Partners",
+                DisplayName = "Internal Notes for Partners",
                 MessageHeader = "Internal Note for Partners",
                 SharedWithDfe = true,
                 SharedWithOfqual = true,

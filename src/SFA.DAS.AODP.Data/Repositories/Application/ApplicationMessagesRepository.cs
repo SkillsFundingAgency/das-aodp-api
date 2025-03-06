@@ -15,7 +15,7 @@ public class ApplicationMessagesRepository : IApplicationMessagesRepository
 
     public async Task<List<Message>> GetMessagesByApplicationIdAsync(Guid applicationId)
     {
-        return await _context.ApplicationMessages
+        return await _context.Messages
                 .Where(m => m.ApplicationId == applicationId)
                 .ToListAsync();
     }
@@ -24,7 +24,7 @@ public class ApplicationMessagesRepository : IApplicationMessagesRepository
     {
         message.Id = Guid.NewGuid();
         message.SentAt = DateTime.UtcNow;
-        await _context.ApplicationMessages.AddAsync(message);
+        await _context.Messages.AddAsync(message);
         await _context.SaveChangesAsync();
 
         return message.Id;
