@@ -18,11 +18,8 @@ public class GetApplicationMessagesByIdQueryHandler : IRequestHandler<GetApplica
         response.Success = false;
         try
         {
-            var result = await _messagesRepository.GetMessagesByApplicationIdAsync(request.ApplicationId);
-            response.Value = new()
-            {
-                ApplicationId = request.ApplicationId,
-            };
+            List<SFA.DAS.AODP.Data.Entities.Application.Message> result = await _messagesRepository.GetMessagesByApplicationIdAsync(request.ApplicationId);
+            response.Value = result;
             response.Success = true;
         }
         catch (Exception ex)
