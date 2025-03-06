@@ -11,6 +11,7 @@ using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
+using ChangedQualification = SFA.DAS.AODP.Models.Qualifications.ChangedQualification;
 
 namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
 {
@@ -59,7 +60,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             // Arrange
             var queryResponse = _fixture.Create<BaseMediatrResponse<GetChangedQualificationsQueryResponse>>();
             queryResponse.Success = true;
-            queryResponse.Value.Data = _fixture.CreateMany<GetChangedQualificationsQueryResponse.ChangedQualification>(2).ToList();
+            queryResponse.Value.Data = _fixture.CreateMany<ChangedQualification>(2).ToList();
 
             _mediatorMock.Setup(m => m.Send(It.IsAny<GetChangedQualificationsQuery>(), default))
                          .ReturnsAsync(queryResponse);
@@ -71,18 +72,55 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<GetChangedQualificationsQueryResponse>(okResult.Value);
             Assert.Equal(2, model.Data.Count);
-            Assert.Equal(queryResponse.Value.Data[0].QualificationReference, model.Data[0].QualificationReference);
-            Assert.Equal(queryResponse.Value.Data[0].AwardingOrganisation, model.Data[0].AwardingOrganisation);
-            Assert.Equal(queryResponse.Value.Data[0].QualificationTitle, model.Data[0].QualificationTitle);
-            Assert.Equal(queryResponse.Value.Data[0].QualificationType, model.Data[0].QualificationType);
-            Assert.Equal(queryResponse.Value.Data[0].Level, model.Data[0].Level);
-            Assert.Equal(queryResponse.Value.Data[0].AgeGroup, model.Data[0].AgeGroup);
             Assert.Equal(queryResponse.Value.Data[0].Subject, model.Data[0].Subject);
+            Assert.Equal(queryResponse.Value.Data[0].QualificationType, model.Data[0].QualificationType);
+            Assert.Equal(queryResponse.Value.Data[0].QualificationReference, model.Data[0].QualificationReference);
+            Assert.Equal(queryResponse.Value.Data[0].QualificationTitle, model.Data[0].QualificationTitle);
             Assert.Equal(queryResponse.Value.Data[0].SectorSubjectArea, model.Data[0].SectorSubjectArea);
+            Assert.Equal(queryResponse.Value.Data[0].Level, model.Data[0].Level);
+            Assert.Equal(queryResponse.Value.Data[0].AwardingOrganisation, model.Data[0].AwardingOrganisation);
+            Assert.Equal(queryResponse.Value.Data[0].ChangedFieldNames, model.Data[0].ChangedFieldNames);
         }
 
+        [Fact]
+        public async Task GetChangedQualifications_ReturnsStatusCode_WhenQueryFails()
+        {
+            // Arrange
+            var queryResponse = _fixture.Create<BaseMediatrResponse<GetChangedQualificationsQueryResponse>>();
+            queryResponse.Success = false;
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetChangedQualificationsQuery>(), default))
+                         .ReturnsAsync(queryResponse);
+
+            // Act
+            var result = await _controller.GetQualifications(status: "changed", skip: 0, take: 10, name: "", organisation: "", qan: "");
+
+            // Assert
+            var notFoundResult = Assert.IsType<StatusCodeResult>(result);
+        }
+
+        [Fact]
+        public async Task GetChangedQualifications_ReturnsOk_WhenMediatorReturnsNull()
+        {
+            // Arrange
+            var queryResponse = _fixture.Create<BaseMediatrResponse<GetChangedQualificationsQueryResponse>>();
+            queryResponse.Success = true;
+            queryResponse.Value = null;
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetChangedQualificationsQuery>(), default))
+                         .ReturnsAsync(queryResponse);
+
+            // Act
+            var result = await _controller.GetQualifications(status: "changed", skip: 0, take: 10, name: "", organisation: "", qan: "");
+
+            // Assert
+            var notFoundResult = Assert.IsType<OkObjectResult>(result);
+        }
+
+
+
         [Fact]        
-        public async Task GetQualifications_ReturnsStatusCode_WhenQueryFails()
+        public async Task GetNewQualifications_ReturnsStatusCode_WhenQueryFails()
         {
             // Arrange
             var queryResponse = _fixture.Create<BaseMediatrResponse<GetNewQualificationsQueryResponse>>();
@@ -99,7 +137,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
         }
 
         [Fact]
-        public async Task GetQualifications_ReturnsOk_WhenMediatorReturnsNull()
+        public async Task GetNewQualifications_ReturnsOk_WhenMediatorReturnsNull()
         {
             // Arrange
             var queryResponse = _fixture.Create<BaseMediatrResponse<GetNewQualificationsQueryResponse>>();
