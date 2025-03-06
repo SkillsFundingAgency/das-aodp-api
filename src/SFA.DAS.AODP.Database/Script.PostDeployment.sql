@@ -11,3 +11,4 @@ Post-Deployment Script Template
 */
 :r .\MigrationScripts\MVS1_Jobs_Data_Seed.sql
 :r .\MigrationScripts\MVS1_Qual_Ref_Data.sql
+:r .\MigrationScripts\MVS1_Qual_Ref_Data_award_185.sql
