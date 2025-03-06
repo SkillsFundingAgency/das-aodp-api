@@ -14,47 +14,45 @@
 
 SELECT 
     -- Identifiers and Meta Information
-    qf.Qan AS QualificationNumber,   -- QAN as Qualification Number
-    qf.Qan AS [QAN Text],            -- QAN reused as Text
-    GETDATE() AS [Date of download], -- Download timestamp
-    
+    qf.Qan AS QualificationNumber,   
+    qf.Qan AS [QAN Text],            
+    GETDATE() AS [Date of download], 
+
     -- Organisation Details
     ao.RecognitionNumber,
-    ao.NameLegal AS OrganisationName,
+    ao.NameOfqual AS OrganisationName,
     ao.Acronym AS OrganisationAcronym,
     ao.Ukprn AS OrganisationReferenceNumber,
-    
+
     -- Qualification Details
     qf.QualificationName AS Title,
-    q.QualificationType,
-    q.[Level] AS QualificationLevelCode,
-    q.SectorSubjectArea AS QualSSADescription,
-    q.SubCategory AS QualSSACode,
-    
-    -- Qualification Versions Details
     qv.LinkToSpecification,
+    q.[Level] AS QualificationLevelCode,
+    q.QualificationType,
     qv.TotalCredits AS QualCredit,
+    q.SubCategory AS QualSSACode,
+    q.SectorSubjectArea AS QualSSADescription,
     qv.GradingType AS OverallGradingType,
     qv.GradingScale,
     qv.EntitlementFrameworkDesign AS EntitlementFrameworkDesignation,
     qv.Specialism,
     qv.Pathways,
-    
+
     -- Region Availability
     qv.OfferedInEngland,
-    NULL AS OfferedInWales,  -- Placeholder
+    NULL AS OfferedInWales,  
     qv.OfferedInNi AS OfferedInNorthernIreland,
-    
+
     -- Age Group Availability
     qv.PreSixteen,
     qv.SixteenToEighteen,
     qv.EighteenPlus,
     qv.NineteenPlus,
-    
+
     -- Funding Details
-    NULL AS FundingInEngland,          -- Placeholder
-    NULL AS FundingInWales,            -- Placeholder
-    NULL AS FundingInNorthernIreland,  -- Placeholder
+    NULL AS FundingInEngland,          
+    NULL AS FundingInWales,            
+    NULL AS FundingInNorthernIreland,  
     qv.GcseSizeEquivelence AS GCSESizeEquivalence,
     qv.GceSizeEquivelence AS GCESizeEquivalence,
     qv.Glh AS QualGLH,
@@ -63,15 +61,15 @@ SELECT
     qv.Tqt AS TQT,
     qv.ApprovedForDelFundedProgramme AS ApprovedForDELFundedProgramme,
     qv.NiDiscountCode AS NIDiscountCode,
-    
+
     -- Qualification Dates
     qv.RegulationStartDate,
     qv.OperationalStartDate,
     qv.ReviewDate,
     qv.OperationalEndDate,
-    NULL AS EmbargoDate,  -- Placeholder
+    NULL AS EmbargoDate,  
     qv.CertificationEndDate,
-    
+
     -- Metadata & Versioning
     qv.UiLastUpdatedDate AS UILastUpdatedDate,
     qv.InsertedDate,
