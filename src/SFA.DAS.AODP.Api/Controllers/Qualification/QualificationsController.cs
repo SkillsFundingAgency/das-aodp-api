@@ -95,18 +95,25 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
 
             return Ok(result);
         }
-
         [HttpGet("export")]
         [ProducesResponseType(typeof(BaseMediatrResponse<GetNewQualificationsCsvExportResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseMediatrResponse<GetChangedQualificationsCsvExportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetQualificationCSVExportData([FromQuery] string? status)
         {
-            IActionResult response = status?.ToLower() switch
+            var validationResult = ProcessAndValidateStatus(status);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new { message = validationResult.ErrorMessage });
+            }
+
+            IActionResult response = validationResult.ProcessedStatus switch
             {
                 "new" => await HandleNewQualificationCSVExport(),
-                _ => BadRequest(new { message = $"Invalid status param: {status}" })
+                "changed" => await HandleChangedQualificationCSVExport(),
+                _ => BadRequest(new { message = $"Invalid status: {validationResult.ProcessedStatus}" })
             };
 
             return response;
@@ -125,6 +132,38 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             return Ok(result);
         }
 
+        private async Task<IActionResult> HandleChangedQualificationCSVExport()
+        {
+            var result = await _mediator.Send(new GetChangedQualificationsCsvExportQuery());
+
+            if (result == null || !result.Success || result.Value == null)
+            {
+                _logger.LogWarning(result.ErrorMessage);
+                return NotFound(new { message = result.ErrorMessage });
+            }
+
+            return Ok(result);
+        }
+        private StatusValidationResult ProcessAndValidateStatus(string? status)
+        {
+            status = status?.Trim().ToLower();
+
+            if (string.IsNullOrEmpty(status))
+            {
+                _logger.LogWarning("Qualification status is missing.");
+                return new StatusValidationResult
+                {
+                    IsValid = false,
+                    ErrorMessage = "Qualification status cannot be empty."
+                };
+            }
+
+            return new StatusValidationResult
+            {
+                IsValid = true,
+                ProcessedStatus = status
+            };
+        }
         private ParamValidationResult ValidateQualificationParams(string? status, int? skip, int? take, string? name, string? organisation, string? qan)
         {
             var result = new ParamValidationResult() { IsValid = true };
@@ -161,6 +200,12 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
         }
 
         private class ParamValidationResult
+        {
+            public bool IsValid { get; set; }
+            public string? ErrorMessage { get; set; }
+            public string? ProcessedStatus { get; set; }
+        }
+        private class StatusValidationResult
         {
             public bool IsValid { get; set; }
             public string? ErrorMessage { get; set; }

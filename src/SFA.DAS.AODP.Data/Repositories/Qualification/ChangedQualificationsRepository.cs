@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
+using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification;
@@ -59,5 +60,10 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
             Take = take,
             TotalRecords = totalRecords
         };
+    }
+
+    public async Task<List<ChangedExport>> GetChangedQualificationsCSVExport()
+    {
+        return await _context.ChangedQualificationCSVExport.ToListAsync();
     }
 }
