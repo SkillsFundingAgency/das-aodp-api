@@ -107,6 +107,9 @@
     <Build Include="Tables\JobRuns.sql" />
     <Build Include="Tables\JobConfigurations.sql" />
     <Build Include="Tables\MigrationScripts.sql" />
+    <None Include="MigrationScripts\MVS1_Qual_Ref_Data_award_185.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
