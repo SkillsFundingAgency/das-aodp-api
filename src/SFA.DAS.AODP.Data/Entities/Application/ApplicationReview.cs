@@ -12,6 +12,7 @@
         public virtual Application Application { get; set; }
         public virtual List<ApplicationReviewFeedback> ApplicationReviewFeedbacks { get; set; }
         public virtual ApplicationReviewDecision ApplicationReviewDecision { get; set; }
+        public virtual List<ApplicationReviewFunding> ApplicationReviewFundings { get; set; }
 
     }
 }

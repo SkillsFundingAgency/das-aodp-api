@@ -5,6 +5,7 @@ using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Entities.Jobs;
+using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using System.Collections.Generic;
 
@@ -37,6 +38,8 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<JobRun> JobRuns { get; set; }
         DbSet<ApplicationReview> ApplicationReviews { get; set; }
         DbSet<ApplicationReviewFeedback> ApplicationReviewFeedbacks { get; set; }
+        DbSet<FundingOffer> FundingOffers { get; set; }
+        DbSet<ApplicationReviewFunding> ApplicationReviewFundings { get; set; }
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BulkInsertAsync<T>(IEnumerable<T> entities, CancellationToken cancellationToken = default) where T : class;
