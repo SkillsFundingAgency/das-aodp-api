@@ -74,7 +74,7 @@ namespace SFA.DAS.AODP.Tests.Api.Controllers
                 .Create();
 
             _mediatorMock.Setup(x => x.Send(It.IsAny<GetJobByNameQuery>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(queryResponse));
-            var name = queryResponse.Value.Job.Name;
+            var name = queryResponse.Value.Name;
 
             // Act
             var result = await _controller.GetByNameAsync(name);
@@ -82,7 +82,7 @@ namespace SFA.DAS.AODP.Tests.Api.Controllers
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<GetJobByNameQueryResponse>(okResult.Value);
-            Assert.Equal(queryResponse.Value.Job.Id, model.Job.Id);
+            Assert.Equal(queryResponse.Value.Id, model.Id);
         }
 
         [Fact]
@@ -95,7 +95,7 @@ namespace SFA.DAS.AODP.Tests.Api.Controllers
                 .Create();
 
             _mediatorMock.Setup(x => x.Send(It.IsAny<GetJobByNameQuery>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(queryResponse));
-            var name = queryResponse.Value.Job.Name;
+            var name = queryResponse.Value.Name;
 
             // Act
             var result = await _controller.GetByNameAsync(name);

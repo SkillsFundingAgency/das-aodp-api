@@ -1,8 +1,6 @@
-﻿using SFA.DAS.AODP.Models.Qualifications;
-
-namespace SFA.DAS.AODP.Application.Queries.Qualifications
+﻿namespace SFA.DAS.AODP.Models.Qualifications
 {
-    public class GetNewQualificationsQueryResponse
+    public class NewQualificationsResult
     {
         public List<NewQualification> Data { get; set; }
         public int TotalRecords { get; set; } = 0;

@@ -36,6 +36,7 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IQuestionOptionRepository, QuestionOptionRepository>();
             services.AddScoped<IRouteRepository, RouteRepository>();
             services.AddScoped<IFormRepository, FormRepository>();
+            services.AddScoped<IQualificationsRepository, QualificationsRepository>();
 
             services.AddScoped<IFundingOfferRepository, FundingOfferRepository>();
             services.AddScoped<IApplicationReviewFundingRepository, ApplicationReviewFundingRepository>();

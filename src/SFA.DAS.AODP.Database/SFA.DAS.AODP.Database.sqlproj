@@ -66,6 +66,7 @@
     <Folder Include="Tables\Application" />
     <Folder Include="Tables\FormBuilder" />
     <Folder Include="Tables\Offer" />
+    <Folder Include="Stored Procedures" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Schemas\FundedSchema.sql" />
@@ -115,6 +116,11 @@
     <Build Include="Tables\FormBuilder\Route.sql" />
     <Build Include="Tables\Offer\Offers.sql" />
     <Build Include="Tables\Application\ApplicationReviewFundings.sql" />
+    <None Include="MigrationScripts\MVS1_Qual_Ref_Data_award_185.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Build Include="Stored Procedures\Truncate_QualificationImportStaging.sql" />
+    <Build Include="Stored Procedures\Truncate_Funded_Qualifications.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
