@@ -63,6 +63,7 @@
     <Folder Include="Views" />
     <Folder Include="Schemas" />
     <Folder Include="MigrationScripts" />
+    <Folder Include="Stored Procedures" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Form.sql" />
@@ -110,6 +111,8 @@
     <None Include="MigrationScripts\MVS1_Qual_Ref_Data_award_185.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Build Include="Stored Procedures\Truncate_QualificationImportStaging.sql" />
+    <Build Include="Stored Procedures\Truncate_Funded_Qualifications.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
