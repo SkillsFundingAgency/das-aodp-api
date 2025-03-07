@@ -48,8 +48,13 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
                       QualificationTitle = q.QualificationTitle,
                       QualificationReference= q.QualificationReference,
                       AwardingOrganisation = q.AwardingOrganisation,
-                      //Status = "New",
-                      AgeGroup = q.AgeGroup
+                      ChangedFieldNames = q.ChangedFieldNames,
+                      SectorSubjectArea = q.SectorSubjectArea,
+                      Level = q.Level,
+                      QualificationType = q.QualificationType, 
+                      Subject = q.Subject,                      
+                      AgeGroup = q.AgeGroup,
+                      Status = q.Status
                   }).ToList();
 
         return new ChangedQualificationsResult()

@@ -12,4 +12,5 @@ public class ChangedQualification
     public string? Subject { get; set; } = string.Empty;
     public string? SectorSubjectArea { get; set; } = string.Empty;
     public string? ChangedFieldNames { get; set; }
+    public string? Status { get; set; }
 }
