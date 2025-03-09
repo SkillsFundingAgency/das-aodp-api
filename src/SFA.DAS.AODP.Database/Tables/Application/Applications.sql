@@ -11,6 +11,9 @@ CREATE TABLE [dbo].[Applications](
     [QualificationNumber] NVARCHAR(100) NULL, 
     [ReferenceId] INT NOT NULL IDENTITY(1,1),
     [UpdatedAt] DATETIME NOT NULL, 
+    [Status] NVARCHAR(100) NULL, 
+    [AwardingOrganisationName] NVARCHAR(400) NULL,
+    [AwardingOrganisationUkprn] NVARCHAR(100) NULL
     CONSTRAINT [PK_Applications] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC

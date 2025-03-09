@@ -5,6 +5,7 @@ using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Entities.Jobs;
+using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.EntityConfiguration;
 
@@ -41,6 +42,10 @@ namespace SFA.DAS.AODP.Data.Context
         public DbSet<View_PagesSectionsAssociatedWithRouting> View_PagesSectionsAssociatedWithRoutings { get; set; }
 
         public DbSet<Application> Applications { get; set; }
+        public DbSet<ApplicationReview> ApplicationReviews { get; set; }
+        public DbSet<ApplicationReviewFeedback> ApplicationReviewFeedbacks { get; set; }
+        public DbSet<ApplicationReviewDecision> ApplicationReviewDecisions { get; set; }
+        public DbSet<ApplicationReviewFunding> ApplicationReviewFundings { get; set; }
         public DbSet<ApplicationPage> ApplicationPages { get; set; }
         public DbSet<ApplicationQuestionAnswer> ApplicationQuestionAnswers { get; set; }
         public DbSet<View_RemainingPagesBySectionForApplication> View_RemainingPagesBySectionForApplications { get; set; }
@@ -53,6 +58,7 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<JobConfiguration> JobConfigurations { get; set; }
         public virtual DbSet<JobRun> JobRuns { get; set; }
 
+        public virtual DbSet<FundingOffer> FundingOffers { get; set; }
         public virtual DbSet<ActionType> ActionType { get; set; }
         public virtual DbSet<LifecycleStage> LifecycleStages { get; set; }
         public virtual DbSet<AwardingOrganisation> AwardingOrganisation { get; set; }
