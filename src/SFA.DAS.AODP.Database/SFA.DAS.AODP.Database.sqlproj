@@ -87,7 +87,6 @@
     <Build Include="Views\View_QuestionRoutingDetails.sql" />
     <Build Include="Views\View_SectionPageCount.sql" />
     <Build Include="Views\View_RemainingPagesBySectionForApplication.sql" />
-    <Build Include="Tables\Question.sql" />
     <Build Include="Views\View_SkippedPagesBySectionForApplication.sql" />
     <Build Include="Views\View_SectionSummaryForApplication.sql" />
     <Build Include="Views\v_QualificationChangedReviewRequired.sql" />
