@@ -21,7 +21,7 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
                 var result = await _repository.GetAllNewQualificationsAsync(
                     request.Skip, 
                     request.Take, 
-                    new NewQualificationsFilter() {
+                    new QualificationsFilter() {
                         Name = request.Name,
                         Organisation = request.Organisation,
                         QAN = request.QAN});
