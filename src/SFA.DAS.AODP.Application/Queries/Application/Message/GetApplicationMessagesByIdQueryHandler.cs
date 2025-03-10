@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Data.Repositories.Application;
+using SFA.DAS.AODP.Models.Application;
 
 namespace SFA.DAS.AODP.Application.Queries.Application.Message;
 
@@ -18,7 +19,9 @@ public class GetApplicationMessagesByIdQueryHandler : IRequestHandler<GetApplica
         response.Success = false;
         try
         {
-            List<SFA.DAS.AODP.Data.Entities.Application.Message> result = await _messagesRepository.GetMessagesByApplicationIdAsync(request.ApplicationId);
+            if (!Enum.TryParse(request.UserType, out UserType userType)) throw new Exception("Invalid user type provided");
+
+            List<SFA.DAS.AODP.Data.Entities.Application.Message> result = await _messagesRepository.GetMessagesByApplicationIdAndUserTypeAsync(request.ApplicationId, userType);
             response.Value = result;
             response.Success = true;
         }
