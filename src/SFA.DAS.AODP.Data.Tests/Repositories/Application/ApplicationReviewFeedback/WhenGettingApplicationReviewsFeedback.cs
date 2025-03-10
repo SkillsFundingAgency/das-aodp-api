@@ -8,12 +8,12 @@ using System;
 
 namespace SFA.DAS.AODP.Data.Tests.Repositories.Application.ApplicationReviewFeedback;
 
-public class WhenGettingApplicationReviews
+public class WhenGettingApplicationReviewsFeedback
 {
     private readonly Fixture _fixture = new();
     private readonly Mock<IApplicationDbContext> _context = new();
     private readonly Data.Repositories.Application.ApplicationReviewFeedbackRepository _sut;
-    public WhenGettingApplicationReviews() => _sut = new(_context.Object);
+    public WhenGettingApplicationReviewsFeedback() => _sut = new(_context.Object);
 
     [Fact]
     public async Task Then_Get_Applications_With_Count()

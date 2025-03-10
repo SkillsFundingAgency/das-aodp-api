@@ -3,7 +3,6 @@ using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Application;
 
 namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Application;
-
 public class EditApplicationCommandHandlerTests
 {
     private readonly Mock<IApplicationRepository> _applicationRepository = new Mock<IApplicationRepository>();

@@ -7,9 +7,11 @@ using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 using SFA.DAS.AODP.Data.Repositories.FundingOffer;
 using SFA.DAS.AODP.Data.Repositories.Jobs;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Data.Extensions
 {
+    [ExcludeFromCodeCoverage]
     public static class DataExtensions
     {
         public static IServiceCollection ConfigureDatabase(this IServiceCollection services, IConfigurationRoot configuration)

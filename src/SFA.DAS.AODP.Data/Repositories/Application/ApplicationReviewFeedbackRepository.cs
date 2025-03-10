@@ -79,22 +79,14 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
 
         }
 
-        public async Task CreateAsync(List<ApplicationReviewFeedback> applicationReviewFeedbacks)
-        {
-            foreach (var feedback in applicationReviewFeedbacks)
-            {
-                feedback.Id = Guid.NewGuid();
-                _context.ApplicationReviewFeedbacks.Add(feedback);
-            }
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task CreateAsync(ApplicationReviewFeedback applicationReviewFeedback)
+        public async Task<ApplicationReviewFeedback> CreateAsync(ApplicationReviewFeedback applicationReviewFeedback)
         {
             applicationReviewFeedback.Id = Guid.NewGuid();
 
-            _context.ApplicationReviewFeedbacks.Add(applicationReviewFeedback);
+            await _context.ApplicationReviewFeedbacks.AddAsync(applicationReviewFeedback);
             await _context.SaveChangesAsync();
+
+            return applicationReviewFeedback;
         }
 
         public async Task UpdateAsync(ApplicationReviewFeedback applicationReviewFeedback)
@@ -108,24 +100,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             _context.ApplicationReviewFeedbacks.UpdateRange(applicationReviewFeedback);
             await _context.SaveChangesAsync();
         }
-
-        public async Task RemoveAsync(List<ApplicationReviewFeedback> applicationReviewFeedback)
-        {
-            _context.ApplicationReviewFeedbacks.RemoveRange(applicationReviewFeedback);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task UpsertAsync(List<ApplicationReviewFeedback> applicationReviewFeedback)
-        {
-            await CreateAsync(applicationReviewFeedback.Where(a => a.Id == Guid.Empty).ToList());
-            await UpdateAsync(applicationReviewFeedback.Where(a => a.Id != Guid.Empty).ToList());
-        }
-
-        public async Task<ApplicationReviewFeedback> GetByIdAsync(Guid id)
-        {
-            return await _context.ApplicationReviewFeedbacks.FirstOrDefaultAsync(a => a.Id == id) ?? throw new RecordNotFoundException(id);
-        }
-
         public async Task<ApplicationReviewFeedback> GetApplicationReviewFeedbackDetailsByReviewIdAsync(Guid applicationReviewId, UserType userType)
         {
             var res = await _context
