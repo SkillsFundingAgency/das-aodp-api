@@ -2,6 +2,7 @@
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Exceptions;
+using SFA.DAS.AODP.Models.Application;
 
 namespace SFA.DAS.AODP.Data.Repositories.Application
 {
@@ -37,6 +38,24 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
         public async Task<ApplicationReview> GetByIdAsync(Guid id)
         {
             return await _context.ApplicationReviews.Include(a => a.ApplicationReviewFeedbacks).FirstOrDefaultAsync(a => a.Id == id) ?? throw new RecordNotFoundException(id);
+        }
+
+        public async Task<ApplicationReview> GetApplicationForReviewByReviewIdAsync(Guid applicationReviewId)
+        {
+            var res = await _context
+                            .ApplicationReviews
+                            .Include(a => a.Application)
+
+                            .Include(a => a.ApplicationReviewFeedbacks)
+
+                            .Include(a => a.ApplicationReviewFundings)
+                            .ThenInclude(a => a.FundingOffer)
+
+                            .Include(a => a.ApplicationReviewDecision)
+
+                            .FirstOrDefaultAsync(v => v.Id == applicationReviewId);
+
+            return res is null ? throw new RecordNotFoundException(applicationReviewId) : res;
         }
     }
 }

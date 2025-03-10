@@ -9,6 +9,7 @@ namespace SFA.DAS.AODP.Application.Queries.Application.Review
         public class Application
         {
             public Guid Id { get; set; }
+            public Guid ApplicationReviewId { get; set; }
             public string Name { get; set; }
             public DateTime LastUpdated { get; set; }
             public int Reference { get; set; }
@@ -39,7 +40,8 @@ namespace SFA.DAS.AODP.Application.Queries.Application.Review
                     Status = review.Status,
                     NewMessage = review.NewMessage,
                     Owner = review.Owner,
-                    AwardingOrganisation = review.ApplicationReview.Application.AwardingOrganisationName
+                    AwardingOrganisation = review.ApplicationReview.Application.AwardingOrganisationName,
+                    ApplicationReviewId = review.ApplicationReviewId
                 };
 
 
