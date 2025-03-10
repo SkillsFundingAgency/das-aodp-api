@@ -29,12 +29,16 @@ public class CreateApplicationMessageCommandHandler : IRequestHandler<CreateAppl
 
             var messageTypeConfiguration = MessageTypeConfigurationRules.GetMessageSharingSettings(messageType);
 
+            var canUserCreateMessage = messageTypeConfiguration.AvailableTo.Contains(userType);
+
+            if (!canUserCreateMessage)
+                throw new ArgumentException($"User of type {request.UserType} cannot create message type of {request.MessageType}");
+
             var messageId = await _messageRepository.CreateAsync(new()
             {
                 ApplicationId = request.ApplicationId,
                 Text = request.MessageText,
                 Type = messageType,
-                //Status = messageTypeConfiguration.DisplayName,
                 MessageHeader = messageTypeConfiguration.MessageHeader,
                 SharedWithDfe = messageTypeConfiguration.SharedWithDfe,
                 SharedWithOfqual = messageTypeConfiguration.SharedWithOfqual,

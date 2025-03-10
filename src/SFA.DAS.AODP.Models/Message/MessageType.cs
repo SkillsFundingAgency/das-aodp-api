@@ -24,15 +24,16 @@ public static class MessageTypeConfigurationRules
     public static readonly Dictionary<MessageType, Func<MessageTypeConfiguration>> MessageTypeConfigurations =
         new()
         {
-            // DfE
-            { MessageType.UnlockApplication, () => new MessageTypeConfiguration
+    { MessageType.UnlockApplication, () => new MessageTypeConfiguration
             {
                 DisplayName = "Unlock Application",
                 MessageHeader = "Application Unlocked",
                 SharedWithDfe = true,
                 SharedWithOfqual = false,
-                SharedWithSkillsEngland = false, 
-                SharedWithAwardingOrganisation = true } },
+                SharedWithSkillsEngland = false,
+                SharedWithAwardingOrganisation = true,
+                AvailableTo = [UserType.Qfau, UserType.AwardingOrganisation]
+            } },
 
             { MessageType.PutApplicationOnHold, () => new MessageTypeConfiguration
             {
@@ -41,7 +42,9 @@ public static class MessageTypeConfigurationRules
                 SharedWithDfe = true,
                 SharedWithOfqual = false,
                 SharedWithSkillsEngland = false,
-                SharedWithAwardingOrganisation = true } },
+                SharedWithAwardingOrganisation = true,
+                AvailableTo = [UserType.Qfau, UserType.AwardingOrganisation]
+            } },
 
             { MessageType.RequestInformationFromAOByQfau, () => new MessageTypeConfiguration
             {
@@ -50,7 +53,9 @@ public static class MessageTypeConfigurationRules
                 SharedWithDfe = true,
                 SharedWithOfqual = false,
                 SharedWithSkillsEngland = false,
-                SharedWithAwardingOrganisation = true } },
+                SharedWithAwardingOrganisation = true,
+                AvailableTo = [UserType.Qfau, UserType.AwardingOrganisation]
+            } },
 
             { MessageType.RequestInformationFromAOByOfqaul, () => new MessageTypeConfiguration
             {
@@ -59,7 +64,9 @@ public static class MessageTypeConfigurationRules
                 SharedWithDfe = false,
                 SharedWithOfqual = true,
                 SharedWithSkillsEngland = false,
-                SharedWithAwardingOrganisation = true } },
+                SharedWithAwardingOrganisation = true,
+                AvailableTo = [UserType.Ofqual, UserType.AwardingOrganisation]
+            } },
 
             { MessageType.RequestInformationFromAOBySkillsEngland, () => new MessageTypeConfiguration
             {
@@ -68,7 +75,9 @@ public static class MessageTypeConfigurationRules
                 SharedWithDfe = false,
                 SharedWithOfqual = false,
                 SharedWithSkillsEngland = true,
-                SharedWithAwardingOrganisation = true } },
+                SharedWithAwardingOrganisation = true,
+                AvailableTo = [UserType.SkillsEngland, UserType.AwardingOrganisation]
+            } },
 
             { MessageType.InternalNotes, () => new MessageTypeConfiguration
             {
@@ -77,7 +86,9 @@ public static class MessageTypeConfigurationRules
                 SharedWithDfe = true,
                 SharedWithOfqual = false,
                 SharedWithSkillsEngland = false,
-                SharedWithAwardingOrganisation = false } },
+                SharedWithAwardingOrganisation = false,
+                AvailableTo = [UserType.Qfau]
+            } },
 
             { MessageType.InternalNotesForQfauFromOfqual, () => new MessageTypeConfiguration
             {
@@ -86,8 +97,10 @@ public static class MessageTypeConfigurationRules
                 SharedWithDfe = true,
                 SharedWithOfqual = true,
                 SharedWithSkillsEngland = false,
-                SharedWithAwardingOrganisation = false } },
-            
+                SharedWithAwardingOrganisation = false,
+                AvailableTo = [UserType.Qfau, UserType.Ofqual]
+            } },
+
             { MessageType.InternalNotesForQfauFromSkillsEngland, () => new MessageTypeConfiguration
             {
                 DisplayName = "Internal Notes for DfE",
@@ -95,7 +108,9 @@ public static class MessageTypeConfigurationRules
                 SharedWithDfe = true,
                 SharedWithOfqual = false,
                 SharedWithSkillsEngland = true,
-                SharedWithAwardingOrganisation = false } },
+                SharedWithAwardingOrganisation = false,
+                AvailableTo = [UserType.Qfau, UserType.SkillsEngland]
+            } },
 
             { MessageType.InternalNotesForPartners, () => new MessageTypeConfiguration
             {
@@ -104,7 +119,9 @@ public static class MessageTypeConfigurationRules
                 SharedWithDfe = true,
                 SharedWithOfqual = true,
                 SharedWithSkillsEngland = true,
-                SharedWithAwardingOrganisation = false } },
+                SharedWithAwardingOrganisation = false,
+                AvailableTo = [UserType.Qfau, UserType.Ofqual, UserType.SkillsEngland]
+            } },
 
             { MessageType.ReplyToInformationRequest, () => new MessageTypeConfiguration
             {
@@ -113,7 +130,9 @@ public static class MessageTypeConfigurationRules
                 SharedWithDfe = true,
                 SharedWithOfqual = true,
                 SharedWithSkillsEngland = true,
-                SharedWithAwardingOrganisation = true } }
+                SharedWithAwardingOrganisation = true,
+                AvailableTo = [UserType.Qfau, UserType.Ofqual, UserType.SkillsEngland, UserType.AwardingOrganisation]
+            } }
         };
 
     public static MessageTypeConfiguration GetMessageSharingSettings(MessageType messageType)
@@ -135,4 +154,5 @@ public class MessageTypeConfiguration
     public bool SharedWithAwardingOrganisation { get; set; }
     public bool SharedWithSkillsEngland { get; set; }
     public bool SharedWithOfqual { get; set; }
+    public List<UserType> AvailableTo { get; set; }
 }
