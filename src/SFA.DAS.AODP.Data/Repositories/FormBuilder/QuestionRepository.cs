@@ -94,16 +94,16 @@ public class QuestionRepository : IQuestionRepository
     {
         if (!await IsQuestionEditable(questionId)) throw new RecordLockedException();
 
+
+        await _context.QuestionValidations.Where(t => t.QuestionId == questionId).ExecuteDeleteAsync();
+        await _context.QuestionOptions.Where(t => t.QuestionId == questionId).ExecuteDeleteAsync();
+        await _context.SaveChangesAsync();
+
         var question = await GetQuestionByIdAsync(questionId);
-
-        await _context.QuestionValidations.Where(t => t.QuestionId == question.Id).ExecuteDeleteAsync();
-        await _context.QuestionOptions.Where(t => t.QuestionId == question.Id).ExecuteDeleteAsync();
-
         _context.Questions.Remove(question);
+        await _context.SaveChangesAsync();
 
         await UpdateQuestionOrdering(questionId, question.Order);
-
-        await _context.SaveChangesAsync();
     }
 
 
@@ -205,6 +205,8 @@ public class QuestionRepository : IQuestionRepository
         var toUpdate = await _context.Questions
             .Where(p => p.Id == questionId && p.Order > deletedQuestionOrder)
             .ToListAsync();
+
+        if (toUpdate.Count == 0) return;
 
         foreach (var question in toUpdate)
             question.Order--;
