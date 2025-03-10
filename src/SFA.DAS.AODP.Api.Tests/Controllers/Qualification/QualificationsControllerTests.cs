@@ -165,7 +165,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualificationDetails("Ref123");
+            var result = await _controller.GetQualificationDetails("new","Ref123");
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -186,7 +186,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualificationDetails("Ref123");
+            var result = await _controller.GetQualificationDetails("new","Ref123");
 
             // Assert
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
@@ -198,7 +198,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
         public async Task GetQualificationDetails_ReturnsBadRequest_WhenQualificationReferenceIsEmpty()
         {
             // Act
-            var result = await _controller.GetQualificationDetails(string.Empty);
+            var result = await _controller.GetQualificationDetails("new",string.Empty);
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);

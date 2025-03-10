@@ -73,10 +73,10 @@ namespace SFA.DAS.AODP.Data.Tests
 
         private async Task PopulateDbWithReferenceData()
         {
-            var actionType1 = new ActionType() { Description = "No Action Required", Id = ActionTypeNoAction };
-            var actionType2 = new ActionType() { Description = "Action Required", Id = ActionTypeDecision };
-            var actionType3 = new ActionType() { Description = "Ignore", Id = Guid.NewGuid() };
-            await _dbContext.AddRangeAsync(new List<ActionType>() { actionType1, actionType2, actionType3 });
+            var actionType1 = new Entities.Qualification.ActionType() { Description = "No Action Required", Id = ActionTypeNoAction };
+            var actionType2 = new Entities.Qualification.ActionType() { Description = "Action Required", Id = ActionTypeDecision };
+            var actionType3 = new Entities.Qualification.ActionType() { Description = "Ignore", Id = Guid.NewGuid() };
+            await _dbContext.AddRangeAsync(new List<Entities.Qualification.ActionType>() { actionType1, actionType2, actionType3 });
             await _dbContext.SaveChangesAsync();
 
             var processStatus1 = new ProcessStatus() { Name = Enum.ProcessStatus.DecisionRequired, Id = ProcessStageDecision };

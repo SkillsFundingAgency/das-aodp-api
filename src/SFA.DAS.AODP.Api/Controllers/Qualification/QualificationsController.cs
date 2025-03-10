@@ -72,12 +72,9 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             }
         }
 
-        [HttpGet("{qualificationReference}")]
-        [ProducesResponseType(typeof(BaseMediatrResponse<GetQualificationDetailsQueryResponse>), StatusCodes.Status200OK)]
+        [HttpGet("{status}/{qualificationReference}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetQualificationDetails(string? qualificationReference)
+        public async Task<IActionResult> GetQualificationDetails(string status,string? qualificationReference)
         {
             if (string.IsNullOrWhiteSpace(qualificationReference))
             {
@@ -85,16 +82,27 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
                 return BadRequest(new { message = "Qualification reference cannot be empty" });
             }
 
-            var result = await _mediator.Send(new GetQualificationDetailsQuery { QualificationReference = qualificationReference });
-
-            if (!result.Success || result.Value == null)
+            if (status == "new")
             {
-                _logger.LogWarning(result.ErrorMessage);
-                return NotFound(new { message = $"No details found for qualification reference: {qualificationReference}" });
-            }
+                var query = new GetQualificationDetailsQuery()
+                {
+                    QualificationReference = qualificationReference
+                };
+                return await SendRequestAsync(query);
 
-            return Ok(result);
+            }
+            else if (status=="changed")
+                {
+                var query = new GetChangedQualificationDetailsQuery()
+                {
+                    QualificationReference = qualificationReference
+                };
+                return await SendRequestAsync(query);
+
+            }
+            return BadRequest(new { message = "Qualification reference cannot be empty" });
         }
+
         [HttpGet("export")]
         [ProducesResponseType(typeof(BaseMediatrResponse<GetNewQualificationsCsvExportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BaseMediatrResponse<GetChangedQualificationsCsvExportResponse>), StatusCodes.Status200OK)]
@@ -132,6 +140,20 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             return Ok(result);
         }
 
+          [HttpGet("GetActionTypes")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetActionTypes()
+        {
+            var result = await _mediator.Send(new GetActionTypesQuery());
+
+            if (result == null || !result.Success || result.Value == null)
+            {
+                _logger.LogWarning(result.ErrorMessage);
+                return NotFound(new { message = result.ErrorMessage });
+            }
+
+            return Ok(result);
+        }
         private async Task<IActionResult> HandleChangedQualificationCSVExport()
         {
             var result = await _mediator.Send(new GetChangedQualificationsCsvExportQuery());
