@@ -2,7 +2,6 @@
 
 namespace SFA.DAS.AODP.Data.Entities.Qualification;
 
-[Table("QualificationVersions", Schema = "regulated")]
 public partial class QualificationVersions
 {
     public Guid Id { get; set; }
