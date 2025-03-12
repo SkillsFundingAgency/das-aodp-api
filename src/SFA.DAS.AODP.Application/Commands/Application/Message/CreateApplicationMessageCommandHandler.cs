@@ -102,21 +102,29 @@ public class CreateApplicationMessageCommandHandler : IRequestHandler<CreateAppl
             }
         }
 
+        var qfauReview = review.ApplicationReviewFeedbacks?.FirstOrDefault(f => f.Type == UserType.Qfau.ToString());
         if (messageType == MessageType.PutApplicationOnHold)
         {
-            var qfauReview = review.ApplicationReviewFeedbacks?.FirstOrDefault(f => f.Type == UserType.Qfau.ToString());
-            if (qfauReview != null)
-            {
-                qfauReview.Status = ApplicationStatus.OnHold.ToString();
-
-                if (!feedbacksToUpdate.Any(f => f.Type == UserType.Qfau.ToString()))
-                {
-                    feedbacksToUpdate.Add(qfauReview);
-                }
-            }
+            SetQfauReviewStatus(ApplicationStatus.OnHold, feedbacksToUpdate, qfauReview);
+        } else if (messageType == MessageType.UnlockApplication) 
+        {
+            SetQfauReviewStatus(ApplicationStatus.Draft, feedbacksToUpdate, qfauReview);
         }
 
         await _feedbackRepository.UpdateAsync(feedbacksToUpdate);
+    }
+
+    private static void SetQfauReviewStatus(ApplicationStatus status, List<ApplicationReviewFeedback> feedbacksToUpdate, ApplicationReviewFeedback? qfauReview)
+    {
+        if (qfauReview != null)
+        {
+            qfauReview.Status = status.ToString();
+
+            if (!feedbacksToUpdate.Any(f => f.Type == UserType.Qfau.ToString()))
+            {
+                feedbacksToUpdate.Add(qfauReview);
+            }
+        }
     }
 
     private static void HandleActionMessages(Data.Entities.Application.Application application, MessageType messageType)
