@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Enum;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification
@@ -78,6 +80,25 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                 return null;
             }
 
+            var comments = await _context.QualificationDiscussionHistory
+                .Where(v => v.Qualification.Qan == qualificationReference)
+                .Include(v => v.ActionType)
+                .Select(v => new Models.Qualifications.QualificationDiscussionHistory
+                {
+                    Id = v.Id,
+                    QualificationId = v.QualificationId,
+                    ActionTypeId = v.ActionTypeId,
+                    UserDisplayName = v.UserDisplayName,
+                    Notes = v.Notes,
+                    Timestamp = v.Timestamp,
+                    ActionType = new Models.Qualifications.ActionType
+                    {
+                        Id = v.ActionType.Id,
+                        Description = v.ActionType.Description,
+                    }
+                })
+                .ToListAsync();
+
             return new QualificationDetails
             {
                 QualificationReference = qualification.QualificationReference,
@@ -96,8 +117,22 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                 Priority = "Medium",
                 Changes = "No recent changes",
                 ProposedChanges = "None",
-                Category = "General Education"
+                Category = "General Education",
+                QualificationDiscussionHistories = comments
             };
+        }
+
+        public async Task AddQualificationDiscussionHistory(Entities.Qualification.QualificationDiscussionHistory qualificationDiscussionHistory, string qualificationReference)
+        {
+            var qual = await _context.Qualification.FirstOrDefaultAsync(v => v.Qan == qualificationReference);
+            if (qual is null)
+            {
+                throw new RecordWithNameNotFoundException(qualificationReference);
+            }
+            qualificationDiscussionHistory.QualificationId = qual.Id;
+            qualificationDiscussionHistory.Timestamp = DateTime.Now;
+            _context.QualificationDiscussionHistory.Add(qualificationDiscussionHistory);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<List<QualificationExport>> GetNewQualificationsCSVExport() =>

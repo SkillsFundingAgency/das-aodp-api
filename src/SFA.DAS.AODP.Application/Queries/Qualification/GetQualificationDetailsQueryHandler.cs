@@ -36,7 +36,21 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
                         Category = qualification.Category,
                         Subject = qualification.Subject,
                         SectorSubjectArea = qualification.SectorSubjectArea,
-                        Comments = qualification.Comments
+                        Comments = qualification.Comments,
+                        QualificationDiscussionHistories = qualification.QualificationDiscussionHistories.Select(v => new QualificationDiscussionHistory
+                        {
+                            Id = v.Id,
+                            QualificationId = v.QualificationId,
+                            ActionTypeId = v.ActionTypeId,
+                            UserDisplayName = v.UserDisplayName,
+                            Notes = v.Notes,
+                            Timestamp = v.Timestamp,
+                            ActionType = new ActionType
+                            {
+                                Id = v.ActionType.Id,
+                                Description = v.ActionType.Description,
+                            }
+                        }).ToList()
                     };
                     response.Success = true;
                 }

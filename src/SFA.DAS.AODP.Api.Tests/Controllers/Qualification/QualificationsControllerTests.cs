@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.AODP.Api.Controllers.Qualification;
 using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Commands.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Data.Entities.Qualification;
@@ -134,6 +135,24 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
 
             // Assert
             var notFoundResult = Assert.IsType<StatusCodeResult>(result);                   
+        }
+
+        [Fact]
+        public async Task AddQualification_ReturnsOk()
+        {
+            // Arrange
+            var model = _fixture.Create<AddQualificationDiscussionHistoryCommand>();
+            var queryResponse = _fixture.Create<BaseMediatrResponse<EmptyResponse>>();
+            queryResponse.Success = true;
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<AddQualificationDiscussionHistoryCommand>(), default))
+                         .ReturnsAsync(queryResponse);
+
+            // Act
+            var result = await _controller.AddQualification(model);
+
+            // Assert
+            var notFoundResult = Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]

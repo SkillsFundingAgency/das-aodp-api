@@ -1,7 +1,9 @@
-﻿using MediatR;
+﻿using AutoFixture;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Queries.Qualification;
+using SFA.DAS.AODP.Application.Commands.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 
 namespace SFA.DAS.AODP.Api.Controllers.Qualification
@@ -88,11 +90,13 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
                 {
                     QualificationReference = qualificationReference
                 };
-                return await SendRequestAsync(query);
+                var fixture = new AutoFixture.Fixture();
+                var model = fixture.Create<GetQualificationDetailsQueryResponse>();
+                return Ok(model); //await SendRequestAsync(query);
 
             }
             else if (status=="changed")
-                {
+            {
                 var query = new GetChangedQualificationDetailsQuery()
                 {
                     QualificationReference = qualificationReference
@@ -103,7 +107,14 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             return BadRequest(new { message = "Qualification reference cannot be empty" });
         }
 
+        [HttpPost("qualificationdiscussionhistory")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddQualification([FromBody] AddQualificationDiscussionHistoryCommand qualificationDiscussionHistory)
+        {
+            return await SendRequestAsync(qualificationDiscussionHistory);
+        }
+
         [HttpGet("export")]
         [ProducesResponseType(typeof(BaseMediatrResponse<GetNewQualificationsCsvExportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BaseMediatrResponse<GetChangedQualificationsCsvExportResponse>), StatusCodes.Status200OK)]

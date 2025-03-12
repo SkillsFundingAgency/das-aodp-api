@@ -26,7 +26,11 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
                 {
                     response.Value = new GetActionTypesResponse()
                     {
-                        ActionTypes = actionTypes
+                        ActionTypes = actionTypes.Select(v => new ActionType
+                        {
+                            Id = v.Id,
+                            Description = v.Description
+                        }).ToList()
                     };
 
                     response.Success = true;
