@@ -19,8 +19,6 @@ public class CreateApplicationMessageCommandHandler : IRequestHandler<CreateAppl
 
         try
         {
-            // any check on the application status here?
-
             if (!Enum.TryParse(request.UserType, true, out UserType userType))
                 throw new ArgumentException($"Invalid User Type: {request.UserType}");
 
