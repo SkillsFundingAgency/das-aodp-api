@@ -79,12 +79,14 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
 
         }
 
-        public async Task CreateAsync(ApplicationReviewFeedback applicationReviewFeedback)
+        public async Task<ApplicationReviewFeedback> CreateAsync(ApplicationReviewFeedback applicationReviewFeedback)
         {
             applicationReviewFeedback.Id = Guid.NewGuid();
 
-            _context.ApplicationReviewFeedbacks.Add(applicationReviewFeedback);
+            await _context.ApplicationReviewFeedbacks.AddAsync(applicationReviewFeedback);
             await _context.SaveChangesAsync();
+
+            return applicationReviewFeedback;
         }
 
         public async Task UpdateAsync(ApplicationReviewFeedback applicationReviewFeedback)
@@ -102,6 +104,20 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
         public async Task<ApplicationReviewFeedback> GetByIdAsync(Guid id)
         {
             return await _context.ApplicationReviewFeedbacks.FirstOrDefaultAsync(a => a.Id == id) ?? throw new RecordNotFoundException(id);
+        }
+
+        public async Task<ApplicationReviewFeedback> GetApplicationReviewFeedbackDetailsByReviewIdAsync(Guid applicationReviewId, UserType userType)
+        {
+            var res = await _context
+                            .ApplicationReviewFeedbacks
+
+                            .Include(a => a.ApplicationReview)
+                            .ThenInclude(a => a.ApplicationReviewFundings)
+                            .ThenInclude(a => a.FundingOffer)
+
+                            .FirstOrDefaultAsync(v => v.ApplicationReviewId == applicationReviewId && v.Type == userType.ToString());
+
+            return res is null ? throw new RecordNotFoundException(applicationReviewId) : res;
         }
 
     }

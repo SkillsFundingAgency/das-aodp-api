@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Data.Exceptions;
+using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Models.Application;
 
@@ -35,7 +36,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
 
                 if (!review.ApplicationReviewFeedbacks.Exists(f => f.Type == request.ApplicationReviewUserType.ToString()))
                 {
-                    await _applicationReviewFeedbackRepository.CreateAsync(new()
+                    await _applicationReviewFeedbackRepository.CreateAsync(new ApplicationReviewFeedback()
                     {
                         ApplicationReviewId = review.Id,
                         Type = request.ApplicationReviewUserType.ToString(),

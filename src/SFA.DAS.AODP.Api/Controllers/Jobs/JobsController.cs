@@ -7,12 +7,12 @@ namespace SFA.DAS.AODP.Api.Controllers.Application;
 
 [ApiController]
 [Route("api/[controller]")]
-public class JobsController : Controller
+public class JobsController : BaseController
 {
     private readonly IMediator _mediator;
     private readonly ILogger<JobsController> _logger;
 
-    public JobsController(IMediator mediator, ILogger<JobsController> logger)
+    public JobsController(IMediator mediator, ILogger<JobsController> logger) : base(mediator, logger)
     {
         _mediator = mediator;
         _logger = logger;
@@ -25,14 +25,7 @@ public class JobsController : Controller
     public async Task<IActionResult> GetAllAsync()
     {
         var query = new GetJobsQuery();
-        var response = await _mediator.Send(query);
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        _logger.LogError(message: $"Error thrown getting jobs.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
 
@@ -43,22 +36,7 @@ public class JobsController : Controller
     public async Task<IActionResult> GetByNameAsync([FromQuery] string name)
     {        
         var query = new GetJobByNameQuery(name);
-
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        if (response.InnerException is NotFoundException)
-        {
-            _logger.LogError($"Request for job with name `{name}` returned 404 (not found).");
-            return NotFound();
-        }
-
-        _logger.LogError(message: $"Error thrown getting with name `{name}.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }   
 
 }
