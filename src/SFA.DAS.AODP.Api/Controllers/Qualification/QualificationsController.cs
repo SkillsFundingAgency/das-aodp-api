@@ -103,6 +103,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             return BadRequest(new { message = "Qualification reference cannot be empty" });
         }
 
+        public async Task<IActionResult> AddQualification([FromBody] AddQualificationDiscussionHistoryCommand qualificationDiscussionHistory)
         [HttpGet("export")]
         [ProducesResponseType(typeof(BaseMediatrResponse<GetNewQualificationsCsvExportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(BaseMediatrResponse<GetChangedQualificationsCsvExportResponse>), StatusCodes.Status200OK)]
