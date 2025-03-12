@@ -46,7 +46,7 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.RequestInformationFromAOByQfau, () => new MessageTypeConfiguration
             {
-                MessageHeader = "Information requested from Awarding Organisation",
+                MessageHeader = "Information requested from Awarding Organisation by DfE",
                 SharedWithDfe = true,
                 SharedWithOfqual = true,
                 SharedWithSkillsEngland = true,
@@ -56,7 +56,7 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.RequestInformationFromAOByOfqaul, () => new MessageTypeConfiguration
             {
-                MessageHeader = "Information requested from Awarding Organisation",
+                MessageHeader = "Information requested from Awarding Organisation by Ofqual",
                 SharedWithDfe = true,
                 SharedWithOfqual = true,
                 SharedWithSkillsEngland = true,
@@ -66,7 +66,7 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.RequestInformationFromAOBySkillsEngland, () => new MessageTypeConfiguration
             {
-                MessageHeader = "Information requested from Awarding Organisation",
+                MessageHeader = "Information requested from Awarding Organisation by Skills England",
                 SharedWithDfe = true,
                 SharedWithOfqual = true,
                 SharedWithSkillsEngland = true,
