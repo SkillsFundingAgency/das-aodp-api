@@ -2,16 +2,16 @@
 
 public enum MessageType
 {
-    UnlockApplication, // DfE only
-    PutApplicationOnHold, // DfE only
+    UnlockApplication,
+    PutApplicationOnHold,
 
     RequestInformationFromAOByQfau,
     RequestInformationFromAOByOfqaul,
     RequestInformationFromAOBySkillsEngland,
 
-    ReplyToInformationRequest, // AO only
+    ReplyToInformationRequest,
 
-    InternalNotes, // DfE to DfE
+    InternalNotes,
 
     InternalNotesForQfauFromOfqual,
     InternalNotesForQfauFromSkillsEngland,
@@ -48,35 +48,35 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.RequestInformationFromAOByQfau, () => new MessageTypeConfiguration
             {
-                DisplayName = "Request Information",
+                DisplayName = "Request Information From AO",
                 MessageHeader = "Information Requested From Awarding Organisation",
                 SharedWithDfe = true,
-                SharedWithOfqual = false,
-                SharedWithSkillsEngland = false,
+                SharedWithOfqual = true,
+                SharedWithSkillsEngland = true,
                 SharedWithAwardingOrganisation = true,
-                AvailableTo = [UserType.Qfau, UserType.AwardingOrganisation]
+                AvailableTo = [UserType.Qfau, UserType.Ofqual, UserType.SkillsEngland, UserType.AwardingOrganisation]
             } },
 
             { MessageType.RequestInformationFromAOByOfqaul, () => new MessageTypeConfiguration
             {
-                DisplayName = "Request Information",
+                DisplayName = "Request Information From AO",
                 MessageHeader = "Information Requested From Awarding Organisation",
-                SharedWithDfe = false,
+                SharedWithDfe = true,
                 SharedWithOfqual = true,
-                SharedWithSkillsEngland = false,
+                SharedWithSkillsEngland = true,
                 SharedWithAwardingOrganisation = true,
-                AvailableTo = [UserType.Ofqual, UserType.AwardingOrganisation]
+                AvailableTo = [UserType.Qfau, UserType.Ofqual, UserType.SkillsEngland, UserType.AwardingOrganisation]
             } },
 
             { MessageType.RequestInformationFromAOBySkillsEngland, () => new MessageTypeConfiguration
             {
                 DisplayName = "Request Information From AO",
                 MessageHeader = "Information Requested From Awarding Organisation",
-                SharedWithDfe = false,
-                SharedWithOfqual = false,
+                SharedWithDfe = true,
+                SharedWithOfqual = true,
                 SharedWithSkillsEngland = true,
                 SharedWithAwardingOrganisation = true,
-                AvailableTo = [UserType.SkillsEngland, UserType.AwardingOrganisation]
+                AvailableTo = [UserType.Qfau, UserType.Ofqual, UserType.SkillsEngland, UserType.AwardingOrganisation]
             } },
 
             { MessageType.InternalNotes, () => new MessageTypeConfiguration
