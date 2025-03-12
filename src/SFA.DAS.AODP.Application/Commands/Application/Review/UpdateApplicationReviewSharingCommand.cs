@@ -11,5 +11,4 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
         public bool ShareApplication { get; set; }
         public Guid ApplicationReviewId { get; set; }
     }
-
 }

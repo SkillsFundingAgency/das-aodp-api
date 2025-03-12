@@ -100,6 +100,12 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             _context.ApplicationReviewFeedbacks.UpdateRange(applicationReviewFeedback);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<ApplicationReviewFeedback> GetByIdAsync(Guid id)
+        {
+            return await _context.ApplicationReviewFeedbacks.FirstOrDefaultAsync(a => a.Id == id) ?? throw new RecordNotFoundException(id);
+        }
+
         public async Task<ApplicationReviewFeedback> GetApplicationReviewFeedbackDetailsByReviewIdAsync(Guid applicationReviewId, UserType userType)
         {
             var res = await _context
