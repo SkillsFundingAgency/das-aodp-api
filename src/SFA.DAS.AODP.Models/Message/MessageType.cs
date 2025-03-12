@@ -24,10 +24,9 @@ public static class MessageTypeConfigurationRules
     public static readonly Dictionary<MessageType, Func<MessageTypeConfiguration>> MessageTypeConfigurations =
         new()
         {
-    { MessageType.UnlockApplication, () => new MessageTypeConfiguration
+            { MessageType.UnlockApplication, () => new MessageTypeConfiguration
             {
-                DisplayName = "Unlock Application",
-                MessageHeader = "Application Unlocked",
+                MessageHeader = "Application unlocked",
                 SharedWithDfe = true,
                 SharedWithOfqual = false,
                 SharedWithSkillsEngland = false,
@@ -37,8 +36,7 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.PutApplicationOnHold, () => new MessageTypeConfiguration
             {
-                DisplayName = "Put Application On Hold",
-                MessageHeader = "Application Put On Hold",
+                MessageHeader = "Application put on hold",
                 SharedWithDfe = true,
                 SharedWithOfqual = false,
                 SharedWithSkillsEngland = false,
@@ -48,8 +46,7 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.RequestInformationFromAOByQfau, () => new MessageTypeConfiguration
             {
-                DisplayName = "Request Information From AO",
-                MessageHeader = "Information Requested From Awarding Organisation",
+                MessageHeader = "Information requested from Awarding Organisation",
                 SharedWithDfe = true,
                 SharedWithOfqual = true,
                 SharedWithSkillsEngland = true,
@@ -59,8 +56,7 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.RequestInformationFromAOByOfqaul, () => new MessageTypeConfiguration
             {
-                DisplayName = "Request Information From AO",
-                MessageHeader = "Information Requested From Awarding Organisation",
+                MessageHeader = "Information requested from Awarding Organisation",
                 SharedWithDfe = true,
                 SharedWithOfqual = true,
                 SharedWithSkillsEngland = true,
@@ -70,8 +66,7 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.RequestInformationFromAOBySkillsEngland, () => new MessageTypeConfiguration
             {
-                DisplayName = "Request Information From AO",
-                MessageHeader = "Information Requested From Awarding Organisation",
+                MessageHeader = "Information requested from Awarding Organisation",
                 SharedWithDfe = true,
                 SharedWithOfqual = true,
                 SharedWithSkillsEngland = true,
@@ -81,8 +76,7 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.InternalNotes, () => new MessageTypeConfiguration
             {
-                DisplayName = "Internal Notes",
-                MessageHeader = "Internal Note",
+                MessageHeader = "Internal note",
                 SharedWithDfe = true,
                 SharedWithOfqual = false,
                 SharedWithSkillsEngland = false,
@@ -92,8 +86,7 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.InternalNotesForQfauFromOfqual, () => new MessageTypeConfiguration
             {
-                DisplayName = "Internal Notes for DfE",
-                MessageHeader = "Internal Note for DfE",
+                MessageHeader = "Internal note for DfE",
                 SharedWithDfe = true,
                 SharedWithOfqual = true,
                 SharedWithSkillsEngland = false,
@@ -103,8 +96,7 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.InternalNotesForQfauFromSkillsEngland, () => new MessageTypeConfiguration
             {
-                DisplayName = "Internal Notes for DfE",
-                MessageHeader = "Internal Note for DfE",
+                MessageHeader = "Internal note for DfE",
                 SharedWithDfe = true,
                 SharedWithOfqual = false,
                 SharedWithSkillsEngland = true,
@@ -114,8 +106,7 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.InternalNotesForPartners, () => new MessageTypeConfiguration
             {
-                DisplayName = "Internal Notes for Partners",
-                MessageHeader = "Internal Note for Partners",
+                MessageHeader = "Internal note for partners",
                 SharedWithDfe = true,
                 SharedWithOfqual = true,
                 SharedWithSkillsEngland = true,
@@ -125,8 +116,7 @@ public static class MessageTypeConfigurationRules
 
             { MessageType.ReplyToInformationRequest, () => new MessageTypeConfiguration
             {
-                DisplayName = "Reply To Information Request",
-                MessageHeader = "Answer to Information Request from Awarding Organisation",
+                MessageHeader = "Answer to information request from Awarding Organisation",
                 SharedWithDfe = true,
                 SharedWithOfqual = true,
                 SharedWithSkillsEngland = true,
@@ -148,7 +138,6 @@ public static class MessageTypeConfigurationRules
 
 public class MessageTypeConfiguration
 {
-    public string DisplayName { get; set; }
     public string MessageHeader { get; set; }
     public bool SharedWithDfe { get; set; }
     public bool SharedWithAwardingOrganisation { get; set; }
