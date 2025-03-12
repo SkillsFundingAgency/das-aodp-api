@@ -17,7 +17,7 @@ public class GetQuestionByIdQueryHandler(IQuestionRepository _QuestionRepository
             var routes = await _routeRepository.GetQuestionRoutingDetailsByQuestionId(request.QuestionId);
             var question = await _QuestionRepository.GetQuestionByIdAsync(request.QuestionId);
 
-            response.Value = GetQuestionByIdQueryResponse.Map(question, routes);
+            response.Value = GetQuestionByIdQueryResponse.MapWithRoutes(question, routes);
             response.Value.Editable = await _formVersionRepository.IsFormVersionEditable(request.FormVersionId);
             response.Success = true;
         }
