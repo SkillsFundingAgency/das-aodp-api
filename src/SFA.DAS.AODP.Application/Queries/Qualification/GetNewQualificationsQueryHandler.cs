@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
+using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualifications
 {
@@ -17,12 +18,21 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
             var response = new BaseMediatrResponse<GetNewQualificationsQueryResponse>();
             try
             {
-                var qualifications = await _repository.GetAllNewQualificationsAsync();
-                if (qualifications != null && qualifications.Any())
+                var result = await _repository.GetAllNewQualificationsAsync(
+                    request.Skip, 
+                    request.Take, 
+                    new NewQualificationsFilter() {
+                        Name = request.Name,
+                        Organisation = request.Organisation,
+                        QAN = request.QAN});
+                if (result != null)
                 {
                     response.Value = new GetNewQualificationsQueryResponse
-                    {
-                        NewQualifications = qualifications
+                    {                        
+                        Data = result.Data,
+                        Skip = result.Skip,
+                        Take = result.Take,
+                        TotalRecords = result.TotalRecords                        
                     };
                     response.Success = true;
                 }
