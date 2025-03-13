@@ -53,7 +53,7 @@ namespace SFA.DAS.AODP.Data.Context
         public DbSet<View_SectionSummaryForApplication> View_SectionSummaryForApplications { get; set; }
         public DbSet<QualificationNewReviewRequired> QualificationNewReviewRequired { get; set; }
         public DbSet<QualificationExport> NewQualificationCSVExport { get; set; }
-
+        public DbSet<ChangedExport> ChangedQualificationCSVExport { get; set; }
 
         public virtual DbSet<Job> Jobs { get; set; }
         public virtual DbSet<JobConfiguration> JobConfigurations { get; set; }
@@ -80,6 +80,14 @@ namespace SFA.DAS.AODP.Data.Context
             modelBuilder.Entity<Message>().Property(m => m.Type).HasConversion<string>();
             modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
                 .HasKey(v => v.QualificationReference);
+
+            modelBuilder.Entity<ChangedExport>().ToView("v_ChangedQualificationsExport", "regulated").HasNoKey();
+            modelBuilder.Entity<ChangedExport>().Property(q => q.QANText).HasColumnName("QAN Text");
+            modelBuilder.Entity<ChangedExport>().Property(q => q.DateOfDownload).HasColumnName("Date of download");
+
+
+            modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
+                .HasKey(v => v.QualificationReference);            
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 
