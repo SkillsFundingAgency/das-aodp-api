@@ -5,9 +5,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Application.Exceptions;
-using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
-using SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Sections;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
@@ -48,7 +45,12 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder.SectionsControllerTests
             var result = await _controller.GetAllAsync(request.FormVersionId);
 
             // Assert
-            _mediatorMock.Verify(m => m.Send(request, default), Times.Never());
+            _mediatorMock.Verify(m => m.Send(It.IsAny<GetAllSectionsQuery>(), default), Times.Once());
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<GetAllSectionsQuery>(q =>
+                        q.FormVersionId == request.FormVersionId
+            ), default), Times.Once());
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<GetAllSectionsQueryResponse>(okResult.Value);
             Assert.Equal(response, model);
@@ -74,7 +76,13 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder.SectionsControllerTests
             var result = await _controller.GetByIdAsync(request.SectionId, request.FormVersionId);
 
             // Assert
-            _mediatorMock.Verify(m => m.Send(request, default), Times.Never());
+            _mediatorMock.Verify(m => m.Send(It.IsAny<GetSectionByIdQuery>(), default), Times.Once());
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<GetSectionByIdQuery>(q =>
+                        q.FormVersionId == request.FormVersionId
+                        && q.SectionId == request.SectionId
+            ), default), Times.Once());
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<GetSectionByIdQueryResponse>(okResult.Value);
             Assert.Equal(response, model);
@@ -152,7 +160,13 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder.SectionsControllerTests
             var result = await _controller.MoveUpAsync(request.FormVersionId, request.SectionId);
 
             // Assert
-            _mediatorMock.Verify(m => m.Send(request, default), Times.Never());
+            _mediatorMock.Verify(m => m.Send(It.IsAny<MoveSectionUpCommand>(), default), Times.Once());
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<MoveSectionUpCommand>(q =>
+                        q.FormVersionId == request.FormVersionId
+                        && q.SectionId == request.SectionId
+            ), default), Times.Once());
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<EmptyResponse>(okResult.Value);
             Assert.Equal(response, model);
@@ -178,7 +192,13 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder.SectionsControllerTests
             var result = await _controller.MoveDownAsync(request.FormVersionId, request.SectionId);
 
             // Assert
-            _mediatorMock.Verify(m => m.Send(request, default), Times.Never());
+            _mediatorMock.Verify(m => m.Send(It.IsAny<MoveSectionDownCommand>(), default), Times.Once());
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<MoveSectionDownCommand>(q =>
+                        q.FormVersionId == request.FormVersionId
+                        && q.SectionId == request.SectionId
+            ), default), Times.Once());
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<EmptyResponse>(okResult.Value);
             Assert.Equal(response, model);
@@ -204,7 +224,12 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder.SectionsControllerTests
             var result = await _controller.RemoveAsync(request.SectionId);
 
             // Assert
-            _mediatorMock.Verify(m => m.Send(request, default), Times.Never());
+            _mediatorMock.Verify(m => m.Send(It.IsAny<DeleteSectionCommand>(), default), Times.Once());
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<DeleteSectionCommand>(q =>
+                        q.SectionId == request.SectionId
+            ), default), Times.Once());
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<EmptyResponse>(okResult.Value);
             Assert.Equal(response, model);
