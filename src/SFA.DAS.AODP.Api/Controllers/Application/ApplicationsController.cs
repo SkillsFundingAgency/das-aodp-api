@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.Application.Application;
 
 namespace SFA.DAS.AODP.Api.Controllers.Application;
@@ -13,7 +12,7 @@ public class ApplicationsController : BaseController
     private readonly IMediator _mediator;
     private readonly ILogger<ApplicationsController> _logger;
 
-    public ApplicationsController(IMediator mediator, ILogger<ApplicationsController> logger) : base(mediator, logger) 
+    public ApplicationsController(IMediator mediator, ILogger<ApplicationsController> logger) : base(mediator, logger)
     {
         _mediator = mediator;
         _logger = logger;
@@ -41,21 +40,13 @@ public class ApplicationsController : BaseController
 
 
     [HttpGet("/api/applications/{applicationId}")]
-    [ProducesResponseType(typeof(GetApplicationMetadataByIdQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetApplicationByIdQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetApplicationByIdAsync(Guid applicationId)
     {
         var query = new GetApplicationByIdQuery(applicationId);
-
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-        _logger.LogError(message: $"Error thrown getting application for application Id `{applicationId}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
     [HttpGet("/api/applications/{applicationId}/form-preview")]
@@ -65,15 +56,7 @@ public class ApplicationsController : BaseController
     public async Task<IActionResult> GetApplicationFormPreviewByIdAsync(Guid applicationId)
     {
         var query = new GetApplicationFormPreviewByIdQuery(applicationId);
-
-        var response = await _mediator.Send(query);
-
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-        _logger.LogError(message: $"Error thrown getting application for application Id `{applicationId}`.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(query);
     }
 
 
@@ -194,17 +177,11 @@ public class ApplicationsController : BaseController
     {
         command.ApplicationId = applicationId;
 
-        var response = await _mediator.Send(command);
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
-
-        _logger.LogError(message: $"Error thrown updating a application.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+        return await SendRequestAsync(command);
     }
 
     [HttpDelete("/api/applications/{applicationId}")]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> DeleteApplicationByIdAsync(Guid applicationId)
@@ -212,5 +189,15 @@ public class ApplicationsController : BaseController
         var query = new DeleteApplicationCommand(applicationId);
 
         return await SendRequestAsync(query);
+    }
+
+    [HttpPut("/api/applications/{applicationId}/submit")]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> SubmitApplicationByIdAsync(Guid applicationId, SubmitApplicationCommand submitApplicationCommand)
+    {
+        submitApplicationCommand.ApplicationId = applicationId;
+        return await SendRequestAsync(submitApplicationCommand);
     }
 }

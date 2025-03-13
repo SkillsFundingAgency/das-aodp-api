@@ -7,17 +7,25 @@ namespace SFA.DAS.AODP.Data.Entities.Application
 
         public Guid Id { get; set; }
         public Guid FormVersionId { get; set; }
-        public Guid OrganisationId { get; set; }
         public string Name { get; set; }
         public DateTime? SubmittedAt { get; set; }
         public string Owner { get; set; }
         public bool? Submitted { get; set; }
-        [DatabaseGenerated(DatabaseGeneratedOption.Computed)] 
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public int ReferenceId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
-        public virtual List<ApplicationPage> Pages { get; set; }
         public string? QualificationNumber { get; set; }
+        public string? Status { get; set; }
+
+        public Guid OrganisationId { get; set; }
+        public string? AwardingOrganisationName { get; set; }
+        public string? AwardingOrganisationUkprn { get; set; }
+
+
+        public virtual List<ApplicationPage> Pages { get; set; }
+        public virtual ApplicationReview ApplicationReview { get; set; }
+
     }
 }

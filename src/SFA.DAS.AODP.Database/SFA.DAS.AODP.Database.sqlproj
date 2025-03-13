@@ -63,14 +63,12 @@
     <Folder Include="Views" />
     <Folder Include="Schemas" />
     <Folder Include="MigrationScripts" />
-    <Folder Include="StoredProcedures" />
+    <Folder Include="Tables\Application" />
+    <Folder Include="Tables\FormBuilder" />
+    <Folder Include="Tables\Offer" />
+    <Folder Include="Stored Procedures" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="Tables\Form.sql" />
-    <Build Include="Tables\FormVersion.sql" />
-    <Build Include="Tables\Page.sql" />
-    <Build Include="Tables\Section.sql" />
-    <Build Include="Tables\Question.sql" />
     <Build Include="Schemas\FundedSchema.sql" />
     <Build Include="Schemas\RegulatedSchema.sql" />
     <Build Include="Tables\ActionType.sql" />
@@ -85,17 +83,10 @@
     <Build Include="Tables\VersionFieldChanges.sql" />
     <Build Include="Views\v_QualificationNewReviewRequired.sql" />
     <Build Include="Tables\QualificationImportStaging.sql" />
-    <Build Include="Tables\Route.sql" />
-    <Build Include="Tables\QuestionOption.sql" />
-    <Build Include="Tables\QuestionValidation.sql" />
     <Build Include="Views\View_AvailableQuestionsForRouting.sql" />
     <Build Include="Views\View_QuestionRoutingDetails.sql" />
-    <Build Include="Tables\ApplicationQuestionAnswers.sql" />
-    <Build Include="Tables\Applications.sql" />
-    <Build Include="Tables\ApplicationPages.sql" />
     <Build Include="Views\View_SectionPageCount.sql" />
     <Build Include="Views\View_RemainingPagesBySectionForApplication.sql" />
-    <Build Include="Tables\Question.sql" />
     <Build Include="Views\View_SkippedPagesBySectionForApplication.sql" />
     <Build Include="Views\View_SectionSummaryForApplication.sql" />
     <Build Include="Views\v_QualificationChangedReviewRequired.sql" />
@@ -108,8 +99,29 @@
     <Build Include="Tables\JobRuns.sql" />
     <Build Include="Tables\JobConfigurations.sql" />
     <Build Include="Tables\MigrationScripts.sql" />
+    <Build Include="Tables\Application\ApplicationReviews.sql" />
+    <Build Include="Tables\Application\Applications.sql" />
+    <Build Include="Tables\Application\ApplicationReviewFeedbacks.sql" />
+    <Build Include="Tables\Application\ApplicationReviewDecisions.sql" />
+    <Build Include="Tables\Application\ApplicationPages.sql" />
+    <Build Include="Tables\Application\ApplicationQuestionAnswers.sql" />
+    <Build Include="Tables\FormBuilder\Form.sql" />
+    <Build Include="Tables\FormBuilder\FormVersion.sql" />
+    <Build Include="Tables\FormBuilder\Page.sql" />
+    <Build Include="Tables\FormBuilder\Question.sql" />
+    <Build Include="Tables\FormBuilder\QuestionOption.sql" />
+    <Build Include="Tables\FormBuilder\QuestionValidation.sql" />
+    <Build Include="Tables\FormBuilder\Section.sql" />
+    <Build Include="Tables\FormBuilder\Route.sql" />
+    <Build Include="Tables\Offer\Offers.sql" />
+    <Build Include="Tables\Application\ApplicationReviewFundings.sql" />
+    <None Include="MigrationScripts\MVS1_Qual_Ref_Data_award_185.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Build Include="Stored Procedures\Truncate_QualificationImportStaging.sql" />
+    <Build Include="Stored Procedures\Truncate_Funded_Qualifications.sql" />
     <Build Include="Tables\MS_KPI_RQR_CR_CT_001.sql" />
-    <Build Include="StoredProcedures\proc_MS_KPI_RQR_CR_CT_001.sql" />
+    <Build Include="Stored Procedures\proc_MS_KPI_RQR_CR_CT_001.sql" />
     <Build Include="Views\v_MS_KPI_NQS_CR_CT_001.sql" />
   </ItemGroup>
   <ItemGroup>
