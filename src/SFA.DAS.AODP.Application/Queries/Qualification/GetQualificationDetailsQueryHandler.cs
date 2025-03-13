@@ -20,38 +20,7 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
                 var qualification = await _repository.GetQualificationDetailsByIdAsync(request.QualificationReference);
                 if (qualification != null)
                 {
-                    response.Value = new GetQualificationDetailsQueryResponse
-                    {
-                        Id = qualification.Id,
-                        Status = qualification.Status,
-                        Priority = qualification.Priority,
-                        Changes = qualification.Changes,
-                        QualificationReference = qualification.QualificationReference,
-                        AwardingOrganisation = qualification.AwardingOrganisation,
-                        Title = qualification.Title,
-                        QualificationType = qualification.QualificationType,
-                        Level = qualification.Level,
-                        ProposedChanges = qualification.ProposedChanges,
-                        AgeGroup = qualification.AgeGroup,
-                        Category = qualification.Category,
-                        Subject = qualification.Subject,
-                        SectorSubjectArea = qualification.SectorSubjectArea,
-                        Comments = qualification.Comments,
-                        QualificationDiscussionHistories = qualification.QualificationDiscussionHistories.Select(v => new QualificationDiscussionHistory
-                        {
-                            Id = v.Id,
-                            QualificationId = v.QualificationId,
-                            ActionTypeId = v.ActionTypeId,
-                            UserDisplayName = v.UserDisplayName,
-                            Notes = v.Notes,
-                            Timestamp = v.Timestamp,
-                            ActionType = new ActionType
-                            {
-                                Id = v.ActionType.Id,
-                                Description = v.ActionType.Description,
-                            }
-                        }).ToList()
-                    };
+                    response.Value = qualification;
                     response.Success = true;
                 }
                 else

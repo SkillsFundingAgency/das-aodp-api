@@ -68,58 +68,24 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             };
         }
 
-        public async Task<QualificationDetails?> GetQualificationDetailsByIdAsync(string qualificationReference)
+        public async Task<QualificationVersions?> GetQualificationDetailsByIdAsync(string qualificationReference)
         {
-            var qualification = await _context.QualificationNewReviewRequired
-                .Where(q => q.QualificationReference == qualificationReference)
-                .AsNoTracking()
-                .FirstOrDefaultAsync();
+            var qualVersion = await _context.QualificationVersions
+                .OrderByDescending(v => v.Version)
+                .Include(v => v.LifecycleStage)
+                .Include(v => v.Organisation)
+                .Include(v => v.Qualification)
+                .ThenInclude(v => v.QualificationDiscussionHistories)
+                .ThenInclude(v => v.ActionType)
+                .FirstOrDefaultAsync(v => v.LifecycleStage.Name == "New" && v.Qualification.Qan == qualificationReference);
 
-            if (qualification == null)
+
+            if (qualVersion == null)
             {
-                return null;
+                throw new RecordWithNameNotFoundException(qualificationReference);
             }
 
-            var comments = await _context.QualificationDiscussionHistory
-                .Where(v => v.Qualification.Qan == qualificationReference)
-                .Include(v => v.ActionType)
-                .Select(v => new Models.Qualifications.QualificationDiscussionHistory
-                {
-                    Id = v.Id,
-                    QualificationId = v.QualificationId,
-                    ActionTypeId = v.ActionTypeId,
-                    UserDisplayName = v.UserDisplayName,
-                    Notes = v.Notes,
-                    Timestamp = v.Timestamp,
-                    ActionType = new Models.Qualifications.ActionType
-                    {
-                        Id = v.ActionType.Id,
-                        Description = v.ActionType.Description,
-                    }
-                })
-                .ToListAsync();
-
-            return new QualificationDetails
-            {
-                QualificationReference = qualification.QualificationReference,
-                AwardingOrganisation = qualification.AwardingOrganisation,
-                Title = qualification.QualificationTitle,
-                QualificationType = qualification.QualificationType,
-                Level = qualification.Level,
-                AgeGroup = qualification.AgeGroup,
-                Subject = qualification.Subject,
-                SectorSubjectArea = qualification.SectorSubjectArea,
-                Comments = "No comments available",
-
-                // Placeholder values for missing properties
-                Id = 1,
-                Status = "New",
-                Priority = "Medium",
-                Changes = "No recent changes",
-                ProposedChanges = "None",
-                Category = "General Education",
-                QualificationDiscussionHistories = comments
-            };
+            return qualVersion;
         }
 
         public async Task AddQualificationDiscussionHistory(Entities.Qualification.QualificationDiscussionHistory qualificationDiscussionHistory, string qualificationReference)
