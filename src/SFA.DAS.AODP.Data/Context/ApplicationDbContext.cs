@@ -55,7 +55,6 @@ namespace SFA.DAS.AODP.Data.Context
         public DbSet<NewQualificationExport> NewQualificationExport { get; set; }
         public DbSet<ChangedQualificationExport> ChangedQualificationExport { get; set; }
 
-
         public virtual DbSet<Job> Jobs { get; set; }
         public virtual DbSet<JobConfiguration> JobConfigurations { get; set; }
         public virtual DbSet<JobRun> JobRuns { get; set; }
@@ -86,6 +85,14 @@ namespace SFA.DAS.AODP.Data.Context
             modelBuilder.Entity<Message>().Property(m => m.Type).HasConversion<string>();
             modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
                 .HasKey(v => v.QualificationReference);
+
+            modelBuilder.Entity<ChangedExport>().ToView("v_ChangedQualificationsExport", "regulated").HasNoKey();
+            modelBuilder.Entity<ChangedExport>().Property(q => q.QANText).HasColumnName("QAN Text");
+            modelBuilder.Entity<ChangedExport>().Property(q => q.DateOfDownload).HasColumnName("Date of download");
+
+
+            modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
+                .HasKey(v => v.QualificationReference);            
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 
