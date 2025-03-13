@@ -103,6 +103,7 @@
     <Build Include="Tables\Application\Applications.sql" />
     <Build Include="Tables\Application\ApplicationReviewFeedbacks.sql" />
     <Build Include="Tables\Application\ApplicationReviewDecisions.sql" />
+    <Build Include="Tables\Message.sql" />
     <Build Include="Tables\Application\ApplicationPages.sql" />
     <Build Include="Tables\Application\ApplicationQuestionAnswers.sql" />
     <Build Include="Tables\FormBuilder\Form.sql" />
@@ -120,6 +121,9 @@
     </None>
     <Build Include="Stored Procedures\Truncate_QualificationImportStaging.sql" />
     <Build Include="Stored Procedures\Truncate_Funded_Qualifications.sql" />
+    <Build Include="Tables\MS_KPI_RQR_CR_CT_001.sql" />
+    <Build Include="Stored Procedures\proc_MS_KPI_RQR_CR_CT_001.sql" />
+    <Build Include="Views\v_MS_KPI_NQS_CR_CT_001.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
