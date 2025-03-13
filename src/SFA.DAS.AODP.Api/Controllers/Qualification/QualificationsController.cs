@@ -107,7 +107,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             {
                 "new" => await HandleNewQualificationCSVExport(),
                 "changed" => await HandleChangedQualificationCSVExport(),
-                _ => BadRequest(new { message = $"Invalid status: {validationResult.ProcessedStatus}" })
+                _ => BadRequest(new { message = $"Invalid status param: {status}" })
             };
 
             return response;
@@ -139,40 +139,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             return Ok(result);
         }
 
-        private ParamValidationResult ValidateQualificationParams(string? status, int? skip, int? take, string? name, string? organisation, string? qan)
-        {
-            var result = new ParamValidationResult() { IsValid = true };
-            status = status?.Trim().ToLower();
 
-            if (string.IsNullOrEmpty(status))
-            {
-                result.IsValid = false;
-                result.ErrorMessage = "Qualification status cannot be empty.";
-            }
-            else
-            {
-                result.ProcessedStatus = status;
-            }
-
-            if (skip < 0)
-            {
-                result.IsValid = false;
-                result.ErrorMessage = "Skip param is invalid.";
-            }
-
-            if (take < 0)
-            {
-                result.IsValid = false;
-                result.ErrorMessage = "Take param is invalid.";
-            }
-
-            if (!result.IsValid)
-            {
-                _logger.LogWarning(result.ErrorMessage);
-            }
-
-            return result;
-        }
         private ParamValidationResult ValidateQualificationParams(string? status, int? skip, int? take, string? name, string? organisation, string? qan)
         {
             var result = new ParamValidationResult() { IsValid = true };
