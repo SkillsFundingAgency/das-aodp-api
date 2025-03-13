@@ -38,6 +38,10 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IQuestionOptionRepository, QuestionOptionRepository>();
             services.AddScoped<IRouteRepository, RouteRepository>();
             services.AddScoped<IFormRepository, FormRepository>();
+            services.AddScoped<IQualificationsRepository, QualificationsRepository>();
+
+            services.AddScoped<IFundingOfferRepository, FundingOfferRepository>();
+            services.AddScoped<IApplicationReviewFundingRepository, ApplicationReviewFundingRepository>();
             services.AddScoped<IChangedQualificationsRepository, ChangedQualificationsRepository>();
 
             services.AddScoped<IFundingOfferRepository, FundingOfferRepository>();
@@ -48,6 +52,7 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IApplicationReviewFeedbackRepository, ApplicationReviewFeedbackRepository>();
             services.AddScoped<IApplicationPageRepository, ApplicationPageRepository>();
             services.AddScoped<IApplicationQuestionAnswerRepository, ApplicationQuestionAnswerRepository>();
+            services.AddScoped<IApplicationMessagesRepository, ApplicationMessagesRepository>();
             services.AddScoped<INewQualificationsRepository, NewQualificationsRepository>();
             services.AddScoped<IJobsRepository, JobsRepository>();
 

@@ -12,6 +12,8 @@ public class GetChangedQualificationsQueryHandler(IChangedQualificationsReposito
     public async Task<BaseMediatrResponse<GetChangedQualificationsQueryResponse>> Handle(GetChangedQualificationsQuery request, CancellationToken cancellationToken)
     {
         var response = new BaseMediatrResponse<GetChangedQualificationsQueryResponse>();
+        response.Success = false;
+
         try
         {
             var result = await _changedQualificationsRepository.GetAllChangedQualificationsAsync(
@@ -32,8 +34,8 @@ public class GetChangedQualificationsQueryHandler(IChangedQualificationsReposito
                     Take = result.Take,
                     TotalRecords = result.TotalRecords
                 };
-                response.Success = true;
-            }
+            response.Success = true;
+        }
             else
             {
                 response.Success = false;
@@ -43,6 +45,7 @@ public class GetChangedQualificationsQueryHandler(IChangedQualificationsReposito
         catch (Exception ex)
         {
             response.ErrorMessage = ex.Message;
+            response.InnerException = ex;
         }
 
         return response;
