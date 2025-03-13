@@ -9,5 +9,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
         Task<QualificationVersions> GetQualificationDetailsByIdAsync(string qualificationReference);
         Task<List<QualificationExport>> GetNewQualificationsCSVExport();
         Task AddQualificationDiscussionHistory(Entities.Qualification.QualificationDiscussionHistory qualificationDiscussionHistory, string qualificationReference);
+        Task UpdateQualificationStatus(string qualificationReference, string status);
     }
 }
