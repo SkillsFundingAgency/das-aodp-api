@@ -103,6 +103,7 @@
     <Build Include="Tables\Application\Applications.sql" />
     <Build Include="Tables\Application\ApplicationReviewFeedbacks.sql" />
     <Build Include="Tables\Application\ApplicationReviewDecisions.sql" />
+    <Build Include="Tables\Message.sql" />
     <Build Include="Tables\Application\ApplicationPages.sql" />
     <Build Include="Tables\Application\ApplicationQuestionAnswers.sql" />
     <Build Include="Tables\FormBuilder\Form.sql" />

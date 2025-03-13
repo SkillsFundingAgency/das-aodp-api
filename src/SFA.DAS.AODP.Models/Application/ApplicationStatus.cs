@@ -2,6 +2,6 @@
 {
     public enum ApplicationStatus
     {
-        Draft, InReview, Approved, NotApproved, Withdrawn
+        Draft, InReview, Approved, NotApproved, Withdrawn, OnHold
     }
 }
