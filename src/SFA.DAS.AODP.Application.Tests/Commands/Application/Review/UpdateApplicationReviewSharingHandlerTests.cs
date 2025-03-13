@@ -36,7 +36,7 @@ public class UpdateApplicationReviewSharingHandlerTests
         {
             ApplicationReviewId = funding.Id,
             ShareApplication = true,
-            ApplicationReviewUserType = Models.Application.UserType.Ofqual
+            ApplicationReviewUserType = Models.Application.UserType.Ofqual.ToString()
 
         }, default);
 
@@ -64,7 +64,7 @@ public class UpdateApplicationReviewSharingHandlerTests
         {
             ApplicationReviewId = funding.Id,
             ShareApplication = true,
-            ApplicationReviewUserType = Models.Application.UserType.SkillsEngland
+            ApplicationReviewUserType = Models.Application.UserType.SkillsEngland.ToString()
 
         }, default);
 
@@ -91,7 +91,7 @@ public class UpdateApplicationReviewSharingHandlerTests
         {
             ApplicationReviewId = funding.Id,
             ShareApplication = true,
-            ApplicationReviewUserType = Models.Application.UserType.SkillsEngland
+            ApplicationReviewUserType = Models.Application.UserType.SkillsEngland.ToString()
 
         }, default);
 

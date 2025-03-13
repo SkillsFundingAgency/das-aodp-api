@@ -18,6 +18,7 @@ namespace SFA.DAS.AODP.Data.Entities.Application
 
         public string? QualificationNumber { get; set; }
         public string? Status { get; set; }
+        public bool? NewMessage { get; set; }
 
         public Guid OrganisationId { get; set; }
         public string? AwardingOrganisationName { get; set; }
