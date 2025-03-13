@@ -54,7 +54,7 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<VersionFieldChange> VersionFieldChanges { get; set; }
         DbSet<QualificationNewReviewRequired> QualificationNewReviewRequired { get; set; }
         DbSet<QualificationExport> NewQualificationCSVExport { get; set; }
-
+        DbSet<QualificationFundingFeedbacks> QualificationFundingFeedbacks { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BulkInsertAsync<T>(IEnumerable<T> entities, CancellationToken cancellationToken = default) where T : class;
         Task<IDbContextTransaction> StartTransactionAsync();

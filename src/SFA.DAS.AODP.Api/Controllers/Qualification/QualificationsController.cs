@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Queries.Application.Review;
 using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 
@@ -102,7 +103,16 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             };
 
             return response;
-        }              
+        }
+
+        [HttpGet("/api/qualifications/{qualificationVersionId}/feedback")]
+        [ProducesResponseType(typeof(GetFeedbackForQualificationFundingByIdQueryResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetFeedbackForApplicationReviewById(Guid qualificationVersionId)
+        {
+            return await SendRequestAsync(new GetFeedbackForQualificationFundingByIdQuery(qualificationVersionId));
+        }
 
         private async Task<IActionResult> HandleNewQualificationCSVExport()
         {

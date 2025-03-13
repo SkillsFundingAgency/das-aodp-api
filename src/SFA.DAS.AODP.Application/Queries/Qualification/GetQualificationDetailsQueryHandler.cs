@@ -23,6 +23,7 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
                     response.Value = new GetQualificationDetailsQueryResponse
                     {
                         Id = qualification.Id,
+                        QualificationVersionId = qualification.QualificationVersionId,
                         Status = qualification.Status,
                         Priority = qualification.Priority,
                         Changes = qualification.Changes,

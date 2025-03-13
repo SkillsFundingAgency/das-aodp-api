@@ -69,6 +69,7 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<QualificationDiscussionHistory> QualificationDiscussionHistory { get; set; }
         public virtual DbSet<QualificationOffer> QualificationOffers { get; set; }        
         public virtual DbSet<VersionFieldChange> VersionFieldChanges { get; set; }
+        public virtual DbSet<QualificationFundingFeedbacks> QualificationFundingFeedbacks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
