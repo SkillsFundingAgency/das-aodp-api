@@ -13,6 +13,6 @@ public class QualificationFundings
     public DateOnly? EndDate { get; set; }
     public string? Comments { get; set; }
 
-    public virtual QualificationVersions QualificationVersions { get; set; }
+    public virtual QualificationVersions QualificationVersion { get; set; }
     public virtual FundingOffer FundingOffer { get; set; }
 }
