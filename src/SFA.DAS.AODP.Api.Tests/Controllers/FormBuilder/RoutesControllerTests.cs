@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Routes;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Routes;
+using SFA.DAS.AODP.Application.Queries.FormBuilder.Questions;
+using SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
 namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder.RoutesControllerTests
 {
