@@ -67,8 +67,8 @@ BEGIN
 				,Q.Qan
 				,Q.QualificationName
 				,QV.Version AS QualificationVersion
-				,QV.InsertTimestamp
-				,DATEDIFF(HOUR,LAG(QV.InsertTimestamp) over(ORDER BY QV.Version ASC),QV.InsertTimestamp) AS Duration
+				,QV.InsertedTimestamp
+				,DATEDIFF(HOUR,LAG(QV.InsertedTimestamp) over(ORDER BY QV.Version ASC),QV.InsertedTimestamp) AS Duration
 				,PS.IsOutcomeDecision
 				,PS.Name as ProcessStatus
 				,Case When LEAD(PS.IsOutcomeDecision) Over (Partition By Q.Id Order By QV.Version ASC) =0
