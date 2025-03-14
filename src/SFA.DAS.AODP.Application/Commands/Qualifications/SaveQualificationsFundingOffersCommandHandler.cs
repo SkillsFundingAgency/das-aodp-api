@@ -1,8 +1,8 @@
-﻿ using MediatR;
+﻿using MediatR;
 using SFA.DAS.AODP.Data.Entities.Qualification;
-using SFA.DAS.AODP.Data.Repositories.Application;
+using SFA.DAS.AODP.Data.Repositories.Qualification;
 
-namespace SFA.DAS.AODP.Application.Commands.Application.Review
+namespace SFA.DAS.AODP.Application.Commands.Qualifications
 {
     public class SaveQualificationsFundingOffersCommandHandler : IRequestHandler<SaveQualificationsFundingOffersCommand, BaseMediatrResponse<EmptyResponse>>
     {

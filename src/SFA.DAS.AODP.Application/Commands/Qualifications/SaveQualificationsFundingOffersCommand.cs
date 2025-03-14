@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace SFA.DAS.AODP.Application.Commands.Application.Review
+namespace SFA.DAS.AODP.Application.Commands.Qualifications
 {
     public class SaveQualificationsFundingOffersCommand : IRequest<BaseMediatrResponse<EmptyResponse>>
     {
