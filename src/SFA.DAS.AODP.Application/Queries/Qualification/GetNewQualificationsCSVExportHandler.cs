@@ -19,28 +19,20 @@ namespace SFA.DAS.AODP.Application.Queries.Qualification
 
             try
             {
-                var qualifications = await _repository.GetNewQualificationsCSVExport();
+                var qualifications = await _repository.GetNewQualificationsExport();
                 if (qualifications == null)
                 {
                     response.Success = false;
                     response.ErrorMessage = "No new qualifications found.";
                 }
-                else if (qualifications.Any())
+                else
                 {
                     response.Value = new GetNewQualificationsCsvExportResponse
                     {
                         QualificationExports = qualifications
                     };
                     response.Success = true;
-                }
-                else
-                {
-                    response.Value = new GetNewQualificationsCsvExportResponse
-                    {
-                        QualificationExports = new List<QualificationExport>()
-                    };
-                    response.Success = true;
-                }
+                }                
             }
             catch (Exception ex)
             {

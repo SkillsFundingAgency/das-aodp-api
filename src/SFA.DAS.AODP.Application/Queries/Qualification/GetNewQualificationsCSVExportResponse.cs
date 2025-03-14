@@ -4,6 +4,6 @@ namespace SFA.DAS.AODP.Application.Queries.Qualification
 {
     public class GetNewQualificationsCsvExportResponse
     {
-        public List<QualificationExport> QualificationExports { get; set; } = new();
+        public IEnumerable<NewQualificationExport> QualificationExports { get; set; } = new List<NewQualificationExport>();
     }
 }

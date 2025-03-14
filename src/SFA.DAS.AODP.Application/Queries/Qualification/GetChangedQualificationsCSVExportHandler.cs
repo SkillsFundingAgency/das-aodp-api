@@ -37,7 +37,7 @@ namespace SFA.DAS.AODP.Application.Queries.Qualification
                 {
                     response.Value = new GetChangedQualificationsCsvExportResponse
                     {
-                        QualificationExports = new List<ChangedExport>()
+                        QualificationExports = new List<ChangedQualificationExport>()
                     };
                     response.Success = true;
                 }
