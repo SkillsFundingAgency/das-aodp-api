@@ -9,6 +9,18 @@ public class GetFeedbackForQualificationFundingByIdQueryResponse
     public string Status { get; set; }
     public string? Comments { get; set; }
 
+    public List<QualificationFunding> QualificationFundedOffers { get; set; } = new();
+
+    public class QualificationFunding
+    {
+        public Guid Id { get; set; }
+        public Guid FundingOfferId { get; set; }
+        public string FundedOfferName { get; set; }
+        public DateOnly? StartDate { get; set; }
+        public DateOnly? EndDate { get; set; }
+        public string? Comments { get; set; }
+    }
+
     public static implicit operator GetFeedbackForQualificationFundingByIdQueryResponse(QualificationFundingFeedbacks feedback)
     {
         GetFeedbackForQualificationFundingByIdQueryResponse model = new()
@@ -18,6 +30,32 @@ public class GetFeedbackForQualificationFundingByIdQueryResponse
             Comments = feedback.Comments,
             Status = feedback.Status,
         };
+        return model;
+    }
+
+    public static GetFeedbackForQualificationFundingByIdQueryResponse Map(QualificationFundingFeedbacks feedback, List<QualificationFunding> qualificationFundedOffers)
+    {
+        GetFeedbackForQualificationFundingByIdQueryResponse model = new()
+        {
+            Id = feedback.Id,
+            QualificationVersionId = feedback.QualificationVersionId,
+            Comments = feedback.Comments,
+            Status = feedback.Status,
+        };
+
+        foreach (var funding in qualificationFundedOffers ?? [])
+        {
+            model.QualificationFundedOffers.Add(new()
+            {
+                Id = funding.Id,
+                FundedOfferName = funding.FundedOfferName,
+                FundingOfferId = funding.FundingOfferId,
+                Comments = funding.Comments,
+                EndDate = funding.EndDate,
+                StartDate = funding.StartDate,
+            });
+        }
+
         return model;
     }
 }
