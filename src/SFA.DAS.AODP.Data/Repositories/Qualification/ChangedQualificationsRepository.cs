@@ -67,7 +67,7 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
         };
     }
 
-    public async Task<List<ChangedQualificationExport>> GetChangedQualificationsCSVExport()
+    public async Task<IEnumerable<ChangedQualificationExport>> GetChangedQualificationsCSVExport()
     {
         return await _context.ChangedQualificationExport.ToListAsync();
     }
