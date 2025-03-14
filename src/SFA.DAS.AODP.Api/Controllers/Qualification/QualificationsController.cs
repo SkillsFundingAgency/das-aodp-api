@@ -74,37 +74,22 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             }
         }
 
-        [HttpGet("{status}/{qualificationReference}")]
+        [HttpGet("{qualificationReference}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetQualificationDetails(string status,string? qualificationReference)
+        public async Task<IActionResult> GetQualificationDetails(string? qualificationReference)
         {
             if (string.IsNullOrWhiteSpace(qualificationReference))
             {
                 _logger.LogWarning("Qualification reference is empty");
                 return BadRequest(new { message = "Qualification reference cannot be empty" });
             }
-
-            if (status == "new")
+            var query = new GetQualificationDetailsQuery()
             {
-                var query = new GetQualificationDetailsQuery()
-                {
-                    QualificationReference = qualificationReference
-                };
-                var fixture = new AutoFixture.Fixture();
-                var model = fixture.Create<GetQualificationDetailsQueryResponse>();
-                return Ok(model); //await SendRequestAsync(query);
-
-            }
-            else if (status=="changed")
-            {
-                var query = new GetChangedQualificationDetailsQuery()
-                {
-                    QualificationReference = qualificationReference
-                };
-                return await SendRequestAsync(query);
-
-            }
-            return BadRequest(new { message = "Qualification reference cannot be empty" });
+                QualificationReference = qualificationReference
+            };
+            var fixture = new AutoFixture.Fixture();
+            var model = fixture.Create<GetQualificationDetailsQueryResponse>();
+            return await SendRequestAsync(query);
         }
 
         [HttpPost("qualificationdiscussionhistory")]

@@ -3,52 +3,50 @@ using MediatR;
 using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 
-namespace SFA.DAS.AODP.Application.Queries.Qualifications
+namespace SFA.DAS.AODP.Application.Queries.Qualifications;
+
+
+public class GetActionTypes : IRequestHandler<GetActionTypesQuery, BaseMediatrResponse<GetActionTypesResponse>>
 {
+    private readonly IChangedQualificationsRepository _repository;
 
-    public class GetActionTypes : IRequestHandler<GetActionTypesQuery, BaseMediatrResponse<GetActionTypesResponse>>
+    public GetActionTypes(IChangedQualificationsRepository repository)
     {
-        private readonly IChangedQualificationsRepository _repository;
+        _repository = repository;
+    }
 
-        public GetActionTypes(IChangedQualificationsRepository repository)
+    public async Task<BaseMediatrResponse<GetActionTypesResponse>> Handle(GetActionTypesQuery request, CancellationToken cancellationToken)
+    {
+        var response = new BaseMediatrResponse<GetActionTypesResponse>();
+        try
         {
-            _repository = repository;
-        }
-
-        public async Task<BaseMediatrResponse<GetActionTypesResponse>> Handle(GetActionTypesQuery request, CancellationToken cancellationToken)
-        {
-            var response = new BaseMediatrResponse<GetActionTypesResponse>();
-            try
+            var actionTypes = await _repository.GetActionTypes();
+            if (actionTypes != null)
             {
-                var actionTypes = await _repository.GetActionTypes();
-                ;
-                if (actionTypes != null)
+                response.Value = new GetActionTypesResponse()
                 {
-                    response.Value = new GetActionTypesResponse()
+                    ActionTypes = actionTypes.Select(v => new GetActionTypesResponse.ActionType
                     {
-                        ActionTypes = actionTypes.Select(v => new ActionType
-                        {
-                            Id = v.Id,
-                            Description = v.Description
-                        }).ToList()
-                    };
+                        Id = v.Id,
+                        Description = v.Description
+                    }).ToList()
+                };
 
-                    response.Success = true;
-                }
-                else
-                {
-                    response.Success = false;
-                    response.ErrorMessage = $"No ActionTypes ";
-                }
+                response.Success = true;
             }
-            catch (Exception ex)
+            else
             {
                 response.Success = false;
-                response.ErrorMessage = ex.Message;
-                response.InnerException = ex;
+                response.ErrorMessage = $"No ActionTypes ";
             }
-            return response;
         }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.ErrorMessage = ex.Message;
+            response.InnerException = ex;
+        }
+        return response;
     }
 }
 

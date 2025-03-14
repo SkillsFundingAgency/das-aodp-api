@@ -68,26 +68,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             };
         }
 
-        public async Task<QualificationVersions?> GetQualificationDetailsByIdAsync(string qualificationReference)
-        {
-            var qualVersion = await _context.QualificationVersions
-                .OrderByDescending(v => v.Version)
-                .Include(v => v.LifecycleStage)
-                .Include(v => v.Organisation)
-                .Include(v => v.Qualification)
-                    .ThenInclude(v => v.QualificationDiscussionHistories)
-                    .ThenInclude(v => v.ActionType)
-                .FirstOrDefaultAsync(v => v.LifecycleStage.Name == "New" && v.Qualification.Qan == qualificationReference);
-
-
-            if (qualVersion == null)
-            {
-                throw new RecordWithNameNotFoundException(qualificationReference);
-            }
-
-            return qualVersion;
-        }
-
         public async Task AddQualificationDiscussionHistory(Entities.Qualification.QualificationDiscussionHistory qualificationDiscussionHistory, string qualificationReference)
         {
             var qual = await _context.Qualification.FirstOrDefaultAsync(v => v.Qan == qualificationReference);
