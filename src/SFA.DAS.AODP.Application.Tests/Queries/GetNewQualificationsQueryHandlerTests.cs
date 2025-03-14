@@ -36,14 +36,14 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
                 Take = 20
             };
 
-            _repositoryMock.Setup(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<QualificationsFilter>()))
+            _repositoryMock.Setup(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()))
                            .ReturnsAsync(new NewQualificationsResult() { Data = response.Value.Data, TotalRecords = response.Value.TotalRecords});
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            _repositoryMock.Verify(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<QualificationsFilter>()), Times.Once);
+            _repositoryMock.Verify(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()), Times.Once);
             Assert.True(result.Success);
             Assert.Equal(2, result.Value.Data.Count);
         }
@@ -57,14 +57,14 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
             response.Success = false;
             response.Value = null;
 
-            _repositoryMock.Setup(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<QualificationsFilter>()))
+            _repositoryMock.Setup(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()))
                            .ReturnsAsync(new NewQualificationsResult());
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            _repositoryMock.Verify(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<QualificationsFilter>()), Times.Once);
+            _repositoryMock.Verify(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()), Times.Once);
             Assert.True(result.Success);           
         }
 
@@ -74,14 +74,14 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
             // Arrange
             var query = _fixture.Create<GetNewQualificationsQuery>();
             var exceptionMessage = "An error occurred";
-            _repositoryMock.Setup(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<QualificationsFilter>()))
+            _repositoryMock.Setup(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()))
                            .ThrowsAsync(new Exception(exceptionMessage));
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            _repositoryMock.Verify(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<QualificationsFilter>()), Times.Once);
+            _repositoryMock.Verify(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()), Times.Once);
             Assert.False(result.Success);
             Assert.Equal(exceptionMessage, result.ErrorMessage);
         }

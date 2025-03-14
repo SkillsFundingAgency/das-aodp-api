@@ -69,6 +69,7 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<QualificationDiscussionHistory> QualificationDiscussionHistory { get; set; }
         public virtual DbSet<QualificationOffer> QualificationOffers { get; set; }        
         public virtual DbSet<VersionFieldChange> VersionFieldChanges { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<QualificationNewReviewRequired>().ToView("v_QualificationNewReviewRequired", "regulated").HasNoKey();
@@ -76,6 +77,9 @@ namespace SFA.DAS.AODP.Data.Context
             modelBuilder.Entity<QualificationExport>().ToView("v_NewQualificationsExport", "regulated").HasNoKey();
             modelBuilder.Entity<QualificationExport>().Property(q => q.QANText).HasColumnName("QAN Text");
             modelBuilder.Entity<QualificationExport>().Property(q => q.DateOfDownload).HasColumnName("Date of download");
+            modelBuilder.Entity<Message>().Property(m => m.Type).HasConversion<string>();
+            modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
+                .HasKey(v => v.QualificationReference);
 
             modelBuilder.Entity<ChangedExport>().ToView("v_ChangedQualificationsExport", "regulated").HasNoKey();
             modelBuilder.Entity<ChangedExport>().Property(q => q.QANText).HasColumnName("QAN Text");
