@@ -81,9 +81,4 @@ public class GetApplicationDetailsByIdQueryResponse
                 .ToList()
           };
     }
-
-    public static implicit operator GetApplicationDetailsByIdQueryResponse(List<ApplicationQuestionAnswersDTO> v)
-    {
-        throw new NotImplementedException();
-    }
 }
