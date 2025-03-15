@@ -24,6 +24,8 @@ public enum MessageType
 
     ApplicationUnsharedWithOfqual,
     ApplicationUnsharedWithSkillsEngland,
+
+    ApplicationSubmitted
 }
 
 public static class MessageTypeConfigurationRules
@@ -201,6 +203,20 @@ public static class MessageTypeConfigurationRules
                         SharedWithSkillsEngland = true,
                         SharedWithAwardingOrganisation = false,
                         AvailableTo = [UserType.Qfau]
+                 }
+            },
+
+
+            {
+                MessageType.ApplicationSubmitted,
+                 new MessageTypeConfiguration
+                 {
+                        MessageHeader = "Application submitted",
+                        SharedWithDfe = true,
+                        SharedWithOfqual = true,
+                        SharedWithSkillsEngland = true,
+                        SharedWithAwardingOrganisation = true,
+                        AvailableTo = [UserType.AwardingOrganisation]
                  }
             },
         };

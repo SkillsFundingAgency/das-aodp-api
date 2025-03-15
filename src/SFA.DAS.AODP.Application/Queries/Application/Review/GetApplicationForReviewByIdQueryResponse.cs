@@ -40,7 +40,7 @@
         {
             GetApplicationForReviewByIdQueryResponse model = new()
             {
-                Id = review.Id,
+                Id = review.Application.Id,
                 AwardingOrganisation = review.Application.AwardingOrganisationName,
                 LastUpdated = review.Application.UpdatedAt,
                 Name = review.Application.Name,
