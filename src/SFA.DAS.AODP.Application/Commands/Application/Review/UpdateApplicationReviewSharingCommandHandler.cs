@@ -6,13 +6,13 @@ using SFA.DAS.AODP.Models.Application;
 
 namespace SFA.DAS.AODP.Application.Commands.Application.Review
 {
-    public class UpdateApplicationReviewSharingHandler : IRequestHandler<UpdateApplicationReviewSharingCommand, BaseMediatrResponse<EmptyResponse>>
+    public class UpdateApplicationReviewSharingCommandHandler : IRequestHandler<UpdateApplicationReviewSharingCommand, BaseMediatrResponse<EmptyResponse>>
     {
         private readonly IApplicationReviewRepository _applicationReviewRepository;
         private readonly IApplicationReviewFeedbackRepository _applicationReviewFeedbackRepository;
         private readonly IMediator _mediator;
 
-        public UpdateApplicationReviewSharingHandler(IApplicationReviewRepository applicationReviewRepository, IApplicationReviewFeedbackRepository applicationReviewFeedbackRepository, IMediator mediator)
+        public UpdateApplicationReviewSharingCommandHandler(IApplicationReviewRepository applicationReviewRepository, IApplicationReviewFeedbackRepository applicationReviewFeedbackRepository, IMediator mediator)
         {
             _applicationReviewRepository = applicationReviewRepository;
             _applicationReviewFeedbackRepository = applicationReviewFeedbackRepository;

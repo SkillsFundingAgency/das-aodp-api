@@ -44,7 +44,6 @@ namespace SFA.DAS.AODP.Data.Context
         public DbSet<Application> Applications { get; set; }
         public DbSet<ApplicationReview> ApplicationReviews { get; set; }
         public DbSet<ApplicationReviewFeedback> ApplicationReviewFeedbacks { get; set; }
-        public DbSet<ApplicationReviewDecision> ApplicationReviewDecisions { get; set; }
         public DbSet<ApplicationReviewFunding> ApplicationReviewFundings { get; set; }
         public DbSet<ApplicationPage> ApplicationPages { get; set; }
         public DbSet<ApplicationQuestionAnswer> ApplicationQuestionAnswers { get; set; }

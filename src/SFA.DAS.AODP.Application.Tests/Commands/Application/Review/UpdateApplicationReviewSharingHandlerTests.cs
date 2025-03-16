@@ -10,7 +10,7 @@ public class UpdateApplicationReviewSharingHandlerTests
     private readonly Mock<IApplicationReviewRepository> _applicationReviewRepository = new();
     private readonly Mock<IApplicationReviewFeedbackRepository> _applicationReviewFeedbackRepository = new();
 
-    private readonly UpdateApplicationReviewSharingHandler _handler;
+    private readonly UpdateApplicationReviewSharingCommandHandler _handler;
 
     public UpdateApplicationReviewSharingHandlerTests()
     {
