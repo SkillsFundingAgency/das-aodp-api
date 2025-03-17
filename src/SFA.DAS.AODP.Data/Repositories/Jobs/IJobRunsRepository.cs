@@ -6,5 +6,7 @@
 
         Task<List<Entities.Jobs.JobRun>> GetJobRunsByJobId(Guid jobId);
 
+        Task<List<Entities.Jobs.JobRun>> GetJobRunsByNameAsync(string name);
+
     }
 }

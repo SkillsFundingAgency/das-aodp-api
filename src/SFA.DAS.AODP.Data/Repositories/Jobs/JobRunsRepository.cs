@@ -30,5 +30,21 @@ namespace SFA.DAS.AODP.Data.Repositories.Jobs
 
             return records;
         }
+
+        public async Task<List<Entities.Jobs.JobRun>> GetJobRunsByNameAsync(string name)
+        {
+            var records = await _context.Jobs
+                .Join(_context.JobRuns,
+                      job => job.Id,
+                      run => run.JobId,
+                      (job, run) => new { job, run })
+                .Where(x => x.job.Name == name)
+                .Select(x => x.run)
+                .ToListAsync();
+
+            if (records.Count == 0)
+                throw new RecordWithNameNotFoundException(name);
+            return records;
+        }
     }
 }

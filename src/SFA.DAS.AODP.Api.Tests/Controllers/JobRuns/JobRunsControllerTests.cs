@@ -63,5 +63,45 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.JobRuns
             var errorResult = Assert.IsType<StatusCodeResult>(result);
             Assert.Equal(StatusCodes.Status500InternalServerError, errorResult.StatusCode);
         }
+
+        [Fact]
+        public async Task GetJobRunsByName_ReturnsOkResult()
+        {
+            // Arrange
+            var queryResponse = _fixture
+                .Build<BaseMediatrResponse<GetJobRunsByNameQueryResponse>>()
+                .With(w => w.Success, true)
+                .Create();
+
+            _mediatorMock.Setup(x => x.Send(It.IsAny<GetJobRunsByNameQuery>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(queryResponse));
+            var name = "TestJob";
+
+            // Act
+            var result = await _controller.GetByNameAsync(name);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var model = Assert.IsAssignableFrom<GetJobRunsByNameQueryResponse>(okResult.Value);
+        }
+
+        [Fact]
+        public async Task GetJobsByName_Returns500_WhenQueryFails()
+        {
+            // Arrange
+            var queryResponse = _fixture
+                .Build<BaseMediatrResponse<GetJobRunsByNameQueryResponse>>()
+                .With(w => w.Success, false)
+                .Create();
+
+            _mediatorMock.Setup(x => x.Send(It.IsAny<GetJobRunsByNameQuery>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(queryResponse));
+            var name = "TestJob";
+
+            // Act
+            var result = await _controller.GetByNameAsync(name);
+
+            // Assert
+            var errorResult = Assert.IsType<StatusCodeResult>(result);
+            Assert.Equal(StatusCodes.Status500InternalServerError, errorResult.StatusCode);
+        }
     }
 }

@@ -25,5 +25,15 @@ public class JobRunsController : BaseController
         var query = new GetJobRunsQuery();
         return await SendRequestAsync(query);
     }
+
+    [HttpGet("/api/job-runs/{jobName}")]
+    [ProducesResponseType(typeof(GetJobRunsByNameQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetByNameAsync(string jobName)
+    {
+        var query = new GetJobRunsByNameQuery(jobName);
+        return await SendRequestAsync(query);
+    }
 }
 

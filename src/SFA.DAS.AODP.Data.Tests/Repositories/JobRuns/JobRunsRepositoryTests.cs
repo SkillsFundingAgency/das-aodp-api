@@ -41,6 +41,25 @@ namespace SFA.DAS.AODP.Data.Tests.Repositories.JobRuns
             Assert.Equal(jobRuns.Count, result.Count);
         }
 
+        [Fact]
+        public async Task GetJobRunsByName_ReturnsList()
+        {
+            // Arrange           
+            var jobRuns = _fixture.Build<JobRun>()
+                .With(w => w.Job, new Job() { Name = "TestJob", Status = "Initial"})
+                .CreateMany<JobRun>(3)
+                .ToList();
+
+            await PopulateDb(jobRuns);
+
+            // Act
+            var result = await _repository.GetJobRunsByNameAsync(jobRuns[0].Job.Name);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(jobRuns.Count, result.Count);
+        }
+
         private async Task PopulateDb(List<JobRun> jobRuns)
         {
             await _dbContext.AddRangeAsync(jobRuns);
