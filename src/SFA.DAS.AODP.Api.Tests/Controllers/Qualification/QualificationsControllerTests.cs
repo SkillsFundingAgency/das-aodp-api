@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.AODP.Api.Controllers.Qualification;
 using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Commands;
 using SFA.DAS.AODP.Application.Commands.Qualification;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.Qualification;
@@ -139,7 +140,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
         }
 
         [Fact]
-        public async Task AddQualification_ReturnsOk()
+        public async Task AddQualificationDiscussionHistory_ReturnsOk()
         {
             // Arrange
             var model = _fixture.Create<AddQualificationDiscussionHistoryCommand>();
@@ -151,6 +152,24 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
 
             // Act
             var result = await _controller.AddQualification(model);
+
+            // Assert
+            var notFoundResult = Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task UpdateQualificationStatus_ReturnsOk()
+        {
+            // Arrange
+            var model = _fixture.Create<UpdateQualificationStatusCommand>();
+            var queryResponse = _fixture.Create<BaseMediatrResponse<EmptyResponse>>();
+            queryResponse.Success = true;
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateQualificationStatusCommand>(), default))
+                         .ReturnsAsync(queryResponse);
+
+            // Act
+            var result = await _controller.UpdateQualificationStatus(model);
 
             // Assert
             var notFoundResult = Assert.IsType<OkObjectResult>(result);

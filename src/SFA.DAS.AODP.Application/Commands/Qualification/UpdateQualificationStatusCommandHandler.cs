@@ -8,28 +8,22 @@ using SFA.DAS.AODP.Application.Exceptions;
 
 namespace SFA.DAS.AODP.Application.Commands.Qualification;
 
-public class AddQualificationDiscussionHistoryCommandHandler : IRequestHandler<AddQualificationDiscussionHistoryCommand, BaseMediatrResponse<EmptyResponse>>
+public class UpdateQualificationStatusCommandHandler : IRequestHandler<UpdateQualificationStatusCommand, BaseMediatrResponse<EmptyResponse>>
 {
     private readonly IQualificationsRepository _qualificationsRepository;
 
-    public AddQualificationDiscussionHistoryCommandHandler(IQualificationsRepository qualificationsRepository)
+    public UpdateQualificationStatusCommandHandler(IQualificationsRepository qualificationsRepository)
     {
         _qualificationsRepository = qualificationsRepository;
     }
 
-    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(AddQualificationDiscussionHistoryCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(UpdateQualificationStatusCommand request, CancellationToken cancellationToken)
     {
         var response = new BaseMediatrResponse<EmptyResponse>();
 
         try
         {
-            var qualificationDiscussionHistory = new QualificationDiscussionHistory()
-            {
-                ActionTypeId = request.ActionTypeId,
-                UserDisplayName = request.UserDisplayName,
-                Notes = request.Notes,
-            };
-            await _qualificationsRepository.AddQualificationDiscussionHistory(qualificationDiscussionHistory, request.QualificationReference);
+            await _qualificationsRepository.UpdateQualificationStatus(request.QualificationReference, request.Status);
             response.Success = true;
         }
         catch (RecordWithNameNotFoundException ex)
