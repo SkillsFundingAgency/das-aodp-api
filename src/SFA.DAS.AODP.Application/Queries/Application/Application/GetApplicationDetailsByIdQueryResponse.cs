@@ -35,7 +35,10 @@ public class GetApplicationDetailsByIdQueryResponse
 
     public class QuestionAnswer
     {
-        public string AnswerText { get; set; }
+        public string? AnswerTextValue { get; set; }
+        public string? AnswerDateValue { get; set; }
+        public string? AnswerChoiceValue { get; set; }
+        public decimal? AnswerNumberValue { get; set; }
     }
 
     public static GetApplicationDetailsByIdQueryResponse Map(
@@ -70,7 +73,10 @@ public class GetApplicationDetailsByIdQueryResponse
                                     QuestionAnswers = questionGroup
                                         .Select(a => new QuestionAnswer
                                         {
-                                            AnswerText = a.AnswerText
+                                            AnswerTextValue = a.AnswerText,
+                                            AnswerDateValue = a.AnswerDate,
+                                            AnswerChoiceValue = a.AnswerChoice,
+                                            AnswerNumberValue = a.AnswerNumber
                                         })
                                         .ToList()
                                 })

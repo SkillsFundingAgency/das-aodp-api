@@ -70,7 +70,10 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
                     QuestionTitle = aqa.Question.Title,
                     QuestionType = aqa.Question.Type,
                     QuestionRequired = aqa.Question.Required,
-                    AnswerText = aqa.TextValue != null ? aqa.TextValue : ""
+                    AnswerText = aqa.TextValue,
+                    AnswerChoice = aqa.OptionsValue,
+                    AnswerDate = aqa.DateValue.ToString(),
+                    AnswerNumber = aqa.NumberValue
                 })
                 .ToListAsync();
         }
@@ -90,7 +93,10 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             public string QuestionType { get; set; }
             public bool QuestionRequired { get; set; }
 
-            public string AnswerText { get; set; }
+            public string? AnswerText { get; set; }
+            public string? AnswerDate { get; set; }
+            public string? AnswerChoice { get; set; }
+            public decimal? AnswerNumber { get; set; }
         }
     }
 }
