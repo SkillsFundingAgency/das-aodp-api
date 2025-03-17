@@ -34,7 +34,7 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
         var qual = await _context.QualificationVersions
             .Include(v => v.LifecycleStage)
             .Include(v => v.Qualification)
-            .FirstOrDefaultAsync(v => v.LifecycleStage.Name == "New" && v.Qualification.Qan == qualificationReference);
+            .FirstOrDefaultAsync(v => v.Qualification.Qan == qualificationReference);
         if (qual is null)
         {
             throw new RecordWithNameNotFoundException(qualificationReference);
