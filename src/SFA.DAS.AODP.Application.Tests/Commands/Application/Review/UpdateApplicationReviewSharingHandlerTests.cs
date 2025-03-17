@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using MediatR;
+using Moq;
 using SFA.DAS.AODP.Application.Commands.Application.Review;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Repositories.Application;
@@ -9,12 +10,13 @@ public class UpdateApplicationReviewSharingHandlerTests
 {
     private readonly Mock<IApplicationReviewRepository> _applicationReviewRepository = new();
     private readonly Mock<IApplicationReviewFeedbackRepository> _applicationReviewFeedbackRepository = new();
+    private readonly Mock<IMediator> _mediator = new();
 
     private readonly UpdateApplicationReviewSharingCommandHandler _handler;
 
     public UpdateApplicationReviewSharingHandlerTests()
     {
-        _handler = new(_applicationReviewRepository.Object, _applicationReviewFeedbackRepository.Object);
+        _handler = new(_applicationReviewRepository.Object, _applicationReviewFeedbackRepository.Object, _mediator.Object);
     }
 
     [Fact]
