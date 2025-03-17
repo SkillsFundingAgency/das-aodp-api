@@ -19,7 +19,7 @@ public class QualificationDetailsRepository(IApplicationDbContext context) : IQu
                 .ThenInclude(v => v.QualificationDiscussionHistories)
                     .ThenInclude(v => v.ActionType)
             .OrderByDescending(v => v.Version)
-            .FirstOrDefaultAsync(v => v.LifecycleStage.Name == "New" && v.Qualification.Qan == qualificationReference);
+            .FirstOrDefaultAsync(v => v.Qualification.Qan == qualificationReference);
 
         if (qualVersion == null)
         {

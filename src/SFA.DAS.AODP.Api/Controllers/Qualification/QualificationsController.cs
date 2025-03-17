@@ -88,8 +88,6 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             {
                 QualificationReference = qualificationReference
             };
-            var fixture = new AutoFixture.Fixture();
-            var model = fixture.Create<GetQualificationDetailsQueryResponse>();
             return await SendRequestAsync(query);
         }
 
