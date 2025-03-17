@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Commands.Application.Message;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Application;
@@ -10,12 +11,14 @@ public class SubmitApplicationCommandHandler : IRequestHandler<SubmitApplication
     private readonly IApplicationRepository _applicationRepository;
     private readonly IApplicationReviewRepository _applicationReviewRepository;
     private readonly IApplicationReviewFeedbackRepository _applicationReviewFeedbackRepository;
+    private readonly IMediator _mediator;
 
-    public SubmitApplicationCommandHandler(IApplicationRepository applicationRepository, IApplicationReviewRepository applicationReviewRepository, IApplicationReviewFeedbackRepository applicationReviewFeedbackRepository)
+    public SubmitApplicationCommandHandler(IApplicationRepository applicationRepository, IApplicationReviewRepository applicationReviewRepository, IApplicationReviewFeedbackRepository applicationReviewFeedbackRepository, IMediator mediator)
     {
         _applicationRepository = applicationRepository;
         _applicationReviewRepository = applicationReviewRepository;
         _applicationReviewFeedbackRepository = applicationReviewFeedbackRepository;
+        _mediator = mediator;
     }
 
     public async Task<BaseMediatrResponse<EmptyResponse>> Handle(SubmitApplicationCommand request, CancellationToken cancellationToken)
@@ -69,6 +72,17 @@ public class SubmitApplicationCommandHandler : IRequestHandler<SubmitApplication
             }
 
             await _applicationRepository.UpdateAsync(application);
+
+           var msgResult =  await _mediator.Send(new CreateApplicationMessageCommand()
+            {
+                ApplicationId = request.ApplicationId,
+                MessageText = string.Empty,
+                MessageType = MessageType.ApplicationSubmitted.ToString(),
+                SentByEmail = request.SubmittedByEmail,
+                SentByName = request.SubmittedBy,
+                UserType = UserType.AwardingOrganisation.ToString()
+            });
+            if (!msgResult.Success) throw new Exception(msgResult.ErrorMessage, msgResult.InnerException);
             response.Success = true;
         }
         catch (Exception ex)

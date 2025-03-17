@@ -24,7 +24,7 @@ public class SaveQfauFundingReviewOutcomeCommandHandlerTests
 
         };
 
-        _repository.Setup(a => a.GetApplicationReviewFeedbackDetailsByReviewIdAsync(funding.ApplicationReviewId, Models.Application.UserType.Qfau)).ReturnsAsync(funding);
+        _repository.Setup(a => a.GeyByReviewIdAndUserType(funding.ApplicationReviewId, Models.Application.UserType.Qfau)).ReturnsAsync(funding);
 
         // Act
         var response = await _handler.Handle(new()
@@ -48,7 +48,7 @@ public class SaveQfauFundingReviewOutcomeCommandHandlerTests
 
         };
 
-        _repository.Setup(a => a.GetApplicationReviewFeedbackDetailsByReviewIdAsync(funding.ApplicationReviewId, Models.Application.UserType.Qfau)).ReturnsAsync(funding);
+        _repository.Setup(a => a.GeyByReviewIdAndUserType(funding.ApplicationReviewId, Models.Application.UserType.Qfau)).ReturnsAsync(funding);
 
         // Act
         var response = await _handler.Handle(new()
@@ -71,7 +71,7 @@ public class SaveQfauFundingReviewOutcomeCommandHandlerTests
             ApplicationReviewId = Guid.NewGuid(),
         };
 
-        _repository.Setup(a => a.GetApplicationReviewFeedbackDetailsByReviewIdAsync(funding.ApplicationReviewId, Models.Application.UserType.Qfau)).ThrowsAsync(new Exception());
+        _repository.Setup(a => a.GeyByReviewIdAndUserType(funding.ApplicationReviewId, Models.Application.UserType.Qfau)).ThrowsAsync(new Exception());
 
         // Act
         var response = await _handler.Handle(new()
