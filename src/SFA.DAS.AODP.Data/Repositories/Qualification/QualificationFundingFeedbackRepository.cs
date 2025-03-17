@@ -37,6 +37,8 @@ public class QualificationFundingFeedbackRepository : IQualificationFundingFeedb
     public async Task<QualificationFundingFeedbacks> GetByIdAsync(Guid qualificationVersionId)
     {
         return await _context.QualificationFundingFeedbacks
-                             .FirstOrDefaultAsync(v => v.QualificationVersionId == qualificationVersionId);
+            .Include(a => a.QualificationVersion)
+            .ThenInclude(b => b.Qualification)
+            .FirstOrDefaultAsync(v => v.QualificationVersionId == qualificationVersionId);
     }
 }

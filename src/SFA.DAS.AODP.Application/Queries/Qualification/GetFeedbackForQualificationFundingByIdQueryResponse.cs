@@ -6,6 +6,7 @@ public class GetFeedbackForQualificationFundingByIdQueryResponse
 {
     public Guid Id { get; set; }
     public Guid QualificationVersionId { get; set; }
+    public string? QualificationReference { get; set; }
     public string Status { get; set; }
     public string? Comments { get; set; }
 
@@ -28,7 +29,7 @@ public class GetFeedbackForQualificationFundingByIdQueryResponse
             Id = feedback.Id,
             QualificationVersionId = feedback.QualificationVersionId,
             Comments = feedback.Comments,
-            Status = feedback.Status,
+            Status = feedback?.Status,
         };
         return model;
     }
@@ -39,8 +40,9 @@ public class GetFeedbackForQualificationFundingByIdQueryResponse
         {
             Id = feedback.Id,
             QualificationVersionId = feedback.QualificationVersionId,
-            Comments = feedback.Comments,
-            Status = feedback.Status,
+            QualificationReference = feedback.QualificationVersion?.Qualification?.Qan,
+            Comments = feedback?.Comments,
+            Status = feedback?.Status,
         };
 
         foreach (var funding in qualificationFundedOffers ?? [])
@@ -52,7 +54,7 @@ public class GetFeedbackForQualificationFundingByIdQueryResponse
                 FundingOfferId = funding.FundingOfferId,
                 Comments = funding.Comments,
                 EndDate = funding.EndDate,
-                StartDate = funding.StartDate,
+                StartDate = funding?.StartDate,
             });
         }
 
