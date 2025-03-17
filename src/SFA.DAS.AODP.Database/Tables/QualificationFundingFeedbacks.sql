@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [funded].[QualificationFundingFeedbacks](
 	[Id] [uniqueidentifier] NOT NULL,
 	[QualificationVersionId] [uniqueidentifier] NOT NULL,
-	[Status] [nvarchar](50) NULL,
+	[Approved] [bit] NULL,
 	[Comments] [nvarchar](max) NULL,
  CONSTRAINT [PK_QualificationFundingFeedback] PRIMARY KEY CLUSTERED 
 (

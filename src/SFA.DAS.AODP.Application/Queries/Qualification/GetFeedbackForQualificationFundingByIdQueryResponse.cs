@@ -7,7 +7,7 @@ public class GetFeedbackForQualificationFundingByIdQueryResponse
     public Guid Id { get; set; }
     public Guid QualificationVersionId { get; set; }
     public string? QualificationReference { get; set; }
-    public string Status { get; set; }
+    public bool? Approved { get; set; }
     public string? Comments { get; set; }
 
     public List<QualificationFunding> QualificationFundedOffers { get; set; } = new();
@@ -29,7 +29,7 @@ public class GetFeedbackForQualificationFundingByIdQueryResponse
             Id = feedback.Id,
             QualificationVersionId = feedback.QualificationVersionId,
             Comments = feedback.Comments,
-            Status = feedback?.Status,
+            Approved = feedback?.Approved,
         };
         return model;
     }
@@ -42,7 +42,7 @@ public class GetFeedbackForQualificationFundingByIdQueryResponse
             QualificationVersionId = feedback.QualificationVersionId,
             QualificationReference = feedback.QualificationVersion?.Qualification?.Qan,
             Comments = feedback?.Comments,
-            Status = feedback?.Status,
+            Approved = feedback?.Approved,
         };
 
         foreach (var funding in qualificationFundedOffers ?? [])

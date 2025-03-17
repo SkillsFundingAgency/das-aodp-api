@@ -7,7 +7,7 @@ public class QualificationFundingFeedbacks
 {
     public Guid Id { get; set; }
     public Guid QualificationVersionId { get; set; }
-    public string? Status { get; set; }
+    public bool? Approved { get; set; }
     public string? Comments { get; set; }
 
     public virtual QualificationVersions QualificationVersion { get; set; }

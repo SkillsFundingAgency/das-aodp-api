@@ -33,7 +33,7 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                 else
                 {
                     qualificationFundingFeedback.Comments = request.Comments;
-                    qualificationFundingFeedback.Status = request.Approved ? ApplicationStatus.Approved.ToString() : ApplicationStatus.NotApproved.ToString();
+                    qualificationFundingFeedback.Approved = request?.Approved;
                     await _repository.UpdateAsync(qualificationFundingFeedback);
                     response.Success = true;
                 }
