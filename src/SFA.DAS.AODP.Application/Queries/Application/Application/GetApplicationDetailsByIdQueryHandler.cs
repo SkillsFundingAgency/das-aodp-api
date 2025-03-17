@@ -8,10 +8,12 @@ namespace SFA.DAS.AODP.Application.Queries.Application.Application;
 public class GetApplicationDetailsByIdQueryHandler : IRequestHandler<GetApplicationDetailsByIdQuery, BaseMediatrResponse<GetApplicationDetailsByIdQueryResponse>>
 {
     private readonly IApplicationQuestionAnswerRepository _applicationQuestionAnswerRepository;
-
-    public GetApplicationDetailsByIdQueryHandler(IApplicationQuestionAnswerRepository applicationQuestionAnswerRepository)
+    private readonly IApplicationReviewRepository _applicationReviewRepository;
+    
+    public GetApplicationDetailsByIdQueryHandler(IApplicationQuestionAnswerRepository applicationQuestionAnswerRepository, IApplicationReviewRepository applicationReviewRepository)
     {
         _applicationQuestionAnswerRepository = applicationQuestionAnswerRepository;
+        _applicationReviewRepository = applicationReviewRepository;
     }
 
     public async Task<BaseMediatrResponse<GetApplicationDetailsByIdQueryResponse>> Handle(GetApplicationDetailsByIdQuery request, CancellationToken cancellationToken)
@@ -20,8 +22,10 @@ public class GetApplicationDetailsByIdQueryHandler : IRequestHandler<GetApplicat
         response.Success = false;
         try
         {
-            List<ApplicationQuestionAnswersDTO> result = await _applicationQuestionAnswerRepository.GetAnswersByApplicationId(request.ApplicationId);
-            response.Value = GetApplicationDetailsByIdQueryResponse.Map(request.ApplicationId, result);
+            var applicationReview = _applicationReviewRepository.GetByIdAsync(request.ApplicationReviewId);
+            var applicationId = applicationReview.Result.ApplicationId;
+            List<ApplicationQuestionAnswersDTO> result = await _applicationQuestionAnswerRepository.GetAnswersByApplicationId(applicationId);
+            response.Value = GetApplicationDetailsByIdQueryResponse.Map(applicationId, result);
             response.Success = true;
         }
         catch (Exception ex)

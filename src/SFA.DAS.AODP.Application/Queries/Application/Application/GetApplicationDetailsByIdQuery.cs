@@ -3,9 +3,9 @@
 namespace SFA.DAS.AODP.Application.Queries.Application.Application;
 public class GetApplicationDetailsByIdQuery : IRequest<BaseMediatrResponse<GetApplicationDetailsByIdQueryResponse>>
 {
-    public GetApplicationDetailsByIdQuery(Guid applicationId)
+    public GetApplicationDetailsByIdQuery(Guid applicationReviewId)
     {
-        ApplicationId = applicationId;
+        ApplicationReviewId = applicationReviewId;
     }
-    public Guid ApplicationId { get; set; }
+    public Guid ApplicationReviewId { get; set; }
 }
