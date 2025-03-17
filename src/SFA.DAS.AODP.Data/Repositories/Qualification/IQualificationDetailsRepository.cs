@@ -9,7 +9,5 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification;
 
 public interface IQualificationDetailsRepository
 {
-    Task AddQualificationDiscussionHistory(QualificationDiscussionHistory qualificationDiscussionHistory, string qualificationReference);
     Task<QualificationVersions> GetQualificationDetailsByIdAsync(string qualificationReference);
-    Task UpdateQualificationStatus(string qualificationReference, string status);
 }

@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Exceptions;
+using Markdig.Extensions.Figures;
 
 namespace SFA.DAS.AODP.Tests.Application.Queries
 {
@@ -23,6 +24,8 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
         public GetQualificationDetailsQueryHandlerTests()
         {
             _fixture = new Fixture().Customize(new AutoMoqCustomization());
+            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList().ForEach(b => _fixture.Behaviors.Remove(b));
+            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             _repositoryMock = _fixture.Freeze<Mock<INewQualificationsRepository>>();
             _detailsRepositoryMock = _fixture.Freeze<Mock<IQualificationDetailsRepository>>();
             _handler = _fixture.Create<GetQualificationDetailsQueryHandler>();
@@ -33,9 +36,7 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
         {
             // Arrange
             var query = _fixture.Create<GetQualificationDetailsQuery>();
-            var response = _fixture.Create<BaseMediatrResponse<GetQualificationDetailsQueryResponse>>();
             var qual = _fixture.Create<QualificationVersions>();
-            response.Success = true;
 
             _detailsRepositoryMock.Setup(x => x.GetQualificationDetailsByIdAsync(It.IsAny<string>()))
                            .ReturnsAsync(qual);
@@ -46,7 +47,7 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
             // Assert
             _detailsRepositoryMock.Verify(x => x.GetQualificationDetailsByIdAsync(It.IsAny<string>()), Times.Once);
             Assert.True(result.Success);
-            Assert.Equal(response.Value.Id, result.Value.Id);
+            Assert.Equal(qual.Id, result.Value.Id);
         }
 
         [Fact]
