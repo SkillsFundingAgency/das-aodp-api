@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
-using SFA.DAS.AODP.Data.Exceptions;
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification;
 
@@ -35,10 +34,9 @@ public class QualificationFundingFeedbackRepository : IQualificationFundingFeedb
         _context.QualificationFundingFeedbacks.UpdateRange(QualificationFundingFeedbacks);
         await _context.SaveChangesAsync();
     }
-    public async Task<QualificationFundingFeedbacks> GetQualificationFundingFeedbackDetailsByIdAsync(Guid QualificationVersionId)
+    public async Task<QualificationFundingFeedbacks> GetByIdAsync(Guid qualificationVersionId)
     {
         return await _context.QualificationFundingFeedbacks
-                             .Include(a => a.QualificationVersion)
-                             .FirstOrDefaultAsync(v => v.QualificationVersionId == QualificationVersionId);
+                             .FirstOrDefaultAsync(v => v.QualificationVersionId == qualificationVersionId);
     }
 }

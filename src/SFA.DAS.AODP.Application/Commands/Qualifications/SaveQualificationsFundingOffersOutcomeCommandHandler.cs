@@ -20,21 +20,21 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
 
             try
             {
-                var review = await _repository.GetQualificationFundingFeedbackDetailsByIdAsync(request.QualificationVersionId);
-                if (review == null)
+                var qualificationFundingFeedback = await _repository.GetByIdAsync(request.QualificationVersionId);
+                if (qualificationFundingFeedback == null)
                 {
-                    review = new QualificationFundingFeedbacks
+                    qualificationFundingFeedback = new QualificationFundingFeedbacks
                     {
                         QualificationVersionId = request.QualificationVersionId,
                     };
-                    await _repository.CreateAsync(review);
+                    await _repository.CreateAsync(qualificationFundingFeedback);
                     response.Success = true; 
                 }
                 else
                 {
-                    review.Comments = request.Comments;
-                    review.Status = request.Approved ? ApplicationStatus.Approved.ToString() : ApplicationStatus.NotApproved.ToString();
-                    await _repository.UpdateAsync(review);
+                    qualificationFundingFeedback.Comments = request.Comments;
+                    qualificationFundingFeedback.Status = request.Approved ? ApplicationStatus.Approved.ToString() : ApplicationStatus.NotApproved.ToString();
+                    await _repository.UpdateAsync(qualificationFundingFeedback);
                     response.Success = true;
                 }
             }

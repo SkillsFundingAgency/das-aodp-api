@@ -22,14 +22,14 @@ public class GetFeedbackForQualificationFundingByIdQueryHandler : IRequestHandle
         response.Success = false;
         try
         {
-            var result = await _qualificationFundingFeedbackRepository.GetQualificationFundingFeedbackDetailsByIdAsync(request.QualificationVersionId);
-            if (result == null)
+            var qualificationFundingFeedback = await _qualificationFundingFeedbackRepository.GetByIdAsync(request.QualificationVersionId);
+            if (qualificationFundingFeedback == null)
             {
-                var qualificationFundingFeedback = new QualificationFundingFeedbacks
+                var qualificationFundingFeedbackNew = new QualificationFundingFeedbacks
                 {
                     QualificationVersionId = request.QualificationVersionId,
                 };
-                result = await _qualificationFundingFeedbackRepository.CreateAsync(qualificationFundingFeedback);
+                qualificationFundingFeedback = await _qualificationFundingFeedbackRepository.CreateAsync(qualificationFundingFeedbackNew);
             }
             var qualificationFundings = await _qualificationFundingsRepository.GetByIdAsync(request.QualificationVersionId);
 
@@ -44,7 +44,7 @@ public class GetFeedbackForQualificationFundingByIdQueryHandler : IRequestHandle
                 Comments = qf.Comments
             }).ToList();
 
-            response.Value = GetFeedbackForQualificationFundingByIdQueryResponse.Map(result, qualificationFundedOffers);
+            response.Value = GetFeedbackForQualificationFundingByIdQueryResponse.Map(qualificationFundingFeedback, qualificationFundedOffers);
             response.Success = true;
         }
         catch (Exception ex)
