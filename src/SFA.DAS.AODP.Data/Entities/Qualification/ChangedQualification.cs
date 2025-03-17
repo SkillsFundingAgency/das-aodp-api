@@ -4,6 +4,7 @@ namespace SFA.DAS.AODP.Data.Entities.Qualification;
 public class ChangedQualification
 {
     public string QualificationReference { get; set; } = string.Empty;
+    public Guid? QualificationVersionId { get; set; }
     public string AwardingOrganisation { get; set; } = string.Empty;
     public string QualificationTitle { get; set; } = string.Empty;
     public string QualificationType { get; set; } = string.Empty;

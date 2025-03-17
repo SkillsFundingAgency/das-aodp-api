@@ -80,7 +80,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
 
             return new QualificationDetails
             {
-                QualificationVersionId = new Guid("33D22C77-2F54-4968-BC2F-C712017E7742"),
+                QualificationVersionId = qualification.QualificationVersionId, //new Guid("33D22C77-2F54-4968-BC2F-C712017E7742"),
                 QualificationReference = qualification.QualificationReference,
                 AwardingOrganisation = qualification.AwardingOrganisation,
                 Title = qualification.QualificationTitle,

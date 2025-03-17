@@ -37,12 +37,8 @@ public class QualificationFundingFeedbackRepository : IQualificationFundingFeedb
     }
     public async Task<QualificationFundingFeedbacks> GetQualificationFundingFeedbackDetailsByIdAsync(Guid QualificationVersionId)
     {
-        var res = await _context
-                        .QualificationFundingFeedbacks
-                        .Include(a => a.QualificationVersion)
-                        .FirstOrDefaultAsync(v => v.QualificationVersionId == QualificationVersionId);
-
-        return res is null ? throw new RecordNotFoundException(QualificationVersionId) : res;
+        return await _context.QualificationFundingFeedbacks
+                             .Include(a => a.QualificationVersion)
+                             .FirstOrDefaultAsync(v => v.QualificationVersionId == QualificationVersionId);
     }
-
 }

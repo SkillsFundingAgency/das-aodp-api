@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application.Queries.Application.Review;
+using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualification;
@@ -22,6 +23,14 @@ public class GetFeedbackForQualificationFundingByIdQueryHandler : IRequestHandle
         try
         {
             var result = await _qualificationFundingFeedbackRepository.GetQualificationFundingFeedbackDetailsByIdAsync(request.QualificationVersionId);
+            if (result == null)
+            {
+                var qualificationFundingFeedback = new QualificationFundingFeedbacks
+                {
+                    QualificationVersionId = request.QualificationVersionId,
+                };
+                result = await _qualificationFundingFeedbackRepository.CreateAsync(qualificationFundingFeedback);
+            }
             var qualificationFundings = await _qualificationFundingsRepository.GetByIdAsync(request.QualificationVersionId);
 
             // Convert qualificationFundings to the required type
