@@ -149,12 +149,6 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> QualificationFundingOffersSummary(CreateQualificationDiscussionHistoryCommand command, Guid qualificationVersionId)
         {
-            var response = await SendRequestAsync(new GetFeedbackForQualificationFundingByIdQuery(qualificationVersionId));
-            command.UserDisplayName = command.UserDisplayName;
-            command.ActionTypeId = command.ActionTypeId; 
-            command.Timestamp = DateTime.Now;
-
-
             return await SendRequestAsync(command);
         }
 

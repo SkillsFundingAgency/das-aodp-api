@@ -23,21 +23,23 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
             {
                 var qualificationFundings = await _qualificationFundingsRepository.GetByIdAsync(request.QualificationVersionId);
                 string fundedOfferName = "";
-
-                foreach (var qf in qualificationFundings)
+                if (qualificationFundings != null && qualificationFundings.Count != 0)
                 {
-                    fundedOfferName += qf.FundingOffer.Name + ", StartDate:" + qf.StartDate?.ToString("dd-MM-yyyy") + ", EndDate:" + qf.EndDate?.ToString("dd-MM-yyyy");
-                    request.QualificationId = qf.QualificationVersion.Qualification.Id;
+                    foreach (var qf in qualificationFundings)
+                    {
+                        fundedOfferName += qf.FundingOffer.Name + ", StartDate:" + qf.StartDate?.ToString("dd-MM-yyyy") + ", EndDate:" + qf.EndDate?.ToString("dd-MM-yyyy");
+                        request.QualificationId = qf.QualificationVersion.Qualification.Id;
+                    }
+
+                    await _repository.CreateAsync(new QualificationDiscussionHistory
+                    {
+                        QualificationId = request.QualificationId,
+                        UserDisplayName = request.UserDisplayName,
+                        Notes = "Qualification funding offers review - " + fundedOfferName,
+                        ActionTypeId = request.ActionTypeId,
+                        Timestamp = DateTime.Now
+                    });
                 }
-
-                await _repository.CreateAsync(new QualificationDiscussionHistory
-                {
-                    QualificationId = request.QualificationId,
-                    ActionTypeId = request.ActionTypeId,
-                    UserDisplayName = request.UserDisplayName,
-                    Notes = "No Action Required - Qualification funding offers review - " + fundedOfferName,
-                    Timestamp = request.Timestamp
-                });
                 response.Success = true;
             }
             catch (Exception ex)
