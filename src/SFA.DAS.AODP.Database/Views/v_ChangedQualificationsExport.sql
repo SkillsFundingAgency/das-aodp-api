@@ -1,21 +1,21 @@
-﻿CREATE VIEW [regulated].[v_NewQualificationsExport] AS
+﻿CREATE VIEW [regulated].[v_ChangedQualificationsExport] AS
 
 /*##################################################################################################
-	-Name:				New Qualifications Export
-	-Description:		Gets qualification data to populate exported CSV file for new qualifications, these are flagged in the Lifecycle Stage as 'New'
-	-Date of Creation:	20/02/2025
-	-Created By:		Peter Roddy (Fujitsu)
+	-Name:				Changed Qualifications Export
+	-Description:		Gets qualification data to populate exported CSV file for changed qualifications, these are flagged in the Lifecycle Stage as 'Changed'
+	-Date of Creation:	12/03/2025
+	-Created By:		Robert Rybnikar
 ####################################################################################################
 
 	Version No.			Updated By		Updated Date		Description of Change
 ####################################################################################################
-	1					Peter Roddy		20/02/2025			Original
+	1					Robert Rybnikar		12/03/2025			Original
 ##################################################################################################*/
 
 SELECT 
     -- Identifiers and Meta Information
     q.Qan AS QualificationNumber,   -- QAN as Qualification Number
-    (SUBSTRING ( q.Qan, 1, 3 ) + '/' + SUBSTRING ( q.Qan, 4, 4 ) + '/' + SUBSTRING ( q.Qan, 8, 1 )) AS [QAN Text],   
+    (SUBSTRING ( q.Qan, 1, 3 ) + '/' + SUBSTRING ( q.Qan, 4, 4 ) + '/' + SUBSTRING ( q.Qan, 8, 1 )) AS [QAN Text],
     GETDATE() AS [Date of download], -- Download timestamp
     -- Organisation Details
     ao.RecognitionNumber,
@@ -76,5 +76,5 @@ Left Outer Join regulated.QualificationVersions qv ON q.Id = qv.QualificationId
 Left Outer Join dbo.AwardingOrganisation ao ON qv.AwardingOrganisationId = ao.Id
 Left Outer Join regulated.LifecycleStage ls ON qv.LifecycleStageId = ls.Id
  
-WHERE ls.Name = 'New';
+WHERE ls.Name = 'Changed';
 GO
