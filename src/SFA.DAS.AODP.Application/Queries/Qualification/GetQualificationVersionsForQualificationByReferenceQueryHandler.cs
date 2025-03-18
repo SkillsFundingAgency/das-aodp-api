@@ -20,7 +20,11 @@ public class GetQualificationVersionsForQualificationByReferenceQueryHandler : I
         try
         {
             var qualification = await _qualificationRepository.GetByIdAsync(request.QualificationReference);
-            
+            if (qualification == null)
+            {
+                response.ErrorMessage = "Qualification not found";
+                return response;
+            }
             response.Value = qualification;
             response.Success = true;
         }
