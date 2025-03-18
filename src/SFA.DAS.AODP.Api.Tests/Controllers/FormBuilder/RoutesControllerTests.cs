@@ -61,7 +61,6 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder.RoutesControllerTests
         {
             // Arrange
             var request = _fixture.Create<GetRoutingInformationForFormQuery>();
-            //var response = _fixture.Create<GetRoutingInformationForFormQueryResponse>();
             var response = new GetRoutingInformationForFormQueryResponse()
             {
                 Sections = new(),
@@ -176,6 +175,36 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder.RoutesControllerTests
 
             // Assert
             _mediatorMock.Verify(m => m.Send(request, default), Times.Once());
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var model = Assert.IsAssignableFrom<EmptyResponse>(okResult.Value);
+            Assert.Equal(response, model);
+        }
+
+        [Fact]
+        public async Task DeleteRouteForQuestion_ReturnsOkResult()
+        {
+            // Arrange
+            DeleteRouteCommand command = _fixture.Create<DeleteRouteCommand>();
+            var response = _fixture.Create<EmptyResponse>();
+            BaseMediatrResponse<EmptyResponse> wrapper = new()
+            {
+                Value = response,
+                Success = true
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<DeleteRouteCommand>(), default))
+                .ReturnsAsync(wrapper);
+
+            // Act
+            var result = await _controller.DeleteRouteAsync(command.FormVersionId, command.SectionId, command.PageId, command.QuestionId);
+
+            // Assert
+            _mediatorMock.Verify(m => m.Send(It.Is<DeleteRouteCommand>(c => c.FormVersionId == command.FormVersionId), default), Times.Once());
+            _mediatorMock.Verify(m => m.Send(It.Is<DeleteRouteCommand>(c => c.SectionId == command.SectionId), default), Times.Once());
+            _mediatorMock.Verify(m => m.Send(It.Is<DeleteRouteCommand>(c => c.PageId == command.PageId), default), Times.Once());
+            _mediatorMock.Verify(m => m.Send(It.Is<DeleteRouteCommand>(c => c.QuestionId == command.QuestionId), default), Times.Once());
+
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<EmptyResponse>(okResult.Value);
             Assert.Equal(response, model);
