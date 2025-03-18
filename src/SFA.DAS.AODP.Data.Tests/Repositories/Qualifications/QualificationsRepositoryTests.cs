@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
-using SFA.DAS.AODP.Models.Qualifications;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using System.Reflection.Metadata;
 using Moq.EntityFrameworkCore;

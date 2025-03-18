@@ -10,7 +10,6 @@ namespace SFA.DAS.AODP.Models.Qualifications
     {
         public bool Success { get; set; }
         public int Id { get; set; }
-        public Guid? QualificationVersionId { get; set; }
         public string? Status { get; set; }
         public string? Priority { get; set; }
         public string? Changes { get; set; }

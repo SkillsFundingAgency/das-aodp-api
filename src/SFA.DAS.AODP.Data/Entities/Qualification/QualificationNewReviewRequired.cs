@@ -2,7 +2,6 @@
 {
     public class QualificationNewReviewRequired
     {
-        public Guid? QualificationVersionId { get; set; }
         public string QualificationReference { get; set; } = "";
         public string AwardingOrganisation { get; set; } = "";
         public string QualificationTitle { get; set; } = "";

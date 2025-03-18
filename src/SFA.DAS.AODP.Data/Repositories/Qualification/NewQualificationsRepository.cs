@@ -80,7 +80,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
 
             return new QualificationDetails
             {
-                QualificationVersionId = qualification.QualificationVersionId, 
                 QualificationReference = qualification.QualificationReference,
                 AwardingOrganisation = qualification.AwardingOrganisation,
                 Title = qualification.QualificationTitle,

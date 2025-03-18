@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
-using SFA.DAS.AODP.Models.Application;
 
 namespace SFA.DAS.AODP.Application.Commands.Qualifications
 {

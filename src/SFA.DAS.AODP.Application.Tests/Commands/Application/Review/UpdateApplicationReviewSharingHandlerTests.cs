@@ -2,7 +2,6 @@
 using SFA.DAS.AODP.Application.Commands.Application.Review;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Repositories.Application;
-using SFA.DAS.AODP.Data.Repositories.Qualification;
 
 namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review;
 
