@@ -56,7 +56,6 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<NewQualificationExport> NewQualificationExport { get; set; }
         DbSet<ChangedQualificationExport> ChangedQualificationExport { get; set; }
 
-        DbSet<QualificationExport> NewQualificationCSVExport { get; set; }
         DbSet<QualificationFundingFeedbacks> QualificationFundingFeedbacks { get; set; }
         DbSet<QualificationFundings> QualificationFundings { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
