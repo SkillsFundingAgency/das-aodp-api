@@ -19,8 +19,9 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
 
             try
             {
-                var review = await _repository.GetApplicationReviewFeedbackDetailsByReviewIdAsync(request.ApplicationReviewId, Models.Application.UserType.Qfau);
+                var review = await _repository.GeyByReviewIdAndUserType(request.ApplicationReviewId, Models.Application.UserType.Qfau);
 
+                review.LatestCommunicatedToAwardingOrganisation = false;
                 review.Comments = request.Comments;
                 review.Status = request.Approved ? ApplicationStatus.Approved.ToString() : ApplicationStatus.NotApproved.ToString();
 

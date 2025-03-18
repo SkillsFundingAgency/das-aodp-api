@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.Application.Message;
 using SFA.DAS.AODP.Application.Queries.Application.Message;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SFA.DAS.AODP.Api.Controllers.Application;
 
@@ -37,13 +38,18 @@ public class ApplicationMessagesController : BaseController
     {
         command.ApplicationId = applicationId;
 
-        var response = await _mediator.Send(command);
-        if (response.Success)
-        {
-            return Ok(response.Value);
-        }
+        return await SendRequestAsync(command);
 
-        _logger.LogError(message: $"Error thrown updating a application.", exception: response.InnerException);
-        return StatusCode(StatusCodes.Status500InternalServerError);
+    }
+
+    [HttpPut("/api/applications/{applicationId}/messages/read")]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> MarkAllMessagesAsRead([FromBody] MarkAllMessagesAsReadCommand command, [FromRoute] Guid applicationId)
+    {
+        command.ApplicationId = applicationId;
+
+        return await SendRequestAsync(command);
+
     }
 }

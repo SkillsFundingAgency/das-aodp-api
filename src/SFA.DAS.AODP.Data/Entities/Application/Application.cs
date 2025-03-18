@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SFA.DAS.AODP.Data.Entities.FormBuilder;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SFA.DAS.AODP.Data.Entities.Application
 {
@@ -18,6 +19,7 @@ namespace SFA.DAS.AODP.Data.Entities.Application
 
         public string? QualificationNumber { get; set; }
         public string? Status { get; set; }
+        public bool? NewMessage { get; set; }
 
         public Guid OrganisationId { get; set; }
         public string? AwardingOrganisationName { get; set; }
@@ -26,6 +28,7 @@ namespace SFA.DAS.AODP.Data.Entities.Application
 
         public virtual List<ApplicationPage> Pages { get; set; }
         public virtual ApplicationReview ApplicationReview { get; set; }
+        public virtual FormVersion FormVersion { get; set; }
 
     }
 }

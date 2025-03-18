@@ -44,7 +44,6 @@ namespace SFA.DAS.AODP.Data.Context
         public DbSet<Application> Applications { get; set; }
         public DbSet<ApplicationReview> ApplicationReviews { get; set; }
         public DbSet<ApplicationReviewFeedback> ApplicationReviewFeedbacks { get; set; }
-        public DbSet<ApplicationReviewDecision> ApplicationReviewDecisions { get; set; }
         public DbSet<ApplicationReviewFunding> ApplicationReviewFundings { get; set; }
         public DbSet<ApplicationPage> ApplicationPages { get; set; }
         public DbSet<ApplicationQuestionAnswer> ApplicationQuestionAnswers { get; set; }
@@ -52,8 +51,8 @@ namespace SFA.DAS.AODP.Data.Context
         public DbSet<View_RemainingPagesBySectionForApplication> View_RemainingPagesBySectionForApplications { get; set; }
         public DbSet<View_SectionSummaryForApplication> View_SectionSummaryForApplications { get; set; }
         public DbSet<QualificationNewReviewRequired> QualificationNewReviewRequired { get; set; }
-        public DbSet<QualificationExport> NewQualificationCSVExport { get; set; }
-
+        public DbSet<NewQualificationExport> NewQualificationExport { get; set; }
+        public DbSet<ChangedQualificationExport> ChangedQualificationExport { get; set; }
 
         public virtual DbSet<Job> Jobs { get; set; }
         public virtual DbSet<JobConfiguration> JobConfigurations { get; set; }
@@ -75,12 +74,20 @@ namespace SFA.DAS.AODP.Data.Context
         {
             modelBuilder.Entity<QualificationNewReviewRequired>().ToView("v_QualificationNewReviewRequired", "regulated").HasNoKey();
 
-            modelBuilder.Entity<QualificationExport>().ToView("v_NewQualificationsExport", "regulated").HasNoKey();
-            modelBuilder.Entity<QualificationExport>().Property(q => q.QANText).HasColumnName("QAN Text");
-            modelBuilder.Entity<QualificationExport>().Property(q => q.DateOfDownload).HasColumnName("Date of download");
+            modelBuilder.Entity<NewQualificationExport>().ToView("v_NewQualificationsExport", "regulated").HasNoKey();
+            modelBuilder.Entity<NewQualificationExport>().Property(q => q.QANText).HasColumnName("QAN Text");
+            modelBuilder.Entity<NewQualificationExport>().Property(q => q.DateOfDownload).HasColumnName("Date of download");
+
+            modelBuilder.Entity<ChangedQualificationExport>().ToView("v_ChangedQualificationsExport", "regulated").HasNoKey();
+            modelBuilder.Entity<ChangedQualificationExport>().Property(q => q.QANText).HasColumnName("QAN Text");
+            modelBuilder.Entity<ChangedQualificationExport>().Property(q => q.DateOfDownload).HasColumnName("Date of download");
+
             modelBuilder.Entity<Message>().Property(m => m.Type).HasConversion<string>();
             modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
-                .HasKey(v => v.QualificationReference);
+                .HasKey(v => v.QualificationReference);           
+
+            modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
+                .HasKey(v => v.QualificationReference);            
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 

@@ -6,12 +6,15 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
 {
     public class SaveQfauFundingReviewOffersCommandHandler : IRequestHandler<SaveQfauFundingReviewOffersCommand, BaseMediatrResponse<EmptyResponse>>
     {
-        private readonly IApplicationReviewFundingRepository _repository;
+        private readonly IApplicationReviewFundingRepository _fundingRepository;
+        private readonly IApplicationReviewFeedbackRepository _feedbackRepository;
 
-        public SaveQfauFundingReviewOffersCommandHandler(IApplicationReviewFundingRepository repository)
+        public SaveQfauFundingReviewOffersCommandHandler(IApplicationReviewFundingRepository repository, IApplicationReviewFeedbackRepository feedbackRepository)
         {
-            _repository = repository;
+            _fundingRepository = repository;
+            _feedbackRepository = feedbackRepository;
         }
+
 
         public async Task<BaseMediatrResponse<EmptyResponse>> Handle(SaveQfauFundingReviewOffersCommand request, CancellationToken cancellationToken)
         {
@@ -19,7 +22,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
 
             try
             {
-                var fundedOffers = await _repository.GetByReviewIdAsync(request.ApplicationReviewId);
+                var fundedOffers = await _fundingRepository.GetByReviewIdAsync(request.ApplicationReviewId);
 
                 List<ApplicationReviewFunding> create = new();
                 List<ApplicationReviewFunding> remove = new();
@@ -42,8 +45,15 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                     }
                 }
 
-                if (remove.Count > 0) await _repository.RemoveAsync(remove);
-                if (create.Count > 0) await _repository.CreateAsync(create);
+                if (remove.Count > 0) await _fundingRepository.RemoveAsync(remove);
+                if (create.Count > 0) await _fundingRepository.CreateAsync(create);
+
+                var review = await _feedbackRepository.GeyByReviewIdAndUserType(request.ApplicationReviewId, Models.Application.UserType.Qfau);
+                if (review != null)
+                {
+                    review.LatestCommunicatedToAwardingOrganisation = false;
+                    await _feedbackRepository.UpdateAsync(review);
+                }
 
                 response.Success = true;
             }

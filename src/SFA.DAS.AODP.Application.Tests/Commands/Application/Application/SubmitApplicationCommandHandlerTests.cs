@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using MediatR;
+using Moq;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
@@ -13,10 +14,12 @@ public class SubmitApplicationCommandHandlerTests
     private readonly Mock<IApplicationReviewRepository> _applicationReviewRepository = new();
     private readonly Mock<IApplicationReviewFeedbackRepository> _applicationReviewFeedbackRepository = new();
     private readonly SubmitApplicationCommandHandler _submitApplicationCommandHandler;
+    private readonly Mock<IMediator> _mediator = new();
 
     public SubmitApplicationCommandHandlerTests()
     {
-        _submitApplicationCommandHandler = new(_applicationRepository.Object, _applicationReviewRepository.Object, _applicationReviewFeedbackRepository.Object);
+        _submitApplicationCommandHandler = new(_applicationRepository.Object,
+            _applicationReviewRepository.Object, _applicationReviewFeedbackRepository.Object, _mediator.Object);
     }
 
     [Fact]

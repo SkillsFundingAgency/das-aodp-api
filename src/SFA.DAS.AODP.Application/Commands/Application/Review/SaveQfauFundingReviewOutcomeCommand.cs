@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using SFA.DAS.AODP.Data.Exceptions;
 
 namespace SFA.DAS.AODP.Application.Commands.Application.Review
 {
@@ -9,5 +8,4 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
         public string? Comments { get; set; }
         public bool Approved { get; set; }
     }
-
 }

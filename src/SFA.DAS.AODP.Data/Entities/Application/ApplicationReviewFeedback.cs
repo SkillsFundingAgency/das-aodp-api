@@ -9,6 +9,7 @@
         public string? Comments { get; set; }
         public bool NewMessage { get; set; }
         public string Type { get; set; }
+        public bool? LatestCommunicatedToAwardingOrganisation { get; set; }
 
         public virtual ApplicationReview ApplicationReview { get; set; }
 

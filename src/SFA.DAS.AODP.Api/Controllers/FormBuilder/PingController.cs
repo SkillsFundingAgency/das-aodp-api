@@ -25,9 +25,6 @@ public class PingController : BaseController
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public IActionResult Ping()
     {
-        //var query = new Ping();
-        //return await SendRequestAsync(query);
-
         return Ok("Pong");
     }
 }

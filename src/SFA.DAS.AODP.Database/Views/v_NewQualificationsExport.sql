@@ -14,23 +14,20 @@
 
 SELECT 
     -- Identifiers and Meta Information
-    qf.Qan AS QualificationNumber,   -- QAN as Qualification Number
-    qf.Qan AS [QAN Text],            -- QAN reused as Text
+    q.Qan AS QualificationNumber,   -- QAN as Qualification Number
+    (SUBSTRING ( q.Qan, 1, 3 ) + '/' + SUBSTRING ( q.Qan, 4, 4 ) + '/' + SUBSTRING ( q.Qan, 8, 1 )) AS [QAN Text],   
     GETDATE() AS [Date of download], -- Download timestamp
-    
     -- Organisation Details
     ao.RecognitionNumber,
-    ao.NameLegal AS OrganisationName,
+    ao.NameOfqual AS OrganisationName,
     ao.Acronym AS OrganisationAcronym,
     ao.Ukprn AS OrganisationReferenceNumber,
-    
     -- Qualification Details
-    qf.QualificationName AS Title,
-    q.QualificationType,
-    q.[Level] AS QualificationLevelCode,
-    q.SectorSubjectArea AS QualSSADescription,
-    q.SubCategory AS QualSSACode,
-    
+    q.QualificationName AS Title,
+    qv.Type as QualificationType,
+    qv.Level AS QualificationLevelCode,
+    qv.SSA AS QualSSADescription,
+    qv.SubLevel AS QualSSACode,
     -- Qualification Versions Details
     qv.LinkToSpecification,
     qv.TotalCredits AS QualCredit,
@@ -39,18 +36,15 @@ SELECT
     qv.EntitlementFrameworkDesign AS EntitlementFrameworkDesignation,
     qv.Specialism,
     qv.Pathways,
-    
     -- Region Availability
     qv.OfferedInEngland,
     NULL AS OfferedInWales,  -- Placeholder
     qv.OfferedInNi AS OfferedInNorthernIreland,
-    
     -- Age Group Availability
     qv.PreSixteen,
     qv.SixteenToEighteen,
     qv.EighteenPlus,
     qv.NineteenPlus,
-    
     -- Funding Details
     NULL AS FundingInEngland,          -- Placeholder
     NULL AS FundingInWales,            -- Placeholder
@@ -63,7 +57,6 @@ SELECT
     qv.Tqt AS TQT,
     qv.ApprovedForDelFundedProgramme AS ApprovedForDELFundedProgramme,
     qv.NiDiscountCode AS NIDiscountCode,
-    
     -- Qualification Dates
     qv.RegulationStartDate,
     qv.OperationalStartDate,
@@ -71,17 +64,17 @@ SELECT
     qv.OperationalEndDate,
     NULL AS EmbargoDate,  -- Placeholder
     qv.CertificationEndDate,
-    
     -- Metadata & Versioning
     qv.UiLastUpdatedDate AS UILastUpdatedDate,
     qv.InsertedDate,
     qv.LastUpdatedDate,
     qv.Version,
     qv.OfferedInternationally
-
-FROM funded.Qualifications q
-JOIN dbo.AwardingOrganisation ao ON q.AwardingOrganisationId = ao.Id
-JOIN regulated.QualificationVersions qv ON q.QualificationId = qv.QualificationId
-JOIN dbo.Qualification qf ON q.QualificationId = qf.Id
-JOIN regulated.LifecycleStage ls ON qv.LifecycleStageId = ls.Id
+ 
+FROM dbo.Qualification q
+Left Outer Join regulated.QualificationVersions qv ON q.Id = qv.QualificationId
+Left Outer Join dbo.AwardingOrganisation ao ON qv.AwardingOrganisationId = ao.Id
+Left Outer Join regulated.LifecycleStage ls ON qv.LifecycleStageId = ls.Id
+ 
 WHERE ls.Name = 'New';
+GO

@@ -106,7 +106,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             return await _context.ApplicationReviewFeedbacks.FirstOrDefaultAsync(a => a.Id == id) ?? throw new RecordNotFoundException(id);
         }
 
-        public async Task<ApplicationReviewFeedback> GetApplicationReviewFeedbackDetailsByReviewIdAsync(Guid applicationReviewId, UserType userType)
+        public async Task<ApplicationReviewFeedback> GeyByReviewIdAndUserType(Guid applicationReviewId, UserType userType)
         {
             var res = await _context
                             .ApplicationReviewFeedbacks
