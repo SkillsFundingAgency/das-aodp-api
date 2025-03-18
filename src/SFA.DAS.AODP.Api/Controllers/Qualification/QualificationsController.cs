@@ -112,16 +112,32 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetQualificationVersionsForQualificationByReference(string qualificationReference)
         {
-            return await SendRequestAsync(new GetQualificationVersionsForQualificationByReferenceQuery(qualificationReference));
+            var result = await _mediator.Send(new GetQualificationVersionsForQualificationByReferenceQuery(qualificationReference));
+
+            if (!result.Success || result.Value == null)
+            {
+                _logger.LogWarning(result.ErrorMessage);
+                return NotFound(new { message = result.ErrorMessage });
+            }
+
+            return Ok(result);
         }
 
         [HttpGet("/api/qualifications/{qualificationVersionId}/feedback")]
         [ProducesResponseType(typeof(GetFeedbackForQualificationFundingByIdQueryResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetFeedbackForApplicationReviewById(Guid qualificationVersionId)
+        public async Task<IActionResult> GetFeedbackForQualificationFundingById(Guid qualificationVersionId)
         {
-            return await SendRequestAsync(new GetFeedbackForQualificationFundingByIdQuery(qualificationVersionId));
+            var result = await _mediator.Send(new GetFeedbackForQualificationFundingByIdQuery(qualificationVersionId));
+
+            if (!result.Success || result.Value == null)
+            {
+                _logger.LogWarning(result?.ErrorMessage);
+                return NotFound(new { message = result?.ErrorMessage });
+            }
+
+            return Ok(result);
         }
 
         [HttpPut("/api/qualifications/{qualificationVersionId}/save-qualification-funding-offers-outcome")]
@@ -168,8 +184,8 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
 
             if (result == null || !result.Success || result.Value == null)
             {
-                _logger.LogWarning(result.ErrorMessage);
-                return NotFound(new { message = result.ErrorMessage });
+                _logger.LogWarning(result?.ErrorMessage);
+                return NotFound(new { message = result?.ErrorMessage });
             }
 
             return Ok(result);
