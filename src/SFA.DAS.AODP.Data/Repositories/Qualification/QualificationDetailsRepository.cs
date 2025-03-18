@@ -28,4 +28,11 @@ public class QualificationDetailsRepository(IApplicationDbContext context) : IQu
 
         return qualVersion;
     }
+
+    public async Task<List<QualificationDiscussionHistory>> GetDiscussionHistoriesForQualificationRef(string qualificationRef)
+    {
+        return await _context.QualificationDiscussionHistory.Where(v => v.Qualification.Qan == qualificationRef)
+            .Include(v => v.ActionType)
+            .ToListAsync();
+    }
 }

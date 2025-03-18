@@ -243,6 +243,37 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             var badRequestValue = badRequestResult.Value?.GetType().GetProperty("message")?.GetValue(badRequestResult.Value, null);
             Assert.Equal("Qualification reference cannot be empty", badRequestValue);
         }
+
+        [Fact]
+        public async Task GetDiscussionHistoriesForQualification_ReturnsOk()
+        {
+            // Arrange
+            var queryResponse = _fixture.Create<BaseMediatrResponse<GetDiscussionHistoriesForQualificationQueryResponse>>();
+            queryResponse.Success = true;
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetDiscussionHistoriesForQualificationQuery>(), default))
+                         .ReturnsAsync(queryResponse);
+
+            // Act
+            var result = await _controller.GetDiscussionHistoriesForQualification("Ref123");
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var model = Assert.IsAssignableFrom<GetDiscussionHistoriesForQualificationQueryResponse>(okResult.Value);
+            Assert.Equal(queryResponse.Value.QualificationDiscussionHistories[0].Id, model.QualificationDiscussionHistories[0].Id);
+        }
+
+        [Fact]
+        public async Task GetDiscussionHistoriesForQualification_ReturnsBadRequest_WhenQualificationReferenceIsEmpty()
+        {
+            // Act
+            var result = await _controller.GetDiscussionHistoriesForQualification(string.Empty);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badRequestValue = badRequestResult.Value?.GetType().GetProperty("message")?.GetValue(badRequestResult.Value, null);
+            Assert.Equal("Qualification reference cannot be empty", badRequestValue);
+        }
     }
 }
 
