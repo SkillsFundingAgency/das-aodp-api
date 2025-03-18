@@ -27,25 +27,27 @@ public class GetQualificationVersionsForQualificationByReferenceQueryResponse
 
     public static implicit operator GetQualificationVersionsForQualificationByReferenceQueryResponse(Data.Entities.Qualification.Qualification qualification)
     {
-        GetQualificationVersionsForQualificationByReferenceQueryResponse model = new()
+        GetQualificationVersionsForQualificationByReferenceQueryResponse model = new();
+        if(qualification != null)
         {
-            Id = qualification.Id,
-            QualificationReference = qualification.Qan,
-            QualificationName = qualification.QualificationName,
-        };
+            model.Id = qualification.Id;
+            model.QualificationReference = qualification.Qan;
+            model.QualificationName = qualification.QualificationName;
 
-        foreach (var item in qualification.QualificationVersions)
-        {
-            model.QualificationVersionsList.Add(new QualificationVersions
+            foreach (var item in qualification.QualificationVersions)
             {
-                Id = item.Id,
-                QualificationId = item.QualificationId,
-                LastUpdatedDate = item.LastUpdatedDate,
-                UiLastUpdatedDate = item.UiLastUpdatedDate,
-                InsertedDate = item.InsertedDate,
-                Version = item.Version
-            });
+                model.QualificationVersionsList.Add(new QualificationVersions
+                {
+                    Id = item.Id,
+                    QualificationId = item.QualificationId,
+                    LastUpdatedDate = item.LastUpdatedDate,
+                    UiLastUpdatedDate = item.UiLastUpdatedDate,
+                    InsertedDate = item.InsertedDate,
+                    Version = item.Version
+                });
+            }
         }
+
         return model;
     }
 }

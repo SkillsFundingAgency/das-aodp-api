@@ -25,6 +25,9 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                     qualificationFundingFeedback = new QualificationFundingFeedbacks
                     {
                         QualificationVersionId = request.QualificationVersionId,
+                        Comments = request.Comments,
+                        Approved = request?.Approved
+
                     };
                     await _repository.CreateAsync(qualificationFundingFeedback);
                     response.Success = true; 
