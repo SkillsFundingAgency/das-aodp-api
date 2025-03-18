@@ -17,6 +17,8 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
         {
             return await _context
                         .QualificationFundings
+                        .Include(a => a.QualificationVersion)
+                        .ThenInclude(b => b.Qualification)
                         .Include(a => a.FundingOffer)
                         .Where(v => v.QualificationVersionId == qualificationVersionId)
                         .ToListAsync();

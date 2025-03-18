@@ -144,6 +144,21 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             return await SendRequestAsync(command);
         }
 
+        [HttpPut("/api/qualifications/{qualificationVersionId}/Create-QualificationDiscussionHistory")]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> QualificationFundingOffersSummary(CreateQualificationDiscussionHistoryCommand command, Guid qualificationVersionId)
+        {
+            var response = await SendRequestAsync(new GetFeedbackForQualificationFundingByIdQuery(qualificationVersionId));
+            command.UserDisplayName = command.UserDisplayName;
+            command.ActionTypeId = command.ActionTypeId; 
+            command.Timestamp = DateTime.Now;
+
+
+            return await SendRequestAsync(command);
+        }
+
+
         private async Task<IActionResult> HandleNewQualificationCSVExport()
         {
             var result = await _mediator.Send(new GetNewQualificationsCsvExportQuery());

@@ -25,11 +25,10 @@ public class GetFeedbackForQualificationFundingByIdQueryHandler : IRequestHandle
             var qualificationFundingFeedback = await _qualificationFundingFeedbackRepository.GetByIdAsync(request.QualificationVersionId);
             if (qualificationFundingFeedback == null)
             {
-                var qualificationFundingFeedbackNew = new QualificationFundingFeedbacks
+                qualificationFundingFeedback = new QualificationFundingFeedbacks
                 {
                     QualificationVersionId = request.QualificationVersionId,
                 };
-                qualificationFundingFeedback = await _qualificationFundingFeedbackRepository.CreateAsync(qualificationFundingFeedbackNew);
             }
             var qualificationFundings = await _qualificationFundingsRepository.GetByIdAsync(request.QualificationVersionId);
 
