@@ -49,6 +49,7 @@ public partial class QualificationVersions
     public DateTime LastUpdatedDate { get; set; }
     public DateTime UiLastUpdatedDate { get; set; }
     public DateTime InsertedDate { get; set; }
+    public DateTime? InsertedTimestamp { get; set; }
     public int? Version { get; set; }
     public bool? AppearsOnPublicRegister { get; set; }
     public int? LevelId { get; set; }

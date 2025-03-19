@@ -48,6 +48,7 @@ public class GetQualificationDetailsQueryResponse
     public DateTime LastUpdatedDate { get; set; }
     public DateTime UiLastUpdatedDate { get; set; }
     public DateTime InsertedDate { get; set; }
+    public DateTime? InsertedTimestamp { get; set; }
     public int? Version { get; set; }
     public bool? AppearsOnPublicRegister { get; set; }
     public int? LevelId { get; set; }
@@ -154,6 +155,7 @@ public class GetQualificationDetailsQueryResponse
             LastUpdatedDate = entity.LastUpdatedDate,
             UiLastUpdatedDate = entity.UiLastUpdatedDate,
             InsertedDate = entity.InsertedDate,
+            InsertedTimestamp = entity.InsertedTimestamp,
             Version = entity.Version,
             AppearsOnPublicRegister = entity.AppearsOnPublicRegister,
             LevelId = entity.LevelId,
