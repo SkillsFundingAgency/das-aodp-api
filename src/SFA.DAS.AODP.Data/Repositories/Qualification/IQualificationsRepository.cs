@@ -1,4 +1,5 @@
 ﻿using SFA.DAS.AODP.Data.Entities;
+using SFA.DAS.AODP.Data.Entities.Qualification;
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification;
 
@@ -9,4 +10,6 @@ public interface IQualificationsRepository
     Task AddQualificationDiscussionHistory(Entities.Qualification.QualificationDiscussionHistory qualificationDiscussionHistory, string qualificationReference);
     Task<List<ChangedQualification>> GetChangedQualificationsAsync();
     Task UpdateQualificationStatus(string qualificationReference, string status);
+
+    Task<IEnumerable<ChangedQualificationExport>> GetChangedQualificationsExport();
 }

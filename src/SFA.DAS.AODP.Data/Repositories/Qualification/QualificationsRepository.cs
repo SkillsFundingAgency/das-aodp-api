@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Exceptions;
+using SFA.DAS.AODP.Data.Entities.Qualification;
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification;
 
@@ -15,7 +16,6 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
         return await _context.ChangedQualifications
             .ToListAsync();
     }
-
     public async Task AddQualificationDiscussionHistory(Entities.Qualification.QualificationDiscussionHistory qualificationDiscussionHistory, string qualificationReference)
     {
         var qual = await _context.Qualification.FirstOrDefaultAsync(v => v.Qan == qualificationReference);
@@ -41,5 +41,9 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
         }
         qual.Status = status;
         await _context.SaveChangesAsync();
+    }
+    public async Task<IEnumerable<ChangedQualificationExport>> GetChangedQualificationsExport()
+    {
+        return await _context.ChangedQualificationExport.ToListAsync<ChangedQualificationExport>();
     }
 }
