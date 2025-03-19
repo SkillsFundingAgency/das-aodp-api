@@ -68,40 +68,6 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
         };
     }
 
-    public async Task<QualificationDetails?> GetQualificationDetailsByIdAsync(string qualificationReference)
-    {
-        var qualification = await _context.ChangedQualifications
-            .Where(q => q.QualificationReference == qualificationReference)
-            .AsNoTracking()
-            .FirstOrDefaultAsync();
-
-        if (qualification == null)
-        {
-            return null;
-        }
-
-        return new QualificationDetails
-        {
-            QualificationReference = qualification.QualificationReference,
-            AwardingOrganisation = qualification.AwardingOrganisation,
-            Title = qualification.QualificationTitle,
-            QualificationType = qualification.QualificationType,
-            Level = qualification.Level,
-            AgeGroup = qualification.AgeGroup,
-            Subject = qualification.Subject,
-            SectorSubjectArea = qualification.SectorSubjectArea,
-            Comments = "No comments available",
-
-            // Placeholder values for missing properties
-            Id = 1,
-            Status = "New",
-            Priority = "Medium",
-            Changes = "No recent changes",
-            ProposedChanges = "None",
-            Category = "General Education"
-        };
-    }
-
     public async Task<List<ChangedExport>> GetChangedQualificationsCSVExport()
     {
         return await _context.ChangedQualificationCSVExport.ToListAsync();

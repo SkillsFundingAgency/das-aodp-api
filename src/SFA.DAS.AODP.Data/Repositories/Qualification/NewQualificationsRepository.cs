@@ -70,20 +70,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
 
         public async Task<List<QualificationExport>> GetNewQualificationsCSVExport() =>
             await _context.NewQualificationCSVExport.ToListAsync();
-
-        public async Task UpdateQualificationStatus(string qualificationReference, string status)
-        {
-            var qual = await _context.QualificationVersions
-                .Include(v => v.LifecycleStage)
-                .Include(v => v.Qualification)
-                .FirstOrDefaultAsync(v => v.LifecycleStage.Name == "New" && v.Qualification.Qan == qualificationReference);
-            if (qual is null)
-            {
-                throw new RecordWithNameNotFoundException(qualificationReference);
-            }
-            qual.Status = status;
-            await _context.SaveChangesAsync();
-        }
     }
 }
 

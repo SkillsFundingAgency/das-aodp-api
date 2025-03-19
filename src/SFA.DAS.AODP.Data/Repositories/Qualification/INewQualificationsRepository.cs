@@ -7,6 +7,5 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
     {
         Task<NewQualificationsResult> GetAllNewQualificationsAsync(int? skip = 0, int? take = 0, NewQualificationsFilter? filter = default);
         Task<List<QualificationExport>> GetNewQualificationsCSVExport();
-        Task UpdateQualificationStatus(string qualificationReference, string status);
     }
 }
