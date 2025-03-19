@@ -18,7 +18,7 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
 
         try
         {
-            if (!await _questionRepository.IsQuestionEditable(request.Id)) throw new RecordLockedException();
+            if (!await _questionRepository.IsQuestionEditableAsync(request.Id)) throw new RecordLockedException();
 
             var question = await _questionRepository.GetQuestionByIdAsync(request.Id);
 

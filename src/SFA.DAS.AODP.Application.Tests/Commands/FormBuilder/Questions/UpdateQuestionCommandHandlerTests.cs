@@ -38,7 +38,7 @@ public class UpdateQuestionCommandHandlerTests
             Hint = "",
         };
 
-        _questionRepository.Setup(v => v.IsQuestionEditable(It.Is<Guid>(v => v == request.Id)))
+        _questionRepository.Setup(v => v.IsQuestionEditableAsync(It.Is<Guid>(v => v == request.Id)))
             .ReturnsAsync(true);
 
         _questionRepository.Setup(v => v.GetQuestionByIdAsync(It.Is<Guid>(v => v == request.Id)))
@@ -67,7 +67,7 @@ public class UpdateQuestionCommandHandlerTests
         };
         var newQuestion = new Question() { Id = Guid.NewGuid() };
 
-        _questionRepository.Setup(v => v.IsQuestionEditable(It.Is<Guid>(v => v == request.Id)))
+        _questionRepository.Setup(v => v.IsQuestionEditableAsync(It.Is<Guid>(v => v == request.Id)))
             .ReturnsAsync(false);
 
         _questionRepository.Setup(v => v.GetMaxOrderByPageId(It.Is<Guid>(v => v == request.PageId)))

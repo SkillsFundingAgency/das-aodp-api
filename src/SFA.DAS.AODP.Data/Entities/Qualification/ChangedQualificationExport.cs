@@ -1,10 +1,6 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace SFA.DAS.AODP.Data.Entities.Qualification
+﻿namespace SFA.DAS.AODP.Data.Entities.Qualification
 {
-    public class QualificationExport
+    public class ChangedQualificationExport
     {
         // Identifiers and Meta Information
         public string? QualificationNumber { get; set; }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Models.Form;
 
 namespace SFA.DAS.AODP.Data.Repositories.FormBuilder;
@@ -75,7 +76,7 @@ public class RouteRepository : IRouteRepository
     }
 
 
-    public async Task<bool> IsRouteEditable(Guid id)
+    public async Task<bool> IsRouteEditableAsync(Guid id)
     {
         return await _context.Routes.AnyAsync(v => v.Id == id && v.SourceQuestion.Page.Section.FormVersion.Status == FormVersionStatus.Draft.ToString());
     }
@@ -99,6 +100,15 @@ public class RouteRepository : IRouteRepository
             entity.Id = Guid.NewGuid();
         }
         await _context.Routes.AddRangeAsync(toMigrate);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteRouteByQuestionIdAsync(Guid questionId)
+    {
+        var routes = await _context.Routes.Where(r => r.SourceQuestionId == questionId).ToListAsync();
+        if(routes.Count == 0) return;
+
+        _context.Routes.RemoveRange(routes);
         await _context.SaveChangesAsync();
     }
 }

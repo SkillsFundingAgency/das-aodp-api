@@ -4,13 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
-using SFA.DAS.AODP.Models.Qualifications;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
-using System.Reflection.Metadata;
-using Moq.EntityFrameworkCore;
-using System.Collections.Generic;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using SFA.DAS.AODP.Data.Tests.Extensions;
 
 namespace SFA.DAS.AODP.Data.Tests
 {

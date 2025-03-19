@@ -11,5 +11,4 @@ namespace SFA.DAS.AODP.Application.Queries.Application.Review
             ApplicationReviewId = applicationReviewId;
         }
     }
-
 }

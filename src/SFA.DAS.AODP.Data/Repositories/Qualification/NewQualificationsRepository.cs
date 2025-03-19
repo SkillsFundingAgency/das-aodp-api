@@ -100,8 +100,10 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             };
         }
 
-        public async Task<List<QualificationExport>> GetNewQualificationsCSVExport() =>
-            await _context.NewQualificationCSVExport.ToListAsync();
+        public async Task<IEnumerable<NewQualificationExport>> GetNewQualificationsExport()
+        {
+            return await _context.NewQualificationExport.ToListAsync<NewQualificationExport>();
+        }
     }
 }
 

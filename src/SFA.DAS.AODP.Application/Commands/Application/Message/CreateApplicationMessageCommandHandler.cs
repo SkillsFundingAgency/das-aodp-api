@@ -26,9 +26,6 @@ public class CreateApplicationMessageCommandHandler : IRequestHandler<CreateAppl
 
         try
         {
-            var application = await _applicationRepository.GetByIdAsync(request.ApplicationId);
-            application.UpdatedAt = DateTime.UtcNow;
-
             if (!Enum.TryParse(request.UserType, true, out UserType userType))
                 throw new ArgumentException($"Invalid User Type: {request.UserType}");
 
@@ -41,6 +38,10 @@ public class CreateApplicationMessageCommandHandler : IRequestHandler<CreateAppl
 
             if (!canUserCreateMessage)
                 throw new ArgumentException($"User of type {request.UserType} cannot create message type of {request.MessageType}");
+
+            var application = await _applicationRepository.GetByIdAsync(request.ApplicationId);
+            application.UpdatedAt = DateTime.UtcNow;
+            if (userType != UserType.AwardingOrganisation && messageTypeConfiguration.SharedWithAwardingOrganisation) application.NewMessage = true;
 
             var messageId = await _messageRepository.CreateAsync(new()
             {
@@ -57,7 +58,7 @@ public class CreateApplicationMessageCommandHandler : IRequestHandler<CreateAppl
             });
 
             HandleActionMessages(application, messageType);
-            await HandleReviewUpdate(application.Id, messageTypeConfiguration, messageType);
+            await HandleReviewUpdate(application.Id, messageTypeConfiguration, messageType, userType);
             await _applicationRepository.UpdateAsync(application);
 
             response.Value = new() { Id = messageId };
@@ -73,7 +74,7 @@ public class CreateApplicationMessageCommandHandler : IRequestHandler<CreateAppl
         return response;
     }
 
-    private async Task HandleReviewUpdate(Guid applicationId, MessageTypeConfiguration messageTypeConfiguration, MessageType messageType)
+    private async Task HandleReviewUpdate(Guid applicationId, MessageTypeConfiguration messageTypeConfiguration, MessageType messageType, UserType sourceUserType)
     {
         var review = await _reviewRepository.GetByApplicationIdAsync(applicationId);
         if (review == null) return;
@@ -82,15 +83,15 @@ public class CreateApplicationMessageCommandHandler : IRequestHandler<CreateAppl
         foreach (var feedback in review.ApplicationReviewFeedbacks ?? [])
         {
             bool updateRequired = false;
-            if (feedback.Type == UserType.Ofqual.ToString() && messageTypeConfiguration.SharedWithOfqual)
+            if (feedback.Type == UserType.Ofqual.ToString() && messageTypeConfiguration.SharedWithOfqual && sourceUserType != UserType.Ofqual)
             {
                 updateRequired = true;
             }
-            else if (feedback.Type == UserType.SkillsEngland.ToString() && messageTypeConfiguration.SharedWithSkillsEngland)
+            else if (feedback.Type == UserType.SkillsEngland.ToString() && messageTypeConfiguration.SharedWithSkillsEngland && sourceUserType != UserType.SkillsEngland)
             {
                 updateRequired = true;
             }
-            else if (feedback.Type == UserType.Qfau.ToString() && messageTypeConfiguration.SharedWithDfe)
+            else if (feedback.Type == UserType.Qfau.ToString() && messageTypeConfiguration.SharedWithDfe && sourceUserType != UserType.Qfau)
             {
                 updateRequired = true;
             }

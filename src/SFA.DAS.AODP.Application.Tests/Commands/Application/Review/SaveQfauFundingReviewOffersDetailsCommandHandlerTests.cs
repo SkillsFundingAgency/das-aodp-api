@@ -10,10 +10,11 @@ public class SaveQfauFundingReviewOffersDetailsCommandHandlerTests
 {
     private readonly Mock<IApplicationReviewFundingRepository> _applicationReviewFundingRepository = new();
     private readonly SaveQfauFundingReviewOffersDetailsCommandHandler _handler;
+    private readonly Mock<IApplicationReviewFeedbackRepository> _applicationReviewFeedbackRepository = new();
 
     public SaveQfauFundingReviewOffersDetailsCommandHandlerTests()
     {
-        _handler = new(_applicationReviewFundingRepository.Object);
+        _handler = new(_applicationReviewFundingRepository.Object, _applicationReviewFeedbackRepository.Object);
     }
 
     [Fact]

@@ -5,22 +5,22 @@ using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 
-public class DeleteFormVersionCommandHandler : IRequestHandler<DeleteFormVersionCommand, BaseMediatrResponse<EmptyResponse>>
+public class DeleteFormCommandHandler : IRequestHandler<DeleteFormCommand, BaseMediatrResponse<EmptyResponse>>
 {
-    private readonly IFormVersionRepository _formVersionRepository;
+    private readonly IFormRepository _formRepository;
 
-    public DeleteFormVersionCommandHandler(IFormVersionRepository formVersionRepository)
+    public DeleteFormCommandHandler(IFormRepository formRepository)
     {
-        _formVersionRepository = formVersionRepository;
+        _formRepository = formRepository;
     }
 
-    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(DeleteFormVersionCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(DeleteFormCommand request, CancellationToken cancellationToken)
     {
         var response = new BaseMediatrResponse<EmptyResponse>();
 
         try
         {
-            var success = await _formVersionRepository.Archive(request.FormVersionId);
+            await _formRepository.Archive(request.FormId);
             response.Success = true;
         }
         catch (RecordNotFoundException ex)
