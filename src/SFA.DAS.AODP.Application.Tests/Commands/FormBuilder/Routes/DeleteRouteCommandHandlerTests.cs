@@ -4,47 +4,45 @@ using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
 namespace SFA.DAS.AODP.Application.Tests.Commands.FormBuilder.Routes;
 
-public class ConfigureRoutingForQuestionCommandHandlerTests
+public class DeleteRouteCommandHandlerTests
 {
     public Mock<IRouteRepository> _routeRepository = new Mock<IRouteRepository>();
     public Mock<IQuestionRepository> _questionRepository = new Mock<IQuestionRepository>();
-    public ConfigureRoutingForQuestionCommandHandler _configureRoutingForQuestionCommandHandler;
+    public DeleteRouteCommandHandler _deleteRouteCommandHandler;
 
-    public ConfigureRoutingForQuestionCommandHandlerTests()
+    public DeleteRouteCommandHandlerTests()
     {
-        _configureRoutingForQuestionCommandHandler = new(_routeRepository.Object, _questionRepository.Object);
+        _deleteRouteCommandHandler = new(_routeRepository.Object, _questionRepository.Object);
     }
 
     [Fact]
-    public async Task Test_Configure_Routes_For_Questions()
+    public async Task Test_Deletes_Routes_For_Questions()
     {
-        var request = new ConfigureRoutingForQuestionCommand()
+        var request = new DeleteRouteCommand()
         {
             QuestionId = Guid.NewGuid(),
-            Routes = new()
         };
         _questionRepository.Setup(v => v.IsQuestionEditableAsync(It.Is<Guid>(v => v == request.QuestionId)))
             .ReturnsAsync(true);
-        _routeRepository.Setup(v => v.UpsertAsync(It.IsAny<List<Data.Entities.FormBuilder.Route>>()))
+        _routeRepository.Setup(v => v.DeleteRouteByQuestionIdAsync(request.QuestionId))
             .Returns(Task.CompletedTask);
 
-        var result = await _configureRoutingForQuestionCommandHandler.Handle(request, default);
+        var result = await _deleteRouteCommandHandler.Handle(request, default);
 
         Assert.True(result.Success);
     }
 
     [Fact]
-    public async Task Test_Configure_Routes_For_Question_Erros_When_Question_Locked()
+    public async Task Test_Delete_Routes_For_Question_Errors_When_Question_Locked()
     {
-        var request = new ConfigureRoutingForQuestionCommand()
+        var request = new DeleteRouteCommand()
         {
             QuestionId = Guid.NewGuid(),
-            Routes = new()
         };
         _questionRepository.Setup(v => v.IsQuestionEditableAsync(It.Is<Guid>(v => v == request.QuestionId)))
             .ReturnsAsync(false);
 
-        var result = await _configureRoutingForQuestionCommandHandler.Handle(request, default);
+        var result = await _deleteRouteCommandHandler.Handle(request, default);
 
         Assert.False(result.Success);
     }

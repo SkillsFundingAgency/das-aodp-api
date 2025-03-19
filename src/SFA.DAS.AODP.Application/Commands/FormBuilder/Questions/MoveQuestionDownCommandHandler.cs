@@ -17,7 +17,7 @@ public class MoveQuestionDownCommandHandler(IQuestionRepository questionReposito
 
         try
         {
-            if (!await _questionRepository.IsQuestionEditable(request.QuestionId)) throw new RecordLockedException();
+            if (!await _questionRepository.IsQuestionEditableAsync(request.QuestionId)) throw new RecordLockedException();
 
             var res = await _questionRepository.MoveQuestionOrderDown(request.QuestionId);
             response.Success = true;
