@@ -60,12 +60,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
                 .AsSplitQuery()
                 .Select(aqa => new ApplicationQuestionAnswersDTO
                 {
-                    SectionId = aqa.ApplicationPage.Page.Section.Id,
-                    SectionOrder = aqa.ApplicationPage.Page.Section.Order,
-                    SectionTitle = aqa.ApplicationPage.Page.Section.Title,
-                    PageId = aqa.ApplicationPage.Page.Id,
-                    PageOrder = aqa.ApplicationPage.Page.Order,
-                    PageTitle = aqa.ApplicationPage.Page.Title,
                     QuestionId = aqa.Question.Id,
                     QuestionTitle = aqa.Question.Title,
                     QuestionType = aqa.Question.Type,
@@ -80,14 +74,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
 
         public class ApplicationQuestionAnswersDTO
         {
-            public Guid SectionId { get; set; }
-            public int SectionOrder { get; set; }
-            public string SectionTitle { get; set; }
-
-            public Guid PageId { get; set; }
-            public int PageOrder { get; set; }
-            public string PageTitle { get; set; }
-
             public Guid QuestionId { get; set; }
             public string QuestionTitle { get; set; }
             public string QuestionType { get; set; }
