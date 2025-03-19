@@ -11,7 +11,6 @@ public class ChangedQualification
     public string? AgeGroup { get; set; } = string.Empty;
     public string? Subject { get; set; } = string.Empty;
     public string? SectorSubjectArea { get; set; } = string.Empty;
-    public string? ChangedFieldNames { get; set; } = string.Empty;
-    public string? Status { get; set; } = string.Empty;
-    public Guid StatusId { get; set; } 
+    public string? ChangedFieldNames { get; set; }
+    public string? Status { get; set; }
 }

@@ -2,6 +2,7 @@
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
+using SFA.DAS.AODP.Models.Application;
 using SFA.DAS.AODP.Models.Form;
 
 public class CreateApplicationCommandHandler : IRequestHandler<CreateApplicationCommand, BaseMediatrResponse<CreateApplicationCommandResponse>>
@@ -32,7 +33,10 @@ public class CreateApplicationCommandHandler : IRequestHandler<CreateApplication
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 OrganisationId = request.OrganisationId,
-                QualificationNumber = request.QualificationNumber
+                QualificationNumber = request.QualificationNumber,
+                AwardingOrganisationName = request.OrganisationName,
+                AwardingOrganisationUkprn = request.OrganisationUkprn,
+                Status = ApplicationStatus.Draft.ToString()
             });
 
             response.Value = new() { Id = form.Id };

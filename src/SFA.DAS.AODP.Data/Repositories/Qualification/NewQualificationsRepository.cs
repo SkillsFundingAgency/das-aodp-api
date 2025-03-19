@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Enum;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification
@@ -14,7 +16,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             _context = context;
         }
 
-        public async Task<NewQualificationsResult> GetAllNewQualificationsAsync(int? skip = 0, int? take = 0, QualificationsFilter? filter = default)
+        public async Task<NewQualificationsResult> GetAllNewQualificationsAsync(int? skip = 0, int? take = 0, NewQualificationsFilter? filter = default)
         {
             var query = _context.QualificationNewReviewRequired.AsQueryable();
             var countQuery = _context.QualificationNewReviewRequired.AsQueryable();
@@ -66,42 +68,22 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             };
         }
 
-        public async Task<QualificationDetails?> GetQualificationDetailsByIdAsync(string qualificationReference)
-        {
-            var qualification = await _context.QualificationNewReviewRequired
-                .Where(q => q.QualificationReference == qualificationReference)
-                .AsNoTracking()
-                .FirstOrDefaultAsync();
-
-            if (qualification == null)
-            {
-                return null;
-            }
-
-            return new QualificationDetails
-            {
-                QualificationReference = qualification.QualificationReference,
-                AwardingOrganisation = qualification.AwardingOrganisation,
-                Title = qualification.QualificationTitle,
-                QualificationType = qualification.QualificationType,
-                Level = qualification.Level,
-                AgeGroup = qualification.AgeGroup,
-                Subject = qualification.Subject,
-                SectorSubjectArea = qualification.SectorSubjectArea,
-                Comments = "No comments available",
-
-                // Placeholder values for missing properties
-                Id = 1,
-                Status = "New",
-                Priority = "Medium",
-                Changes = "No recent changes",
-                ProposedChanges = "None",
-                Category = "General Education"
-            };
-        }
-
         public async Task<List<QualificationExport>> GetNewQualificationsCSVExport() =>
             await _context.NewQualificationCSVExport.ToListAsync();
+
+        public async Task UpdateQualificationStatus(string qualificationReference, string status)
+        {
+            var qual = await _context.QualificationVersions
+                .Include(v => v.LifecycleStage)
+                .Include(v => v.Qualification)
+                .FirstOrDefaultAsync(v => v.LifecycleStage.Name == "New" && v.Qualification.Qan == qualificationReference);
+            if (qual is null)
+            {
+                throw new RecordWithNameNotFoundException(qualificationReference);
+            }
+            qual.Status = status;
+            await _context.SaveChangesAsync();
+        }
     }
 }
 

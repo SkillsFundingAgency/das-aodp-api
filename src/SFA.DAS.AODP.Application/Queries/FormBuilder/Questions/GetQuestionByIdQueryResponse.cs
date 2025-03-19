@@ -165,73 +165,9 @@ public class GetQuestionByIdQueryResponse()
         return question;
     }
 
-    public static GetQuestionByIdQueryResponse Map(Question entity, List<View_QuestionRoutingDetail> questionRoutes)
+    public static GetQuestionByIdQueryResponse MapWithRoutes(Question entity, List<View_QuestionRoutingDetail> questionRoutes)
     {
-        var question = new GetQuestionByIdQueryResponse()
-        {
-            Id = entity.Id,
-            PageId = entity.PageId,
-            Title = entity.Title,
-            Key = entity.Key,
-            Hint = entity.Hint,
-            Helper = entity.Helper,
-            HelperHTML = entity.HelperHTML,
-            Order = entity.Order,
-            Required = entity.Required,
-            Type = entity.Type,
-        };
-
-        if ((question.Type == QuestionType.TextArea.ToString() || question.Type == QuestionType.Text.ToString()) && entity.QuestionValidation != null)
-        {
-            question.TextInput = new()
-            {
-                MinLength = entity.QuestionValidation.MinLength,
-                MaxLength = entity.QuestionValidation.MaxLength,
-            };
-        }
-
-        else if ((question.Type == QuestionType.Radio.ToString() || question.Type == QuestionType.MultiChoice.ToString()) && entity.QuestionOptions != null)
-        {
-            question.Options = new();
-            foreach (var option in entity.QuestionOptions)
-            {
-                question.Options.Add(new()
-                {
-                    Id = option.Id,
-                    Value = option.Value,
-                    Order = option.Order,
-                });
-            }
-
-
-            if (question.Type == QuestionType.MultiChoice.ToString())
-            {
-                question.Checkbox = new()
-                {
-                    MaxNumberOfOptions = entity.QuestionValidation?.MaxNumberOfOptions ?? 0,
-                    MinNumberOfOptions = entity.QuestionValidation?.MinNumberOfOptions ?? 0,
-                };
-            }
-        }
-        else if (question.Type == QuestionType.Number.ToString())
-        {
-            question.NumberInput = new()
-            {
-                GreaterThanOrEqualTo = entity.QuestionValidation?.NumberGreaterThanOrEqualTo,
-                LessThanOrEqualTo = entity.QuestionValidation?.NumberLessThanOrEqualTo,
-                NotEqualTo = entity.QuestionValidation?.NumberNotEqualTo,
-            };
-        }
-        else if (question.Type == QuestionType.Date.ToString())
-        {
-            question.DateInput = new()
-            {
-                GreaterThanOrEqualTo = entity.QuestionValidation?.DateGreaterThanOrEqualTo,
-                LessThanOrEqualTo = entity.QuestionValidation?.DateLessThanOrEqualTo,
-                MustBeInFuture = entity.QuestionValidation?.DateMustBeInFuture,
-                MustBeInPast = entity.QuestionValidation?.DateMustBeInPast,
-            };
-        }
+        GetQuestionByIdQueryResponse question = entity;
 
         if (questionRoutes != null)
         {

@@ -1,8 +1,11 @@
-﻿using MediatR;
+﻿using AutoFixture;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Queries.Qualification;
+using SFA.DAS.AODP.Application.Commands.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
+using SFA.DAS.AODP.Application.Commands;
 
 namespace SFA.DAS.AODP.Api.Controllers.Qualification
 {
@@ -72,37 +75,36 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             }
         }
 
-        [HttpGet("{status}/{qualificationReference}")]
+        [HttpGet("{qualificationReference}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(BaseMediatrResponse<GetQualificationDetailsQueryResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(BaseMediatrResponse<GetChangedQualificationDetailsResponse>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetQualificationDetails(string status,string? qualificationReference)
+        public async Task<IActionResult> GetQualificationDetails(string? qualificationReference)
         {
             if (string.IsNullOrWhiteSpace(qualificationReference))
             {
                 _logger.LogWarning("Qualification reference is empty");
                 return BadRequest(new { message = "Qualification reference cannot be empty" });
             }
-
-            if (status == "new")
+            var query = new GetQualificationDetailsQuery()
             {
-                var query = new GetQualificationDetailsQuery()
-                {
-                    QualificationReference = qualificationReference
-                };
-                return await SendRequestAsync(query);
+                QualificationReference = qualificationReference
+            };
+            return await SendRequestAsync(query);
+        }
 
-            }
-            else if (status=="changed")
-                {
-                var query = new GetChangedQualificationDetailsQuery()
-                {
-                    QualificationReference = qualificationReference
-                };
-                return await SendRequestAsync(query);
+        [HttpPost("qualificationdiscussionhistory")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddQualification([FromBody] AddQualificationDiscussionHistoryCommand qualificationDiscussionHistory)
+        {
+            return await SendRequestAsync(qualificationDiscussionHistory);
+        }
 
-            }
-            return BadRequest(new { message = "Qualification reference cannot be empty" });
+        [HttpPost("qualificationstatus")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateQualificationStatus([FromBody] UpdateQualificationStatusCommand qualificationStatus)
+        {
+            return await SendRequestAsync(qualificationStatus);
         }
 
         [HttpGet("ChangedQualifications/{qualificationReference}")]
@@ -131,22 +133,16 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetQualificationCSVExportData([FromQuery] string? status)
-        {
-            var validationResult = ProcessAndValidateStatus(status);
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(new { message = validationResult.ErrorMessage });
-            }
-
-            IActionResult response = validationResult.ProcessedStatus switch
+        {            
+            IActionResult response = status?.ToLower() switch
             {
                 "new" => await HandleNewQualificationCSVExport(),
                 "changed" => await HandleChangedQualificationCSVExport(),
-                _ => BadRequest(new { message = $"Invalid status: {validationResult.ProcessedStatus}" })
+                _ => BadRequest(new { message = $"Invalid status param: {status}" })
             };
 
             return response;
-        }
+        }              
 
         private async Task<IActionResult> HandleNewQualificationCSVExport()
         {
@@ -187,26 +183,8 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
 
             return Ok(result);
         }
-        private StatusValidationResult ProcessAndValidateStatus(string? status)
-        {
-            status = status?.Trim().ToLower();
 
-            if (string.IsNullOrEmpty(status))
-            {
-                _logger.LogWarning("Qualification status is missing.");
-                return new StatusValidationResult
-                {
-                    IsValid = false,
-                    ErrorMessage = "Qualification status cannot be empty."
-                };
-            }
 
-            return new StatusValidationResult
-            {
-                IsValid = true,
-                ProcessedStatus = status
-            };
-        }
         private ParamValidationResult ValidateQualificationParams(string? status, int? skip, int? take, string? name, string? organisation, string? qan)
         {
             var result = new ParamValidationResult() { IsValid = true };
@@ -243,12 +221,6 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
         }
 
         private class ParamValidationResult
-        {
-            public bool IsValid { get; set; }
-            public string? ErrorMessage { get; set; }
-            public string? ProcessedStatus { get; set; }
-        }
-        private class StatusValidationResult
         {
             public bool IsValid { get; set; }
             public string? ErrorMessage { get; set; }
