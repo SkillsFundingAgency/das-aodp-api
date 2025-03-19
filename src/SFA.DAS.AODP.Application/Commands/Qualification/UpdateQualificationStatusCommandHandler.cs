@@ -23,7 +23,7 @@ public class UpdateQualificationStatusCommandHandler : IRequestHandler<UpdateQua
 
         try
         {
-            await _qualificationsRepository.UpdateQualificationStatus(request.QualificationReference, request.Status);
+            await _qualificationsRepository.UpdateQualificationStatus(request.QualificationReference, request.ProcessStatusId);
             response.Success = true;
         }
         catch (RecordWithNameNotFoundException ex)
@@ -31,6 +31,12 @@ public class UpdateQualificationStatusCommandHandler : IRequestHandler<UpdateQua
             response.Success = false;
             response.ErrorMessage = ex.Message;
             response.InnerException = new NotFoundWithNameException(request.QualificationReference);
+        }
+        catch (NoForeignKeyException ex)
+        {
+            response.Success = false;
+            response.ErrorMessage = ex.Message;
+            response.InnerException = new DependantNotFoundException(request.ProcessStatusId);
         }
         catch (Exception ex)
         {

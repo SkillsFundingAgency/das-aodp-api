@@ -29,7 +29,7 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
         await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateQualificationStatus(string qualificationReference, string status)
+    public async Task UpdateQualificationStatus(string qualificationReference, Guid processStatusId)
     {
         var qual = await _context.QualificationVersions
             .Include(v => v.LifecycleStage)
@@ -39,7 +39,11 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
         {
             throw new RecordWithNameNotFoundException(qualificationReference);
         }
-        qual.Status = status;
+        if (!_context.ProcessStatus.Any(v => v.Id == processStatusId))
+        {
+            throw new NoForeignKeyException(processStatusId);
+        }
+        qual.ProcessStatusId = processStatusId;
         await _context.SaveChangesAsync();
     }
     public async Task<IEnumerable<ChangedQualificationExport>> GetChangedQualificationsExport()

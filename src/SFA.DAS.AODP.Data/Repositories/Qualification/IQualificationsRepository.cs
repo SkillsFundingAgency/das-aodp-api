@@ -9,7 +9,7 @@ public interface IQualificationsRepository
 {
     Task AddQualificationDiscussionHistory(Entities.Qualification.QualificationDiscussionHistory qualificationDiscussionHistory, string qualificationReference);
     Task<List<ChangedQualification>> GetChangedQualificationsAsync();
-    Task UpdateQualificationStatus(string qualificationReference, string status);
+    Task UpdateQualificationStatus(string qualificationReference, Guid processStatusId);
 
     Task<IEnumerable<ChangedQualificationExport>> GetChangedQualificationsExport();
 }
