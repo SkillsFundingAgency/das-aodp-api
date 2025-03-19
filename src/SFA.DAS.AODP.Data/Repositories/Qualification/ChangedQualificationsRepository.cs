@@ -91,7 +91,6 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
             Subject = qualification.Subject,
             SectorSubjectArea = qualification.SectorSubjectArea,
             Comments = "No comments available",
-            StatusId=qualification.StatusId,
             // Placeholder values for missing properties
             Id = 1,
             Status = "New",
