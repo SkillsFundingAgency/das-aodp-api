@@ -51,7 +51,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                         msgCommand.MessageType = MessageType.SkillsEnglandOwnerUpdated.ToString();
                         break;
                     case UserType.Ofqual:
-                        msgCommand.MessageType = MessageType.OfqualFeedbackSubmitted.ToString();
+                        msgCommand.MessageType = MessageType.OfqualOwnerUpdated.ToString();
                         break;
                     case UserType.Qfau:
                         msgCommand.MessageType = MessageType.QfauOwnerUpdated.ToString();
