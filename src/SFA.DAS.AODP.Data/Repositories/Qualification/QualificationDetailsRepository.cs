@@ -13,6 +13,7 @@ public class QualificationDetailsRepository(IApplicationDbContext context) : IQu
     {
         var qualVersion = await _context.QualificationVersions
             .Include(v => v.LifecycleStage)
+            .Include(v => v.ProcessStatus)
             .Include(v => v.Organisation)
             .Include(v => v.VersionFieldChanges)
             .Include(v => v.Qualification)
