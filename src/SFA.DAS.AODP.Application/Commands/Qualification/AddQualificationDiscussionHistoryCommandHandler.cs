@@ -25,7 +25,6 @@ public class AddQualificationDiscussionHistoryCommandHandler : IRequestHandler<A
         {
             var qualificationDiscussionHistory = new QualificationDiscussionHistory()
             {
-                ActionTypeId = request.ActionTypeId,
                 UserDisplayName = request.UserDisplayName,
                 Notes = request.Notes,
             };

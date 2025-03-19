@@ -25,8 +25,23 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
         }
         qualificationDiscussionHistory.QualificationId = qual.Id;
         qualificationDiscussionHistory.Timestamp = DateTime.Now;
+        qualificationDiscussionHistory.ActionTypeId = await GetActionTypeId(qual.Id);
         _context.QualificationDiscussionHistory.Add(qualificationDiscussionHistory);
         await _context.SaveChangesAsync();
+    }
+
+    private async Task<Guid> GetActionTypeId(Guid qualificationId)
+    {
+        var lastItem = await _context.QualificationDiscussionHistory
+            .OrderByDescending(v => v.Timestamp)
+            .FirstOrDefaultAsync(v => v.QualificationId == qualificationId);
+        if (lastItem is not null)
+        {
+            return lastItem.ActionTypeId;
+        }
+        return await _context.ActionType.Where(v => v.Description == "No Action Required")
+            .Select(v => v.Id)
+            .FirstOrDefaultAsync();
     }
 
     public async Task UpdateQualificationStatus(string qualificationReference, Guid processStatusId)
