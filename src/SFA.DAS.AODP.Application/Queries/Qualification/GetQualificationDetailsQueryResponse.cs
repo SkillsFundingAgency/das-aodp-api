@@ -7,6 +7,10 @@ public class GetQualificationDetailsQueryResponse
     public Guid Id { get; set; }
     public Guid QualificationId { get; set; }
     public Guid VersionFieldChangesId { get; set; }
+    public string AgeGroup { get; set; }
+
+    public string? VersionFieldChanges { get; set; }
+    public string? VersionType { get; set; }
     public Guid ProcessStatusId { get; set; }
     public int AdditionalKeyChangesReceivedFlag { get; set; }
     public Guid LifecycleStageId { get; set; }
@@ -111,6 +115,7 @@ public class GetQualificationDetailsQueryResponse
         return new GetQualificationDetailsQueryResponse
         {
             Id = entity.Id,
+            AgeGroup = GetAgeGroup(entity),
             QualificationId = entity.QualificationId,
             VersionFieldChangesId = entity.VersionFieldChangesId,
             ProcessStatusId = entity.ProcessStatusId,
@@ -122,6 +127,7 @@ public class GetQualificationDetailsQueryResponse
             Type = entity.Type,
             Ssa = entity.Ssa,
             Level = entity.Level,
+            VersionFieldChanges = entity.VersionFieldChanges.ChangedFieldNames,
             SubLevel = entity.SubLevel,
             EqfLevel = entity.EqfLevel,
             GradingType = entity.GradingType,
@@ -166,6 +172,7 @@ public class GetQualificationDetailsQueryResponse
             EighteenPlus = entity.EighteenPlus,
             NineteenPlus = entity.NineteenPlus,
             ImportStatus = entity.ImportStatus,
+
             Stage = new LifecycleStage
             {
                 Id = entity.LifecycleStage.Id,
@@ -204,5 +211,27 @@ public class GetQualificationDetailsQueryResponse
                     }).ToList()
             }
         };
+    }
+
+    private static string GetAgeGroup(QualificationVersions entity)
+    {
+        if (entity.PreSixteen == true)
+        {
+            return "<16";
+
+        }
+        else if (entity.SixteenToEighteen == true)
+        {
+            return "16 - 18";
+        }
+        else if (entity.EighteenPlus == true)
+        {
+            return "18+";
+        }
+        else if (entity.NineteenPlus == true)
+        {
+            return "19+";
+        }
+        else return "";
     }
 }
