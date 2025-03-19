@@ -10,6 +10,8 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
 
         public Guid QualificationId { get; set; }
 
+        public string? QualificationReference { get; set; }
+
         public Guid ActionTypeId { get; set; }
 
         public string? UserDisplayName { get; set; }
