@@ -23,7 +23,12 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
 
             try
             {
-                var qualificationFundings = await _qualificationFundingsRepository.GetByIdAsync(request.QualificationVersionId);
+                if (string.IsNullOrEmpty(request.QualificationReference))
+                {
+                    response.ErrorMessage = "Qualification reference is required";
+                    response.Success = false;
+                    return response;
+                }
                 var qualification = await _qualificationRepository.GetByIdAsync(request.QualificationReference);
                 if (qualification == null)
                 {
@@ -33,6 +38,7 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                 }
                 request.QualificationId = qualification.Id;
 
+                var qualificationFundings = await _qualificationFundingsRepository.GetByIdAsync(request.QualificationVersionId);
                 string fundedOfferName = "";
                 if (qualificationFundings != null && qualificationFundings.Count != 0)
                 {
@@ -40,6 +46,10 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                     {
                         fundedOfferName += qf.FundingOffer.Name + ", StartDate:" + qf.StartDate?.ToString("dd-MM-yyyy") + ", EndDate:" + qf.EndDate?.ToString("dd-MM-yyyy");
                     }
+                }
+                else
+                {
+                    fundedOfferName = "No funding offers";
                 }
                 await _repository.CreateAsync(new QualificationDiscussionHistory
                 {
