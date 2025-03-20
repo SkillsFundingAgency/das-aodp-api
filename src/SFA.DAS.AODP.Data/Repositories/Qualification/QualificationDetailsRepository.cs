@@ -17,8 +17,6 @@ public class QualificationDetailsRepository(IApplicationDbContext context) : IQu
             .Include(v => v.Organisation)
             .Include(v => v.VersionFieldChanges)
             .Include(v => v.Qualification)
-                .ThenInclude(v => v.QualificationDiscussionHistories)
-                    .ThenInclude(v => v.ActionType)
             .OrderByDescending(v => v.Version)
             .FirstOrDefaultAsync(v => v.Qualification.Qan == qualificationReference);
 

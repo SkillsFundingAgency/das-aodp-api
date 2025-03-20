@@ -61,6 +61,8 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
         qual.ProcessStatusId = processStatusId;
         await _context.SaveChangesAsync();
     }
+
+    public async Task<List<ProcessStatus>> GetProcessingStatuses() => await _context.ProcessStatus.ToListAsync();
     public async Task<IEnumerable<ChangedQualificationExport>> GetChangedQualificationsExport()
     {
         return await _context.ChangedQualificationExport.ToListAsync<ChangedQualificationExport>();
