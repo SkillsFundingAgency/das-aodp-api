@@ -23,7 +23,7 @@ public class MoveQuestionDownCommandHandlerTests
         {
             QuestionId = Guid.NewGuid()
         };
-        _questionRepository.Setup(v => v.IsQuestionEditable(It.Is<Guid>(v => v == request.QuestionId)))
+        _questionRepository.Setup(v => v.IsQuestionEditableAsync(It.Is<Guid>(v => v == request.QuestionId)))
             .Returns(Task.FromResult(true));
         _questionRepository.Setup(v => v.MoveQuestionOrderDown(It.Is<Guid>(v => v == request.QuestionId)))
             .Returns(Task.FromResult(true));
@@ -40,7 +40,7 @@ public class MoveQuestionDownCommandHandlerTests
         {
             QuestionId = Guid.NewGuid()
         };
-        _questionRepository.Setup(v => v.IsQuestionEditable(It.Is<Guid>(v => v == request.QuestionId)))
+        _questionRepository.Setup(v => v.IsQuestionEditableAsync(It.Is<Guid>(v => v == request.QuestionId)))
             .Returns(Task.FromResult(true));
         _questionRepository.Setup(v => v.MoveQuestionOrderDown(It.Is<Guid>(v => v == request.QuestionId)))
             .Throws(new Exception("Test"));

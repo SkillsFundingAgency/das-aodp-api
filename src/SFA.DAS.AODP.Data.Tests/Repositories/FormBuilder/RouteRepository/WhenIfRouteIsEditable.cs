@@ -43,7 +43,7 @@ public class WhenIfTheRouteIsEditable
         _context.SetupGet(c => c.Routes).ReturnsDbSet(dbSet);
 
         // Act
-        var result = await _sut.IsRouteEditable(RouteId);
+        var result = await _sut.IsRouteEditableAsync(RouteId);
 
         // Assert
         Assert.True(result);

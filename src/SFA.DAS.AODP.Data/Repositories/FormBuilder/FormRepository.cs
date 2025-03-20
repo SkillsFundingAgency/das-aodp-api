@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Exceptions;
+using SFA.DAS.AODP.Models.Form;
 
 namespace SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
@@ -70,5 +71,18 @@ public class FormRepository : IFormRepository
         await _context.SaveChangesAsync();
 
         return true;
+    }
+
+    /// <summary>
+    /// Sets the status of a form with a given Id to the status of archived. 
+    /// </summary>
+    /// <param name="formVersionId"></param>
+    /// <exception cref="RecordNotFoundException"></exception>
+    public async Task Archive(Guid formId)
+    {
+        var form = await _context.Forms
+        .FirstOrDefaultAsync(v => v.Id == formId) ?? throw new RecordNotFoundException(formId);
+        form.Status = FormStatus.Deleted.ToString();
+        await _context.SaveChangesAsync();
     }
 }
