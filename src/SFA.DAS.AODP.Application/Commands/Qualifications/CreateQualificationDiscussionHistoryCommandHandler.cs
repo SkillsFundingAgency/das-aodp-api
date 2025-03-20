@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 
 namespace SFA.DAS.AODP.Application.Commands.Qualifications
@@ -29,13 +30,8 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                     response.Success = false;
                     return response;
                 }
-                var qualification = await _qualificationRepository.GetByIdAsync(request.QualificationReference);
-                if (qualification == null)
-                {
-                    response.ErrorMessage = "Qualification not found";
-                    response.Success = false;
-                    return response;
-                }
+                var qualification = await _qualificationRepository.GetByIdAsync(request.QualificationReference) ?? throw new RecordWithNameNotFoundException("Qualification not found"); ;
+                
                 request.QualificationId = qualification.Id;
 
                 var qualificationFundings = await _qualificationFundingsRepository.GetByIdAsync(request.QualificationVersionId);
@@ -44,7 +40,9 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                 {
                     foreach (var qf in qualificationFundings)
                     {
-                        fundedOfferName += qf.FundingOffer.Name + ", StartDate:" + qf.StartDate?.ToString("dd-MM-yyyy") + ", EndDate:" + qf.EndDate?.ToString("dd-MM-yyyy");
+                        fundedOfferName += qf.FundingOffer.Name +
+                            ", StartDate:" + qf.StartDate?.ToString("dd-MM-yyyy") +
+                            ", EndDate:" + qf.EndDate?.ToString("dd-MM-yyyy");
                     }
                 }
                 else

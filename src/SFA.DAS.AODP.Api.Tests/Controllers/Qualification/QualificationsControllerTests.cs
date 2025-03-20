@@ -266,8 +266,8 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var model = Assert.IsAssignableFrom<BaseMediatrResponse<GetQualificationVersionsForQualificationByReferenceQueryResponse>>(okResult.Value);
-            Assert.Equal(queryResponse.Value, model.Value);
+            var model = Assert.IsAssignableFrom<GetQualificationVersionsForQualificationByReferenceQueryResponse>(okResult.Value);
+            Assert.Equal(queryResponse.Value, model);
         }
 
 
@@ -286,8 +286,8 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var model = Assert.IsAssignableFrom<BaseMediatrResponse<GetFeedbackForQualificationFundingByIdQueryResponse>>(okResult.Value);
-            Assert.Equal(queryResponse.Value, model.Value);
+            var model = Assert.IsAssignableFrom<GetFeedbackForQualificationFundingByIdQueryResponse>(okResult.Value);
+            Assert.Equal(queryResponse.Value, model);
         }
 
 

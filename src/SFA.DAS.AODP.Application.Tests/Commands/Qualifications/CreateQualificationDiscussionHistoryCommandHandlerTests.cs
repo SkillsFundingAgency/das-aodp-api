@@ -114,8 +114,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 
             // Assert
             Assert.False(result.Success);
-            Assert.Equal("Qualification not found", result.ErrorMessage);
-        }
+            Assert.Equal("Qualification not found", ((Data.Exceptions.RecordWithNameNotFoundException)result.InnerException).Name);
+         }
     }
 
     public class DateOnlySpecimenBuilder : ISpecimenBuilder

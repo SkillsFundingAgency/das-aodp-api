@@ -121,15 +121,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetQualificationVersionsForQualificationByReference(string qualificationReference)
         {
-            var result = await _mediator.Send(new GetQualificationVersionsForQualificationByReferenceQuery(qualificationReference));
-
-            if (!result.Success || result.Value == null)
-            {
-                _logger.LogWarning(result.ErrorMessage);
-                return NotFound(new { message = result.ErrorMessage });
-            }
-
-            return Ok(result);
+            return await SendRequestAsync(new GetQualificationVersionsForQualificationByReferenceQuery(qualificationReference));
         }
 
         [HttpGet("/api/qualifications/{qualificationVersionId}/feedback")]
@@ -138,15 +130,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetFeedbackForQualificationFundingById(Guid qualificationVersionId)
         {
-            var result = await _mediator.Send(new GetFeedbackForQualificationFundingByIdQuery(qualificationVersionId));
-
-            if (!result.Success || result.Value == null)
-            {
-                _logger.LogWarning(result?.ErrorMessage);
-                return NotFound(new { message = result?.ErrorMessage });
-            }
-
-            return Ok(result);
+            return await SendRequestAsync(new GetFeedbackForQualificationFundingByIdQuery(qualificationVersionId));
         }
 
         [HttpPut("/api/qualifications/{qualificationVersionId}/save-qualification-funding-offers-outcome")]
