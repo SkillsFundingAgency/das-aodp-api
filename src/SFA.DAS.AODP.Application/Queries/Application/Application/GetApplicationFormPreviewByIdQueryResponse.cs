@@ -35,6 +35,7 @@ public class GetApplicationFormPreviewByIdQueryResponse
 
     public class QuestionOption
     {
+        public Guid Id { get; set; }
         public string Value { get; set; }
     }
 
@@ -67,6 +68,7 @@ public class GetApplicationFormPreviewByIdQueryResponse
                         Required = q.Required,
                         QuestionOptions = q.QuestionOptions?.Select(opt => new QuestionOption
                         {
+                            Id = opt.Id,
                             Value = opt.Value
                         }).ToList() ?? new List<QuestionOption>()
                     }).ToList()
