@@ -26,7 +26,8 @@ public class GetApplicationByIdQueryHandler : IRequestHandler<GetApplicationById
                 Reference = result.ReferenceId,
                 Name = result.Name,
                 Owner = result.Owner,
-                QualificationNumber = result.QualificationNumber
+                QualificationNumber = result.QualificationNumber,
+                Status = result.Status
             };
             response.Success = true;
         }
