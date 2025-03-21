@@ -14,7 +14,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
     public class GetQualificationVersionsForQualificationByReferenceQueryHandlerTests
     {
         private readonly IFixture _fixture;
-        private readonly Mock<IQualificationRepository> _qualificationRepositoryMock;
+        private readonly Mock<IQualificationsRepository> _qualificationsRepositoryMock;
         private readonly GetQualificationVersionsForQualificationByReferenceQueryHandler _handler;
 
         public GetQualificationVersionsForQualificationByReferenceQueryHandlerTests()
@@ -24,9 +24,9 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 .ForEach(b => _fixture.Behaviors.Remove(b));
             _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-            _qualificationRepositoryMock = _fixture.Freeze<Mock<IQualificationRepository>>();
+            _qualificationsRepositoryMock = _fixture.Freeze<Mock<IQualificationsRepository>>();
             _handler = new GetQualificationVersionsForQualificationByReferenceQueryHandler(
-                _qualificationRepositoryMock.Object);
+                _qualificationsRepositoryMock.Object);
         }
 
         [Fact]
@@ -36,7 +36,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             var query = _fixture.Create<GetQualificationVersionsForQualificationByReferenceQuery>();
             var qualification = _fixture.Create<Data.Entities.Qualification.Qualification>();
 
-            _qualificationRepositoryMock.Setup(repo => repo.GetByIdAsync(query.QualificationReference))
+            _qualificationsRepositoryMock.Setup(repo => repo.GetByIdAsync(query.QualificationReference))
                 .ReturnsAsync(qualification);
 
             // Act
@@ -56,7 +56,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             var query = _fixture.Create<GetQualificationVersionsForQualificationByReferenceQuery>();
             var exception = new Exception("Test exception");
 
-            _qualificationRepositoryMock.Setup(repo => repo.GetByIdAsync(query.QualificationReference))
+            _qualificationsRepositoryMock.Setup(repo => repo.GetByIdAsync(query.QualificationReference))
                 .ThrowsAsync(exception);
 
             // Act
@@ -74,7 +74,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             // Arrange
             var query = _fixture.Create<GetQualificationVersionsForQualificationByReferenceQuery>();
 
-            _qualificationRepositoryMock.Setup(repo => repo.GetByIdAsync(query.QualificationReference))
+            _qualificationsRepositoryMock.Setup(repo => repo.GetByIdAsync(query.QualificationReference))
                 .ReturnsAsync((Data.Entities.Qualification.Qualification)null);
 
             // Act

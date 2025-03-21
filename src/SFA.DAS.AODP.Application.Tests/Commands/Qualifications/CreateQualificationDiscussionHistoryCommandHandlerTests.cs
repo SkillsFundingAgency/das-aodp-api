@@ -5,11 +5,7 @@ using Moq;
 using SFA.DAS.AODP.Application.Commands.Qualifications;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
+
 
 namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 {
@@ -18,7 +14,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         private readonly IFixture _fixture;
         private readonly Mock<IQualificationDiscussionHistoryRepository> _discussionHistoryRepositoryMock;
         private readonly Mock<IQualificationFundingsRepository> _qualificationFundingsRepositoryMock;
-        private readonly Mock<IQualificationRepository> _qualificationRepositoryMock;
+        private readonly Mock<IQualificationsRepository> _qualificationsRepositoryMock;
         private readonly CreateQualificationDiscussionHistoryCommandHandler _handler;
 
         public CreateQualificationDiscussionHistoryCommandHandlerTests()
@@ -31,11 +27,11 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 
             _discussionHistoryRepositoryMock = _fixture.Freeze<Mock<IQualificationDiscussionHistoryRepository>>();
             _qualificationFundingsRepositoryMock = _fixture.Freeze<Mock<IQualificationFundingsRepository>>();
-            _qualificationRepositoryMock = _fixture.Freeze<Mock<IQualificationRepository>>();
+            _qualificationsRepositoryMock = _fixture.Freeze<Mock<IQualificationsRepository>>();
             _handler = new CreateQualificationDiscussionHistoryCommandHandler(
                 _discussionHistoryRepositoryMock.Object,
                 _qualificationFundingsRepositoryMock.Object,
-                _qualificationRepositoryMock.Object);
+                _qualificationsRepositoryMock.Object);
         }
 
         [Fact]
@@ -48,7 +44,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 
             _qualificationFundingsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
                 .ReturnsAsync(fundings);
-            _qualificationRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationReference))
+            _qualificationsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationReference))
                 .ReturnsAsync(qualification);
 
             // Act
@@ -68,7 +64,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 
             _qualificationFundingsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
                 .ReturnsAsync(new List<QualificationFundings>());
-            _qualificationRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationReference))
+            _qualificationsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationReference))
                 .ReturnsAsync(qualification);
 
             // Act
@@ -106,7 +102,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 
             _qualificationFundingsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
                 .ReturnsAsync(new List<QualificationFundings>());
-            _qualificationRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationReference))
+            _qualificationsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationReference))
                 .ReturnsAsync((Qualification)null);
 
             // Act

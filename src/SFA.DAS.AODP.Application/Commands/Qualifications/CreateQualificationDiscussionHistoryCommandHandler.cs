@@ -9,13 +9,13 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
     {
         private readonly IQualificationDiscussionHistoryRepository _repository;
         private readonly IQualificationFundingsRepository _qualificationFundingsRepository;
-        private readonly IQualificationRepository _qualificationRepository;
+        private readonly IQualificationsRepository _qualificationsRepository;
 
-        public CreateQualificationDiscussionHistoryCommandHandler(IQualificationDiscussionHistoryRepository repository, IQualificationFundingsRepository qualificationFundingsRepository, IQualificationRepository qualificationRepository)
+        public CreateQualificationDiscussionHistoryCommandHandler(IQualificationDiscussionHistoryRepository repository, IQualificationFundingsRepository qualificationFundingsRepository, IQualificationsRepository qualificationsRepository)
         {
             _repository = repository;
             _qualificationFundingsRepository = qualificationFundingsRepository;
-            _qualificationRepository = qualificationRepository;
+            _qualificationsRepository = qualificationsRepository;
         }
 
         public async Task<BaseMediatrResponse<EmptyResponse>> Handle(CreateQualificationDiscussionHistoryCommand request, CancellationToken cancellationToken)
@@ -30,7 +30,7 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                     response.Success = false;
                     return response;
                 }
-                var qualification = await _qualificationRepository.GetByIdAsync(request.QualificationReference) ?? throw new RecordWithNameNotFoundException("Qualification not found"); ;
+                var qualification = await _qualificationsRepository.GetByIdAsync(request.QualificationReference) ?? throw new RecordWithNameNotFoundException("Qualification not found"); ;
                 
                 request.QualificationId = qualification.Id;
 

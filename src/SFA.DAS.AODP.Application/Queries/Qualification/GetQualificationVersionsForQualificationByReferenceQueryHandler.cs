@@ -5,12 +5,12 @@ namespace SFA.DAS.AODP.Application.Queries.Qualification;
 
 public class GetQualificationVersionsForQualificationByReferenceQueryHandler : IRequestHandler<GetQualificationVersionsForQualificationByReferenceQuery, BaseMediatrResponse<GetQualificationVersionsForQualificationByReferenceQueryResponse>>
 {
-    private readonly IQualificationRepository _qualificationRepository;
+    private readonly IQualificationsRepository _qualificationsRepository;
 
 
-    public GetQualificationVersionsForQualificationByReferenceQueryHandler(IQualificationRepository qualificationRepository)
+    public GetQualificationVersionsForQualificationByReferenceQueryHandler(IQualificationsRepository qualificationsRepository)
     {
-        _qualificationRepository = qualificationRepository;
+        _qualificationsRepository = qualificationsRepository;
     }
 
     public async Task<BaseMediatrResponse<GetQualificationVersionsForQualificationByReferenceQueryResponse>> Handle(GetQualificationVersionsForQualificationByReferenceQuery request, CancellationToken cancellationToken)
@@ -19,7 +19,7 @@ public class GetQualificationVersionsForQualificationByReferenceQueryHandler : I
         response.Success = false;
         try
         {
-            var qualification = await _qualificationRepository.GetByIdAsync(request.QualificationReference);
+            var qualification = await _qualificationsRepository.GetByIdAsync(request.QualificationReference);
             if (qualification == null)
             {
                 response.ErrorMessage = "Qualification not found";
