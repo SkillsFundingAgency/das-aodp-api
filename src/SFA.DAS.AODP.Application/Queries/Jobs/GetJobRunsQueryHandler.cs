@@ -22,7 +22,7 @@ namespace SFA.DAS.AODP.Application.Queries.Jobs
             response.Success = false;
             try
             {
-                List<JobRun> result = await _repository.GetJobRunsAsync();
+                List<JobRun> result = await _repository.GetJobRunsAsync(request.JobName);
                 response.Value = result;
                 response.Success = true;
             }

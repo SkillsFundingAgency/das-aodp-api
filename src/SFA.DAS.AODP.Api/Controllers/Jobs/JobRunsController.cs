@@ -1,6 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 using SFA.DAS.AODP.Application.Queries.Jobs;
+using SFA.DAS.AODP.Data.Enum;
 
 namespace SFA.DAS.AODP.Api.Controllers.Jobs;
 
@@ -17,23 +20,35 @@ public class JobRunsController : BaseController
         _logger = logger;
     }
 
-    [HttpGet("/api/job-runs")]
+    [HttpGet("/api/job/{jobName}/runs")]
     [ProducesResponseType(typeof(GetJobRunsQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetAllAsync()
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetAllAsync(string jobName)
     {
-        var query = new GetJobRunsQuery();
+        if (string.IsNullOrWhiteSpace(jobName))
+        {
+            _logger.LogWarning("Job name is empty");
+            return BadRequest(new { message = "Job name cannot be empty" });
+        }
+
+        var query = new GetJobRunsQuery(jobName);
         return await SendRequestAsync(query);
     }
 
-    [HttpGet("/api/job-runs/{jobName}")]
-    [ProducesResponseType(typeof(GetJobRunsByNameQueryResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [HttpPost("/api/job/requestrun")]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetByNameAsync(string jobName)
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CreateAsync([FromBody] RequestJobRunCommand command)
     {
-        var query = new GetJobRunsByNameQuery(jobName);
-        return await SendRequestAsync(query);
+        if (string.IsNullOrWhiteSpace(command.JobName))
+        {
+            _logger.LogWarning("Job name is empty");
+            return BadRequest(new { message = "Job name cannot be empty" });
+        }
+
+        return await SendRequestAsync(command);
     }
 }
 

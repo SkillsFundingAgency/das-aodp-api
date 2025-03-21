@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
+using SFA.DAS.AODP.Data.Entities.Jobs;
+using SFA.DAS.AODP.Data.Enum;
 using SFA.DAS.AODP.Data.Exceptions;
 
 namespace SFA.DAS.AODP.Data.Repositories.Jobs
@@ -13,9 +15,14 @@ namespace SFA.DAS.AODP.Data.Repositories.Jobs
             _context = context;
         }
 
-        public async Task<List<Data.Entities.Jobs.JobRun>> GetJobRunsAsync()
+        public async Task<List<Data.Entities.Jobs.JobRun>> GetJobRunsAsync(string jobName)
         {
             return await _context.JobRuns
+                .Include(i => i.Job)
+                .Where(w => w.Job.Name == jobName)
+                .OrderByDescending(o => o.StartTime)
+                .AsNoTracking()
+                .Take(10)
                 .ToListAsync();
         }
 
@@ -31,20 +38,37 @@ namespace SFA.DAS.AODP.Data.Repositories.Jobs
             return records;
         }
 
-        public async Task<List<Entities.Jobs.JobRun>> GetJobRunsByNameAsync(string name)
+        public async Task<bool> RequestJobRun(string jobName, string userName)
         {
-            var records = await _context.Jobs
-                .Join(_context.JobRuns,
-                      job => job.Id,
-                      run => run.JobId,
-                      (job, run) => new { job, run })
-                .Where(x => x.job.Name == name)
-                .Select(x => x.run)
-                .ToListAsync();
+            var job = await _context.Jobs
+                            .Include(i => i.JobRuns)
+                            .Where(w => w.Name == jobName)
+                            .FirstOrDefaultAsync() ?? throw new RecordWithNameNotFoundException(jobName);
 
-            if (records.Count == 0)
-                throw new RecordWithNameNotFoundException(name);
-            return records;
+            if (job.Status == JobStatus.Running.ToString())
+            {
+                return false;
+            }
+
+            var lastJobRun = job.JobRuns.OrderByDescending(o => o.StartTime).FirstOrDefault();
+            if (lastJobRun != null && lastJobRun.Status == JobStatus.Requested.ToString())
+            {
+                //already requested a job run
+                return true;
+            }
+
+            var jobRun = new JobRun() 
+            { 
+                Id = Guid.NewGuid(),
+                JobId = job.Id,
+                RecordsProcessed = 0,
+                Status = JobStatus.Requested.ToString(),
+                User = userName, 
+                StartTime = DateTime.Now,
+            };
+            await _context.JobRuns.AddAsync(jobRun);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }
