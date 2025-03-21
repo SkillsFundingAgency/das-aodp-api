@@ -23,7 +23,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
             try
             {
                 var review = await _repository.GeyByReviewIdAndUserType(request.ApplicationReviewId, UserType.Ofqual);
-                if (!review.ApplicationReview.SharedWithSkillsEngland) throw new InvalidOperationException("The application is not shared with Ofqual");
+                if (!review.ApplicationReview.SharedWithOfqual) throw new InvalidOperationException("The application is not shared with Ofqual");
 
                 review.Comments = request.Comments;
                 review.Status = ApplicationStatus.Reviewed.ToString();

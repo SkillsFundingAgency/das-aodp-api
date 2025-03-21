@@ -6,11 +6,11 @@ using SFA.DAS.AODP.Data.Repositories.Application;
 public class GetApplicationFormStatusByApplicationIdQueryHandler : IRequestHandler<GetApplicationFormStatusByApplicationIdQuery, BaseMediatrResponse<GetApplicationFormStatusByApplicationIdQueryResponse>>
 {
     private readonly IApplicationRepository _applicationRepository;
-    private readonly IApplicationPageRepository _applicationPageRepository;
-    public GetApplicationFormStatusByApplicationIdQueryHandler(IApplicationRepository applicationRepository, IApplicationPageRepository applicationPageRepository)
+    private readonly IApplicationReviewRepository _applicationReviewRepository;
+    public GetApplicationFormStatusByApplicationIdQueryHandler(IApplicationRepository applicationRepository, IApplicationReviewRepository applicationReviewRepository)
     {
-        this._applicationRepository = applicationRepository;
-        _applicationPageRepository = applicationPageRepository;
+        _applicationRepository = applicationRepository;
+        _applicationReviewRepository = applicationReviewRepository;
     }
 
     public async Task<BaseMediatrResponse<GetApplicationFormStatusByApplicationIdQueryResponse>> Handle(GetApplicationFormStatusByApplicationIdQuery request, CancellationToken cancellationToken)
@@ -19,8 +19,6 @@ public class GetApplicationFormStatusByApplicationIdQueryHandler : IRequestHandl
         try
         {
             Application result = await _applicationRepository.GetByIdAsync(request.ApplicationId);
-            var pages = await _applicationPageRepository.GetApplicationPagesByApplicationIdAsync(request.ApplicationId);
-
             response.Value = result;
 
             var sectionSummary = await _applicationRepository.GetSectionSummaryByApplicationIdAsync(request.ApplicationId);
@@ -36,6 +34,7 @@ public class GetApplicationFormStatusByApplicationIdQueryHandler : IRequestHandl
                 });
             }
             response.Value.ReadyForSubmit = !response.Value.Sections.Any(a => a.PagesRemaining > 0);
+            response.Value.ReviewExists = await _applicationReviewRepository.CheckIfReviewExistsByApplicationIdAsync(request.ApplicationId);
 
             response.Success = true;
         }
