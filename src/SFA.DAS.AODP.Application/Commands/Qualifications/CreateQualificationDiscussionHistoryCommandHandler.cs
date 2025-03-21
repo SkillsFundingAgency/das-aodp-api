@@ -2,6 +2,7 @@
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
+using System.Text;
 
 namespace SFA.DAS.AODP.Application.Commands.Qualifications
 {
@@ -35,25 +36,33 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                 request.QualificationId = qualification.Id;
 
                 var qualificationFundings = await _qualificationFundingsRepository.GetByIdAsync(request.QualificationVersionId);
-                string fundedOfferName = "";
+
+                StringBuilder qualificationDiscussionHistoryNotes = new();
+                qualificationDiscussionHistoryNotes.AppendLine("Feedback from DfE:");
                 if (qualificationFundings != null && qualificationFundings.Count != 0)
                 {
+                    qualificationDiscussionHistoryNotes.AppendLine("The following offers have been approved:");
+                    qualificationDiscussionHistoryNotes.AppendLine();
+
                     foreach (var qf in qualificationFundings)
                     {
-                        fundedOfferName += qf.FundingOffer.Name +
-                            ", StartDate:" + qf.StartDate?.ToString("dd-MM-yyyy") +
-                            ", EndDate:" + qf.EndDate?.ToString("dd-MM-yyyy");
+                        qualificationDiscussionHistoryNotes.AppendLine($"Offer: {qf.FundingOffer.Name}");
+                        qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
+                        qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
+                        qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
+                        qualificationDiscussionHistoryNotes.AppendLine();
                     }
                 }
                 else
                 {
-                    fundedOfferName = "No funding offers";
+                    qualificationDiscussionHistoryNotes.AppendLine("No funding offers have been approved");
                 }
+
                 await _repository.CreateAsync(new QualificationDiscussionHistory
                 {
                     QualificationId = request.QualificationId,
                     UserDisplayName = request.UserDisplayName,
-                    Notes = "Qualification funding offers review - " + fundedOfferName,
+                    Notes = qualificationDiscussionHistoryNotes.ToString(),
                     ActionTypeId = request.ActionTypeId,
                     Timestamp = DateTime.Now
                 });
