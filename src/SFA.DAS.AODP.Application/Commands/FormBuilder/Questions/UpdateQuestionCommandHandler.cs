@@ -1,15 +1,19 @@
 ﻿using Markdig;
 using MediatR;
+using Microsoft.Extensions.Options;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
+using SFA.DAS.AODP.Models.Settings;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
 public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepository,
     IQuestionValidationRepository _questionValidationRepository,
-    IQuestionOptionRepository _questionOptionRepository) : IRequestHandler<UpdateQuestionCommand, BaseMediatrResponse<EmptyResponse>>
+    IQuestionOptionRepository _questionOptionRepository,
+    FormBuilderSettings formBuilderSettings
+   ) : IRequestHandler<UpdateQuestionCommand, BaseMediatrResponse<EmptyResponse>>
 {
     public async Task<BaseMediatrResponse<EmptyResponse>> Handle(UpdateQuestionCommand request, CancellationToken cancellationToken)
     {
@@ -21,6 +25,7 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
             if (!await _questionRepository.IsQuestionEditableAsync(request.Id)) throw new RecordLockedException();
 
             var question = await _questionRepository.GetQuestionByIdAsync(request.Id);
+            ValidateQuestion(request, question);
 
             question.Title = request.Title;
             question.Hint = request.Hint;
@@ -118,9 +123,21 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
         }
         catch (Exception ex)
         {
+            response.InnerException = ex;
             response.ErrorMessage = ex.Message;
         }
 
         return response;
+    }
+
+    private void ValidateQuestion(UpdateQuestionCommand request, Data.Entities.FormBuilder.Question question)
+    {
+        if (question.Type == QuestionType.File.ToString())
+        {
+            if (request.FileUpload.NumberOfFiles > formBuilderSettings.MaxUploadNumberOfFiles)
+            {
+                throw new Exception($"Max number of files allowed is {formBuilderSettings.MaxUploadNumberOfFiles}");
+            }
+        }
     }
 }

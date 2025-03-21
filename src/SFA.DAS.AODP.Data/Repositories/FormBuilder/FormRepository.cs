@@ -34,7 +34,7 @@ public class FormRepository : IFormRepository
 
         var nextHigherModel = await _context.Forms
             .OrderByDescending(v => v.Order)
-            .Where(v => v.Order < modelToUpdate.Order)
+            .Where(v => v.Order < modelToUpdate.Order && v.Order != 0)
             .FirstOrDefaultAsync();
 
         if (nextHigherModel is null)
@@ -83,6 +83,24 @@ public class FormRepository : IFormRepository
         var form = await _context.Forms
         .FirstOrDefaultAsync(v => v.Id == formId) ?? throw new RecordNotFoundException(formId);
         form.Status = FormStatus.Deleted.ToString();
+        var order = form.Order;
+        form.Order = 0;
+
+        await UpdateFormOrdering(order);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdateFormOrdering(int deletedFormOrder)
+    {
+        var toUpdate = await _context.Forms
+            .Where(p => p.Order > deletedFormOrder)
+            .ToListAsync();
+
+        if (toUpdate.Count == 0) return;
+
+        foreach (var form in toUpdate)
+            form.Order--;
+
+        _context.Forms.UpdateRange(toUpdate);
     }
 }
