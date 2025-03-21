@@ -1,15 +1,15 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoMoq;
+using AutoFixture.Kernel;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.AODP.Api.Controllers.Qualification;
 using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Commands.Qualifications;
 using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
-using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
 using ChangedQualification = SFA.DAS.AODP.Models.Qualifications.ChangedQualification;
 
@@ -25,9 +25,23 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
         public QualificationsControllerTests()
         {
             _fixture = new Fixture().Customize(new AutoMoqCustomization());
+            _fixture.Customizations.Add(new DateOnlySpecimenBuilder());
             _loggerMock = _fixture.Freeze<Mock<ILogger<QualificationsController>>>();
             _mediatorMock = _fixture.Freeze<Mock<IMediator>>();
             _controller = new QualificationsController(_mediatorMock.Object, _loggerMock.Object);
+        }
+
+        public class DateOnlySpecimenBuilder : ISpecimenBuilder
+        {
+            public object Create(object request, ISpecimenContext context)
+            {
+                if (request is Type type && type == typeof(DateOnly))
+                {
+                    return DateOnly.FromDateTime(DateTime.Now);
+                }
+
+                return new NoSpecimen();
+            }
         }
 
         [Fact]
@@ -204,6 +218,149 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
             var badRequestValue = badRequestResult.Value?.GetType().GetProperty("message")?.GetValue(badRequestResult.Value, null);
             Assert.Equal("Qualification reference cannot be empty", badRequestValue);
+        }
+
+        [Fact]
+        public async Task GetQualificationCSVExportData_ReturnsOkResult_WithCSVData()
+        {
+            // Arrange
+            var queryResponse = _fixture.Create<BaseMediatrResponse<GetNewQualificationsCsvExportResponse>>();
+            queryResponse.Success = true;
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetNewQualificationsCsvExportQuery>(), default))
+                         .ReturnsAsync(queryResponse);
+
+            // Act
+            var result = await _controller.GetQualificationCSVExportData("new");
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var model = Assert.IsAssignableFrom<BaseMediatrResponse<GetNewQualificationsCsvExportResponse>>(okResult.Value);
+            Assert.Equal(queryResponse.Value, model.Value);
+        }
+
+        [Fact]
+        public async Task GetQualificationCSVExportData_ReturnsBadRequest_WhenStatusIsInvalid()
+        {
+            // Act
+            var result = await _controller.GetQualificationCSVExportData("invalid");
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badRequestValue = badRequestResult.Value?.GetType().GetProperty("message")?.GetValue(badRequestResult.Value, null);
+            Assert.Equal("Invalid status param: invalid", badRequestValue);
+        }
+
+        [Fact]
+        public async Task GetQualificationVersionsForQualificationByReference_ReturnsOkResult_WithVersions()
+        {
+            // Arrange
+            var queryResponse = _fixture.Create<BaseMediatrResponse<GetQualificationVersionsForQualificationByReferenceQueryResponse>>();
+            queryResponse.Success = true;
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetQualificationVersionsForQualificationByReferenceQuery>(), default))
+                         .ReturnsAsync(queryResponse);
+
+            // Act
+            var result = await _controller.GetQualificationVersionsForQualificationByReference("Ref123");
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var model = Assert.IsAssignableFrom<GetQualificationVersionsForQualificationByReferenceQueryResponse>(okResult.Value);
+            Assert.Equal(queryResponse.Value, model);
+        }
+
+
+        [Fact]
+        public async Task GetFeedbackForQualificationFundingById_ReturnsOkResult_WithFeedback()
+        {
+            // Arrange
+            var queryResponse = _fixture.Create<BaseMediatrResponse<GetFeedbackForQualificationFundingByIdQueryResponse>>();
+            queryResponse.Success = true;
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetFeedbackForQualificationFundingByIdQuery>(), default))
+                         .ReturnsAsync(queryResponse);
+
+            // Act
+            var result = await _controller.GetFeedbackForQualificationFundingById(Guid.NewGuid());
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var model = Assert.IsAssignableFrom<GetFeedbackForQualificationFundingByIdQueryResponse>(okResult.Value);
+            Assert.Equal(queryResponse.Value, model);
+        }
+
+
+        [Fact]
+        public async Task SaveFundingOfferOutcome_ReturnsOkResult()
+        {
+            // Arrange
+            var command = _fixture.Create<SaveQualificationsFundingOffersOutcomeCommand>();
+            var response = _fixture.Create<BaseMediatrResponse<EmptyResponse>>();
+            response.Success = true;
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<SaveQualificationsFundingOffersOutcomeCommand>(), default))
+                         .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller.SaveFundingOfferOutcome(command, command.QualificationVersionId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task SaveQualificationFundingOffers_ReturnsOkResult()
+        {
+            // Arrange
+            var command = _fixture.Create<SaveQualificationsFundingOffersCommand>();
+            var response = _fixture.Create<BaseMediatrResponse<EmptyResponse>>();
+            response.Success = true;
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<SaveQualificationsFundingOffersCommand>(), default))
+                         .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller.SaveQualificationFundingOffers(command, command.QualificationVersionId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task SaveQualificationFundingOffersDetails_ReturnsOkResult()
+        {
+            // Arrange
+            var command = _fixture.Create<SaveQualificationsFundingOffersDetailsCommand>();
+            var response = _fixture.Create<BaseMediatrResponse<EmptyResponse>>();
+            response.Success = true;
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<SaveQualificationsFundingOffersDetailsCommand>(), default))
+                         .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller.SaveQualificationFundingOffersDetails(command, command.QualificationVersionId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task QualificationFundingOffersSummary_ReturnsOkResult()
+        {
+            // Arrange
+            var command = _fixture.Create<CreateQualificationDiscussionHistoryCommand>();
+            var response = _fixture.Create<BaseMediatrResponse<EmptyResponse>>();
+            response.Success = true;
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<CreateQualificationDiscussionHistoryCommand>(), default))
+                         .ReturnsAsync(response);
+
+            // Act
+            var result = await _controller.QualificationFundingOffersSummary(command, command.QualificationVersionId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
         }
     }
 }
