@@ -38,7 +38,7 @@ public class BaseController : Controller
             return NotFound();
         }
 
-        if (response.InnerException is NotFoundException)
+        if (response.InnerException is NotFoundException or NotFoundWithNameException)
         {
             _logger.LogWarning($"The record was not found.");
             return NotFound();

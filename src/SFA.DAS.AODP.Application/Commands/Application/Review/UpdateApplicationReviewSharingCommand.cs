@@ -11,5 +11,4 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
         public string SentByName { get; set; }
         public string SentByEmail { get; set; }
     }
-
 }
