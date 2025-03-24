@@ -1,5 +1,4 @@
-﻿using Azure;
-using static SFA.DAS.AODP.Data.Repositories.Application.ApplicationQuestionAnswerRepository;
+﻿using SFA.DAS.AODP.Data.Entities.Application;
 
 namespace SFA.DAS.AODP.Application.Queries.Application.Application;
 
@@ -11,47 +10,44 @@ public class GetApplicationDetailsByIdQueryResponse
     public class Question
     {
         public Guid Id { get; set; }
-        public string Title { get; set; } = string.Empty;
-        public string Type { get; set; }
-        public bool Required { get; set; }
-        public List<QuestionAnswer>? QuestionAnswers { get; set; } = new List<QuestionAnswer>();
+        public Answer? Answer { get; set; }
     }
 
-    public class QuestionAnswer
+    public class Answer
     {
-        public string? AnswerTextValue { get; set; }
-        public string? AnswerDateValue { get; set; }
-        public string? AnswerChoiceValue { get; set; }
-        public decimal? AnswerNumberValue { get; set; }
+        public string? TextValue { get; set; }
+        public decimal? NumberValue { get; set; }
+        public DateOnly? DateValue { get; set; }
+        public List<string>? MultipleChoiceValue { get; set; }
+        public string? RadioChoiceValue { get; set; }
     }
 
 
     public static GetApplicationDetailsByIdQueryResponse Map(
        Guid applicationId,
-       List<ApplicationQuestionAnswersDTO> answers)
+       List<ApplicationQuestionAnswer> answers)
     {
-        return new GetApplicationDetailsByIdQueryResponse
+        GetApplicationDetailsByIdQueryResponse response = new()
         {
             ApplicationId = applicationId,
-            QuestionsWithAnswers = answers
-                    .GroupBy(q => new { q.QuestionId, q.QuestionTitle, q.QuestionType, q.QuestionRequired })
-                    .Select(questionGroup => new Question
-                    {
-                        Id = questionGroup.Key.QuestionId,
-                        Title = questionGroup.Key.QuestionTitle,
-                        Type = questionGroup.Key.QuestionType,
-                        Required = questionGroup.Key.QuestionRequired,
-                        QuestionAnswers = questionGroup
-                            .Select(a => new QuestionAnswer
-                            {
-                                AnswerTextValue = a.AnswerText,
-                                AnswerDateValue = a.AnswerDate,
-                                AnswerChoiceValue = a.AnswerChoice,
-                                AnswerNumberValue = a.AnswerNumber
-                            })
-                            .ToList()
-                    })
-                    .ToList()
-          };
+        };
+
+        foreach (var answer in answers)
+        {
+            response.QuestionsWithAnswers.Add(new()
+            {
+                Id = answer.QuestionId,
+                Answer = new()
+                {
+                    DateValue = answer.DateValue,
+                    TextValue = answer.TextValue,
+                    NumberValue = answer.NumberValue,
+                    MultipleChoiceValue = answer.OptionsValue?.Split(",")?.ToList() ?? [],
+                    RadioChoiceValue = answer.OptionsValue
+                }
+            });
+        }
+
+        return response;
     }
 }

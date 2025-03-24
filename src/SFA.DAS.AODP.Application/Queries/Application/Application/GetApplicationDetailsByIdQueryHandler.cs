@@ -22,9 +22,10 @@ public class GetApplicationDetailsByIdQueryHandler : IRequestHandler<GetApplicat
         response.Success = false;
         try
         {
-            var applicationReview = _applicationReviewRepository.GetByIdAsync(request.ApplicationReviewId);
-            var applicationId = applicationReview.Result.ApplicationId;
-            List<ApplicationQuestionAnswersDTO> result = await _applicationQuestionAnswerRepository.GetAnswersByApplicationId(applicationId);
+            var applicationReview = await _applicationReviewRepository.GetByIdAsync(request.ApplicationReviewId);
+            var applicationId = applicationReview.ApplicationId;
+            var result = await _applicationQuestionAnswerRepository.GetAnswersByApplicationId(applicationId);
+
             response.Value = GetApplicationDetailsByIdQueryResponse.Map(applicationId, result);
             response.Success = true;
         }

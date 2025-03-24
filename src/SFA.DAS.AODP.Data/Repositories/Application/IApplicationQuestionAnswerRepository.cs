@@ -9,6 +9,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
         Task<List<ApplicationQuestionAnswer>> GetAnswersByApplicationAndPageId(Guid applicationId, Guid pageId);
         Task<ApplicationQuestionAnswer> Update(ApplicationQuestionAnswer application);
         Task UpsertAsync(List<ApplicationQuestionAnswer>? questionAnswers);
-        Task<List<ApplicationQuestionAnswersDTO>> GetAnswersByApplicationId(Guid applicationId);
+        Task<List<ApplicationQuestionAnswer>> GetAnswersByApplicationId(Guid applicationId);
     }
 }
