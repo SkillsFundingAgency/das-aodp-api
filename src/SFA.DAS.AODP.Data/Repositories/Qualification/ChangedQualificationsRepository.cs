@@ -3,6 +3,7 @@ using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
 
+
 namespace SFA.DAS.AODP.Data.Repositories.Qualification;
 
 
@@ -47,7 +48,7 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
                   .Select(q => new DAS.AODP.Models.Qualifications.ChangedQualification
                   {
                       QualificationTitle = q.QualificationTitle,
-                      QualificationReference= q.QualificationReference,
+                      QualificationReference = q.QualificationReference,
                       AwardingOrganisation = q.AwardingOrganisation,
                       ChangedFieldNames = q.ChangedFieldNames,
                       SectorSubjectArea = q.SectorSubjectArea,
@@ -71,4 +72,15 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
     {
         return await _context.ChangedQualificationExport.ToListAsync();
     }
+
+    public async Task<List<Entities.Qualification.ActionType>> GetActionTypes()
+    {
+        return await _context.ActionType.ToListAsync();
+    }
+
+
+    //public async Task<List<ActionType?>> GetActionTypes()
+    //{
+    //    return await _context.ActionType.ToListAsync();
+    //}
 }

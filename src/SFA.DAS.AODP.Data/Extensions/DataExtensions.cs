@@ -28,7 +28,7 @@ namespace SFA.DAS.AODP.Data.Extensions
                 {
                     throw new Exception("Database connection string not found");
                 }
-                options.UseSqlServer(connectionString);
+                options.UseSqlServer(connectionString, v => v.CommandTimeout(600));
 
             });
             services.AddScoped<IFormVersionRepository, FormVersionRepository>();
@@ -40,6 +40,7 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IRouteRepository, RouteRepository>();
             services.AddScoped<IFormRepository, FormRepository>();
             services.AddScoped<IQualificationsRepository, QualificationsRepository>();
+            services.AddScoped<IQualificationDetailsRepository, QualificationDetailsRepository>();
             services.AddScoped<IQualificationFundingFeedbackRepository, QualificationFundingFeedbackRepository>();
             services.AddScoped<IQualificationFundingsRepository, QualificationFundingsRepository>();
             services.AddScoped<IQualificationDiscussionHistoryRepository, QualificationDiscussionHistoryRepository>();

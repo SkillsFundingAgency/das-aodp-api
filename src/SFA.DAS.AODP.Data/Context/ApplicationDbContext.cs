@@ -86,8 +86,9 @@ namespace SFA.DAS.AODP.Data.Context
             modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
                 .HasKey(v => v.QualificationReference);           
 
+            modelBuilder.Entity<Message>().Property(m => m.Type).HasConversion<string>();
             modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
-                .HasKey(v => v.QualificationReference);            
+                .HasKey(v => v.QualificationReference);
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 
