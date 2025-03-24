@@ -28,7 +28,8 @@ public class UpdateQualificationStatusCommandHandler : IRequestHandler<UpdateQua
                 UserDisplayName = request.UserDisplayName,
                 Notes = request.Notes,
             }; 
-            await _qualificationsRepository.UpdateQualificationStatus(request.QualificationReference, request.ProcessStatusId);
+            var status = await _qualificationsRepository.UpdateQualificationStatus(request.QualificationReference, request.ProcessStatusId);
+            discussuionHistory.Title = $"Updated status to: {status.Name}";
             await _qualificationsRepository.AddQualificationDiscussionHistory(discussuionHistory, request.QualificationReference);
             response.Success = true;
         }

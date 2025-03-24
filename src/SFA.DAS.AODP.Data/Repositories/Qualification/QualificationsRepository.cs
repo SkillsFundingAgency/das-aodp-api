@@ -16,7 +16,7 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
         return await _context.ChangedQualifications
             .ToListAsync();
     }
-    public async Task AddQualificationDiscussionHistory(Entities.Qualification.QualificationDiscussionHistory qualificationDiscussionHistory, string qualificationReference)
+    public async Task AddQualificationDiscussionHistory(QualificationDiscussionHistory qualificationDiscussionHistory, string qualificationReference)
     {
         var qual = await _context.Qualification.FirstOrDefaultAsync(v => v.Qan == qualificationReference);
         if (qual is null)
@@ -44,7 +44,7 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
             .FirstOrDefaultAsync();
     }
 
-    public async Task UpdateQualificationStatus(string qualificationReference, Guid processStatusId)
+    public async Task<ProcessStatus> UpdateQualificationStatus(string qualificationReference, Guid processStatusId)
     {
         var qual = await _context.QualificationVersions
             .Include(v => v.LifecycleStage)
@@ -54,12 +54,14 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
         {
             throw new RecordWithNameNotFoundException(qualificationReference);
         }
-        if (!_context.ProcessStatus.Any(v => v.Id == processStatusId))
+        var processStatus = await _context.ProcessStatus.FirstOrDefaultAsync(v => v.Id == processStatusId);
+        if (processStatus is null)
         {
             throw new NoForeignKeyException(processStatusId);
         }
         qual.ProcessStatusId = processStatusId;
         await _context.SaveChangesAsync();
+        return processStatus;
     }
 
     public async Task<List<ProcessStatus>> GetProcessingStatuses() => await _context.ProcessStatus.ToListAsync();
