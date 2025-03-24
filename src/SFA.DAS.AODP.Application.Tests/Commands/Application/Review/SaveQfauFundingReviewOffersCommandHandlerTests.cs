@@ -8,11 +8,12 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review;
 public class SaveQfauFundingReviewOffersCommandHandlerTests
 {
     private readonly Mock<IApplicationReviewFundingRepository> _applicationReviewFundingRepository = new();
+    private readonly Mock<IApplicationReviewFeedbackRepository> _applicationReviewFeedbackRepository = new();
     private readonly SaveQfauFundingReviewOffersCommandHandler _saveQfauFundingReviewOffersCommandHandler;
 
     public SaveQfauFundingReviewOffersCommandHandlerTests()
     {
-        _saveQfauFundingReviewOffersCommandHandler = new(_applicationReviewFundingRepository.Object);
+        _saveQfauFundingReviewOffersCommandHandler = new(_applicationReviewFundingRepository.Object, _applicationReviewFeedbackRepository.Object);
     }
 
     [Fact]

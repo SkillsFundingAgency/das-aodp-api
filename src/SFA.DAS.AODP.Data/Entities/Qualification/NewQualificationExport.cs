@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SFA.DAS.AODP.Data.Entities.Qualification
 {
-    public class QualificationExport
+    public class NewQualificationExport
     {
         // Identifiers and Meta Information
         public string? QualificationNumber { get; set; }

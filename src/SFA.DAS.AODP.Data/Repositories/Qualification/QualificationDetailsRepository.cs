@@ -13,11 +13,11 @@ public class QualificationDetailsRepository(IApplicationDbContext context) : IQu
     {
         var qualVersion = await _context.QualificationVersions
             .Include(v => v.LifecycleStage)
+            .Include(v => v.ProcessStatus)
             .Include(v => v.Organisation)
             .Include(v => v.VersionFieldChanges)
             .Include(v => v.Qualification)
-                .ThenInclude(v => v.QualificationDiscussionHistories)
-                    .ThenInclude(v => v.ActionType)
+                .ThenInclude(v => v.QualificationVersions)
             .OrderByDescending(v => v.Version)
             .FirstOrDefaultAsync(v => v.Qualification.Qan == qualificationReference);
 
@@ -27,5 +27,12 @@ public class QualificationDetailsRepository(IApplicationDbContext context) : IQu
         }
 
         return qualVersion;
+    }
+
+    public async Task<List<QualificationDiscussionHistory>> GetDiscussionHistoriesForQualificationRef(string qualificationRef)
+    {
+        return await _context.QualificationDiscussionHistory.Where(v => v.Qualification.Qan == qualificationRef)
+            .Include(v => v.ActionType)
+            .ToListAsync();
     }
 }

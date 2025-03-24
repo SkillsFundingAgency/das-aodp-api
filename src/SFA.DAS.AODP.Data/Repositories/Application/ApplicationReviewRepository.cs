@@ -45,13 +45,12 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             var res = await _context
                             .ApplicationReviews
                             .Include(a => a.Application)
+                            .ThenInclude(f => f.FormVersion)
 
                             .Include(a => a.ApplicationReviewFeedbacks)
 
                             .Include(a => a.ApplicationReviewFundings)
                             .ThenInclude(a => a.FundingOffer)
-
-                            .Include(a => a.ApplicationReviewDecision)
 
                             .FirstOrDefaultAsync(v => v.Id == applicationReviewId);
 
