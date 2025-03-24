@@ -1,24 +1,22 @@
 ﻿using MediatR;
-using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Repositories.Application;
-using static SFA.DAS.AODP.Data.Repositories.Application.ApplicationQuestionAnswerRepository;
 
-namespace SFA.DAS.AODP.Application.Queries.Application.Application;
+namespace SFA.DAS.AODP.Application.Queries.Application.Review;
 
-public class GetApplicationDetailsByIdQueryHandler : IRequestHandler<GetApplicationDetailsByIdQuery, BaseMediatrResponse<GetApplicationDetailsByIdQueryResponse>>
+public class GetApplicationFormAnswersByReviewIdQueryHandler : IRequestHandler<GetApplicationFormAnswersByReviewIdQuery, BaseMediatrResponse<GetApplicationFormAnswersByReviewIdQueryResponse>>
 {
     private readonly IApplicationQuestionAnswerRepository _applicationQuestionAnswerRepository;
     private readonly IApplicationReviewRepository _applicationReviewRepository;
-    
-    public GetApplicationDetailsByIdQueryHandler(IApplicationQuestionAnswerRepository applicationQuestionAnswerRepository, IApplicationReviewRepository applicationReviewRepository)
+
+    public GetApplicationFormAnswersByReviewIdQueryHandler(IApplicationQuestionAnswerRepository applicationQuestionAnswerRepository, IApplicationReviewRepository applicationReviewRepository)
     {
         _applicationQuestionAnswerRepository = applicationQuestionAnswerRepository;
         _applicationReviewRepository = applicationReviewRepository;
     }
 
-    public async Task<BaseMediatrResponse<GetApplicationDetailsByIdQueryResponse>> Handle(GetApplicationDetailsByIdQuery request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<GetApplicationFormAnswersByReviewIdQueryResponse>> Handle(GetApplicationFormAnswersByReviewIdQuery request, CancellationToken cancellationToken)
     {
-        var response = new BaseMediatrResponse<GetApplicationDetailsByIdQueryResponse>();
+        var response = new BaseMediatrResponse<GetApplicationFormAnswersByReviewIdQueryResponse>();
         response.Success = false;
         try
         {
@@ -26,7 +24,7 @@ public class GetApplicationDetailsByIdQueryHandler : IRequestHandler<GetApplicat
             var applicationId = applicationReview.ApplicationId;
             var result = await _applicationQuestionAnswerRepository.GetAnswersByApplicationId(applicationId);
 
-            response.Value = GetApplicationDetailsByIdQueryResponse.Map(applicationId, result);
+            response.Value = GetApplicationFormAnswersByReviewIdQueryResponse.Map(applicationId, result);
             response.Success = true;
         }
         catch (Exception ex)

@@ -1,8 +1,8 @@
 ﻿using SFA.DAS.AODP.Data.Entities.Application;
 
-namespace SFA.DAS.AODP.Application.Queries.Application.Application;
+namespace SFA.DAS.AODP.Application.Queries.Application.Review;
 
-public class GetApplicationDetailsByIdQueryResponse
+public class GetApplicationFormAnswersByReviewIdQueryResponse
 {
     public Guid ApplicationId { get; set; }
     public List<Question> QuestionsWithAnswers { get; set; } = new List<Question>();
@@ -23,11 +23,11 @@ public class GetApplicationDetailsByIdQueryResponse
     }
 
 
-    public static GetApplicationDetailsByIdQueryResponse Map(
+    public static GetApplicationFormAnswersByReviewIdQueryResponse Map(
        Guid applicationId,
        List<ApplicationQuestionAnswer> answers)
     {
-        GetApplicationDetailsByIdQueryResponse response = new()
+        GetApplicationFormAnswersByReviewIdQueryResponse response = new()
         {
             ApplicationId = applicationId,
         };
