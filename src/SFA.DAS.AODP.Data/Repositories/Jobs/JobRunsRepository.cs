@@ -26,16 +26,16 @@ namespace SFA.DAS.AODP.Data.Repositories.Jobs
                 .ToListAsync();
         }
 
-        public async Task<List<Entities.Jobs.JobRun>> GetJobRunsByJobId(Guid jobId)
+        public async Task<Entities.Jobs.JobRun> GetJobRunsById(Guid id)
         {
-            var records = await _context.JobRuns
-                .Where(v => v.JobId == jobId)
-                .ToListAsync();
+            var record = await _context.JobRuns
+                .Where(v => v.Id == id)
+                .FirstOrDefaultAsync();
 
-            if (records.Count == 0)
-                throw new RecordNotFoundException(jobId);
+            if (record == null)
+                throw new RecordNotFoundException(id);
 
-            return records;
+            return record;
         }
 
         public async Task<bool> RequestJobRun(string jobName, string userName)

@@ -36,6 +36,22 @@ public class JobRunsController : BaseController
         return await SendRequestAsync(query);
     }
 
+    [HttpGet("/api/job/jobruns/{id}")]
+    [ProducesResponseType(typeof(GetJobRunByIdQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetJobRunByIdAsync(Guid id)
+    {
+        if (id == Guid.Empty)
+        {
+            _logger.LogWarning("Job run id is empty");
+            return BadRequest(new { message = "Job run id cannot be empty" });
+        }
+
+        var query = new GetJobRunByIdQuery(id);
+        return await SendRequestAsync(query);
+    }
+
     [HttpPost("/api/job/requestrun")]
     [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

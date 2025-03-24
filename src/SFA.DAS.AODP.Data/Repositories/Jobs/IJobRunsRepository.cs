@@ -3,8 +3,7 @@
     public interface IJobRunsRepository
     {
         Task<List<Data.Entities.Jobs.JobRun>> GetJobRunsAsync(string jobName);
-
-        Task<List<Entities.Jobs.JobRun>> GetJobRunsByJobId(Guid jobId);
+        Task<Entities.Jobs.JobRun> GetJobRunsById(Guid id);
         Task<bool> RequestJobRun(string jobName, string userName);
     }
 }
