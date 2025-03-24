@@ -3,6 +3,7 @@ using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Models.Form;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Data.Repositories.FormBuilder;
 
@@ -90,9 +91,10 @@ public class QuestionRepository : IQuestionRepository
     /// <returns></returns>
     /// <exception cref="RecordNotFoundException"></exception>
     /// <exception cref="RecordLockedException"></exception>
+    [ExcludeFromCodeCoverage( Justification = "ExecuteDeleteAsync method not supported by in-memory database")]
     public async Task Archive(Guid questionId)
     {
-        if (!await IsQuestionEditable(questionId)) throw new RecordLockedException();
+        if (!await IsQuestionEditableAsync(questionId)) throw new RecordLockedException();
 
 
         await _context.QuestionValidations.Where(t => t.QuestionId == questionId).ExecuteDeleteAsync();
@@ -103,7 +105,7 @@ public class QuestionRepository : IQuestionRepository
         _context.Questions.Remove(question);
         await _context.SaveChangesAsync();
 
-        await UpdateQuestionOrdering(questionId, question.Order);
+        await UpdateQuestionOrdering(question.PageId, question.Order);
     }
 
 
@@ -117,7 +119,7 @@ public class QuestionRepository : IQuestionRepository
                         .FirstOrDefaultAsync(q => q.Id == questionId) ?? throw new RecordNotFoundException(questionId);
     }
 
-    public async Task<bool> IsQuestionEditable(Guid id)
+    public async Task<bool> IsQuestionEditableAsync(Guid id)
     {
         return await _context.Questions.AnyAsync(v => v.Id == id && v.Page.Section.FormVersion.Status == FormVersionStatus.Draft.ToString());
     }
@@ -200,10 +202,10 @@ public class QuestionRepository : IQuestionRepository
         return true;
     }
 
-    public async Task UpdateQuestionOrdering(Guid questionId, int deletedQuestionOrder)
+    public async Task UpdateQuestionOrdering(Guid pageId, int deletedQuestionOrder)
     {
         var toUpdate = await _context.Questions
-            .Where(p => p.Id == questionId && p.Order > deletedQuestionOrder)
+            .Where(p => p.PageId == pageId && p.Order > deletedQuestionOrder)
             .ToListAsync();
 
         if (toUpdate.Count == 0) return;

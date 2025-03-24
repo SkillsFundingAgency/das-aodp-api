@@ -35,6 +35,11 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             return await _context.ApplicationReviews.Include(a => a.ApplicationReviewFeedbacks).FirstOrDefaultAsync(a => a.ApplicationId == id);
         }
 
+        public async Task<bool> CheckIfReviewExistsByApplicationIdAsync(Guid applicationId)
+        {
+            return await _context.ApplicationReviews.AnyAsync(a => a.ApplicationId == applicationId);
+        }
+
         public async Task<ApplicationReview> GetByIdAsync(Guid id)
         {
             return await _context.ApplicationReviews.Include(a => a.ApplicationReviewFeedbacks).FirstOrDefaultAsync(a => a.Id == id) ?? throw new RecordNotFoundException(id);
@@ -45,13 +50,12 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             var res = await _context
                             .ApplicationReviews
                             .Include(a => a.Application)
+                            .ThenInclude(f => f.FormVersion)
 
                             .Include(a => a.ApplicationReviewFeedbacks)
 
                             .Include(a => a.ApplicationReviewFundings)
                             .ThenInclude(a => a.FundingOffer)
-
-                            .Include(a => a.ApplicationReviewDecision)
 
                             .FirstOrDefaultAsync(v => v.Id == applicationReviewId);
 

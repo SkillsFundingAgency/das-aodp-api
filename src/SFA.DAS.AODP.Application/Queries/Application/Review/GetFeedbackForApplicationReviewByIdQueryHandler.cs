@@ -21,7 +21,7 @@ namespace SFA.DAS.AODP.Application.Queries.Application.Review
             {
                 if (!Enum.TryParse(request.UserType, out UserType userType)) throw new Exception("Invalid user type provided");
 
-                var result = await _applicationRepository.GetApplicationReviewFeedbackDetailsByReviewIdAsync(request.ApplicationReviewId, userType);
+                var result = await _applicationRepository.GeyByReviewIdAndUserType(request.ApplicationReviewId, userType);
                 response.Value = result;
                 response.Success = true;
             }
