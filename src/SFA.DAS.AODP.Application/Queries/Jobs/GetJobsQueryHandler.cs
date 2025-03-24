@@ -5,12 +5,12 @@ using SFA.DAS.AODP.Data.Repositories.Jobs;
 
 namespace SFA.DAS.AODP.Application.Queries.Jobs
 {
-    public class GetJobsQueryQueryHandler : IRequestHandler<GetJobsQuery, BaseMediatrResponse<GetJobsQueryResponse>>
+    public class GetJobsQueryHandler : IRequestHandler<GetJobsQuery, BaseMediatrResponse<GetJobsQueryResponse>>
     {
-        private readonly ILogger<GetJobsQueryQueryHandler> _logger;
+        private readonly ILogger<GetJobsQueryHandler> _logger;
         private readonly IJobsRepository _repository;
 
-        public GetJobsQueryQueryHandler(ILogger<GetJobsQueryQueryHandler> logger, IJobsRepository repository)
+        public GetJobsQueryHandler(ILogger<GetJobsQueryHandler> logger, IJobsRepository repository)
         {
             _logger = logger;
             _repository = repository;

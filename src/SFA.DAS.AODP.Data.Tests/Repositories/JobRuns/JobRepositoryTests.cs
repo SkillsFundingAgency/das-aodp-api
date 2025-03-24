@@ -8,19 +8,19 @@ using SFA.DAS.AODP.Data.Repositories.Jobs;
 
 namespace SFA.DAS.AODP.Data.Tests.Repositories.JobRuns
 {
-    public class JobRunsRepositoryTests
+    public class JobRepositoryTests
     {
         private ApplicationDbContext _dbContext;
-        private JobRunsRepository _repository;
+        private JobsRepository _repository;
         private Fixture _fixture;
 
-        public JobRunsRepositoryTests()
+        public JobRepositoryTests()
         {
             _fixture = new Fixture();
             var options = new DbContextOptionsBuilder<ApplicationDbContext>().UseInMemoryDatabase("ApplicationDbContext" + Guid.NewGuid()).Options;
             var configuration = new Mock<IConfiguration>();
             _dbContext = new ApplicationDbContext(options, configuration.Object);
-            _repository = new JobRunsRepository(_dbContext);
+            _repository = new JobsRepository(_dbContext);
         }       
 
         [Fact]
@@ -35,30 +35,51 @@ namespace SFA.DAS.AODP.Data.Tests.Repositories.JobRuns
             await PopulateDb(jobRuns);
 
             // Act
-            var result = await _repository.GetJobRunsAsync("TestJob");
+            var result = await _repository.GetJobsAsync();
 
             // Assert
-            Assert.Equal(jobRuns.Count, result.Count);
+            Assert.Equal(1, result.Count);
+            Assert.Equal("TestJob", result[0].Name);
         }
 
         [Fact]
-        public async Task GetJobRunsById_ReturnsList()
+        public async Task GetJobByName_ReturnsList()
         {
             // Arrange           
             var id = Guid.NewGuid();
             var jobRuns = _fixture.Build<JobRun>()
-                .With(w => w.Job, new Job() { Name = "TestJob", Status = "Initial"})
+                .With(w => w.Job, new Job() { Name = "TestJob", Status = "Initial", Id = id})
                 .CreateMany<JobRun>(3)
                 .ToList();
 
             await PopulateDb(jobRuns);
 
             // Act
-            var result = await _repository.GetJobRunsById(jobRuns[0].Id);
+            var result = await _repository.GetJobByNameAsync("TestJob");
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(jobRuns[0].Id, result.Id);
+            Assert.Equal(id, result.Id);
+        }
+
+        [Fact]
+        public async Task GetJobById_ReturnsList()
+        {
+            // Arrange           
+            var id = Guid.NewGuid();
+            var jobRuns = _fixture.Build<JobRun>()
+                .With(w => w.Job, new Job() { Name = "TestJob", Status = "Initial", Id = id })
+                .CreateMany<JobRun>(3)
+                .ToList();
+
+            await PopulateDb(jobRuns);
+
+            // Act
+            var result = await _repository.GetJobByIdAsync(id);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(id, result.Id);
         }
 
         private async Task PopulateDb(List<JobRun> jobRuns)

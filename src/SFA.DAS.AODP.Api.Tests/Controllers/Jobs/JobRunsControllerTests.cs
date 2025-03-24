@@ -1,14 +1,14 @@
 ﻿using AutoFixture;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.AODP.Api.Controllers.Jobs;
-using SFA.DAS.AODP.Application.Queries.Jobs;
 using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
+using SFA.DAS.AODP.Application.Queries.Jobs;
 
-namespace SFA.DAS.AODP.Api.Tests.Controllers.JobRuns
+namespace SFA.DAS.AODP.Api.Tests.Controllers.Jobs
 {
     public class JobRunsControllerTests
     {
@@ -26,46 +26,28 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.JobRuns
         }
 
         [Fact]
-        public async Task GetJobRuns_ReturnsOkResult()
+        public async Task GetJobs_ReturnsOkResult()
         {
             // Arrange
             var queryResponse = _fixture
                 .Build<BaseMediatrResponse<GetJobRunsQueryResponse>>()
                 .With(w => w.Success, true)
                 .Create();
+            var jobName = "Test";
 
             _mediatorMock.Setup(x => x.Send(It.IsAny<GetJobRunsQuery>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(queryResponse));
 
             // Act
-            var result = await _controller.GetAllAsync("TestJob");
+            var result = await _controller.GetAllAsync(jobName);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<GetJobRunsQueryResponse>(okResult.Value);
             Assert.Equal(queryResponse.Value.JobRuns.Count, model.JobRuns.Count);
         }
-
+       
         [Fact]
-        public async Task GetJobRuns_Returns500_WhenQueryFails()
-        {
-            // Arrange
-            var queryResponse = _fixture
-                .Build<BaseMediatrResponse<GetJobRunsQueryResponse>>()
-                .With(w => w.Success, false)
-                .Create();
-
-            _mediatorMock.Setup(x => x.Send(It.IsAny<GetJobRunsQuery>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(queryResponse));
-
-            // Act
-            var result = await _controller.GetAllAsync("TestJob");
-
-            // Assert
-            var errorResult = Assert.IsType<StatusCodeResult>(result);
-            Assert.Equal(StatusCodes.Status500InternalServerError, errorResult.StatusCode);
-        }
-
-        [Fact]
-        public async Task GetJobRunsById_ReturnsOkResult()
+        public async Task GetJobRunById_ReturnsOkResult()
         {
             // Arrange
             var queryResponse = _fixture
@@ -74,7 +56,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.JobRuns
                 .Create();
 
             _mediatorMock.Setup(x => x.Send(It.IsAny<GetJobRunByIdQuery>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(queryResponse));
-            var id = Guid.NewGuid();
+            var id = queryResponse.Value.Id;
 
             // Act
             var result = await _controller.GetJobRunByIdAsync(id);
@@ -82,26 +64,31 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.JobRuns
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<GetJobRunByIdQueryResponse>(okResult.Value);
+            Assert.Equal(queryResponse.Value.Id, model.Id);
         }
 
         [Fact]
-        public async Task GetJobRunById_Returns500_WhenQueryFails()
+        public async Task RequestJobRunCommand_ReturnsOkResult()
         {
             // Arrange
             var queryResponse = _fixture
-                .Build<BaseMediatrResponse<GetJobRunByIdQueryResponse>>()
-                .With(w => w.Success, false)
+                .Build<BaseMediatrResponse<EmptyResponse>>()
+                .With(w => w.Success, true)
                 .Create();
 
-            _mediatorMock.Setup(x => x.Send(It.IsAny<GetJobRunByIdQuery>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(queryResponse));
-            var id = Guid.NewGuid();
+            var command = _fixture
+                .Build<RequestJobRunCommand>()                
+                .Create();
+
+            _mediatorMock.Setup(x => x.Send(It.IsAny<RequestJobRunCommand>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult(queryResponse));           
 
             // Act
-            var result = await _controller.GetJobRunByIdAsync(id);
+            var result = await _controller.CreateAsync(command);
 
             // Assert
-            var errorResult = Assert.IsType<StatusCodeResult>(result);
-            Assert.Equal(StatusCodes.Status500InternalServerError, errorResult.StatusCode);
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var model = Assert.IsAssignableFrom<EmptyResponse>(okResult.Value);
+            Assert.NotNull(model);
         }
     }
 }
