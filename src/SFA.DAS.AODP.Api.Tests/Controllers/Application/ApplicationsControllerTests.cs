@@ -300,10 +300,10 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
             //    (
             //    );
             BaseMediatrResponse<GetApplicationPageAnswersByPageIdQueryResponse> wrapper = new()
-                {
-                    Value = response,
-                    Success = true
-                };
+            {
+                Value = response,
+                Success = true
+            };
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<GetApplicationPageAnswersByPageIdQuery>(), default))

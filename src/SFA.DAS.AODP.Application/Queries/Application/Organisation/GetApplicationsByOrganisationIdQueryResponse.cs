@@ -1,6 +1,4 @@
-﻿using SFA.DAS.AODP.Application;
-
-public class GetApplicationsByOrganisationIdQueryResponse
+﻿public class GetApplicationsByOrganisationIdQueryResponse
 {
     public List<Application> Applications { get; set; } = new();
 
@@ -14,8 +12,9 @@ public class GetApplicationsByOrganisationIdQueryResponse
         public string? Owner { get; set; }
         public string? Reference { get; set; }
         public Guid FormVersionId { get; set; }
-
-
+        public DateTime? UpdatedDate { get; set; }
+        public string? Status { get; set; }
+        public bool NewMessage { get; set; }
     }
 
     public static implicit operator GetApplicationsByOrganisationIdQueryResponse(List<SFA.DAS.AODP.Data.Entities.Application.Application> applications)
@@ -34,6 +33,9 @@ public class GetApplicationsByOrganisationIdQueryResponse
                 Submitted = app.Submitted ?? false,
                 SubmittedDate = app.SubmittedAt,
                 FormVersionId = app.FormVersionId,
+                UpdatedDate = app.UpdatedAt,
+                Status = app.Status,
+                NewMessage = app.NewMessage ?? false
             });
 
         }

@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Forms;
 
@@ -272,7 +271,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder
         public async Task RemoveAsync_ReturnsOkResult()
         {
             // Arrange
-            var request = _fixture.Create<DeleteFormVersionCommand>();
+            var request = _fixture.Create<DeleteFormCommand>();
             var response = _fixture.Create<EmptyResponse>();
             BaseMediatrResponse<EmptyResponse> wrapper = new()
             {
@@ -281,18 +280,18 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.FormBuilder
             };
 
             _mediatorMock
-                .Setup(m => m.Send(It.IsAny<DeleteFormVersionCommand>(), default))
+                .Setup(m => m.Send(It.IsAny<DeleteFormCommand>(), default))
                 .ReturnsAsync(wrapper);
 
             // Act
-            var result = await _controller.RemoveAsync(request.FormVersionId);
+            var result = await _controller.RemoveAsync(request.FormId);
 
             // Assert
-            _mediatorMock.Verify(m => m.Send(It.IsAny<DeleteFormVersionCommand>(), default), Times.Once());
+            _mediatorMock.Verify(m => m.Send(It.IsAny<DeleteFormCommand>(), default), Times.Once());
             _mediatorMock.Verify(m =>
                 m.Send(
-                    It.Is<DeleteFormVersionCommand>(q =>
-                        q.FormVersionId == request.FormVersionId
+                    It.Is<DeleteFormCommand>(q =>
+                        q.FormId == request.FormId
             ), default), Times.Once());
             var okResult = Assert.IsType<OkObjectResult>(result);
             var model = Assert.IsAssignableFrom<EmptyResponse>(okResult.Value);
