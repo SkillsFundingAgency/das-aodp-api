@@ -42,6 +42,6 @@ From dbo.Applications A
 Left Outer Join dbo.Messages M ON M.ApplicationId = A.Id
 Left Outer Join dbo.AwardingOrganisation AO ON A.OrganisationId = AO.Id
 
-Where M.Type = 'Submitted'  ) as COM
+Where M.Type = 'ApplicationSubmitted'  ) as COM
 
 Where COM.R_K = 1
