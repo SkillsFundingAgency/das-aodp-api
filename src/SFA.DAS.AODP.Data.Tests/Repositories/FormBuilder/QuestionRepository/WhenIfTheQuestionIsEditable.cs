@@ -40,7 +40,7 @@ public class WhenIfTheQuestionIsEditable
         _context.SetupGet(c => c.Questions).ReturnsDbSet(dbSet);
 
         // Act
-        var result = await _sut.IsQuestionEditable(questionId);
+        var result = await _sut.IsQuestionEditableAsync(questionId);
 
         // Assert
         Assert.True(result);

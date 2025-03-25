@@ -13,7 +13,7 @@ public class DeleteQuestionCommandHandler(IQuestionRepository _questionRepositor
 
         try
         {
-            if (!await _questionRepository.IsQuestionEditable(request.QuestionId)) throw new RecordLockedException();
+            if (!await _questionRepository.IsQuestionEditableAsync(request.QuestionId)) throw new RecordLockedException();
 
             await _questionRepository.Archive(request.QuestionId);
 
