@@ -5,12 +5,12 @@ using SFA.DAS.AODP.Data.Repositories.Jobs;
 
 namespace SFA.DAS.AODP.Application.Queries.Jobs
 {
-    public class GetJobByNameQueryQueryHandler : IRequestHandler<GetJobByNameQuery, BaseMediatrResponse<GetJobByNameQueryResponse>>
+    public class GetJobByNameQueryHandler : IRequestHandler<GetJobByNameQuery, BaseMediatrResponse<GetJobByNameQueryResponse>>
     {
-        private readonly ILogger<GetJobByNameQueryQueryHandler> _logger;
+        private readonly ILogger<GetJobByNameQueryHandler> _logger;
         private readonly IJobsRepository _repository;
 
-        public GetJobByNameQueryQueryHandler(ILogger<GetJobByNameQueryQueryHandler> logger, IJobsRepository repository)
+        public GetJobByNameQueryHandler(ILogger<GetJobByNameQueryHandler> logger, IJobsRepository repository)
         {
             _logger = logger;
             _repository = repository;
@@ -29,6 +29,7 @@ namespace SFA.DAS.AODP.Application.Queries.Jobs
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error while trying to get job by name {request.Name} from repository");
+                response.InnerException = ex;
                 response.ErrorMessage = ex.Message;
             }
 

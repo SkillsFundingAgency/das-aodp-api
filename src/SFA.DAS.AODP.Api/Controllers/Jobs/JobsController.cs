@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using SFA.DAS.AODP.Application.Exceptions;
+using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 using SFA.DAS.AODP.Application.Queries.Jobs;
 
 namespace SFA.DAS.AODP.Api.Controllers.Application;
@@ -37,6 +38,13 @@ public class JobsController : BaseController
     {        
         var query = new GetJobByNameQuery(name);
         return await SendRequestAsync(query);
-    }   
+    }
 
+    [HttpPut("/api/job")]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> UpdateAsync([FromBody] UpdateJobCommand command)
+    {
+        return await SendRequestAsync(command);
+    }
 }

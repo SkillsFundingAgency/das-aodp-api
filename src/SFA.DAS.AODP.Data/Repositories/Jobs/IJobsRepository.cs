@@ -7,5 +7,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Jobs
         Task<Job> GetJobByIdAsync(Guid id);
         Task<Job> GetJobByNameAsync(string name);
         Task<List<Job>> GetJobsAsync();
+        Task<bool> UpdateJob(Guid jobId, bool jobEnabled);
     }
 }
