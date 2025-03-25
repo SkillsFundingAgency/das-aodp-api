@@ -31,5 +31,12 @@ namespace SFA.DAS.AODP.Data.Repositories.Jobs
             return record is null ? throw new RecordWithNameNotFoundException(name) : record;
         }
 
+        public async Task<bool> UpdateJob(Guid jobId, bool jobEnabled)
+        {
+            var record = await _context.Jobs.FirstOrDefaultAsync(v => v.Id == jobId) ?? throw new RecordNotFoundException(jobId);
+            record.Enabled = jobEnabled;
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }
