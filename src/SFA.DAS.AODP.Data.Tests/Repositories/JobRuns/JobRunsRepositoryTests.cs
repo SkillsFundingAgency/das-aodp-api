@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Jobs;
+using SFA.DAS.AODP.Data.Enum;
 using SFA.DAS.AODP.Data.Repositories.Jobs;
 
 namespace SFA.DAS.AODP.Data.Tests.Repositories.JobRuns
@@ -59,6 +60,50 @@ namespace SFA.DAS.AODP.Data.Tests.Repositories.JobRuns
             // Assert
             Assert.NotNull(result);
             Assert.Equal(jobRuns[0].Id, result.Id);
+        }
+
+        [Fact]
+        public async Task RequestJobRun_ReturnsTrue()
+        {
+            // Arrange           
+            var id = Guid.NewGuid();
+            var jobRuns = _fixture.Build<JobRun>()
+                .With(w => w.Job, new Job() { Name = "TestJob", Status = "Initial" })
+                .With(w => w.Status, JobStatus.Completed.ToString())
+                .CreateMany<JobRun>(3)
+                .ToList();
+
+            await PopulateDb(jobRuns);
+
+            // Act
+            var result = await _repository.RequestJobRun("TestJob", "TestUser");
+
+            // Assert
+            Assert.True(result);  
+            var resultJobRuns = _dbContext.JobRuns.Where(w => w.Status == JobStatus.Requested.ToString()).ToList();
+            Assert.Single(resultJobRuns);
+        }
+
+        [Fact]
+        public async Task RequestJobRun_AlreadyRunning()
+        {
+            // Arrange           
+            var id = Guid.NewGuid();
+            var jobRuns = _fixture.Build<JobRun>()
+                .With(w => w.Job, new Job() { Name = "TestJob", Status = "Initial" })
+                .With(w => w.Status, JobStatus.Requested.ToString())
+                .CreateMany<JobRun>(3)
+                .ToList();
+
+            await PopulateDb(jobRuns);
+
+            // Act
+            var result = await _repository.RequestJobRun("TestJob", "TestUser");
+
+            // Assert
+            Assert.True(result);
+            var resultJobRuns = _dbContext.JobRuns.Where(w => w.Status == JobStatus.Requested.ToString()).ToList();
+            Assert.Equal(3, resultJobRuns.Count());
         }
 
         private async Task PopulateDb(List<JobRun> jobRuns)

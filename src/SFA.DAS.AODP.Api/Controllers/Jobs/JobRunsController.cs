@@ -52,7 +52,7 @@ public class JobRunsController : BaseController
         return await SendRequestAsync(query);
     }
 
-    [HttpPost("/api/job/requestrun")]
+    [HttpPost("/api/job/request-run")]
     [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

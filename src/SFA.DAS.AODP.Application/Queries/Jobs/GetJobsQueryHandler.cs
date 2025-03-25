@@ -29,6 +29,7 @@ namespace SFA.DAS.AODP.Application.Queries.Jobs
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while trying to get jobs from repository");
+                response.InnerException = ex;
                 response.ErrorMessage = ex.Message;
             }
 
