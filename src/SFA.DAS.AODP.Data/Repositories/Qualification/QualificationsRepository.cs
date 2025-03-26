@@ -44,12 +44,12 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
             .FirstOrDefaultAsync();
     }
 
-    public async Task UpdateQualificationStatus(string qualificationReference, Guid processStatusId)
+    public async Task UpdateQualificationStatus(string qualificationReference, Guid processStatusId,int version)
     {
         var qual = await _context.QualificationVersions
             .Include(v => v.LifecycleStage)
             .Include(v => v.Qualification)
-            .FirstOrDefaultAsync(v => v.Qualification.Qan == qualificationReference);
+            .FirstOrDefaultAsync(v => v.Qualification.Qan == qualificationReference && v.Version==version);
         if (qual is null)
         {
             throw new RecordWithNameNotFoundException(qualificationReference);

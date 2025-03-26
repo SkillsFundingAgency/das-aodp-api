@@ -8,7 +8,6 @@ public class GetQualificationDetailsQueryResponse
     public Guid QualificationId { get; set; }
     public Guid VersionFieldChangesId { get; set; }
     public string AgeGroup { get; set; }
-
     public string? VersionFieldChanges { get; set; }
     public string? VersionType { get; set; }
     public Guid ProcessStatusId { get; set; }
