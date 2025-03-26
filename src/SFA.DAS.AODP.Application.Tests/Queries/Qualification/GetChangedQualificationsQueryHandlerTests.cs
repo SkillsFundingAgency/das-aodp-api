@@ -1,30 +1,20 @@
 ﻿using Moq;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualification;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
-using Moq;
-using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Application.Queries.Qualification;
-using SFA.DAS.AODP.Application.Queries.Qualifications;
-using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
 
-namespace SFA.DAS.AODP.Tests.Application.Queries
+namespace SFA.DAS.AODP.Application.Tests.Queries.Qualification
 {
-public class GetChangedQualificationsQueryHandlerTests
-{
-    private readonly IFixture _fixture;
+    public class GetChangedQualificationsQueryHandlerTests
+    {
+        private readonly IFixture _fixture;
         private readonly Mock<IChangedQualificationsRepository> _repositoryMock;
         private readonly GetChangedQualificationsQueryHandler _handler;
-    public GetChangedQualificationsQueryHandlerTests()
-    {
-        _fixture = new Fixture().Customize(new AutoMoqCustomization());
+        public GetChangedQualificationsQueryHandlerTests()
+        {
+            _fixture = new Fixture().Customize(new AutoMoqCustomization());
             _repositoryMock = _fixture.Freeze<Mock<IChangedQualificationsRepository>>();
             _handler = _fixture.Create<GetChangedQualificationsQueryHandler>();
         }
@@ -54,11 +44,11 @@ public class GetChangedQualificationsQueryHandlerTests
             _repositoryMock.Verify(x => x.GetAllChangedQualificationsAsync(query.Skip, query.Take, It.IsAny<QualificationsFilter>()), Times.Once);
             Assert.True(result.Success);
             Assert.Equal(2, result.Value.Data.Count);
-    }
+        }
 
-    [Fact]
+        [Fact]
         public async Task Then_The_Api_Is_Called_With_The_Request_And_Empty_Is_Returned()
-    {
+        {
             // Arrange
             var query = _fixture.Create<GetChangedQualificationsQuery>();
             var response = _fixture.Create<BaseMediatrResponse<GetChangedQualificationsQueryResponse>>();
@@ -74,11 +64,11 @@ public class GetChangedQualificationsQueryHandlerTests
             // Assert
             _repositoryMock.Verify(x => x.GetAllChangedQualificationsAsync(query.Skip, query.Take, It.IsAny<QualificationsFilter>()), Times.Once);
             Assert.True(result.Success);
-    }
+        }
 
-    [Fact]
+        [Fact]
         public async Task Then_The_Api_Is_Called_With_The_Request_And_Exception_Is_Handled()
-    {
+        {
             // Arrange
             var query = _fixture.Create<GetChangedQualificationsQuery>();
             var exceptionMessage = "An error occurred";

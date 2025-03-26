@@ -6,7 +6,7 @@ using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
 
-namespace SFA.DAS.AODP.Tests.Application.Queries
+namespace SFA.DAS.AODP.Application.Tests.Queries.Qualification
 {
     public class GetNewQualificationsQueryHandlerTests
     {

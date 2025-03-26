@@ -21,6 +21,7 @@ public class GetApplicationPageByIdQueryHandler : IRequestHandler<GetApplication
         catch (Exception ex)
         {
             response.ErrorMessage = ex.Message;
+            response.InnerException = ex;
         }
 
         return response;
