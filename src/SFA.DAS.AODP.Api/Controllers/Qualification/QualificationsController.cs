@@ -132,7 +132,7 @@ public class QualificationsController : BaseController
         }
     }
 
-    [HttpGet("{qualificationReference}")]
+    [HttpGet("{qualificationReference}/detail")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetQualificationDetails(string? qualificationReference)
     {
