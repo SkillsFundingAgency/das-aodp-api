@@ -6,7 +6,8 @@
 	[Comments] [nvarchar](max) NULL,
 	[NewMessage] [bit] NULL,
 	[Type] [nvarchar](50) NOT NULL,
- CONSTRAINT [PK_ApplicationReviewFeedback] PRIMARY KEY CLUSTERED 
+ [LatestCommunicatedToAwardingOrganisation] BIT NULL, 
+    CONSTRAINT [PK_ApplicationReviewFeedback] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC
 )WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]

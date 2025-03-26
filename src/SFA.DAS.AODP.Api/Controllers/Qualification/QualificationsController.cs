@@ -1,6 +1,8 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Commands.Qualifications;
+using SFA.DAS.AODP.Application.Queries.Application.Review;
 using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 
@@ -21,6 +23,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
 
         [HttpGet]
         [ProducesResponseType(typeof(BaseMediatrResponse<GetNewQualificationsQueryResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseMediatrResponse<GetChangedQualificationsQueryResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -34,7 +37,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             var validationResult = ValidateQualificationParams(status, skip, take, name, organisation, qan);
 
             if (validationResult.IsValid)
-            { 
+            {
                 if (validationResult.ProcessedStatus == "new")
                 {
                     var query = new GetNewQualificationsQuery()
@@ -50,7 +53,14 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
                 }
                 else if (validationResult.ProcessedStatus == "changed")
                 {
-                    var query = new GetChangedQualificationsQuery();
+                    var query = new GetChangedQualificationsQuery()
+                    {
+                        Name = name,
+                        Organisation = organisation,
+                        QAN = qan,
+                        Skip = skip,
+                        Take = take
+                    };
                     return await SendRequestAsync(query);
                 }
                 else
@@ -87,9 +97,9 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
 
             return Ok(result);
         }
-
         [HttpGet("export")]
         [ProducesResponseType(typeof(BaseMediatrResponse<GetNewQualificationsCsvExportResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BaseMediatrResponse<GetChangedQualificationsCsvExportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -98,15 +108,85 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             IActionResult response = status?.ToLower() switch
             {
                 "new" => await HandleNewQualificationCSVExport(),
+                "changed" => await HandleChangedQualificationCSVExport(),
                 _ => BadRequest(new { message = $"Invalid status param: {status}" })
             };
 
             return response;
-        }              
+        }
+
+        [HttpGet("/api/qualifications/{qualificationReference}/QualificationVersions")]
+        [ProducesResponseType(typeof(GetQualificationVersionsForQualificationByReferenceQueryResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetQualificationVersionsForQualificationByReference(string qualificationReference)
+        {
+            return await SendRequestAsync(new GetQualificationVersionsForQualificationByReferenceQuery(qualificationReference));
+        }
+
+        [HttpGet("/api/qualifications/{qualificationVersionId}/feedback")]
+        [ProducesResponseType(typeof(GetFeedbackForQualificationFundingByIdQueryResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetFeedbackForQualificationFundingById(Guid qualificationVersionId)
+        {
+            return await SendRequestAsync(new GetFeedbackForQualificationFundingByIdQuery(qualificationVersionId));
+        }
+
+        [HttpPut("/api/qualifications/{qualificationVersionId}/save-qualification-funding-offers-outcome")]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> SaveFundingOfferOutcome(SaveQualificationsFundingOffersOutcomeCommand command, Guid qualificationVersionId)
+        {
+            command.QualificationVersionId = qualificationVersionId;
+            return await SendRequestAsync(command);
+        }
+
+        [HttpPut("/api/qualifications/{qualificationVersionId}/save-qualification-funding-offers")]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> SaveQualificationFundingOffers(SaveQualificationsFundingOffersCommand command, Guid qualificationVersionId)
+        {
+            command.QualificationVersionId = qualificationVersionId;
+
+            return await SendRequestAsync(command);
+        }
+
+        [HttpPut("/api/qualifications/{qualificationVersionId}/save-qualification-funding-offers-details")]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> SaveQualificationFundingOffersDetails(SaveQualificationsFundingOffersDetailsCommand command, Guid qualificationVersionId)
+        {
+            command.QualificationVersionId = qualificationVersionId;
+
+            return await SendRequestAsync(command);
+        }
+
+        [HttpPut("/api/qualifications/{qualificationVersionId}/Create-QualificationDiscussionHistory")]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> QualificationFundingOffersSummary(CreateQualificationDiscussionHistoryCommand command, Guid qualificationVersionId)
+        {
+            return await SendRequestAsync(command);
+        }
+
 
         private async Task<IActionResult> HandleNewQualificationCSVExport()
         {
             var result = await _mediator.Send(new GetNewQualificationsCsvExportQuery());
+
+            if (result == null || !result.Success || result.Value == null)
+            {
+                _logger.LogWarning(result?.ErrorMessage);
+                return NotFound(new { message = result?.ErrorMessage });
+            }
+
+            return Ok(result);
+        }
+
+        private async Task<IActionResult> HandleChangedQualificationCSVExport()
+        {
+            var result = await _mediator.Send(new GetChangedQualificationsCsvExportQuery());
 
             if (result == null || !result.Success || result.Value == null)
             {
@@ -116,6 +196,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
 
             return Ok(result);
         }
+
 
         private ParamValidationResult ValidateQualificationParams(string? status, int? skip, int? take, string? name, string? organisation, string? qan)
         {
@@ -158,6 +239,6 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             public string? ErrorMessage { get; set; }
             public string? ProcessedStatus { get; set; }
         }
+
     }
 }
-

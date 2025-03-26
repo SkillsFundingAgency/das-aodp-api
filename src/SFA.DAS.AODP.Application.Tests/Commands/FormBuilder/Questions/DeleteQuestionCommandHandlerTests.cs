@@ -19,7 +19,7 @@ public class DeleteQuestionCommandHandlerTests
     public async Task Test_Delete_Form_Version()
     {
         var request = new DeleteQuestionCommand(Guid.NewGuid());
-        _questionRepository.Setup(v => v.IsQuestionEditable(It.Is<Guid>(v => v == request.QuestionId)))
+        _questionRepository.Setup(v => v.IsQuestionEditableAsync(It.Is<Guid>(v => v == request.QuestionId)))
             .Returns(Task.FromResult(true));
         _questionRepository.Setup(v => v.Archive(It.Is<Guid>(v => v == request.QuestionId)))
             .Returns(Task.FromResult(true));
@@ -33,7 +33,7 @@ public class DeleteQuestionCommandHandlerTests
     public async Task Test_Delete_Form_Throws_Returns_Error()
     {
         var request = new DeleteQuestionCommand(Guid.NewGuid());
-        _questionRepository.Setup(v => v.IsQuestionEditable(It.Is<Guid>(v => v == request.QuestionId)))
+        _questionRepository.Setup(v => v.IsQuestionEditableAsync(It.Is<Guid>(v => v == request.QuestionId)))
             .Returns(Task.FromResult(true));
         _questionRepository.Setup(v => v.Archive(It.Is<Guid>(v => v == request.QuestionId)))
             .Throws(new Exception("Test"));

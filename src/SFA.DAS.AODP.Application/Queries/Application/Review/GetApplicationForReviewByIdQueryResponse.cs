@@ -14,6 +14,8 @@
         public bool SharedWithSkillsEngland { get; set; }
         public bool SharedWithOfqual { get; set; }
 
+        public string FormTitle { get; set; }
+
         public List<Funding> FundedOffers { get; set; } = new();
         public List<Feedback> Feedbacks { get; set; } = new();
 
@@ -24,6 +26,7 @@
             public bool NewMessage { get; set; }
             public string UserType { get; set; }
             public string? Comments { get; set; }
+            public bool LatestCommunicatedToAwardingOrganisation { get; set; }
         }
 
         public class Funding
@@ -40,7 +43,7 @@
         {
             GetApplicationForReviewByIdQueryResponse model = new()
             {
-                Id = review.Id,
+                Id = review.Application.Id,
                 AwardingOrganisation = review.Application.AwardingOrganisationName,
                 LastUpdated = review.Application.UpdatedAt,
                 Name = review.Application.Name,
@@ -48,7 +51,8 @@
                 Reference = review.Application.ReferenceId,
                 SharedWithOfqual = review.SharedWithOfqual,
                 SharedWithSkillsEngland = review.SharedWithSkillsEngland,
-                ApplicationReviewId = review.Id
+                ApplicationReviewId = review.Id,
+                FormTitle = review.Application.FormVersion.Title,
             };
 
             foreach (var feedback in review.ApplicationReviewFeedbacks ?? [])
@@ -59,7 +63,8 @@
                     NewMessage = feedback.NewMessage,
                     Owner = feedback.Owner,
                     Status = feedback.Status,
-                    UserType = feedback.Type
+                    UserType = feedback.Type,
+                    LatestCommunicatedToAwardingOrganisation = feedback.LatestCommunicatedToAwardingOrganisation ?? false
                 });
             }
 

@@ -30,12 +30,17 @@ public class GetApplicationFormPreviewByIdQueryResponse
         public string Title { get; set; } = string.Empty;
         public string Type { get; set; }
         public bool Required { get; set; }
+        public int Order { get; set; }
+
         public List<QuestionOption> QuestionOptions { get; set; } = new List<QuestionOption>();
     }
 
     public class QuestionOption
     {
+        public Guid Id { get; set; }
         public string Value { get; set; }
+        public int Order { get; set; }
+
     }
 
     public static GetApplicationFormPreviewByIdQueryResponse Map(
@@ -65,9 +70,12 @@ public class GetApplicationFormPreviewByIdQueryResponse
                         Title = q.Title,
                         Type = q.Type,
                         Required = q.Required,
+                        Order = q.Order,
                         QuestionOptions = q.QuestionOptions?.Select(opt => new QuestionOption
                         {
-                            Value = opt.Value
+                            Id = opt.Id,
+                            Value = opt.Value,
+                            Order = opt.Order,
                         }).ToList() ?? new List<QuestionOption>()
                     }).ToList()
                 }).ToList()

@@ -16,14 +16,14 @@ public class ConfigureRoutingForQuestionCommandHandlerTests
     }
 
     [Fact]
-    public async Task Test_Configure_Routes_For_Questiond()
+    public async Task Test_Configure_Routes_For_Questions()
     {
         var request = new ConfigureRoutingForQuestionCommand()
         {
             QuestionId = Guid.NewGuid(),
             Routes = new()
         };
-        _questionRepository.Setup(v => v.IsQuestionEditable(It.Is<Guid>(v => v == request.QuestionId)))
+        _questionRepository.Setup(v => v.IsQuestionEditableAsync(It.Is<Guid>(v => v == request.QuestionId)))
             .ReturnsAsync(true);
         _routeRepository.Setup(v => v.UpsertAsync(It.IsAny<List<Data.Entities.FormBuilder.Route>>()))
             .Returns(Task.CompletedTask);
@@ -41,7 +41,7 @@ public class ConfigureRoutingForQuestionCommandHandlerTests
             QuestionId = Guid.NewGuid(),
             Routes = new()
         };
-        _questionRepository.Setup(v => v.IsQuestionEditable(It.Is<Guid>(v => v == request.QuestionId)))
+        _questionRepository.Setup(v => v.IsQuestionEditableAsync(It.Is<Guid>(v => v == request.QuestionId)))
             .ReturnsAsync(false);
 
         var result = await _configureRoutingForQuestionCommandHandler.Handle(request, default);

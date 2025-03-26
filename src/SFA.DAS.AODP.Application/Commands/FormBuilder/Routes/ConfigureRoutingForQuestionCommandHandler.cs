@@ -17,7 +17,7 @@ namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Routes
 
             try
             {
-                if (!await _questionRepository.IsQuestionEditable(request.QuestionId)) throw new RecordLockedException();
+                if (!await _questionRepository.IsQuestionEditableAsync(request.QuestionId)) throw new RecordLockedException();
 
                 List<Route> dbRoutes = await _routeRepository.GetRoutesByQuestionId(request.QuestionId);
 

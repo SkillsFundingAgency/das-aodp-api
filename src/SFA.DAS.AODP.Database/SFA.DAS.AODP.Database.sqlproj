@@ -67,6 +67,8 @@
     <Folder Include="Tables\FormBuilder" />
     <Folder Include="Tables\Offer" />
     <Folder Include="Stored Procedures" />
+    <Folder Include="Views\KPIs" />
+    <Folder Include="Tables\KPIs" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Schemas\FundedSchema.sql" />
@@ -102,7 +104,6 @@
     <Build Include="Tables\Application\ApplicationReviews.sql" />
     <Build Include="Tables\Application\Applications.sql" />
     <Build Include="Tables\Application\ApplicationReviewFeedbacks.sql" />
-    <Build Include="Tables\Application\ApplicationReviewDecisions.sql" />
     <Build Include="Tables\Message.sql" />
     <Build Include="Tables\Application\ApplicationPages.sql" />
     <Build Include="Tables\Application\ApplicationQuestionAnswers.sql" />
@@ -121,9 +122,18 @@
     </None>
     <Build Include="Stored Procedures\Truncate_QualificationImportStaging.sql" />
     <Build Include="Stored Procedures\Truncate_Funded_Qualifications.sql" />
-    <Build Include="Tables\MS_KPI_RQR_CR_CT_001.sql" />
     <Build Include="Stored Procedures\proc_MS_KPI_RQR_CR_CT_001.sql" />
-    <Build Include="Views\v_MS_KPI_NQS_CR_CT_001.sql" />
+    <Build Include="Views\v_ChangedQualificationsExport.sql" />
+    <Build Include="Tables\QualificationFundingFeedbacks.sql" />
+    <Build Include="Tables\QualificationFundings.sql" />
+    <Build Include="Views\KPIs\v_MS_KPI_NQR_CR_CT_001.sql" />
+    <Build Include="Views\KPIs\v_MS_KPI_NQS_CR_CT_001.sql" />
+    <Build Include="Views\KPIs\v_MS_KPI_NQR_TU_002.sql" />
+    <Build Include="Views\KPIs\v_MS_KPI_NQR_TU_003.sql" />
+    <Build Include="Tables\KPIs\MS_KPI_RQR_CR_CT_001.sql" />
+    <None Include="MigrationScripts\MVS1_AWARD452_Jobs.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />

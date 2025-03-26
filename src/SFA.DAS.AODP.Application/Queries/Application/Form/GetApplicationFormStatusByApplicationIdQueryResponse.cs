@@ -7,11 +7,14 @@ public class GetApplicationFormStatusByApplicationIdQueryResponse
     public string? QualificationNumber { get; set; }
 
     public bool ReadyForSubmit { get; set; }
-    public DateTime? SubmittedDate { get; set; }
+    public DateTime? SubmittedAt { get; set; }
     public string Owner { get; set; }
     public bool Submitted { get; set; }
     public DateTime? UpdatedDate { get; set; }
     public string? Status { get; set; }
+
+    public bool NewMessage { get; set; }
+    public bool ReviewExists { get; set; }
 
     public List<Section> Sections { get; set; } = new();
 
@@ -32,10 +35,11 @@ public class GetApplicationFormStatusByApplicationIdQueryResponse
             Reference = application.ReferenceId.ToString(),
             Owner = application.Owner,
             Submitted = application.Submitted ?? false,
-            SubmittedDate = application.SubmittedAt,
+            SubmittedAt = application.SubmittedAt,
             QualificationNumber = application.QualificationNumber,
             UpdatedDate = application.UpdatedAt,
-            Status = application.Status
+            Status = application.Status,
+            NewMessage = application.NewMessage ?? false
         };
 
         return response;

@@ -18,10 +18,11 @@ namespace SFA.DAS.AODP.Data.Extensions
         {
             services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options =>
             {
-                var connectionString = configuration.GetConnectionString("SQLSeverConnectionString");
+               var  connectionString = configuration["AodpApi:DatabaseConnectionString"];
+
                 if (string.IsNullOrWhiteSpace(connectionString))
                 {
-                    connectionString = configuration["AodpApi:DatabaseConnectionString"];
+                    connectionString = configuration.GetConnectionString("SQLSeverConnectionString");
                 }
                 if (string.IsNullOrWhiteSpace(connectionString))
                 {
@@ -39,6 +40,13 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IRouteRepository, RouteRepository>();
             services.AddScoped<IFormRepository, FormRepository>();
             services.AddScoped<IQualificationsRepository, QualificationsRepository>();
+            services.AddScoped<IQualificationFundingFeedbackRepository, QualificationFundingFeedbackRepository>();
+            services.AddScoped<IQualificationFundingsRepository, QualificationFundingsRepository>();
+            services.AddScoped<IQualificationDiscussionHistoryRepository, QualificationDiscussionHistoryRepository>();
+
+            services.AddScoped<IFundingOfferRepository, FundingOfferRepository>();
+            services.AddScoped<IApplicationReviewFundingRepository, ApplicationReviewFundingRepository>();
+            services.AddScoped<IChangedQualificationsRepository, ChangedQualificationsRepository>();
 
             services.AddScoped<IFundingOfferRepository, FundingOfferRepository>();
             services.AddScoped<IApplicationReviewFundingRepository, ApplicationReviewFundingRepository>();
@@ -51,6 +59,7 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IApplicationMessagesRepository, ApplicationMessagesRepository>();
             services.AddScoped<INewQualificationsRepository, NewQualificationsRepository>();
             services.AddScoped<IJobsRepository, JobsRepository>();
+            services.AddScoped<IJobRunsRepository, JobRunsRepository>();
 
             return services;
         }

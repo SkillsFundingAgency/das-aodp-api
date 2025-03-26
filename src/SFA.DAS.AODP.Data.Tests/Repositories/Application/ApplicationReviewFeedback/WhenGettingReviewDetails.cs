@@ -30,7 +30,7 @@ public class WhenGettingReviewDetails
 
 
         // Act
-        var result = await _sut.GetApplicationReviewFeedbackDetailsByReviewIdAsync(feedback.ApplicationReviewId, UserType.Qfau);
+        var result = await _sut.GeyByReviewIdAndUserType(feedback.ApplicationReviewId, UserType.Qfau);
 
         // Assert
         Assert.NotNull(result);

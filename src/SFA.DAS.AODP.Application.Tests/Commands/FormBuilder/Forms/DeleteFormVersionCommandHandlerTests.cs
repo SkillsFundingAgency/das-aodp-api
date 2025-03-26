@@ -6,19 +6,19 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.FormBuilder.Forms;
 
 public class DeleteFormVersionCommandHandlerTests
 {
-    private readonly Mock<IFormVersionRepository> _formVersionRepository = new Mock<IFormVersionRepository>();
-    public DeleteFormVersionCommandHandler _deleteFormVersionCommandHandler;
+    private readonly Mock<IFormRepository> _formRepository = new Mock<IFormRepository>();
+    public DeleteFormCommandHandler _deleteFormVersionCommandHandler;
 
     public DeleteFormVersionCommandHandlerTests()
     {
-        _deleteFormVersionCommandHandler = new(_formVersionRepository.Object);
+        _deleteFormVersionCommandHandler = new(_formRepository.Object);
     }
 
     [Fact]
     public async Task Test_Delete_Form_Version()
     {
-        var request = new DeleteFormVersionCommand(Guid.NewGuid());
-        _formVersionRepository.Setup(v => v.Archive(It.Is<Guid>(v => v == request.FormVersionId)))
+        var request = new DeleteFormCommand(Guid.NewGuid());
+        _formRepository.Setup(v => v.Archive(It.Is<Guid>(v => v == request.FormId)))
             .Returns(Task.FromResult(true));
 
         var result = await _deleteFormVersionCommandHandler.Handle(request, default);
@@ -29,8 +29,8 @@ public class DeleteFormVersionCommandHandlerTests
     [Fact]
     public async Task Test_Delete_Form_Throws_Returns_Error()
     {
-        var request = new DeleteFormVersionCommand(Guid.NewGuid());
-        _formVersionRepository.Setup(v => v.Archive(It.Is<Guid>(v => v == request.FormVersionId)))
+        var request = new DeleteFormCommand(Guid.NewGuid());
+        _formRepository.Setup(v => v.Archive(It.Is<Guid>(v => v == request.FormId)))
             .Throws(new Exception("Test"));
 
         var result = await _deleteFormVersionCommandHandler.Handle(request, default);
