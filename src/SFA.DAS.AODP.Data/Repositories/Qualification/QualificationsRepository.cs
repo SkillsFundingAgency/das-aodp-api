@@ -49,6 +49,7 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
         var qual = await _context.QualificationVersions
             .Include(v => v.LifecycleStage)
             .Include(v => v.Qualification)
+            .OrderByDescending(v => v.Version)
             .FirstOrDefaultAsync(v => v.Qualification.Qan == qualificationReference);
         if (qual is null)
         {
