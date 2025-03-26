@@ -91,7 +91,6 @@ public class GetQualificationDetailsQueryResponse
         public Guid Id { get; set; }
         public string Qan { get; set; } = null!;
         public string? QualificationName { get; set; }
-        public List<PreviousVersion> PreviousVersion { get; set; } = new();
         public List<QualificationDiscussionHistory> QualificationDiscussionHistories { get; set; } = new List<QualificationDiscussionHistory>();
     }
 
@@ -267,71 +266,6 @@ public class GetQualificationDetailsQueryResponse
                 Id = entity.Qualification.Id,
                 Qan = entity.Qualification.Qan,
                 QualificationName = entity.Qualification.QualificationName,
-                PreviousVersion = entity.Qualification.QualificationVersions.Select(t => new PreviousVersion()
-                {
-                    Id = t.Id,
-                    AgeGroup = GetAgeGroup(entity),
-                    QualificationId = t.QualificationId,
-                    VersionFieldChangesId = t.VersionFieldChangesId,
-                    ProcessStatusId = t.ProcessStatusId,
-                    AdditionalKeyChangesReceivedFlag = t.AdditionalKeyChangesReceivedFlag,
-                    LifecycleStageId = t.LifecycleStageId,
-                    OutcomeJustificationNotes = t.OutcomeJustificationNotes,
-                    AwardingOrganisationId = t.AwardingOrganisationId,
-                    Status = t.Status,
-                    Type = t.Type,
-                    Ssa = t.Ssa,
-                    Level = t.Level,
-                    SubLevel = t.SubLevel,
-                    EqfLevel = t.EqfLevel,
-                    GradingType = t.GradingType,
-                    GradingScale = t.GradingScale,
-                    TotalCredits = t.TotalCredits,
-                    Tqt = t.Tqt,
-                    Glh = t.Glh,
-                    MinimumGlh = t.MinimumGlh,
-                    MaximumGlh = t.MaximumGlh,
-                    RegulationStartDate = t.RegulationStartDate,
-                    OperationalStartDate = t.OperationalStartDate,
-                    OperationalEndDate = t.OperationalEndDate,
-                    CertificationEndDate = t.CertificationEndDate,
-                    ReviewDate = t.ReviewDate,
-                    OfferedInEngland = t.OfferedInEngland,
-                    OfferedInNi = t.OfferedInNi,
-                    OfferedInternationally = t.OfferedInternationally,
-                    Specialism = t.Specialism,
-                    Pathways = t.Pathways,
-                    AssessmentMethods = t.AssessmentMethods,
-                    ApprovedForDelFundedProgramme = t.ApprovedForDelFundedProgramme,
-                    LinkToSpecification = t.LinkToSpecification,
-                    ApprenticeshipStandardReferenceNumber = t.ApprenticeshipStandardReferenceNumber,
-                    ApprenticeshipStandardTitle = t.ApprenticeshipStandardTitle,
-                    RegulatedByNorthernIreland = t.RegulatedByNorthernIreland,
-                    NiDiscountCode = t.NiDiscountCode,
-                    GceSizeEquivelence = t.GceSizeEquivelence,
-                    GcseSizeEquivelence = t.GcseSizeEquivelence,
-                    EntitlementFrameworkDesign = t.EntitlementFrameworkDesign,
-                    LastUpdatedDate = t.LastUpdatedDate,
-                    UiLastUpdatedDate = t.UiLastUpdatedDate,
-                    InsertedDate = t.InsertedDate,
-                    Version = t.Version,
-                    AppearsOnPublicRegister = t.AppearsOnPublicRegister,
-                    LevelId = t.LevelId,
-                    TypeId = t.TypeId,
-                    SsaId = t.SsaId,
-                    GradingTypeId = t.GradingTypeId,
-                    GradingScaleId = t.GradingScaleId,
-                    PreSixteen = t.PreSixteen,
-                    SixteenToEighteen = t.SixteenToEighteen,
-                    EighteenPlus = t.EighteenPlus,
-                    NineteenPlus = t.NineteenPlus,
-                    ImportStatus = t.ImportStatus,
-                    Organisation = new AwardingOrganisation
-                    {
-                        NameLegal = t.Organisation.NameLegal
-                    },
-                    Qualification = new() { QualificationName = t.Qualification.QualificationName }
-                }).ToList(),
                 QualificationDiscussionHistories = entity.Qualification.QualificationDiscussionHistories
                     .Select(v => new QualificationDiscussionHistory
                     {
