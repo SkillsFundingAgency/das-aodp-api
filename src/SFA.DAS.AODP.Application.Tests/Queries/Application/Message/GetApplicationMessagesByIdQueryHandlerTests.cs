@@ -30,7 +30,7 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Message
             Guid applicationId = Guid.NewGuid();
 
             var query = new GetApplicationMessagesByIdQuery(applicationId, userTypeString);
-            var response = new List<SFA.DAS.AODP.Data.Entities.Application.Message>()
+            var response = new List<Data.Entities.Application.Message>()
             {
                 new()
             };
@@ -57,13 +57,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Message
 
             Guid applicationId = Guid.NewGuid();
 
-            Exception ex = new Exception();
-
             var query = new GetApplicationMessagesByIdQuery(applicationId, userTypeString);
-            var response = new List<SFA.DAS.AODP.Data.Entities.Application.Message>()
-            {
-                new()
-            };
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetMessagesByApplicationIdAndUserTypeAsync(applicationId, userType))
                            .ThrowsAsync(ex);

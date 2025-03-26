@@ -49,13 +49,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Pages
             // Arrange
             Guid sectionId = Guid.NewGuid();
 
-            Exception ex = new Exception();
-
             var query = new GetAllPagesQuery(sectionId);
-            var response = new List<Page>()
-            {
-                new()
-            };
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetPagesForSectionAsync(sectionId))
                            .ThrowsAsync(ex);

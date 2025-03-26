@@ -58,10 +58,8 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Sections
             Exception ex = new Exception();
 
             var query = new GetApplicationSectionStatusByApplicationIdQuery(sectionId, formVersionId, applicationId);
-            var response = new List<Data.Entities.Application.ApplicationPage>()
-            {
-                new()
-            };
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetBySectionIdAsync(sectionId, applicationId))
                            .ThrowsAsync(ex);

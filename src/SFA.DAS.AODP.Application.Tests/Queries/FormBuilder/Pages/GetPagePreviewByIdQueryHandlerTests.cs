@@ -35,8 +35,6 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Pages
 
             Guid questionId = Guid.NewGuid();
 
-            int pageOrder = 1;
-
             var query = new GetPagePreviewByIdQuery(pageId, sectionId, formVersionId);
             var response = new Page()
             {
@@ -81,13 +79,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Pages
 
             Guid pageId = Guid.NewGuid();
 
-            Guid questionId = Guid.NewGuid();
-
-            int pageOrder = 1;
+            var query = new GetPagePreviewByIdQuery(pageId, sectionId, formVersionId);
 
             Exception ex = new Exception();
-
-            var query = new GetPagePreviewByIdQuery(pageId, sectionId, formVersionId);
 
             _repositoryMock.Setup(x => x.GetPageByIdAsync(pageId))
                            .ThrowsAsync(ex);

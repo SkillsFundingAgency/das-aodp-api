@@ -7,6 +7,7 @@ using SFA.DAS.AODP.Application.Queries.Application.Review;
 using SFA.DAS.AODP.Data.Entities.Application;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
 namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Review
 {
@@ -85,34 +86,66 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Review
             Assert.Equal(response.Item1.First().ApplicationReview.Application.Id, result.Value.Applications.First().Id);
         }
 
-        //[Fact]
-        //public async Task Then_The_Api_Is_Called_With_The_Request_And_Exception_Is_Handled()
-        //{
-        //    // Arrange
-        //    Guid applicationReviewId = Guid.NewGuid();
+        [Fact]
+        public async Task Then_The_Api_Is_Called_With_The_Request_And_Exception_Is_Handled()
+        {
+            // Arrange
+            // Arrange
+            var query = new GetApplicationsForReviewQuery()
+            {
+                ReviewUser = UserType.Qfau.ToString(),
+                ApplicationsWithNewMessages = true,
+                AwardingOrganisationSearch = _fixture.Create<string>(),
+                ApplicationSearch = _fixture.Create<string>(),
+                ApplicationStatuses = _fixture.CreateMany<string>().ToList(),
+                Limit = 1,
+                Offset = 1
+            };
 
-        //    Exception ex = new Exception();
+            (List<ApplicationReviewFeedback>, int) response = (new()
+            {
+                new()
+                {
+                    Owner = " ",
+                    Id = Guid.NewGuid(),
+                    ApplicationReviewId = Guid.NewGuid(),
+                    Status = " ",
+                    NewMessage = true,
+                    Type = " ",
+                    ApplicationReview = new()
+                    {
+                        Application = new()
+                        {
+                            Id = Guid.NewGuid(),
+                            Name = " ",
+                            ReferenceId = 1,
+                            UpdatedAt = DateTime.UtcNow,
+                            QualificationNumber = "1",
+                            AwardingOrganisationName = "SkillsEngland"
 
-        //    var query = new GetApplicationsForReviewQuery();
-        //    var response = new ApplicationReview()
-        //    {
-        //        Id = applicationReviewId,
-        //        ApplicationReviewFeedbacks = new()
-        //        {
-        //            new()
-        //        }
-        //    };
+                        }
+                    }
+                }
+            }, 1);
 
-        //    _repositoryMock.Setup(x => x.GetApplicationReviews(applicationReviewId))
-        //                   .ThrowsAsync(ex);
+            Exception ex = new Exception();
 
-        //    // Act
-        //    var result = await _handler.Handle(query, CancellationToken.None);
+            _repositoryMock.Setup(x => x.GetApplicationReviews(
+                UserType.Qfau,
+                query.Offset.Value,
+                query.Limit.Value,
+                query.ApplicationsWithNewMessages,
+                query.ApplicationStatuses,
+                query.ApplicationSearch,
+                query.AwardingOrganisationSearch))
+                           .ThrowsAsync(ex);
 
-        //    // Assert
-        //    _repositoryMock.Verify(x => x.GetApplicationReviews(applicationReviewId), Times.Once);
-        //    Assert.False(result.Success);
-        //    Assert.Equal(ex.Message, result.ErrorMessage);
-        //}
+            // Act
+            var result = await _handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            Assert.False(result.Success);
+            Assert.Equal(ex.Message, result.ErrorMessage);
+        }
     }
 }

@@ -62,17 +62,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Review
             // Arrange
             Guid applicationReviewId = Guid.NewGuid();
 
-            Exception ex = new Exception();
-
             var query = new GetApplicationForReviewByIdQuery(applicationReviewId);
-            var response = new ApplicationReview()
-            {
-                Id = applicationReviewId,
-                ApplicationReviewFeedbacks = new()
-                {
-                    new()
-                }
-            };
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetApplicationForReviewByReviewIdAsync(applicationReviewId))
                            .ThrowsAsync(ex);

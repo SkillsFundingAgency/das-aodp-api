@@ -59,26 +59,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Forms
         public async Task Then_The_Api_Is_Called_With_The_Request_And_Exception_Is_Handled()
         {
             // Arrange
-            Exception ex = new Exception();
-
             var query = new GetAllFormVersionsQuery();
-            var response = new List<FormVersion>()
-            {
-                new FormVersion()
-                {
-                    Id = Guid.NewGuid(),
-                    FormId = Guid.NewGuid(),
-                    Title = " ",
-                    Version = DateTime.Now,
-                    Status = " ",
-                    Description = " ",
-                    DateCreated = DateTime.Now,
-                    Form = new()
-                    {
-                        Order = 1
-                    }
-                }
-            };
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetLatestFormVersions())
                            .ThrowsAsync(ex);

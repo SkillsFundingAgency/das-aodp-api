@@ -69,10 +69,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Page
 
             Guid formVersionId = Guid.NewGuid();
 
-            Exception ex = new Exception();
-
             var query = new GetApplicationPageByIdQuery(pageOrder, sectionId, formVersionId);
-            var response = new Data.Entities.FormBuilder.Page();
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetPageForApplicationAsync(pageOrder, sectionId, formVersionId))
                            .ThrowsAsync(ex);

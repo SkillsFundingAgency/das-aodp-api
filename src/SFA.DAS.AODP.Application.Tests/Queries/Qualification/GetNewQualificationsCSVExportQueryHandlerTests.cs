@@ -64,13 +64,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Qualification
         public async Task Then_The_Api_Is_Called_With_The_Request_And_Exception_Is_Handled()
         {
             // Arrange
-            Exception ex = new Exception();
-
             var query = new GetNewQualificationsCsvExportQuery();
-            var response = new List<QualificationExport>()
-            {
-                new()
-            };
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetNewQualificationsCSVExport())
                            .ThrowsAsync(ex);

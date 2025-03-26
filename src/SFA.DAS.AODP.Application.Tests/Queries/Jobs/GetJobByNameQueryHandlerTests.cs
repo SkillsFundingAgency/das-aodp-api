@@ -49,13 +49,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Jobs
             // Arrange
             string name = "Test";
 
-            Exception ex = new Exception();
-
             var query = new GetJobByNameQuery(name);
-            var response = new Job()
-            {
-                Name = name
-            };
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetJobByNameAsync(name))
                            .ThrowsAsync(ex);

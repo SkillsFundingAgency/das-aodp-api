@@ -24,7 +24,7 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Organisation
             Guid organisationId = Guid.NewGuid();
 
             var query = new GetApplicationsByOrganisationIdQuery(organisationId);
-            var response = new List<SFA.DAS.AODP.Data.Entities.Application.Application>()
+            var response = new List<Data.Entities.Application.Application>()
             {
                 new()
             };
@@ -47,13 +47,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Organisation
             // Arrange
             Guid organisationId = Guid.NewGuid();
 
-            Exception ex = new Exception();
-
             var query = new GetApplicationsByOrganisationIdQuery(organisationId);
-            var response = new List<SFA.DAS.AODP.Data.Entities.Application.Application>()
-            {
-                new()
-            };
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetByOrganisationId(organisationId))
                            .ThrowsAsync(ex);

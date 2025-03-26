@@ -56,18 +56,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Answer
 
             Guid formVersionId = Guid.NewGuid();
 
-            Exception ex = new Exception();
-
             var query = new GetApplicationSectionByIdQuery(sectionId, formVersionId);
-            var response = new Data.Entities.FormBuilder.Section()
-            {
-                Id = sectionId,
-                FormVersionId = formVersionId,
-                Pages = new()
-                {
-                    new()
-                }
-            };
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetSectionByIdAsync(sectionId))
                            .ThrowsAsync(ex);

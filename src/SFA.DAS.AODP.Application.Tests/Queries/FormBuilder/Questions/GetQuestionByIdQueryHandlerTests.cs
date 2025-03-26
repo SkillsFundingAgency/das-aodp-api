@@ -88,13 +88,13 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Questions
 
             Guid pageId = Guid.NewGuid();
 
-            RecordNotFoundException ex = new RecordNotFoundException(questionId);
-
             var query = new GetQuestionByIdQuery();
             query.QuestionId = questionId;
             query.FormVersionId = formVersionId;
             query.SectionId = sectionId;
             query.PageId = pageId;
+
+            RecordNotFoundException ex = new RecordNotFoundException(questionId);
 
             _repositoryMock.Setup(x => x.GetQuestionByIdAsync(questionId))
                 .ThrowsAsync(ex);
@@ -120,24 +120,13 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Questions
 
             Guid pageId = Guid.NewGuid();
 
-            Exception ex = new Exception();
-
             var query = new GetQuestionByIdQuery();
             query.QuestionId = questionId;
             query.FormVersionId = formVersionId;
             query.SectionId = sectionId;
             query.PageId = pageId;
 
-            var response = new Question()
-            {
-                Id = questionId
-            };
-
-            var responseRoutes = new List<View_QuestionRoutingDetail>()
-            {
-                new()
-            };
-            bool isFormVersionEditable = true;
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetQuestionByIdAsync(questionId))
                 .ThrowsAsync(ex);
@@ -163,13 +152,13 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Questions
 
             Guid pageId = Guid.NewGuid();
 
-            Exception ex = new Exception();
-
             var query = new GetQuestionByIdQuery();
             query.QuestionId = questionId;
             query.FormVersionId = formVersionId;
             query.SectionId = sectionId;
             query.PageId = pageId;
+
+            Exception ex = new Exception();
 
             _repositoryRouteMock.Setup(x => x.GetQuestionRoutingDetailsByQuestionId(questionId))
                 .ThrowsAsync(ex);
@@ -195,13 +184,13 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Questions
 
             Guid pageId = Guid.NewGuid();
 
-            Exception ex = new Exception();
-
             var query = new GetQuestionByIdQuery();
             query.QuestionId = questionId;
             query.FormVersionId = formVersionId;
             query.SectionId = sectionId;
             query.PageId = pageId;
+
+            Exception ex = new Exception();
 
             _repositoryFormMock.Setup(x => x.IsFormVersionEditable(formVersionId))
                .ThrowsAsync(ex);

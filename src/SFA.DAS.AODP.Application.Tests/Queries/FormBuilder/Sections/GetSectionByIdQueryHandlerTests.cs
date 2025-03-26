@@ -69,17 +69,10 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Sections
 
             Guid sectionId = Guid.NewGuid();
 
-            RecordNotFoundException ex = new RecordNotFoundException(sectionId);
 
             var query = new GetSectionByIdQuery(sectionId, formVersionId);
-            var response = new Section()
-            {
-                Id = sectionId
-            };
 
-            bool hasRoutesForSection = true;
-
-            bool isFormVersionEditable = true;
+            RecordNotFoundException ex = new RecordNotFoundException(sectionId);
 
             _repositoryMock.Setup(x => x.GetSectionByIdAsync(sectionId))
                            .ThrowsAsync(ex);
@@ -101,17 +94,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Sections
 
             Guid sectionId = Guid.NewGuid();
 
-            Exception ex = new Exception();
-
             var query = new GetSectionByIdQuery(sectionId, formVersionId);
-            var response = new Section()
-            {
-                Id = sectionId
-            };
 
-            bool hasRoutesForSection = true;
-
-            bool isFormVersionEditable = true;
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetSectionByIdAsync(sectionId))
                            .ThrowsAsync(ex);

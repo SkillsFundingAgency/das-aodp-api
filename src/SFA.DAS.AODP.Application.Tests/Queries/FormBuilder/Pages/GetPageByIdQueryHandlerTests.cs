@@ -6,6 +6,9 @@ using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Application.Queries.FormBuilder.Pages;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using SFA.DAS.AODP.Application.Exceptions;
+using SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
+using SFA.DAS.AODP.Data.Exceptions;
 
 namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Pages
 {
@@ -59,30 +62,60 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Pages
             Assert.Equal(response.Id, result.Value.Id);
         }
 
-        //[Fact]
-        //public async Task Then_The_Api_Is_Called_With_The_Request_And_Exception_Is_Handled()
-        //{
-        //    // Arrange
-        //    Guid sectionId = Guid.NewGuid();
+        [Fact]
+        public async Task Then_The_Api_Is_Called_With_The_Request_And_NotFoundException_Is_Handled()
+        {
+            // Arrange
+            Guid formVersionId = Guid.NewGuid();
 
-        //    Exception ex = new Exception();
+            Guid sectionId = Guid.NewGuid();
 
-        //    var query = new GetAllPagesQuery(sectionId);
-        //    var response = new List<Page>()
-        //    {
-        //        new()
-        //    };
+            Guid pageId = Guid.NewGuid();
 
-        //    _repositoryMock.Setup(x => x.GetPagesForSectionAsync(sectionId))
-        //                   .ThrowsAsync(ex);
+            Guid questionId = Guid.NewGuid();
 
-        //    // Act
-        //    var result = await _handler.Handle(query, CancellationToken.None);
+            var query = new GetPageByIdQuery(pageId, sectionId, formVersionId);
 
-        //    // Assert
-        //    _repositoryMock.Verify(x => x.GetPagesForSectionAsync(sectionId), Times.Once);
-        //    Assert.False(result.Success);
-        //    Assert.Equal(ex.Message, result.ErrorMessage);
-        //}
+            RecordNotFoundException ex = new RecordNotFoundException(sectionId);
+
+            _repositoryMock.Setup(x => x.GetPageByIdAsync(pageId))
+                           .ThrowsAsync(ex);
+
+            // Act
+            var result = await _handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            _repositoryMock.Verify(x => x.GetPageByIdAsync(pageId), Times.Once);
+            Assert.False(result.Success);
+            Assert.IsType<NotFoundException>(result.InnerException);
+        }
+
+        [Fact]
+        public async Task Then_The_Api_Is_Called_With_The_Request_And_Exception_Is_Handled()
+        {
+            // Arrange
+            Guid formVersionId = Guid.NewGuid();
+
+            Guid sectionId = Guid.NewGuid();
+
+            Guid pageId = Guid.NewGuid();
+
+            Guid questionId = Guid.NewGuid();
+
+            var query = new GetPageByIdQuery(pageId, sectionId, formVersionId);
+
+            Exception ex = new Exception();
+
+            _repositoryMock.Setup(x => x.GetPageByIdAsync(pageId))
+                           .ThrowsAsync(ex);
+
+            // Act
+            var result = await _handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            _repositoryMock.Verify(x => x.GetPageByIdAsync(pageId), Times.Once);
+            Assert.False(result.Success);
+            Assert.Equal(ex.Message, result.ErrorMessage);
+        }
     }
 }

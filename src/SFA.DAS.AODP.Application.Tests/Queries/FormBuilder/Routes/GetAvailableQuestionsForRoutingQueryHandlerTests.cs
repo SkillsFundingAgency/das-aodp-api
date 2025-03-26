@@ -52,16 +52,10 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Routes
             // Arrange
             Guid pageId = Guid.NewGuid();
 
-            RecordNotFoundException ex = new RecordNotFoundException(pageId);
-
-            NotFoundException expected = new NotFoundException(pageId);
-
             var query = new GetAvailableQuestionsForRoutingQuery();
             query.PageId = pageId;
-            var response = new List<View_AvailableQuestionsForRouting>()
-            {
-                new()
-            };
+
+            RecordNotFoundException ex = new RecordNotFoundException(pageId);
 
             _repositoryMock.Setup(x => x.GetAvailableQuestionsForRoutingByPageId(pageId))
                            .ThrowsAsync(ex);
@@ -81,14 +75,10 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Routes
             // Arrange
             Guid pageId = Guid.NewGuid();
 
-            Exception ex = new Exception();
-
             var query = new GetAvailableQuestionsForRoutingQuery();
             query.PageId = pageId;
-            var response = new List<View_AvailableQuestionsForRouting>()
-            {
-                new()
-            };
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetAvailableQuestionsForRoutingByPageId(pageId))
                            .ThrowsAsync(ex);

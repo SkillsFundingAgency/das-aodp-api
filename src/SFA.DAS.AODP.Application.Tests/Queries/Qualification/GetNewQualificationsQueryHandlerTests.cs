@@ -74,6 +74,7 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Qualification
             // Arrange
             var query = _fixture.Create<GetNewQualificationsQuery>();
             var exceptionMessage = "An error occurred";
+
             _repositoryMock.Setup(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()))
                            .ThrowsAsync(new Exception(exceptionMessage));
 

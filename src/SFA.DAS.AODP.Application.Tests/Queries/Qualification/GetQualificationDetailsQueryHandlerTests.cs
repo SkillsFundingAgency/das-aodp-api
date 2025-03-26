@@ -88,6 +88,7 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Qualification
             // Arrange
             var query = _fixture.Create<GetQualificationDetailsQuery>();
             var exceptionMessage = "An error occurred";
+
             _repositoryMock.Setup(x => x.GetQualificationDetailsByIdAsync(It.IsAny<string>()))
                            .ThrowsAsync(new Exception(exceptionMessage));
 

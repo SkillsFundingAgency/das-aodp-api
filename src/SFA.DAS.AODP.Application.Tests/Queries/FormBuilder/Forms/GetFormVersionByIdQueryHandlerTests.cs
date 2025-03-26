@@ -63,9 +63,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Forms
             // Arrange
             Guid formVersionId = Guid.NewGuid();
 
-            RecordNotFoundException ex = new RecordNotFoundException(formVersionId);
-
             var query = new GetFormVersionByIdQuery(formVersionId);
+
+            RecordNotFoundException ex = new RecordNotFoundException(formVersionId);
 
             _repositoryMock.Setup(x => x.GetFormVersionByIdAsync(formVersionId))
                            .ThrowsAsync(ex);
@@ -85,9 +85,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Forms
             // Arrange
             Guid formVersionId = Guid.NewGuid();
 
-            Exception ex = new Exception();
-
             var query = new GetFormVersionByIdQuery(formVersionId);
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetFormVersionByIdAsync(formVersionId))
                            .ThrowsAsync(ex);

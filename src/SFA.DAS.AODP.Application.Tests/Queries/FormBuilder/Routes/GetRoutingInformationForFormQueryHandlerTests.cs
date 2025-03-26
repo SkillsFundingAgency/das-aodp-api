@@ -53,14 +53,11 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Routes
             // Arrange
             Guid formVersionId = Guid.NewGuid();
 
-            RecordNotFoundException ex = new RecordNotFoundException(formVersionId);
 
             var query = new GetRoutingInformationForFormQuery();
             query.FormVersionId = formVersionId;
-            var response = new List<View_QuestionRoutingDetail>()
-            {
-                new()
-            };
+
+            RecordNotFoundException ex = new RecordNotFoundException(formVersionId);
 
             _repositoryMock.Setup(x => x.GetQuestionRoutingDetailsByFormVersionId(formVersionId))
                            .ThrowsAsync(ex);
@@ -80,14 +77,10 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Routes
             // Arrange
             Guid formVersionId = Guid.NewGuid();
 
-            Exception ex = new Exception();
-
             var query = new GetRoutingInformationForFormQuery();
             query.FormVersionId = formVersionId;
-            var response = new List<View_QuestionRoutingDetail>()
-            {
-                new()
-            };
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetQuestionRoutingDetailsByFormVersionId(formVersionId))
                            .ThrowsAsync(ex);

@@ -60,14 +60,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Review
 
             string userTypeString = userType.ToString();
 
-            Exception ex = new Exception();
-
             var query = new GetFeedbackForApplicationReviewByIdQuery(applicationReviewId, userTypeString);
-            var response = new ApplicationReviewFeedback()
-            {
-                Id = applicationReviewId,
-                Type = userTypeString
-            };
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetApplicationReviewFeedbackDetailsByReviewIdAsync(applicationReviewId, userType))
                            .ThrowsAsync(ex);

@@ -50,13 +50,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Form
         public async Task Then_The_Api_Is_Called_With_The_Request_And_Exception_Is_Handled()
         {
             // Arrange
-            Exception ex = new Exception();
-
             var query = new GetApplicationFormsQuery();
-            var response = new List<FormVersion>()
-            {
-                new FormVersion()
-            };
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetPublishedFormVersions())
                            .ThrowsAsync(ex);

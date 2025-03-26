@@ -47,13 +47,13 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Application
             // Arrange
             Guid applicationId = Guid.NewGuid();
 
-            Exception ex = new Exception();
-
             var query = new GetApplicationMetadataByIdQuery(applicationId);
             var response = new Data.Entities.Application.Application()
             {
                 Id = applicationId
             };
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetByIdAsync(applicationId))
                            .ThrowsAsync(ex);

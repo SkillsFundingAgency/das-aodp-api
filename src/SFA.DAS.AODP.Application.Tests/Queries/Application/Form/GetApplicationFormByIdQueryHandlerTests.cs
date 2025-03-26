@@ -52,17 +52,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Form
             // Arrange
             Guid formVersionId = Guid.NewGuid();
 
-            Exception ex = new Exception();
-
             var query = new GetApplicationFormByIdQuery(formVersionId);
-            var response = new FormVersion()
-            {
-                Id = formVersionId,
-                Sections = new()
-                {
-                    new()
-                }
-            };
+
+            Exception ex = new Exception();
 
             _repositoryMock.Setup(x => x.GetFormVersionByIdAsync(formVersionId))
                            .ThrowsAsync(ex);
