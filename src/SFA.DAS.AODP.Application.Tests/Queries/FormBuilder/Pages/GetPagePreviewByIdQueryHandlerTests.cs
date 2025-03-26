@@ -40,6 +40,7 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Pages
             var query = new GetPagePreviewByIdQuery(pageId, sectionId, formVersionId);
             var response = new Page()
             {
+                SectionId = sectionId,
                 Id = pageId,
                 Title = " ",
                 Questions = new()
@@ -57,6 +58,9 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Pages
 
             _repositoryMock.Setup(x => x.GetPageByIdAsync(pageId))
                 .ReturnsAsync(response);
+
+            _repositoryMock.Setup(x => x.GetPageForApplicationAsync(response.Order, sectionId, formVersionId))
+              .ReturnsAsync(response);
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);

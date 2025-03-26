@@ -26,43 +26,24 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Review
         public async Task Then_The_Api_Is_Called_With_The_Request_And_ApplicationReviews_Are_Returned()
         {
             // Arrange
-            UserType userType = UserType.AwardingOrganisation;
-
-            //SkillsEngland,
-        //Ofqual,
-        //Qfau
-
-            int offset = 0;
-
-            int limit = 10;
-
-            bool includeApplicationWithNewMessages = false;
-
-            List<string> applicationStatuses = new()
-            {
-                " "
-            };
-
-            Guid applicationId = Guid.NewGuid();
-
-            Guid applicationReviewId = Guid.NewGuid();
-
-            string applicationSearch = " ";
-
-            string awardingOrganisationSearch = " ";
-
             var query = new GetApplicationsForReviewQuery()
             {
-                ReviewUser = UserType.AwardingOrganisation.ToString(),
-                ApplicationsWithNewMessages = true
+                ReviewUser = UserType.Qfau.ToString(),
+                ApplicationsWithNewMessages = true,
+                AwardingOrganisationSearch = _fixture.Create<string>(),
+                ApplicationSearch = _fixture.Create<string>(),
+                ApplicationStatuses = _fixture.CreateMany<string>().ToList(),
+                Limit = 1,
+                Offset = 1
             };
+
             (List<ApplicationReviewFeedback>, int) response = (new()
             {
                 new()
                 {
                     Owner = " ",
-                    Id = applicationId,
-                    ApplicationReviewId = applicationReviewId,
+                    Id = Guid.NewGuid(),
+                    ApplicationReviewId = Guid.NewGuid(),
                     Status = " ",
                     NewMessage = true,
                     Type = " ",
@@ -70,7 +51,7 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Review
                     {
                         Application = new()
                         {
-                            Id = applicationId,
+                            Id = Guid.NewGuid(),
                             Name = " ",
                             ReferenceId = 1,
                             UpdatedAt = DateTime.UtcNow,
@@ -82,16 +63,26 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Review
                 }
             }, 1);
 
-            _repositoryMock.Setup(x => x.GetApplicationReviews(userType, offset, limit, includeApplicationWithNewMessages, applicationStatuses, applicationSearch, awardingOrganisationSearch))
+            _repositoryMock.Setup(x => x.GetApplicationReviews(
+                UserType.Qfau, 
+                query.Offset.Value,
+                query.Limit.Value,
+                query.ApplicationsWithNewMessages,
+                query.ApplicationStatuses,
+                query.ApplicationSearch,
+                query.AwardingOrganisationSearch))
                            .ReturnsAsync(response);
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            _repositoryMock.Verify(x => x.GetApplicationReviews(It.IsAny<UserType>(), offset, limit, includeApplicationWithNewMessages, applicationStatuses, applicationSearch, awardingOrganisationSearch), Times.Once);
             Assert.True(result.Success);
-            Assert.Equal(response.Item1.Count, result.Value.Applications.Count);
+
+            Assert.Equal(response.Item2, result.Value.TotalRecordsCount);
+
+            Assert.Single(result.Value.Applications);
+            Assert.Equal(response.Item1.First().ApplicationReview.Application.Id, result.Value.Applications.First().Id);
         }
 
         //[Fact]

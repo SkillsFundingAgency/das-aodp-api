@@ -54,7 +54,7 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Pages
             var result = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            _repositoryMock.Verify(x => x.GetPageByIdAsync(sectionId), Times.Once);
+            _repositoryMock.Verify(x => x.GetPageByIdAsync(pageId), Times.Once);
             Assert.True(result.Success);
             Assert.Equal(response.Id, result.Value.Id);
         }
