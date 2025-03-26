@@ -134,4 +134,14 @@ public class ApplicationsReviewsController : BaseController
         command.ApplicationReviewId = applicationReviewId;
         return await SendRequestAsync(command);
     }
+
+    [HttpGet("/api/application-reviews/{applicationReviewId}/form-answers")]
+    [ProducesResponseType(typeof(GetApplicationFormAnswersByReviewIdQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetApplicationAnswersByIdAsync(Guid applicationReviewId)
+    {
+        var query = new GetApplicationFormAnswersByReviewIdQuery(applicationReviewId);
+        return await SendRequestAsync(query);
+    }
 }

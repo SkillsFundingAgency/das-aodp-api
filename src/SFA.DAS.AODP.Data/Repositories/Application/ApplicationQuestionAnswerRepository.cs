@@ -13,7 +13,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             _context = context;
         }
 
-        public async Task<Data.Entities.Application.ApplicationQuestionAnswer> Create(Data.Entities.Application.ApplicationQuestionAnswer application)
+        public async Task<ApplicationQuestionAnswer> Create(ApplicationQuestionAnswer application)
         {
             application.Id = Guid.NewGuid();
             await _context.ApplicationQuestionAnswers.AddAsync(application);
@@ -51,6 +51,13 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
                 }
             }
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<ApplicationQuestionAnswer>> GetAnswersByApplicationId(Guid applicationId)
+        {
+            return await _context.ApplicationQuestionAnswers
+                .Where(aqa => aqa.ApplicationPage.ApplicationId == applicationId)
+                .ToListAsync();
         }
     }
 }
