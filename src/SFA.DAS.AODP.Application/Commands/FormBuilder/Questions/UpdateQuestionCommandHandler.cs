@@ -66,7 +66,6 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
             }
             else if (question.Type == QuestionType.File.ToString())
             {
-                question.QuestionValidation.FileMaxSize = request.FileUpload.MaxSize;
                 question.QuestionValidation.FileNamePrefix = request.FileUpload.FileNamePrefix;
                 question.QuestionValidation.NumberOfFiles = request.FileUpload.NumberOfFiles;
             }
