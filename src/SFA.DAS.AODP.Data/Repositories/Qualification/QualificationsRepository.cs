@@ -16,7 +16,7 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
         return await _context.ChangedQualifications
             .ToListAsync();
     }
-    public async Task AddQualificationDiscussionHistory(Entities.Qualification.QualificationDiscussionHistory qualificationDiscussionHistory, string qualificationReference)
+    public async Task AddQualificationDiscussionHistory(QualificationDiscussionHistory qualificationDiscussionHistory, string qualificationReference)
     {
         var qual = await _context.Qualification.FirstOrDefaultAsync(v => v.Qan == qualificationReference);
         if (qual is null)
@@ -44,27 +44,40 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
             .FirstOrDefaultAsync();
     }
 
-    public async Task UpdateQualificationStatus(string qualificationReference, Guid processStatusId,int version)
+    public async Task<ProcessStatus> UpdateQualificationStatus(string qualificationReference, Guid processStatusId, int version)
     {
         var qual = await _context.QualificationVersions
             .Include(v => v.LifecycleStage)
             .Include(v => v.Qualification)
-            .FirstOrDefaultAsync(v => v.Qualification.Qan == qualificationReference && v.Version==version);
+            .OrderByDescending(v => v.Version)
+            .FirstOrDefaultAsync(v => v.Qualification.Qan == qualificationReference && v.Version == version);
         if (qual is null)
         {
             throw new RecordWithNameNotFoundException(qualificationReference);
         }
-        if (!_context.ProcessStatus.Any(v => v.Id == processStatusId))
+        var processStatus = await _context.ProcessStatus.FirstOrDefaultAsync(v => v.Id == processStatusId);
+        if (processStatus is null)
         {
             throw new NoForeignKeyException(processStatusId);
         }
         qual.ProcessStatusId = processStatusId;
         await _context.SaveChangesAsync();
+        return processStatus;
     }
 
     public async Task<List<ProcessStatus>> GetProcessingStatuses() => await _context.ProcessStatus.ToListAsync();
     public async Task<IEnumerable<ChangedQualificationExport>> GetChangedQualificationsExport()
     {
         return await _context.ChangedQualificationExport.ToListAsync<ChangedQualificationExport>();
+    }
+
+    public async Task<Entities.Qualification.Qualification> GetByIdAsync(string qualificationReference)
+    {
+        return await _context
+                    .Qualification
+                    .Include(a => a.QualificationVersions)
+                    .Where(v => v.Qan == qualificationReference)
+                    .FirstOrDefaultAsync();
+
     }
 }

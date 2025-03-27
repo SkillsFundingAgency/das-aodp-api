@@ -8,6 +8,7 @@ public partial class QualificationDiscussionHistory
     public string? UserDisplayName { get; set; }
     public string? Notes { get; set; }
     public DateTime? Timestamp { get; set; }
+    public string? Title { get; set; }
     public virtual ActionType ActionType { get; set; } = null!;
     public virtual Qualification Qualification { get; set; } = null!;
 }

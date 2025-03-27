@@ -2,6 +2,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Commands.Qualifications;
+using SFA.DAS.AODP.Application.Queries.Application.Review;
 using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Application.Commands.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
@@ -20,6 +22,61 @@ public class QualificationsController : BaseController
     {
         _mediator = mediator;
         _logger = logger;
+    }
+
+    [HttpGet("/api/qualifications/{qualificationReference}/QualificationVersions")]
+    [ProducesResponseType(typeof(GetQualificationVersionsForQualificationByReferenceQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetQualificationVersionsForQualificationByReference(string qualificationReference)
+    {
+        return await SendRequestAsync(new GetQualificationVersionsForQualificationByReferenceQuery(qualificationReference));
+    }
+
+    [HttpGet("/api/qualifications/{qualificationVersionId}/feedback")]
+    [ProducesResponseType(typeof(GetFeedbackForQualificationFundingByIdQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetFeedbackForQualificationFundingById(Guid qualificationVersionId)
+    {
+        return await SendRequestAsync(new GetFeedbackForQualificationFundingByIdQuery(qualificationVersionId));
+    }
+
+    [HttpPut("/api/qualifications/{qualificationVersionId}/save-qualification-funding-offers-outcome")]
+    [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> SaveFundingOfferOutcome(SaveQualificationsFundingOffersOutcomeCommand command, Guid qualificationVersionId)
+    {
+        command.QualificationVersionId = qualificationVersionId;
+        return await SendRequestAsync(command);
+    }
+
+    [HttpPut("/api/qualifications/{qualificationVersionId}/save-qualification-funding-offers")]
+    [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> SaveQualificationFundingOffers(SaveQualificationsFundingOffersCommand command, Guid qualificationVersionId)
+    {
+        command.QualificationVersionId = qualificationVersionId;
+
+        return await SendRequestAsync(command);
+    }
+
+    [HttpPut("/api/qualifications/{qualificationVersionId}/save-qualification-funding-offers-details")]
+    [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> SaveQualificationFundingOffersDetails(SaveQualificationsFundingOffersDetailsCommand command, Guid qualificationVersionId)
+    {
+        command.QualificationVersionId = qualificationVersionId;
+
+        return await SendRequestAsync(command);
+    }
+
+    [HttpPut("/api/qualifications/{qualificationVersionId}/Create-QualificationDiscussionHistory")]
+    [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> QualificationFundingOffersSummary(CreateQualificationDiscussionHistoryCommand command, Guid qualificationVersionId)
+    {
+        return await SendRequestAsync(command);
     }
 
     [HttpGet]
@@ -73,6 +130,7 @@ public class QualificationsController : BaseController
         {
             return BadRequest(new { message = validationResult.ErrorMessage });
         }
+
     }
 
     [HttpGet("{qualificationReference}/detail")]

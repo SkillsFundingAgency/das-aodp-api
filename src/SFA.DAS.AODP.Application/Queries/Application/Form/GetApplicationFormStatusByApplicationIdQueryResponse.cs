@@ -12,7 +12,9 @@ public class GetApplicationFormStatusByApplicationIdQueryResponse
     public bool Submitted { get; set; }
     public DateTime? UpdatedDate { get; set; }
     public string? Status { get; set; }
+
     public bool NewMessage { get; set; }
+    public bool ReviewExists { get; set; }
 
     public List<Section> Sections { get; set; } = new();
 

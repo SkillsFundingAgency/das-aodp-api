@@ -68,7 +68,8 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<QualificationDiscussionHistory> QualificationDiscussionHistory { get; set; }
         public virtual DbSet<QualificationOffer> QualificationOffers { get; set; }        
         public virtual DbSet<VersionFieldChange> VersionFieldChanges { get; set; }
-
+        public virtual DbSet<QualificationFundingFeedbacks> QualificationFundingFeedbacks { get; set; }
+        public virtual DbSet<QualificationFundings> QualificationFundings { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<QualificationNewReviewRequired>().ToView("v_QualificationNewReviewRequired", "regulated").HasNoKey();
@@ -87,7 +88,10 @@ namespace SFA.DAS.AODP.Data.Context
 
             modelBuilder.Entity<Message>().Property(m => m.Type).HasConversion<string>();
             modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
-                .HasKey(v => v.QualificationReference);
+                .HasKey(v => v.QualificationReference);           
+
+            modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
+                .HasKey(v => v.QualificationReference);            
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 

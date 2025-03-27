@@ -11,6 +11,7 @@ public class GetDiscussionHistoriesForQualificationQueryResponse
         public string? UserDisplayName { get; set; }
         public string? Notes { get; set; }
         public DateTime? Timestamp { get; set; }
+        public string? Title { get; set; }
         public virtual ActionType ActionType { get; set; } = null!;
 
         public static implicit operator QualificationDiscussionHistory(Data.Entities.Qualification.QualificationDiscussionHistory entity)
@@ -23,6 +24,7 @@ public class GetDiscussionHistoriesForQualificationQueryResponse
                 UserDisplayName = entity.UserDisplayName,
                 Notes = entity.Notes,
                 Timestamp = entity.Timestamp,
+                Title = entity.Title,
                 ActionType = new ActionType
                 {
                     Id = entity.ActionType.Id,

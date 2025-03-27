@@ -27,6 +27,7 @@ public class AddQualificationDiscussionHistoryCommandHandler : IRequestHandler<A
             {
                 UserDisplayName = request.UserDisplayName,
                 Notes = request.Notes,
+                Title = "Comment added"
             };
             await _qualificationsRepository.AddQualificationDiscussionHistory(qualificationDiscussionHistory, request.QualificationReference);
             response.Success = true;
