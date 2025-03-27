@@ -26,7 +26,11 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Offers
             var query = new GetFundingOffersQuery();
             var response = new List<FundingOffer>()
             {
-                new()
+                new FundingOffer()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = " "
+                }
             };
 
             _repositoryMock.Setup(x => x.GetFundingOffersAsync())
@@ -39,6 +43,8 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Offers
             _repositoryMock.Verify(x => x.GetFundingOffersAsync(), Times.Once);
             Assert.True(result.Success);
             Assert.Equal(response.Count, result.Value.Offers.Count);
+            Assert.Single(result.Value.Offers);
+            Assert.Equal(response.First().Id, result.Value.Offers.First().Id);
         }
 
         [Fact]

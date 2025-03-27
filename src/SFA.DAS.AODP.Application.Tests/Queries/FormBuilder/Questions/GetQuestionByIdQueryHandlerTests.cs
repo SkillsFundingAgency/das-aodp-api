@@ -47,12 +47,35 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Questions
 
             var response = new Question()
                 {
-                    Id = questionId
-                };
+                    Id = questionId,
+                    PageId = pageId,
+                    Title = " ",
+                    Type = " ",
+                    Required = false,
+                    Order = 1,
+                    Key = Guid.NewGuid()
+               };
 
             var responseRoutes = new List<View_QuestionRoutingDetail>()
             {
-                new()
+                new View_QuestionRoutingDetail()
+                {
+                    FormVersionId = formVersionId,
+                    SectionId = sectionId,
+                    PageId = pageId,
+                    QuestionId = questionId,
+                    OptionId = Guid.NewGuid(),
+                    QuestionTitle = " ",
+                    PageTitle = " ",
+                    SectionTitle = " ",
+                    OptionValue = " ",
+                    QuestionOrder = 1,
+                    PageOrder = 1,
+                    SectionOrder = 1,
+                    OptionOrder = 1,
+                    EndForm = false,
+                    EndSection = false
+                }
             };
             bool isFormVersionEditable = true;
 
@@ -73,6 +96,7 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Questions
             _repositoryRouteMock.Verify(x => x.GetQuestionRoutingDetailsByQuestionId(questionId), Times.Once);
             _repositoryFormMock.Verify(x => x.IsFormVersionEditable(formVersionId), Times.Once);
             Assert.True(result.Success);
+            Assert.Single(result.Value.Routes);
             Assert.Equal(response.Id, result.Value.Id);
         }
 

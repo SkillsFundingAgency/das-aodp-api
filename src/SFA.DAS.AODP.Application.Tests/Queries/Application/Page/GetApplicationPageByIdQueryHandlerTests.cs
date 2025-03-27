@@ -56,7 +56,7 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Page
             // Assert
             _repositoryMock.Verify(x => x.GetPageForApplicationAsync(pageOrder, sectionId, formVersionId), Times.Once);
             Assert.True(result.Success);
-            Assert.Equal(response.Questions.Count, result.Value.Questions.Count);
+            Assert.Equal(response.Id, result.Value.Id);
         }
 
         [Fact]

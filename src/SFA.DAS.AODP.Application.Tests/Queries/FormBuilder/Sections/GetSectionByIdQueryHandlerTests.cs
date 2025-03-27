@@ -44,19 +44,11 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Sections
             _repositoryMock.Setup(x => x.GetSectionByIdAsync(sectionId))
                 .ReturnsAsync(response);
 
-            //_repositoryMock.Setup(x => x.HasRoutesForSectionAsync(sectionId))
-            //    .ReturnsAsync(hasRoutesForSection);
-
-            //_repositoryFormMock.Setup(x => x.IsFormVersionEditable(formVersionId))
-            //    .ReturnsAsync(hasRoutesForSection);
-
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
             _repositoryMock.Verify(x => x.GetSectionByIdAsync(sectionId), Times.Once);
-            //_repositoryMock.Verify(x => x.HasRoutesForSectionAsync(formVersionId), Times.Once);
-            //_repositoryFormMock.Verify(x => x.IsFormVersionEditable(formVersionId), Times.Once);
             Assert.True(result.Success);
             Assert.Equal(response.Id, result.Value.Id);
         }

@@ -26,8 +26,10 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Qualification
             var query = new GetNewQualificationsCsvExportQuery();
             var response = new List<QualificationExport>()
             {
-                new()
-            };
+                new QualificationExport()
+                {
+                    DateOfDownload = DateTime.UtcNow
+                }            };
 
             _repositoryMock.Setup(x => x.GetNewQualificationsCSVExport())
                 .ReturnsAsync(response);
@@ -39,6 +41,8 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Qualification
             _repositoryMock.Verify(x => x.GetNewQualificationsCSVExport(), Times.Once);
             Assert.True(result.Success);
             Assert.Equal(response.Count, result.Value.QualificationExports.Count);
+            Assert.Single(result.Value.QualificationExports);
+            Assert.Equal(response.First().DateOfDownload, result.Value.QualificationExports.First().DateOfDownload);
         }
 
         [Fact]

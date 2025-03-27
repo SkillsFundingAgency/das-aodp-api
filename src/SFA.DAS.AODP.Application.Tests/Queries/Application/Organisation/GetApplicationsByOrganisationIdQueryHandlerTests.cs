@@ -26,7 +26,17 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Organisation
             var query = new GetApplicationsByOrganisationIdQuery(organisationId);
             var response = new List<Data.Entities.Application.Application>()
             {
-                new()
+                new Data.Entities.Application.Application()
+                {
+                    Id = Guid.NewGuid(),
+                    FormVersionId = Guid.NewGuid(),
+                    Name = " ",
+                    Owner = " ",
+                    ReferenceId = 1,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    OrganisationId = organisationId
+                }
             };
 
             _repositoryMock.Setup(x => x.GetByOrganisationId(organisationId))
@@ -39,6 +49,8 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Organisation
             _repositoryMock.Verify(x => x.GetByOrganisationId(organisationId), Times.Once);
             Assert.True(result.Success);
             Assert.Equal(response.Count, result.Value.Applications.Count);
+            Assert.Single(result.Value.Applications);
+            Assert.Equal(response[0].Id, result.Value.Applications[0].Id);
         }
 
         [Fact]

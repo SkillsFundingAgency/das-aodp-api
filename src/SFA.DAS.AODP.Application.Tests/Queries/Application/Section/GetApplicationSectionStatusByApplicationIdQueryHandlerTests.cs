@@ -30,7 +30,13 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Sections
             var query = new GetApplicationSectionStatusByApplicationIdQuery(sectionId, formVersionId, applicationId);
             var response = new List<Data.Entities.Application.ApplicationPage>()
             {
-                new()
+                new Data.Entities.Application.ApplicationPage()
+                {
+                    Id = Guid.NewGuid(),
+                    PageId = Guid.NewGuid(),
+                    ApplicationId = applicationId,
+                    Status = " "
+                }
             };
 
             _repositoryMock.Setup(x => x.GetBySectionIdAsync(sectionId, applicationId))
@@ -43,6 +49,8 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Sections
             _repositoryMock.Verify(x => x.GetBySectionIdAsync(sectionId, applicationId), Times.Once);
             Assert.True(result.Success);
             Assert.Equal(response.Count, result.Value.Pages.Count);
+            Assert.Single(result.Value.Pages);
+            Assert.Equal(response[0].PageId, result.Value.Pages[0].PageId);
         }
 
         [Fact]
@@ -54,8 +62,6 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Sections
             Guid formVersionId = Guid.NewGuid();
 
             Guid applicationId = Guid.NewGuid();
-
-            Exception ex = new Exception();
 
             var query = new GetApplicationSectionStatusByApplicationIdQuery(sectionId, formVersionId, applicationId);
 

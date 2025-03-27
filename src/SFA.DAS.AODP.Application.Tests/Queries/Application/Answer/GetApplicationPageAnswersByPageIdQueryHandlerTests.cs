@@ -50,6 +50,8 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Answer
             _repositoryMock.Verify(x => x.GetAnswersByApplicationAndPageId(applicationId, pageId), Times.Once);
             Assert.True(result.Success);
             Assert.Equal(response.Count, result.Value.Questions.Count);
+            Assert.Single(result.Value.Questions);
+            Assert.Equal(response[0].QuestionId, result.Value.Questions[0].QuestionId);
         }
 
 

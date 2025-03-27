@@ -53,6 +53,8 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Forms
             _repositoryMock.Verify(x => x.GetLatestFormVersions(), Times.Once);
             Assert.True(result.Success);
             Assert.Equal(response.Count, result.Value.Data.Count);
+            Assert.Single(result.Value.Data);
+            Assert.Equal(response[0].Id, result.Value.Data[0].Id);
         }
 
         [Fact]

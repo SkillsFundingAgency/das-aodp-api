@@ -32,7 +32,24 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Routes
             query.FormVersionId = formVersionId;
             var response = new List<View_QuestionRoutingDetail>()
             {
-                new()
+                new View_QuestionRoutingDetail()
+                {
+                    FormVersionId = formVersionId,
+                    SectionId = Guid.NewGuid(),
+                    PageId = Guid.NewGuid(),
+                    QuestionId = Guid.NewGuid(),
+                    OptionId = Guid.NewGuid(),
+                    QuestionTitle = " ",
+                    PageTitle = " ",
+                    SectionTitle = " ",
+                    OptionValue = " ",
+                    QuestionOrder = 1,
+                    PageOrder = 1,
+                    SectionOrder = 1,
+                    OptionOrder = 1,
+                    EndForm = false,
+                    EndSection = false
+                }
             };
 
             _repositoryMock.Setup(x => x.GetQuestionRoutingDetailsByFormVersionId(formVersionId))
@@ -45,6 +62,8 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Routes
             _repositoryMock.Verify(x => x.GetQuestionRoutingDetailsByFormVersionId(formVersionId), Times.Once);
             Assert.True(result.Success);
             Assert.Equal(response.Count, result.Value.Sections.Count);
+            Assert.Single(result.Value.Sections);
+            Assert.Equal(response.First().SectionId, result.Value.Sections.First().Id);
         }
 
         [Fact]

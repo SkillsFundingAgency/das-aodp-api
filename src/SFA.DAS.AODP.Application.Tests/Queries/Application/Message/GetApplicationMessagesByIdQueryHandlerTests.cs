@@ -4,6 +4,7 @@ using Moq;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Application.Queries.Application.Message;
 using SFA.DAS.AODP.Models.Application;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Message
 {
@@ -32,7 +33,21 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Message
             var query = new GetApplicationMessagesByIdQuery(applicationId, userTypeString);
             var response = new List<Data.Entities.Application.Message>()
             {
-                new()
+                new Data.Entities.Application.Message()
+                {
+                    Id = Guid.NewGuid(),
+                    ApplicationId = applicationId,
+                    Text = " ",
+                    Type = MessageType.UnlockApplication,
+                    MessageHeader = " ", 
+                    SharedWithDfe = true,
+                    SharedWithOfqual = true,
+                    SharedWithSkillsEngland = true,
+                    SharedWithAwardingOrganisation = true,
+                    SentByName = " ",
+                    SentByEmail = " ",
+                    SentAt = DateTime.UtcNow
+                }
             };
 
             _repositoryMock.Setup(x => x.GetMessagesByApplicationIdAndUserTypeAsync(applicationId, userType))
@@ -45,6 +60,8 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Message
             _repositoryMock.Verify(x => x.GetMessagesByApplicationIdAndUserTypeAsync(applicationId, userType), Times.Once);
             Assert.True(result.Success);
             Assert.Equal(response.Count, result.Value.Messages.Count);
+            Assert.Single(result.Value.Messages);
+            Assert.Equal(response[0].ApplicationId, result.Value.Messages[0].ApplicationId);
         }
 
         [Fact]

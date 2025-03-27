@@ -20,3 +20,4 @@ namespace SFA.DAS.AODP.Data.Entities.Application
         NotStarted, Completed, Skipped
     }
 }
+

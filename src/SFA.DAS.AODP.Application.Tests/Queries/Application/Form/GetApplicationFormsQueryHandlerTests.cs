@@ -30,6 +30,7 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Form
             {
                 new FormVersion()
                 {
+                    Id = formVersionId,
                     Form = new()
                 }
             };
@@ -44,6 +45,8 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Form
             _repositoryMock.Verify(x => x.GetPublishedFormVersions(), Times.Once);
             Assert.True(result.Success);
             Assert.Equal(response.Count, result.Value.Forms.Count);
+            Assert.Single(result.Value.Forms);
+            Assert.Equal(response[0].Id, result.Value.Forms[0].Id);
         }
 
         [Fact]

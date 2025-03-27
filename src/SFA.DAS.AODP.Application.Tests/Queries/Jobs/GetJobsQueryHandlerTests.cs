@@ -26,7 +26,10 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Jobs
             var query = new GetJobsQuery();
             var response = new List<Job>()
             {
-                new()
+                new Job()
+                {
+                    Name = " "
+                }
             };
 
             _repositoryMock.Setup(x => x.GetJobsAsync())

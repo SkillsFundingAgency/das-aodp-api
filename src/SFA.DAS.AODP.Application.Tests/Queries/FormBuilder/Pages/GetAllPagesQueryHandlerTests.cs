@@ -28,7 +28,14 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Pages
             var query = new GetAllPagesQuery(sectionId);
             var response = new List<Page>()
             {
-                new()
+                new Page()
+                {
+                    Id = Guid.NewGuid(),
+                    SectionId = sectionId,
+                    Title = " ",
+                    Key = Guid.NewGuid(),
+                    Order = 1
+                }
             };
 
             _repositoryMock.Setup(x => x.GetPagesForSectionAsync(sectionId))
@@ -41,6 +48,8 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.FormBuilder.Pages
             _repositoryMock.Verify(x => x.GetPagesForSectionAsync(sectionId), Times.Once);
             Assert.True(result.Success);
             Assert.Equal(response.Count, result.Value.Data.Count);
+            Assert.Single(result.Value.Data);
+            Assert.Equal(response[0].Id, result.Value.Data[0].Id);
         }
 
         [Fact]
