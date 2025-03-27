@@ -21,7 +21,6 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
 
         [HttpGet]
         [ProducesResponseType(typeof(BaseMediatrResponse<GetNewQualificationsQueryResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(BaseMediatrResponse<GetChangedQualificationsQueryResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -51,14 +50,7 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
                 }
                 else if (validationResult.ProcessedStatus == "changed")
                 {
-                    var query = new GetChangedQualificationsQuery()
-                    {
-                        Name = name,
-                        Organisation = organisation,
-                        QAN = qan,
-                        Skip = skip,
-                        Take = take
-                    };
+                    var query = new GetChangedQualificationsQuery();
                     return await SendRequestAsync(query);
                 }
                 else
@@ -95,9 +87,9 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
 
             return Ok(result);
         }
+
         [HttpGet("export")]
         [ProducesResponseType(typeof(BaseMediatrResponse<GetNewQualificationsCsvExportResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(BaseMediatrResponse<GetChangedQualificationsCsvExportResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -106,7 +98,6 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             IActionResult response = status?.ToLower() switch
             {
                 "new" => await HandleNewQualificationCSVExport(),
-                "changed" => await HandleChangedQualificationCSVExport(),
                 _ => BadRequest(new { message = $"Invalid status param: {status}" })
             };
 
@@ -125,20 +116,6 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
 
             return Ok(result);
         }
-
-        private async Task<IActionResult> HandleChangedQualificationCSVExport()
-        {
-            var result = await _mediator.Send(new GetChangedQualificationsCsvExportQuery());
-
-            if (result == null || !result.Success || result.Value == null)
-            {
-                _logger.LogWarning(result.ErrorMessage);
-                return NotFound(new { message = result.ErrorMessage });
-            }
-
-            return Ok(result);
-        }
-
 
         private ParamValidationResult ValidateQualificationParams(string? status, int? skip, int? take, string? name, string? organisation, string? qan)
         {
@@ -181,6 +158,6 @@ namespace SFA.DAS.AODP.Api.Controllers.Qualification
             public string? ErrorMessage { get; set; }
             public string? ProcessedStatus { get; set; }
         }
-
     }
 }
+
