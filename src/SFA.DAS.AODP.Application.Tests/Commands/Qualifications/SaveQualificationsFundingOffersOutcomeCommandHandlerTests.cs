@@ -41,6 +41,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             // Assert
             Assert.True(result.Success);
             _qualificationFundingFeedbackRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<QualificationFundingFeedbacks>()), Times.Once);
+            _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<QualificationDiscussionHistory>()), Times.Once);
         }
 
         [Fact]
@@ -59,6 +60,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             // Assert
             Assert.True(result.Success);
             _qualificationFundingFeedbackRepositoryMock.Verify(repo => repo.UpdateAsync(existingFeedback), Times.Once);
+            _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<QualificationDiscussionHistory>()), Times.Once);
         }
 
         [Fact]
@@ -79,7 +81,69 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             Assert.Equal(exception.Message, result.ErrorMessage);
             Assert.Equal(exception, result.InnerException);
         }
+
+        [Fact]
+        public async Task Handle_CreatesDiscussionHistoryNotes_WhenApproved()
+        {
+            // Arrange
+            var command = _fixture.Build<SaveQualificationsFundingOffersOutcomeCommand>()
+                .With(x => x.Approved, true)
+                .Create();
+            var existingFeedback = _fixture.Create<QualificationFundingFeedbacks>();
+
+            _qualificationFundingFeedbackRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
+                .ReturnsAsync(existingFeedback);
+
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            Assert.True(result.Success);
+            _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.Is<QualificationDiscussionHistory>(qdh =>
+                qdh.Notes.Contains("overall outcome selected is: Approved"))), Times.Once);
+        }
+
+        [Fact]
+        public async Task Handle_CreatesDiscussionHistoryNotes_WhenRejected()
+        {
+            // Arrange
+            var command = _fixture.Build<SaveQualificationsFundingOffersOutcomeCommand>()
+                .With(x => x.Approved, false)
+                .Create();
+            var existingFeedback = _fixture.Create<QualificationFundingFeedbacks>();
+
+            _qualificationFundingFeedbackRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
+                .ReturnsAsync(existingFeedback);
+
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            Assert.True(result.Success);
+            _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.Is<QualificationDiscussionHistory>(qdh =>
+                qdh.Notes.Contains("overall outcome selected is: Rejected"))), Times.Once);
+        }
+
+        [Fact]
+        public async Task Handle_CreatesDiscussionHistoryNotes_WhenOutcomeNotSelected()
+        {
+            // Arrange
+            var command = _fixture.Build<SaveQualificationsFundingOffersOutcomeCommand>()
+                .With(x => x.Approved, (bool?)null)
+                .Create();
+            var existingFeedback = _fixture.Create<QualificationFundingFeedbacks>();
+
+            _qualificationFundingFeedbackRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
+                .ReturnsAsync(existingFeedback);
+
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            Assert.True(result.Success);
+            _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.Is<QualificationDiscussionHistory>(qdh =>
+                qdh.Notes.Contains("The overall outcome for funding this qualification not been selected"))), Times.Once);
+        }
     }
 }
-
 

@@ -2,6 +2,7 @@ using AutoFixture;
 using AutoFixture.AutoMoq;
 using Moq;
 using SFA.DAS.AODP.Application.Commands.Qualifications;
+using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.FundingOffer;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
@@ -12,8 +13,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
     {
         private readonly IFixture _fixture;
         private readonly Mock<IQualificationFundingsRepository> _qualificationFundingsRepositoryMock;
-        private readonly Mock<IQualificationDiscussionHistoryRepository>  _qualificationDiscussionHistoryRepositoryMock;
-        private readonly Mock<IFundingOfferRepository>  _fundingOfferRepositoryMock;
+        private readonly Mock<IQualificationDiscussionHistoryRepository> _qualificationDiscussionHistoryRepositoryMock;
+        private readonly Mock<IFundingOfferRepository> _fundingOfferRepositoryMock;
         private readonly SaveQualificationsFundingOffersCommandHandler _handler;
 
         public SaveQualificationsFundingOffersCommandHandlerTests()
@@ -38,9 +39,12 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             // Arrange
             var command = _fixture.Create<SaveQualificationsFundingOffersCommand>();
             var existingFundings = _fixture.CreateMany<QualificationFundings>(2).ToList();
+            var fundingOffers = _fixture.CreateMany<FundingOffer>(2).ToList();
 
             _qualificationFundingsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
                 .ReturnsAsync(existingFundings);
+            _fundingOfferRepositoryMock.Setup(repo => repo.GetFundingOffersAsync())
+                .ReturnsAsync(fundingOffers);
 
             // Act
             var result = await _handler.Handle(command, CancellationToken.None);
@@ -49,6 +53,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             Assert.True(result.Success);
             _qualificationFundingsRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<List<QualificationFundings>>()), Times.Once);
             _qualificationFundingsRepositoryMock.Verify(repo => repo.RemoveAsync(It.IsAny<List<QualificationFundings>>()), Times.Once);
+            _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<QualificationDiscussionHistory>()), Times.Once);
         }
 
         [Fact]
@@ -65,6 +70,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 
             _qualificationFundingsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
                 .ReturnsAsync(existingFundings);
+            _fundingOfferRepositoryMock.Setup(repo => repo.GetFundingOffersAsync())
+                .ReturnsAsync(new List<FundingOffer>());
 
             // Act
             var result = await _handler.Handle(command, CancellationToken.None);
@@ -73,6 +80,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             Assert.True(result.Success);
             _qualificationFundingsRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<List<QualificationFundings>>()), Times.Never);
             _qualificationFundingsRepositoryMock.Verify(repo => repo.RemoveAsync(It.IsAny<List<QualificationFundings>>()), Times.Never);
+            _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<QualificationDiscussionHistory>()), Times.Once);
         }
 
         [Fact]
@@ -93,7 +101,51 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             Assert.Equal(exception.Message, result.ErrorMessage);
             Assert.Equal(exception, result.InnerException);
         }
+
+        [Fact]
+        public async Task Handle_CreatesDiscussionHistoryNotes_WhenOffersAreRemoved()
+        {
+            // Arrange
+            var command = _fixture.Create<SaveQualificationsFundingOffersCommand>();
+            var existingFundings = _fixture.CreateMany<QualificationFundings>(2).ToList();
+            var fundingOffers = _fixture.CreateMany<FundingOffer>(2).ToList();
+
+            _qualificationFundingsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
+                .ReturnsAsync(existingFundings);
+            _fundingOfferRepositoryMock.Setup(repo => repo.GetFundingOffersAsync())
+                .ReturnsAsync(fundingOffers);
+
+            command.SelectedOfferIds.Clear(); // No offers selected, so all existing offers should be removed
+
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            Assert.True(result.Success);
+            _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.Is<QualificationDiscussionHistory>(qdh =>
+                qdh.Notes.Contains("The following offers have been removed"))), Times.Once);
+        }
+
+        [Fact]
+        public async Task Handle_CreatesDiscussionHistoryNotes_WhenOffersAreSelected()
+        {
+            // Arrange
+            var command = _fixture.Create<SaveQualificationsFundingOffersCommand>();
+            var existingFundings = new List<QualificationFundings>(); // No existing offers
+            var fundingOffers = _fixture.CreateMany<FundingOffer>(2).ToList();
+
+            _qualificationFundingsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
+                .ReturnsAsync(existingFundings);
+            _fundingOfferRepositoryMock.Setup(repo => repo.GetFundingOffersAsync())
+                .ReturnsAsync(fundingOffers);
+
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            Assert.True(result.Success);
+            _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.Is<QualificationDiscussionHistory>(qdh =>
+                qdh.Notes.Contains("The following offers have been selected"))), Times.Once);
+        }
     }
 }
-
-

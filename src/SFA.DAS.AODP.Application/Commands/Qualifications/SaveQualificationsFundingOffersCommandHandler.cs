@@ -63,11 +63,15 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
 
                     foreach (var qf in remove)
                     {
-                        qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffers.FirstOrDefault(a=>a.Id == qf.FundingOffer.Id)?.Name}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
-                        qualificationDiscussionHistoryNotes.AppendLine();
+                        var fundingOffer = fundingOffers.FirstOrDefault(a => a.Id == qf.FundingOfferId);
+                        if (fundingOffer != null)
+                        {
+                            qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
+                            qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
+                            qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
+                            qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
+                            qualificationDiscussionHistoryNotes.AppendLine();
+                        }
                     }
                 }
                 if (create.Count > 0)
@@ -77,11 +81,15 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
 
                     foreach (var qf in create)
                     {
-                        qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffers.FirstOrDefault(a => a.Id == qf.FundingOffer.Id)?.Name}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
-                        qualificationDiscussionHistoryNotes.AppendLine();
+                        var fundingOffer = fundingOffers.FirstOrDefault(a => a.Id == qf.FundingOfferId);
+                        if (fundingOffer != null)
+                        {
+                            qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
+                            qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
+                            qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
+                            qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
+                            qualificationDiscussionHistoryNotes.AppendLine();
+                        }
                     }
                 }
 

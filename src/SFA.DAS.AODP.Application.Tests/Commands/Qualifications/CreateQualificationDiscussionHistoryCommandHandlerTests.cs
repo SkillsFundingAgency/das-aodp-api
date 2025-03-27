@@ -6,7 +6,6 @@ using SFA.DAS.AODP.Application.Commands.Qualifications;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 
-
 namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 {
     public class CreateQualificationDiscussionHistoryCommandHandlerTests
@@ -84,6 +83,38 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             Assert.Equal(exception.Message, result.ErrorMessage);
             Assert.Equal(exception, result.InnerException);
         }
+
+        [Fact]
+        public async Task Handle_ReturnsFailureResponse_WhenQualificationReferenceIsEmpty()
+        {
+            // Arrange
+            var command = _fixture.Build<CreateQualificationDiscussionHistoryCommand>()
+                .With(x => x.QualificationReference, string.Empty)
+                .Create();
+
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            Assert.False(result.Success);
+            Assert.Equal("Qualification reference is required", result.ErrorMessage);
+        }
+
+        [Fact]
+        public async Task Handle_ReturnsFailureResponse_WhenQualificationIdIsEmpty()
+        {
+            // Arrange
+            var command = _fixture.Build<CreateQualificationDiscussionHistoryCommand>()
+                .With(x => x.QualificationId, Guid.Empty)
+                .Create();
+
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            Assert.False(result.Success);
+            Assert.Equal("Qualification Id is required", result.ErrorMessage);
+        }
     }
 
     public class DateOnlySpecimenBuilder : ISpecimenBuilder
@@ -99,6 +130,3 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         }
     }
 }
-
-
-
