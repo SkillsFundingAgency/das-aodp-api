@@ -130,6 +130,7 @@ public class QualificationsController : BaseController
         {
             return BadRequest(new { message = validationResult.ErrorMessage });
         }
+
     }
 
     [HttpGet("{qualificationReference}/detail")]

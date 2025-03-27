@@ -44,7 +44,7 @@ public class BaseController : Controller
             return NotFound();
         }
 
-        _logger.LogError(message: $"Error thrown handling request.", exception: response.InnerException);
+        _logger.LogError(message: $"Error thrown handling request. {response.ErrorMessage}", exception: response.InnerException);
         return StatusCode(StatusCodes.Status500InternalServerError);
     }
 }

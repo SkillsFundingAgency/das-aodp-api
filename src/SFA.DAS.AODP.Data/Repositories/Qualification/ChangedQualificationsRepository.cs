@@ -3,7 +3,6 @@ using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
 
-
 namespace SFA.DAS.AODP.Data.Repositories.Qualification;
 
 
@@ -77,10 +76,4 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
     {
         return await _context.ActionType.ToListAsync();
     }
-
-
-    //public async Task<List<ActionType?>> GetActionTypes()
-    //{
-    //    return await _context.ActionType.ToListAsync();
-    //}
 }
