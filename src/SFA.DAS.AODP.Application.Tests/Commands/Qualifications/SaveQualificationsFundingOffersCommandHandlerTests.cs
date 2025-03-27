@@ -1,15 +1,10 @@
 using AutoFixture;
 using AutoFixture.AutoMoq;
-using AutoFixture.Kernel;
 using Moq;
 using SFA.DAS.AODP.Application.Commands.Qualifications;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Repositories.FundingOffer;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 {
@@ -17,6 +12,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
     {
         private readonly IFixture _fixture;
         private readonly Mock<IQualificationFundingsRepository> _qualificationFundingsRepositoryMock;
+        private readonly Mock<IQualificationDiscussionHistoryRepository>  _qualificationDiscussionHistoryRepositoryMock;
+        private readonly Mock<IFundingOfferRepository>  _fundingOfferRepositoryMock;
         private readonly SaveQualificationsFundingOffersCommandHandler _handler;
 
         public SaveQualificationsFundingOffersCommandHandlerTests()
@@ -28,8 +25,11 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             _fixture.Customizations.Add(new DateOnlySpecimenBuilder());
 
             _qualificationFundingsRepositoryMock = _fixture.Freeze<Mock<IQualificationFundingsRepository>>();
+            _qualificationDiscussionHistoryRepositoryMock = _fixture.Freeze<Mock<IQualificationDiscussionHistoryRepository>>();
+            _fundingOfferRepositoryMock = _fixture.Freeze<Mock<IFundingOfferRepository>>();
+
             _handler = new SaveQualificationsFundingOffersCommandHandler(
-                _qualificationFundingsRepositoryMock.Object);
+                _qualificationFundingsRepositoryMock.Object, _qualificationDiscussionHistoryRepositoryMock.Object, _fundingOfferRepositoryMock.Object);
         }
 
         [Fact]

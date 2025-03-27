@@ -4,10 +4,6 @@ using Moq;
 using SFA.DAS.AODP.Application.Commands.Qualifications;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 {
@@ -15,6 +11,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
     {
         private readonly IFixture _fixture;
         private readonly Mock<IQualificationFundingFeedbackRepository> _qualificationFundingFeedbackRepositoryMock;
+        private readonly Mock<IQualificationDiscussionHistoryRepository> _qualificationDiscussionHistoryRepositoryMock;
         private readonly SaveQualificationsFundingOffersOutcomeCommandHandler _handler;
 
         public SaveQualificationsFundingOffersOutcomeCommandHandlerTests()
@@ -25,8 +22,9 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
             _qualificationFundingFeedbackRepositoryMock = _fixture.Freeze<Mock<IQualificationFundingFeedbackRepository>>();
+            _qualificationDiscussionHistoryRepositoryMock = _fixture.Freeze<Mock<IQualificationDiscussionHistoryRepository>>();
             _handler = new SaveQualificationsFundingOffersOutcomeCommandHandler(
-                _qualificationFundingFeedbackRepositoryMock.Object);
+                _qualificationFundingFeedbackRepositoryMock.Object, _qualificationDiscussionHistoryRepositoryMock.Object);
         }
 
         [Fact]
