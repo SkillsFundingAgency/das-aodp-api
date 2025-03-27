@@ -6,7 +6,7 @@ using SFA.DAS.AODP.Application.Queries.Jobs;
 using SFA.DAS.AODP.Data.Entities.Jobs;
 using SFA.DAS.AODP.Data.Repositories.Jobs;
 
-namespace SFA.DAS.AODP.Tests.Application.Queries
+namespace SFA.DAS.AODP.Application.UnitTests.Queries.Jobs
 {
     public class GetJobRunByIdQueryHandlerTests
     {
@@ -26,7 +26,7 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
         {
             // Arrange
             var query = _fixture.Create<GetJobRunByIdQuery>();
-            var jobRun = _fixture.Build<Data.Entities.Jobs.JobRun>()
+            var jobRun = _fixture.Build<JobRun>()
                         .With(w => w.Job, new Job())                        
                         .Create();
             var response = _fixture.Create<BaseMediatrResponse<GetJobRunByIdQueryResponse>>();
