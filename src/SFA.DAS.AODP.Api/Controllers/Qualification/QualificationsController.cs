@@ -75,7 +75,7 @@ public class QualificationsController : BaseController
         }
     }
 
-    [HttpGet("{qualificationReference}")]
+    [HttpGet("{qualificationReference}/detail")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetQualificationDetails(string? qualificationReference)
     {
@@ -93,7 +93,7 @@ public class QualificationsController : BaseController
 
     [HttpGet("{qualificationReference}/{version}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetQualificationDetails(string? qualificationReference,int version)
+    public async Task<IActionResult> GetQualificationDetails(string? qualificationReference, int version)
     {
         if (string.IsNullOrWhiteSpace(qualificationReference))
         {
@@ -103,8 +103,8 @@ public class QualificationsController : BaseController
         var query = new GetQualificationVersionQuery()
         {
             QualificationReference = qualificationReference,
-            Version=version
-            
+            Version = version
+
         };
         return await SendRequestAsync(query);
     }
@@ -154,7 +154,7 @@ public class QualificationsController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetQualificationCSVExportData([FromQuery] string? status)
-    {            
+    {
         IActionResult response = status?.ToLower() switch
         {
             "new" => await HandleNewQualificationCSVExport(),
@@ -163,7 +163,7 @@ public class QualificationsController : BaseController
         };
 
         return response;
-    }              
+    }
 
     private async Task<IActionResult> HandleNewQualificationCSVExport()
     {
