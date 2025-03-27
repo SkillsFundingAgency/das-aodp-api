@@ -1,16 +1,19 @@
 ﻿using MediatR;
+using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
+using System.Text;
 
 namespace SFA.DAS.AODP.Application.Commands.Qualifications
 {
     public class SaveQualificationsFundingOffersDetailsCommandHandler : IRequestHandler<SaveQualificationsFundingOffersDetailsCommand, BaseMediatrResponse<EmptyResponse>>
     {
-        private readonly IQualificationFundingsRepository _repository;
-
-        public SaveQualificationsFundingOffersDetailsCommandHandler(IQualificationFundingsRepository repository)
+        private readonly IQualificationFundingsRepository _qualificationFundingsrepository;
+        private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
+        public SaveQualificationsFundingOffersDetailsCommandHandler(IQualificationFundingsRepository repository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository)
         {
-            _repository = repository;
+            _qualificationFundingsrepository = repository;
+            _qualificationDiscussionHistoryRepository = qualificationDiscussionHistoryRepository;
         }
 
         public async Task<BaseMediatrResponse<EmptyResponse>> Handle(SaveQualificationsFundingOffersDetailsCommand request, CancellationToken cancellationToken)
@@ -19,7 +22,7 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
 
             try
             {
-                var fundedOffers = await _repository.GetByIdAsync(request.QualificationVersionId);
+                var fundedOffers = await _qualificationFundingsrepository.GetByIdAsync(request.QualificationVersionId);
 
                 foreach (var detail in request.Details)
                 {
@@ -30,8 +33,36 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                     offer.Comments = detail.Comments;
                 }
 
-                await _repository.UpdateAsync(fundedOffers);
+                await _qualificationFundingsrepository.UpdateAsync(fundedOffers);
 
+                StringBuilder qualificationDiscussionHistoryNotes = new();
+                qualificationDiscussionHistoryNotes.AppendLine("Feedback from DfE:");
+                if (request.Details != null && request.Details.Count != 0)
+                {
+                    qualificationDiscussionHistoryNotes.AppendLine("The following offers details have been selected:");
+                    qualificationDiscussionHistoryNotes.AppendLine();
+
+                    foreach (var qf in request.Details)
+                    {
+                        qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
+                        qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
+                        qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
+                        qualificationDiscussionHistoryNotes.AppendLine();
+                    }
+                }
+                else
+                {
+                    qualificationDiscussionHistoryNotes.AppendLine("No funding offers have been selected");
+                }
+
+                await _qualificationDiscussionHistoryRepository.CreateAsync(new QualificationDiscussionHistory
+                {
+                    QualificationId = request.QualificationId,
+                    UserDisplayName = request.UserDisplayName,
+                    Notes = qualificationDiscussionHistoryNotes.ToString(),
+                    ActionTypeId = request.ActionTypeId,
+                    Timestamp = DateTime.Now
+                });
                 response.Success = true;
             }
             catch (Exception ex)
