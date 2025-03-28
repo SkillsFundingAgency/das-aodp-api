@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Enum;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification
@@ -65,41 +67,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                 TotalRecords = totalRecords
             };
         }
-
-        public async Task<QualificationDetails?> GetQualificationDetailsByIdAsync(string qualificationReference)
-        {
-            var qualification = await _context.QualificationNewReviewRequired
-                .Where(q => q.QualificationReference == qualificationReference)
-                .AsNoTracking()
-                .FirstOrDefaultAsync();
-
-            if (qualification == null)
-            {
-                return null;
-            }
-
-            return new QualificationDetails
-            {
-                QualificationReference = qualification.QualificationReference,
-                AwardingOrganisation = qualification.AwardingOrganisation,
-                Title = qualification.QualificationTitle,
-                QualificationType = qualification.QualificationType,
-                Level = qualification.Level,
-                AgeGroup = qualification.AgeGroup,
-                Subject = qualification.Subject,
-                SectorSubjectArea = qualification.SectorSubjectArea,
-                Comments = "No comments available",
-
-                // Placeholder values for missing properties
-                Id = 1,
-                Status = "New",
-                Priority = "Medium",
-                Changes = "No recent changes",
-                ProposedChanges = "None",
-                Category = "General Education"
-            };
-        }
-
         public async Task<IEnumerable<NewQualificationExport>> GetNewQualificationsExport()
         {
             return await _context.NewQualificationExport.ToListAsync<NewQualificationExport>();
