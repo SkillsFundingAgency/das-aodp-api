@@ -11,4 +11,6 @@ public interface IQualificationDetailsRepository
 {
     Task<List<QualificationDiscussionHistory>> GetDiscussionHistoriesForQualificationRef(string qualificationRef);
     Task<QualificationVersions> GetQualificationDetailsByIdAsync(string qualificationReference);
+
+    Task<QualificationVersions> GetVersionByIdAsync(string qualificationReference, int version);
 }
