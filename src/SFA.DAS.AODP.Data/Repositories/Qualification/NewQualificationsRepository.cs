@@ -39,10 +39,10 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                 countQuery = countQuery.Where(w => w.QualificationReference.Equals(filter.QAN));
             }
 
-            if (filter?.ProcessStatusId.HasValue ?? false)
+            if (filter?.ProcessStatusIds?.Any() ?? false)
             {
-                query = query.Where(w => w.ProcessStatusId.Equals(filter.ProcessStatusId.Value));
-                countQuery = countQuery.Where(w => w.ProcessStatusId.Equals(filter.ProcessStatusId.Value));
+                query = query.Where(w => filter.ProcessStatusIds.Contains(w.ProcessStatusId ?? Guid.Empty));
+                countQuery = countQuery.Where(w => filter.ProcessStatusIds.Contains(w.ProcessStatusId ?? Guid.Empty));
             }
                        
             query = query.OrderBy(o => o.QualificationTitle);
