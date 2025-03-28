@@ -426,7 +426,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(response);
 
             // Act
-            var result = await _controller.QualificationFundingOffersSummary(command, command.QualificationVersionId);
+            var result = await _controller.CreateQualificationDiscussionHistory(command, command.QualificationVersionId);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
