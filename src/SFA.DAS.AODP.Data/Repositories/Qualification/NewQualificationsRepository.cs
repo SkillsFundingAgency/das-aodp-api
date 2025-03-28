@@ -38,6 +38,12 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                 query = query.Where(w => w.QualificationReference.Equals(filter.QAN));
                 countQuery = countQuery.Where(w => w.QualificationReference.Equals(filter.QAN));
             }
+
+            if (filter?.ProcessStatusId.HasValue ?? false)
+            {
+                query = query.Where(w => w.ProcessStatusId.Equals(filter.ProcessStatusId.Value));
+                countQuery = countQuery.Where(w => w.ProcessStatusId.Equals(filter.ProcessStatusId.Value));
+            }
                        
             query = query.OrderBy(o => o.QualificationTitle);
             var totalRecords = await countQuery.CountAsync();
