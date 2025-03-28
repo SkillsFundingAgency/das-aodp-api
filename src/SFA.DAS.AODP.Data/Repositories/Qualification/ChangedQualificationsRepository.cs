@@ -47,7 +47,7 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
                   .Select(q => new DAS.AODP.Models.Qualifications.ChangedQualification
                   {
                       QualificationTitle = q.QualificationTitle,
-                      QualificationReference= q.QualificationReference,
+                      QualificationReference = q.QualificationReference,
                       AwardingOrganisation = q.AwardingOrganisation,
                       ChangedFieldNames = q.ChangedFieldNames,
                       SectorSubjectArea = q.SectorSubjectArea,
@@ -70,5 +70,10 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
     public async Task<IEnumerable<ChangedQualificationExport>> GetChangedQualificationsCSVExport()
     {
         return await _context.ChangedQualificationExport.ToListAsync();
+    }
+
+    public async Task<List<Entities.Qualification.ActionType>> GetActionTypes()
+    {
+        return await _context.ActionType.ToListAsync();
     }
 }

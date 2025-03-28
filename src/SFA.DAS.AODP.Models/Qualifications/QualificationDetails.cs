@@ -24,5 +24,6 @@ namespace SFA.DAS.AODP.Models.Qualifications
         public string? Subject { get; set; }
         public string? SectorSubjectArea { get; set; }
         public string? Comments { get; set; }
+        public List<QualificationDiscussionHistory> QualificationDiscussionHistories { get; set; }
     }
 }

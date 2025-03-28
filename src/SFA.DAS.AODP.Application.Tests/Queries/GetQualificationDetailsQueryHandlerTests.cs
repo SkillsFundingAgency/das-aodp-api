@@ -8,6 +8,9 @@ using SFA.DAS.AODP.Models.Qualifications;
 using Xunit;
 using System.Threading;
 using System.Threading.Tasks;
+using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Exceptions;
+using Markdig.Extensions.Figures;
 
 namespace SFA.DAS.AODP.Tests.Application.Queries
 {
@@ -15,12 +18,16 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
     {
         private readonly IFixture _fixture;
         private readonly Mock<INewQualificationsRepository> _repositoryMock;
+        private readonly Mock<IQualificationDetailsRepository> _detailsRepositoryMock;
         private readonly GetQualificationDetailsQueryHandler _handler;
 
         public GetQualificationDetailsQueryHandlerTests()
         {
             _fixture = new Fixture().Customize(new AutoMoqCustomization());
+            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList().ForEach(b => _fixture.Behaviors.Remove(b));
+            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             _repositoryMock = _fixture.Freeze<Mock<INewQualificationsRepository>>();
+            _detailsRepositoryMock = _fixture.Freeze<Mock<IQualificationDetailsRepository>>();
             _handler = _fixture.Create<GetQualificationDetailsQueryHandler>();
         }
 
@@ -29,36 +36,18 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
         {
             // Arrange
             var query = _fixture.Create<GetQualificationDetailsQuery>();
-            var response = _fixture.Create<BaseMediatrResponse<GetQualificationDetailsQueryResponse>>();
-            response.Success = true;
+            var qual = _fixture.Create<QualificationVersions>();
 
-            _repositoryMock.Setup(x => x.GetQualificationDetailsByIdAsync(It.IsAny<string>()))
-                           .ReturnsAsync(new QualificationDetails
-                           {
-                               Id = response.Value.Id,
-                               Status = response.Value.Status,
-                               Priority = response.Value.Priority,
-                               Changes = response.Value.Changes,
-                               QualificationReference = response.Value.QualificationReference,
-                               AwardingOrganisation = response.Value.AwardingOrganisation,
-                               Title = response.Value.Title,
-                               QualificationType = response.Value.QualificationType,
-                               Level = response.Value.Level,
-                               ProposedChanges = response.Value.ProposedChanges,
-                               AgeGroup = response.Value.AgeGroup,
-                               Category = response.Value.Category,
-                               Subject = response.Value.Subject,
-                               SectorSubjectArea = response.Value.SectorSubjectArea,
-                               Comments = response.Value.Comments
-                           });
+            _detailsRepositoryMock.Setup(x => x.GetQualificationDetailsByIdAsync(It.IsAny<string>()))
+                           .ReturnsAsync(qual);
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            _repositoryMock.Verify(x => x.GetQualificationDetailsByIdAsync(It.IsAny<string>()), Times.Once);
+            _detailsRepositoryMock.Verify(x => x.GetQualificationDetailsByIdAsync(It.IsAny<string>()), Times.Once);
             Assert.True(result.Success);
-            Assert.Equal(response.Value.Id, result.Value.Id);
+            Assert.Equal(qual.Id, result.Value.Id);
         }
 
         [Fact]
@@ -73,14 +62,14 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
                 ErrorMessage = $"No details found for qualification reference: {query.QualificationReference}"
             };
 
-            _repositoryMock.Setup(x => x.GetQualificationDetailsByIdAsync(It.IsAny<string>()))
-                           .ReturnsAsync((QualificationDetails?)null);
+            _detailsRepositoryMock.Setup(x => x.GetQualificationDetailsByIdAsync(It.IsAny<string>()))
+                           .Throws(new RecordWithNameNotFoundException(""));
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            _repositoryMock.Verify(x => x.GetQualificationDetailsByIdAsync(It.IsAny<string>()), Times.Once);
+            _detailsRepositoryMock.Verify(x => x.GetQualificationDetailsByIdAsync(It.IsAny<string>()), Times.Once);
             Assert.False(result.Success);
             Assert.Equal($"No details found for qualification reference: {query.QualificationReference}", result.ErrorMessage);
         }
@@ -91,14 +80,14 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
             // Arrange
             var query = _fixture.Create<GetQualificationDetailsQuery>();
             var exceptionMessage = "An error occurred";
-            _repositoryMock.Setup(x => x.GetQualificationDetailsByIdAsync(It.IsAny<string>()))
+            _detailsRepositoryMock.Setup(x => x.GetQualificationDetailsByIdAsync(It.IsAny<string>()))
                            .ThrowsAsync(new Exception(exceptionMessage));
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
 
             // Assert
-            _repositoryMock.Verify(x => x.GetQualificationDetailsByIdAsync(It.IsAny<string>()), Times.Once);
+            _detailsRepositoryMock.Verify(x => x.GetQualificationDetailsByIdAsync(It.IsAny<string>()), Times.Once);
             Assert.False(result.Success);
             Assert.Equal(exceptionMessage, result.ErrorMessage);
         }
