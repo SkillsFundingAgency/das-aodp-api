@@ -149,7 +149,7 @@ public class QualificationsController : BaseController
         return await SendRequestAsync(query);
     }
 
-    [HttpGet("{qualificationReference}/{version}")]
+    [HttpGet("{qualificationReference}/qualificationversions/{version}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetQualificationDetails(string? qualificationReference, int version)
     {
