@@ -35,4 +35,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="Name" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="d0d1f13a-20cc-489a-a346-c993c6a6295b" ChangeDateTime="03/31/2025 10:16:23">
+    <Property Name="ElementName" Value="[funded].[QualificationFundings].[IX_QualificationFundings_Column]" />
+    <Property Name="ElementType" Value="SqlIndex" />
+    <Property Name="ParentElementName" Value="[funded].[QualificationFundings]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[IX_QualificationFundings_QualificationVersion]" />
+  </Operation>
 </Operations>
