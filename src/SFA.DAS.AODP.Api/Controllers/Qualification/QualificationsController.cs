@@ -149,6 +149,24 @@ public class QualificationsController : BaseController
         return await SendRequestAsync(query);
     }
 
+    [HttpGet("{qualificationReference}/qualificationversions/{version}")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetQualificationDetails(string? qualificationReference, int version)
+    {
+        if (string.IsNullOrWhiteSpace(qualificationReference))
+        {
+            _logger.LogWarning("Qualification reference is empty");
+            return BadRequest(new { message = "Qualification reference cannot be empty" });
+        }
+        var query = new GetQualificationVersionQuery()
+        {
+            QualificationReference = qualificationReference,
+            Version = version
+
+        };
+        return await SendRequestAsync(query);
+    }
+
     [HttpPost("qualificationdiscussionhistory")]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -194,7 +212,7 @@ public class QualificationsController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetQualificationCSVExportData([FromQuery] string? status)
-    {            
+    {
         IActionResult response = status?.ToLower() switch
         {
             "new" => await HandleNewQualificationCSVExport(),
@@ -203,7 +221,7 @@ public class QualificationsController : BaseController
         };
 
         return response;
-    }              
+    }
 
     private async Task<IActionResult> HandleNewQualificationCSVExport()
     {
