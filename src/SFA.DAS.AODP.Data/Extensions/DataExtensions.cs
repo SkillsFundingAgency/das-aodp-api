@@ -44,10 +44,11 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IQualificationFundingFeedbackRepository, QualificationFundingFeedbackRepository>();
             services.AddScoped<IQualificationFundingsRepository, QualificationFundingsRepository>();
             services.AddScoped<IQualificationDiscussionHistoryRepository, QualificationDiscussionHistoryRepository>();
+            services.AddScoped<IChangedQualificationsRepository, ChangedQualificationsRepository>();
 
             services.AddScoped<IFundingOfferRepository, FundingOfferRepository>();
             services.AddScoped<IApplicationReviewFundingRepository, ApplicationReviewFundingRepository>();
-            services.AddScoped<IChangedQualificationsRepository, ChangedQualificationsRepository>();
+            services.AddScoped<ISurveyRepository, SurveyRepository>();
 
             services.AddScoped<IFundingOfferRepository, FundingOfferRepository>();
             services.AddScoped<IApplicationReviewFundingRepository, ApplicationReviewFundingRepository>();
