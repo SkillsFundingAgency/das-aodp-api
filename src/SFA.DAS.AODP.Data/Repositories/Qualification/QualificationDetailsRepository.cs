@@ -28,6 +28,24 @@ public class QualificationDetailsRepository(IApplicationDbContext context) : IQu
         return qualVersion;
     }
 
+    public async Task<QualificationVersions> GetVersionByIdAsync(string qualificationReference,int version)
+    {
+        var qualVersion = await _context.QualificationVersions
+            .Include(v => v.LifecycleStage)
+            .Include(v => v.ProcessStatus)
+            .Include(v => v.Organisation)
+            .Include(v => v.VersionFieldChanges)
+            .Include(v => v.Qualification)
+            .OrderByDescending(v => v.Version)
+            .FirstOrDefaultAsync(v => v.Qualification.Qan == qualificationReference && v.Version==version);
+
+        if (qualVersion == null)
+        {
+            throw new RecordWithNameNotFoundException(qualificationReference);
+        }
+
+        return qualVersion;
+    }
     public async Task<List<QualificationDiscussionHistory>> GetDiscussionHistoriesForQualificationRef(string qualificationRef)
     {
         return await _context.QualificationDiscussionHistory.Where(v => v.Qualification.Qan == qualificationRef)
