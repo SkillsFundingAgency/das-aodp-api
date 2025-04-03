@@ -137,6 +137,9 @@
     <None Include="MigrationScripts\MVS1_AWARD_633_NewLifeCycle.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="MigrationScripts\MVS1_AWARD_634_OfferTypes.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
