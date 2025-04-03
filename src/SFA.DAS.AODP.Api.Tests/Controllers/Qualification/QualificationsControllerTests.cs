@@ -62,7 +62,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications(status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
+            var result = await _controller.GetQualifications(null, status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -86,7 +86,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications(status: "changed", skip: 0, take: 10, name: "", organisation: "", qan: "");
+            var result = await _controller.GetQualifications(null,status: "changed", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -113,7 +113,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications(status: "changed", skip: 0, take: 10, name: "", organisation: "", qan: "");
+            var result = await _controller.GetQualifications(null, status: "changed", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
             var notFoundResult = Assert.IsType<StatusCodeResult>(result);
@@ -131,7 +131,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications(status: "changed", skip: 0, take: 10, name: "", organisation: "", qan: "");
+            var result = await _controller.GetQualifications(null, status: "changed", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
             var notFoundResult = Assert.IsType<OkObjectResult>(result);
@@ -150,7 +150,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications(status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
+            var result = await _controller.GetQualifications(null, status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
             var notFoundResult = Assert.IsType<StatusCodeResult>(result);                   
@@ -204,7 +204,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications(status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
+            var result = await _controller.GetQualifications(null, status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
             var notFoundResult = Assert.IsType<OkObjectResult>(result);            
