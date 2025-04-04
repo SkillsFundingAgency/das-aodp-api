@@ -8,14 +8,14 @@ using SFA.DAS.AODP.Data.Repositories.Qualification;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 {
-    public class CreateQualificationDiscussionHistoryCommandHandlerTests
+    public class CreateQualificationDiscussionHistoryNoteForFundingOffersCommandHandlerTests
     {
         private readonly IFixture _fixture;
         private readonly Mock<IQualificationDiscussionHistoryRepository> _discussionHistoryRepositoryMock;
         private readonly Mock<IQualificationFundingsRepository> _qualificationFundingsRepositoryMock;
-        private readonly CreateQualificationDiscussionHistoryCommandHandler _handler;
+        private readonly CreateQualificationDiscussionHistoryNoteForFundingOffersCommandHandler _handler;
 
-        public CreateQualificationDiscussionHistoryCommandHandlerTests()
+        public CreateQualificationDiscussionHistoryNoteForFundingOffersCommandHandlerTests()
         {
             _fixture = new Fixture().Customize(new AutoMoqCustomization());
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
@@ -25,7 +25,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 
             _discussionHistoryRepositoryMock = _fixture.Freeze<Mock<IQualificationDiscussionHistoryRepository>>();
             _qualificationFundingsRepositoryMock = _fixture.Freeze<Mock<IQualificationFundingsRepository>>();
-            _handler = new CreateQualificationDiscussionHistoryCommandHandler(
+            _handler = new CreateQualificationDiscussionHistoryNoteForFundingOffersCommandHandler(
                 _discussionHistoryRepositoryMock.Object,
                 _qualificationFundingsRepositoryMock.Object);
         }
@@ -34,7 +34,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         public async Task Handle_ReturnsSuccessResponse_WhenDataIsFound()
         {
             // Arrange
-            var command = _fixture.Create<CreateQualificationDiscussionHistoryCommand>();
+            var command = _fixture.Create<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand>();
             var fundings = _fixture.CreateMany<QualificationFundings>(2).ToList();
 
             _qualificationFundingsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
@@ -52,7 +52,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         public async Task Handle_ReturnsSuccessResponse_WhenNoFundingsFound()
         {
             // Arrange
-            var command = _fixture.Create<CreateQualificationDiscussionHistoryCommand>();
+            var command = _fixture.Create<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand>();
 
             _qualificationFundingsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
                 .ReturnsAsync(new List<QualificationFundings>());
@@ -69,7 +69,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         public async Task Handle_ReturnsFailureResponse_WhenExceptionIsThrown()
         {
             // Arrange
-            var command = _fixture.Create<CreateQualificationDiscussionHistoryCommand>();
+            var command = _fixture.Create<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand>();
             var exception = new Exception("Test exception");
 
             _qualificationFundingsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
@@ -88,7 +88,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         public async Task Handle_ReturnsFailureResponse_WhenQualificationReferenceIsEmpty()
         {
             // Arrange
-            var command = _fixture.Build<CreateQualificationDiscussionHistoryCommand>()
+            var command = _fixture.Build<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand>()
                 .With(x => x.QualificationReference, string.Empty)
                 .Create();
 
@@ -104,7 +104,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         public async Task Handle_ReturnsFailureResponse_WhenQualificationIdIsEmpty()
         {
             // Arrange
-            var command = _fixture.Build<CreateQualificationDiscussionHistoryCommand>()
+            var command = _fixture.Build<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand>()
                 .With(x => x.QualificationId, Guid.Empty)
                 .Create();
 
