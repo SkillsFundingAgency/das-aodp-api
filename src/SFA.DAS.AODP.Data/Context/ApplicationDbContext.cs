@@ -70,6 +70,7 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<VersionFieldChange> VersionFieldChanges { get; set; }
         public virtual DbSet<QualificationFundingFeedbacks> QualificationFundingFeedbacks { get; set; }
         public virtual DbSet<QualificationFundings> QualificationFundings { get; set; }
+        public virtual DbSet<Survey> Surveys { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<QualificationNewReviewRequired>().ToView("v_QualificationNewReviewRequired", "regulated").HasNoKey();

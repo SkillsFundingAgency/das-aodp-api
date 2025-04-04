@@ -5,9 +5,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Application.Exceptions;
-using SFA.DAS.AODP.Application.Commands.Application.Application;
-using SFA.DAS.AODP.Data.Entities.Application;
 
 namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
 {
