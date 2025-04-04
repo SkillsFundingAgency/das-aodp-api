@@ -13,4 +13,5 @@ public interface IQualificationDetailsRepository
     Task<QualificationVersions> GetQualificationDetailsByIdAsync(string qualificationReference);
 
     Task<QualificationVersions> GetVersionByIdAsync(string qualificationReference, int version);
+    Task<QualificationVersions> GetQualificationDetailWithVersions(string qualificationReference);
 }

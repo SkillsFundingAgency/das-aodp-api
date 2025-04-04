@@ -28,6 +28,9 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
         public QualificationsControllerTests()
         {
             _fixture = new Fixture().Customize(new AutoMoqCustomization());
+            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+                .ForEach(b => _fixture.Behaviors.Remove(b));
+            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             _fixture.Customizations.Add(new DateOnlySpecimenBuilder());
             _loggerMock = _fixture.Freeze<Mock<ILogger<QualificationsController>>>();
             _mediatorMock = _fixture.Freeze<Mock<IMediator>>();
@@ -257,6 +260,42 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             var badRequestValue = badRequestResult.Value?.GetType().GetProperty("message")?.GetValue(badRequestResult.Value, null);
             Assert.Equal("Qualification reference cannot be empty", badRequestValue);
         }
+
+        [Fact]
+        public async Task GetQualificationDetailWithVersions_ReturnsBadRequest_WhenQualificationReferenceIsEmpty()
+        {
+            // Act
+            var result = await _controller.GetQualificationDetailWithVersions(string.Empty);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badRequestValue = badRequestResult.Value?.GetType().GetProperty("message")?.GetValue(badRequestResult.Value, null);
+            Assert.Equal("Qualification reference cannot be empty", badRequestValue);
+        }
+
+        [Fact]
+        public async Task GetQualificationDetailWithVersions_ReturnsNotFound_WhenQueryFails()
+        {
+            // Arrange
+            var queryResponse = _fixture.Create<BaseMediatrResponse<GetQualificationDetailsQueryResponse>>();
+//            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+//.ForEach(b => _fixture.Behaviors.Remove(b));
+//            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            queryResponse.Success = false;
+            queryResponse.ErrorMessage = "No details found for qualification reference: Ref123";
+            queryResponse.InnerException = new NotFoundWithNameException("Ref123");
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetQualificationDetailWithVersionsQuery>(), default))
+                         .ReturnsAsync(queryResponse);
+
+            // Act
+            var result = await _controller.GetQualificationDetailWithVersions("Ref123");
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundResult>(result);
+        }
+
+
 
         [Fact]
         public async Task GetDiscussionHistoriesForQualification_ReturnsOk()
