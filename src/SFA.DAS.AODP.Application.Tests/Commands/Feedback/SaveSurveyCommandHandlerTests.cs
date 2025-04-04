@@ -1,9 +1,10 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoMoq;
 using Moq;
-using SFA.DAS.AODP.Data.Repositories.Application;
+using SFA.DAS.AODP.Data.Entities.Feedback;
+using SFA.DAS.AODP.Data.Repositories.Feedback;
 
-namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Application
+namespace SFA.DAS.AODP.Application.UnitTests.Commands.Feedback
 {
     public class SaveSurveyCommandHandlerTests
     {
@@ -24,7 +25,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Application
             // Arrange
             var command = _fixture.Create<SaveSurveyCommand>();
 
-            _surveyRepositoryMock.Setup(repo => repo.Create(It.IsAny<Data.Entities.Application.Survey>()))
+            _surveyRepositoryMock.Setup(repo => repo.Create(It.IsAny<Survey>()))
                 .Returns(Task.CompletedTask);
 
             // Act
@@ -32,7 +33,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Application
 
             // Assert
             Assert.True(result.Success);
-            _surveyRepositoryMock.Verify(repo => repo.Create(It.Is<Data.Entities.Application.Survey>(s =>
+            _surveyRepositoryMock.Verify(repo => repo.Create(It.Is<Survey>(s =>
                 s.Page == command.Page &&
                 s.SatisfactionScore == command.SatisfactionScore &&
                 s.Comments == command.Comments
@@ -46,7 +47,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Application
             var command = _fixture.Create<SaveSurveyCommand>();
             var exception = new Exception("Test exception");
 
-            _surveyRepositoryMock.Setup(repo => repo.Create(It.IsAny<Data.Entities.Application.Survey>()))
+            _surveyRepositoryMock.Setup(repo => repo.Create(It.IsAny<Survey>()))
                 .ThrowsAsync(exception);
 
             // Act

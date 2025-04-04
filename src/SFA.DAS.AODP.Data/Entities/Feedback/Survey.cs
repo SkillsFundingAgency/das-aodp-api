@@ -1,4 +1,4 @@
-﻿namespace SFA.DAS.AODP.Data.Entities.Application
+﻿namespace SFA.DAS.AODP.Data.Entities.Feedback
 {
     public class Survey
     {

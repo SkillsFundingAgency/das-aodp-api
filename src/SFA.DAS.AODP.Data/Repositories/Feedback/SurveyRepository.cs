@@ -1,6 +1,7 @@
 ﻿using SFA.DAS.AODP.Data.Context;
+using SFA.DAS.AODP.Data.Entities.Feedback;
 
-namespace SFA.DAS.AODP.Data.Repositories.Application
+namespace SFA.DAS.AODP.Data.Repositories.Feedback
 {
     public class SurveyRepository : ISurveyRepository
     {
@@ -11,7 +12,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             _context = context;
         }
 
-        public async Task Create(Data.Entities.Application.Survey survey)
+        public async Task Create(Survey survey)
         {
             survey.Id = Guid.NewGuid();
             await _context.Surveys.AddAsync(survey);

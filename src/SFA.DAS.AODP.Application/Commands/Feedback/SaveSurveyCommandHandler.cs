@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Data.Repositories.Application;
+using SFA.DAS.AODP.Data.Repositories.Feedback;
 
 public class SaveSurveyCommandHandler : IRequestHandler<SaveSurveyCommand, BaseMediatrResponse<EmptyResponse>>
 {
@@ -22,9 +22,8 @@ public class SaveSurveyCommandHandler : IRequestHandler<SaveSurveyCommand, BaseM
                Page = request.Page,
                SatisfactionScore = request.SatisfactionScore,
                Comments = request.Comments,
-               Timestamp = DateTime.Now
+               Timestamp = DateTime.UtcNow
            });
-
             response.Success = true;
         }
         catch (Exception ex)

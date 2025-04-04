@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using SFA.DAS.AODP.Api.Controllers.Application;
+using SFA.DAS.AODP.Api.Controllers.Feedback;
 using SFA.DAS.AODP.Application;
 
-namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
+namespace SFA.DAS.AODP.Api.UnitTests.Controllers.Feedback
 {
     public class SurveyControllerTests
     {

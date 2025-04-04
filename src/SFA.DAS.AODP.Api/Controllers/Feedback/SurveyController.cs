@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace SFA.DAS.AODP.Api.Controllers.Application;
+namespace SFA.DAS.AODP.Api.Controllers.Feedback;
 
 [ApiController]
 [Route("api/[controller]")]
