@@ -41,7 +41,7 @@ FROM regulated.QualificationVersions QV
 Inner Join regulated.ProcessStatus PS on PS.Id = QV.ProcessStatusId
 ),
 /*List of Qualification Ids that are the latest regulated version, have approved status
-and have an Operational end date in the past*/
+and have an Operational end date in the future*/
 CTE_LRV_PastOpEndDate As (
 Select QualificationId
 
