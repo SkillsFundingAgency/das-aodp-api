@@ -40,7 +40,7 @@ SELECT  QV.QualificationId
 FROM regulated.QualificationVersions QV
 Inner Join regulated.ProcessStatus PS on PS.Id = QV.ProcessStatusId
 ),
-/*List of Qualification Ids that are the latest regulated version, have approved status
+/*List of Qualification Ids that are the latest regulated version, have Rejected status
 and have an Operational end date in the past*/
 CTE_LRV_PastOpEndDate As (
 Select QualificationId
