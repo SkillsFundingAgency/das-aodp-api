@@ -85,7 +85,8 @@ public class QualificationsController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetQualifications([FromQuery] string? status,
+    public async Task<IActionResult> GetQualifications([FromQuery] List<Guid>? processStatusIds,
+        [FromQuery] string? status,
         [FromQuery] int? skip,
         [FromQuery] int? take,
         [FromQuery] string? name,
@@ -104,7 +105,8 @@ public class QualificationsController : BaseController
                     Organisation = organisation,
                     QAN = qan,
                     Skip = skip,
-                    Take = take
+                    Take = take,
+                    ProcessStatusIds = processStatusIds,
                 };
 
                 return await SendRequestAsync(query);
