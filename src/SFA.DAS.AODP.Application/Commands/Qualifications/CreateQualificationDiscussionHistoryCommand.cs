@@ -16,8 +16,6 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
 
         public string? UserDisplayName { get; set; }
 
-        public string? Notes { get; set; }
-
         public DateTime? Timestamp { get; set; }
     }
 }
