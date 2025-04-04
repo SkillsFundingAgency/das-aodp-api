@@ -4,8 +4,6 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
 {
     public class CreateQualificationDiscussionHistoryNoteForFundingOffersCommand : IRequest<BaseMediatrResponse<EmptyResponse>>
     {
-        public Guid Id { get; set; }
-
         public Guid QualificationVersionId { get; set; }
 
         public Guid QualificationId { get; set; }
@@ -15,7 +13,5 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
         public Guid ActionTypeId { get; set; }
 
         public string? UserDisplayName { get; set; }
-
-        public DateTime? Timestamp { get; set; }
     }
 }
