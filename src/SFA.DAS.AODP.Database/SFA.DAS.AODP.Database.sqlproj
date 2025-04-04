@@ -69,6 +69,7 @@
     <Folder Include="Stored Procedures" />
     <Folder Include="Views\KPIs" />
     <Folder Include="Tables\KPIs" />
+    <Folder Include="Views\Support" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Schemas\FundedSchema.sql" />
@@ -140,6 +141,7 @@
     <None Include="MigrationScripts\MVS1_AWARD_634_OfferTypes.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Build Include="Views\Support\v_Anomaly_Import_Scenario_1.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
