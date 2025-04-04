@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.AODP.Application.Commands.Qualifications
 {
-    public class CreateQualificationDiscussionHistoryCommand : IRequest<BaseMediatrResponse<EmptyResponse>>
+    public class CreateQualificationDiscussionHistoryNoteForFundingOffersCommand : IRequest<BaseMediatrResponse<EmptyResponse>>
     {
         public Guid Id { get; set; }
 
