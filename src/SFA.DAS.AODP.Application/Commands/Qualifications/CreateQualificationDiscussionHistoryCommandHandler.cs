@@ -5,18 +5,18 @@ using System.Text;
 
 namespace SFA.DAS.AODP.Application.Commands.Qualifications
 {
-    public class CreateQualificationDiscussionHistoryCommandHandler : IRequestHandler<CreateQualificationDiscussionHistoryCommand, BaseMediatrResponse<EmptyResponse>>
+    public class CreateQualificationDiscussionHistoryNoteForFundingOffersCommandHandler : IRequestHandler<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand, BaseMediatrResponse<EmptyResponse>>
     {
         private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
         private readonly IQualificationFundingsRepository _qualificationFundingsRepository;
 
-        public CreateQualificationDiscussionHistoryCommandHandler(IQualificationDiscussionHistoryRepository repository, IQualificationFundingsRepository qualificationFundingsRepository)
+        public CreateQualificationDiscussionHistoryNoteForFundingOffersCommandHandler(IQualificationDiscussionHistoryRepository repository, IQualificationFundingsRepository qualificationFundingsRepository)
         {
             _qualificationDiscussionHistoryRepository = repository;
             _qualificationFundingsRepository = qualificationFundingsRepository;
         }
 
-        public async Task<BaseMediatrResponse<EmptyResponse>> Handle(CreateQualificationDiscussionHistoryCommand request, CancellationToken cancellationToken)
+        public async Task<BaseMediatrResponse<EmptyResponse>> Handle(CreateQualificationDiscussionHistoryNoteForFundingOffersCommand request, CancellationToken cancellationToken)
         {
             var response = new BaseMediatrResponse<EmptyResponse>();
 
