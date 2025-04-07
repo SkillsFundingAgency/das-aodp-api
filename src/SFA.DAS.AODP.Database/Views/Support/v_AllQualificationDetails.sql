@@ -34,19 +34,19 @@ Inner Join regulated.ProcessStatus PS ON PS.Id = QV.ProcessStatusId
 Inner Join regulated.LifecycleStage LS ON LS.Id = QV.LifecycleStageId
 Inner Join dbo.AwardingOrganisation AO ON AO.Id = QV.AwardingOrganisationId
 Where PS.IsOutcomeDecision = 1
-
 ),
 CTE_AggregatedOffers AS (
 
 
-Select QualificationId
-	   ,STRING_AGG(Name, ', ') AS OfferList
+Select QF.QualificationVersionId
+	   ,STRING_AGG(FO.Name, ', ') AS OfferList
 		
-from funded.QualificationOffers
-Where FundingAvailable = 1
-Group By QualificationId
-)
+from funded.QualificationFundings QF
+Inner Join dbo.FundingOffers FO ON FO.Id = QF.FundingOfferId
+Group By QF.QualificationVersionId
 
+
+)
 
 SELECT Q.Qan
       ,Q.QualificationName
@@ -66,5 +66,5 @@ SELECT Q.Qan
 
   FROM dbo.Qualification Q
   Left Outer Join CTE_QualificationDetails QD ON Q.Id = QD.QualificationId
-  Left Outer Join CTE_AggregatedOffers AGG ON AGG.QualificationId = Q.ID
+  Left Outer Join CTE_AggregatedOffers AGG ON AGG.QualificationVersionId = QD.QualificationVersionId
   Where QD.R_K = 1
