@@ -152,6 +152,22 @@ public class QualificationsController : BaseController
         return await SendRequestAsync(query);
     }
 
+    [HttpGet("{qualificationReference}/detailwithversions")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetQualificationDetailWithVersions(string? qualificationReference)
+    {
+        if (string.IsNullOrWhiteSpace(qualificationReference))
+        {
+            _logger.LogWarning("Qualification reference is empty");
+            return BadRequest(new { message = "Qualification reference cannot be empty" });
+        }
+        var query = new GetQualificationDetailWithVersionsQuery()
+        {
+            QualificationReference = qualificationReference
+        };
+        return await SendRequestAsync(query);
+    }
+
     [HttpGet("{qualificationReference}/qualificationversions/{version}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetQualificationDetails(string? qualificationReference, int version)
