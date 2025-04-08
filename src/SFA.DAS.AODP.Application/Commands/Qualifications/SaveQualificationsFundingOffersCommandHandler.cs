@@ -95,7 +95,7 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
 
                 if (remove.Count == 0 && create.Count == 0)
                 {
-                    qualificationDiscussionHistoryNotes.AppendLine("No Changes to funding offers");
+                    qualificationDiscussionHistoryNotes.AppendLine("Funding has been approved but no offers have been selected");
                 }
 
                 await _qualificationDiscussionHistoryRepository.CreateAsync(new QualificationDiscussionHistory
