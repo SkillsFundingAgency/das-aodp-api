@@ -91,7 +91,6 @@ public class GetQualificationDetailsQueryResponse
         public Guid Id { get; set; }
         public string Qan { get; set; } = null!;
         public string? QualificationName { get; set; }
-        public List<QualificationDiscussionHistory> QualificationDiscussionHistories { get; set; } = new List<QualificationDiscussionHistory>();
     }
 
     public class PreviousVersion
@@ -157,23 +156,7 @@ public class GetQualificationDetailsQueryResponse
         public AwardingOrganisation Organisation { get; set; } = null!;
         public Qualification Qualification { get; set; } = null!;
     }
-    public partial class QualificationDiscussionHistory
-    {
-        public Guid Id { get; set; }
-        public Guid QualificationId { get; set; }
-        public Guid ActionTypeId { get; set; }
-        public string? UserDisplayName { get; set; }
-        public string? Notes { get; set; }
-        public DateTime? Timestamp { get; set; }
-        public virtual ActionType ActionType { get; set; } = null!;
-    }
-
-    public class ActionType
-    {
-        public Guid Id { get; set; }
-        public string? Description { get; set; }
-    }
-
+  
     public partial class ProcessStatus
     {
         public Guid Id { get; set; }
@@ -265,22 +248,7 @@ public class GetQualificationDetailsQueryResponse
             {
                 Id = entity.Qualification.Id,
                 Qan = entity.Qualification.Qan,
-                QualificationName = entity.Qualification.QualificationName,
-                QualificationDiscussionHistories = entity.Qualification.QualificationDiscussionHistories
-                    .Select(v => new QualificationDiscussionHistory
-                    {
-                        Id = v.Id,
-                        QualificationId = v.QualificationId,
-                        ActionTypeId = v.ActionTypeId,
-                        UserDisplayName = v.UserDisplayName,
-                        Notes = v.Notes,
-                        Timestamp = v.Timestamp,
-                        ActionType = new ActionType
-                        {
-                            Id = v.ActionType.Id,
-                            Description = v.ActionType.Description,
-                        }
-                    }).ToList()
+                QualificationName = entity.Qualification.QualificationName
             },
             ProcStatus = new ProcessStatus()
             {

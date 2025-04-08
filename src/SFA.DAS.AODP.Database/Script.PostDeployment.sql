@@ -14,3 +14,4 @@ Post-Deployment Script Template
 :r .\MigrationScripts\MVS1_Qual_Ref_Data_award_185.sql
 :r .\MigrationScripts\MVS1_AWARD452_Jobs.sql
 :r .\MigrationScripts\MVS1_AWARD_633_NewLifeCycle.sql
+:r .\MigrationScripts\MVS1_AWARD_634_OfferTypes.sql

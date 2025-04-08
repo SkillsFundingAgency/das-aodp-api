@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.AODP.Api.Controllers.Qualification;
 using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Application.Commands;
 using SFA.DAS.AODP.Application.Commands.Qualification;
 using SFA.DAS.AODP.Application.Commands.Qualifications;
 using SFA.DAS.AODP.Application.Exceptions;
@@ -418,15 +417,15 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
         public async Task QualificationFundingOffersSummary_ReturnsOkResult()
         {
             // Arrange
-            var command = _fixture.Create<CreateQualificationDiscussionHistoryCommand>();
+            var command = _fixture.Create<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand>();
             var response = _fixture.Create<BaseMediatrResponse<EmptyResponse>>();
             response.Success = true;
 
-            _mediatorMock.Setup(m => m.Send(It.IsAny<CreateQualificationDiscussionHistoryCommand>(), default))
+            _mediatorMock.Setup(m => m.Send(It.IsAny<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand>(), default))
                          .ReturnsAsync(response);
 
             // Act
-            var result = await _controller.QualificationFundingOffersSummary(command, command.QualificationVersionId);
+            var result = await _controller.CreateQualificationDiscussionHistoryNoteForFundingOffers(command, command.QualificationVersionId);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);

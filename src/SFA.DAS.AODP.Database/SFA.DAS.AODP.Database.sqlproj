@@ -69,6 +69,8 @@
     <Folder Include="Stored Procedures" />
     <Folder Include="Views\KPIs" />
     <Folder Include="Tables\KPIs" />
+    <Folder Include="Tables\Feedback" />
+    <Folder Include="Views\Support" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Schemas\FundedSchema.sql" />
@@ -137,6 +139,15 @@
     <None Include="MigrationScripts\MVS1_AWARD_633_NewLifeCycle.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="MigrationScripts\MVS1_AWARD_634_OfferTypes.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Build Include="Tables\Feedback\Surveys.sql" />
+    <Build Include="Views\Support\v_Anomaly_Import_Scenario_1.sql" />
+    <Build Include="Views\Support\v_Anomaly_Import_Scenario_2.sql" />
+    <Build Include="Views\Support\v_Anomaly_Import_Scenario_3.sql" />
+    <Build Include="Views\Support\v_AllQualificationDetails.sql" />
+    <Build Include="Views\KPIs\v_MS_KPI_NQS_NQR_US_001.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
