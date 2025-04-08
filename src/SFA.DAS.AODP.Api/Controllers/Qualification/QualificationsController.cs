@@ -98,7 +98,7 @@ public class QualificationsController : BaseController
 
         if (validationResult.IsValid)
         {
-            if (validationResult.ProcessedStatus == "new")
+            if (validationResult.ParsedStatus == "new")
             {
                 var query = new GetNewQualificationsQuery()
                 {
@@ -112,7 +112,7 @@ public class QualificationsController : BaseController
 
                 return await SendRequestAsync(query);
             }
-            else if (validationResult.ProcessedStatus == "changed")
+            else if (validationResult.ParsedStatus == "changed")
             {
                 var query = new GetChangedQualificationsQuery()
                 {
@@ -279,7 +279,7 @@ public class QualificationsController : BaseController
         }
         else
         {
-            result.ProcessedStatus = status;
+            result.ParsedStatus = status;
         }
 
         if (skip < 0)
@@ -320,8 +320,8 @@ public class QualificationsController : BaseController
     {
         public bool IsValid { get; set; }
         public string? ErrorMessage { get; set; }
-        public string? ProcessedStatus { get; set; }
-        public List<Guid> ProcessStatusIds { get; set; }
+        public string? ParsedStatus { get; set; }
+        public List<Guid> ProcessStatusIds { get; set; } = new();
     }
 
 }
