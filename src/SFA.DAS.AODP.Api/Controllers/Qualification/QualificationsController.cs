@@ -85,18 +85,20 @@ public class QualificationsController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetQualifications([FromQuery] string? status,
+    public async Task<IActionResult> GetQualifications(
+        [FromQuery] string? status,
         [FromQuery] int? skip,
         [FromQuery] int? take,
         [FromQuery] string? name,
         [FromQuery] string? organisation,
-        [FromQuery] string? qan)
+        [FromQuery] string? qan,
+        [FromQuery] string? processStatusFilter)
     {
-        var validationResult = ValidateQualificationParams(status, skip, take, name, organisation, qan);
+        var validationResult = ValidateQualificationParams(status, skip, take, name, organisation, qan, processStatusFilter);
 
         if (validationResult.IsValid)
         {
-            if (validationResult.ProcessedStatus == "new")
+            if (validationResult.ParsedStatus == "new")
             {
                 var query = new GetNewQualificationsQuery()
                 {
@@ -104,12 +106,13 @@ public class QualificationsController : BaseController
                     Organisation = organisation,
                     QAN = qan,
                     Skip = skip,
-                    Take = take
+                    Take = take,
+                    ProcessStatusIds = validationResult.ProcessStatusIds,
                 };
 
                 return await SendRequestAsync(query);
             }
-            else if (validationResult.ProcessedStatus == "changed")
+            else if (validationResult.ParsedStatus == "changed")
             {
                 var query = new GetChangedQualificationsQuery()
                 {
@@ -264,7 +267,7 @@ public class QualificationsController : BaseController
     }
 
 
-    private ParamValidationResult ValidateQualificationParams(string? status, int? skip, int? take, string? name, string? organisation, string? qan)
+    private ParamValidationResult ValidateQualificationParams(string? status, int? skip, int? take, string? name, string? organisation, string? qan, string? processStatusFilter)
     {
         var result = new ParamValidationResult() { IsValid = true };
         status = status?.Trim().ToLower();
@@ -276,7 +279,7 @@ public class QualificationsController : BaseController
         }
         else
         {
-            result.ProcessedStatus = status;
+            result.ParsedStatus = status;
         }
 
         if (skip < 0)
@@ -291,6 +294,20 @@ public class QualificationsController : BaseController
             result.ErrorMessage = "Take param is invalid.";
         }
 
+        if (!string.IsNullOrEmpty(processStatusFilter))
+        {
+            var procStatusIdStrings = processStatusFilter.Split(',').Select(v => v.Trim());
+            try
+            {
+                result.ProcessStatusIds = procStatusIdStrings.Select(s => Guid.Parse(s)).ToList();
+            }
+            catch
+            {
+                result.IsValid = false;
+                result.ErrorMessage = "Process status filter param is invalid.";
+            }
+        }
+
         if (!result.IsValid)
         {
             _logger.LogWarning(result.ErrorMessage);
@@ -303,7 +320,8 @@ public class QualificationsController : BaseController
     {
         public bool IsValid { get; set; }
         public string? ErrorMessage { get; set; }
-        public string? ProcessedStatus { get; set; }
+        public string? ParsedStatus { get; set; }
+        public List<Guid> ProcessStatusIds { get; set; } = new();
     }
 
 }
