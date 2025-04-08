@@ -312,6 +312,9 @@
                 "storageAccountName": {
                   "value": "[variables('storageAccount2Name')]"
                 },
+                "allowBlobPublicAccess": {
+                    "value": true
+                },
                 "allowSharedKeyAccess": {
                   "value": true
                 },
