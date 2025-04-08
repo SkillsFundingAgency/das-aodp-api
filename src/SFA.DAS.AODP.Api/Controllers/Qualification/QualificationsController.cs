@@ -71,10 +71,10 @@ public class QualificationsController : BaseController
         return await SendRequestAsync(command);
     }
 
-    [HttpPut("/api/qualifications/{qualificationVersionId}/Create-QualificationDiscussionHistory")]
+    [HttpPut("/api/qualifications/{qualificationVersionId}/funding-offers-history-note")]
     [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> QualificationFundingOffersSummary(CreateQualificationDiscussionHistoryCommand command, Guid qualificationVersionId)
+    public async Task<IActionResult> CreateQualificationDiscussionHistoryNoteForFundingOffers(CreateQualificationDiscussionHistoryNoteForFundingOffersCommand command, Guid qualificationVersionId)
     {
         return await SendRequestAsync(command);
     }
@@ -269,11 +269,11 @@ public class QualificationsController : BaseController
     {
         var result = await _mediator.Send(new GetChangedQualificationsCsvExportQuery());
 
-        if (result == null || !result.Success || result.Value == null)
-        {
-            _logger.LogWarning(result.ErrorMessage);
-            return NotFound(new { message = result.ErrorMessage });
-        }
+            if (result == null || !result.Success || result.Value == null)
+            {
+                _logger.LogWarning(result?.ErrorMessage);
+                return NotFound(new { message = result?.ErrorMessage });
+            }
 
         return Ok(result);
     }

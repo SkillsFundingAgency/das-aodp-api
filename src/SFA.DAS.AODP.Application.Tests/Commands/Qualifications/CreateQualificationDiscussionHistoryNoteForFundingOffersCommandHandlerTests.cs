@@ -6,18 +6,16 @@ using SFA.DAS.AODP.Application.Commands.Qualifications;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 
-
 namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 {
-    public class CreateQualificationDiscussionHistoryCommandHandlerTests
+    public class CreateQualificationDiscussionHistoryNoteForFundingOffersCommandHandlerTests
     {
         private readonly IFixture _fixture;
         private readonly Mock<IQualificationDiscussionHistoryRepository> _discussionHistoryRepositoryMock;
         private readonly Mock<IQualificationFundingsRepository> _qualificationFundingsRepositoryMock;
-        private readonly Mock<IQualificationsRepository> _qualificationsRepositoryMock;
-        private readonly CreateQualificationDiscussionHistoryCommandHandler _handler;
+        private readonly CreateQualificationDiscussionHistoryNoteForFundingOffersCommandHandler _handler;
 
-        public CreateQualificationDiscussionHistoryCommandHandlerTests()
+        public CreateQualificationDiscussionHistoryNoteForFundingOffersCommandHandlerTests()
         {
             _fixture = new Fixture().Customize(new AutoMoqCustomization());
             _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
@@ -27,25 +25,20 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 
             _discussionHistoryRepositoryMock = _fixture.Freeze<Mock<IQualificationDiscussionHistoryRepository>>();
             _qualificationFundingsRepositoryMock = _fixture.Freeze<Mock<IQualificationFundingsRepository>>();
-            _qualificationsRepositoryMock = _fixture.Freeze<Mock<IQualificationsRepository>>();
-            _handler = new CreateQualificationDiscussionHistoryCommandHandler(
+            _handler = new CreateQualificationDiscussionHistoryNoteForFundingOffersCommandHandler(
                 _discussionHistoryRepositoryMock.Object,
-                _qualificationFundingsRepositoryMock.Object,
-                _qualificationsRepositoryMock.Object);
+                _qualificationFundingsRepositoryMock.Object);
         }
 
         [Fact]
         public async Task Handle_ReturnsSuccessResponse_WhenDataIsFound()
         {
             // Arrange
-            var command = _fixture.Create<CreateQualificationDiscussionHistoryCommand>();
+            var command = _fixture.Create<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand>();
             var fundings = _fixture.CreateMany<QualificationFundings>(2).ToList();
-            var qualification = _fixture.Create<Qualification>();
 
             _qualificationFundingsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
                 .ReturnsAsync(fundings);
-            _qualificationsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationReference))
-                .ReturnsAsync(qualification);
 
             // Act
             var result = await _handler.Handle(command, CancellationToken.None);
@@ -59,13 +52,10 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         public async Task Handle_ReturnsSuccessResponse_WhenNoFundingsFound()
         {
             // Arrange
-            var command = _fixture.Create<CreateQualificationDiscussionHistoryCommand>();
-            var qualification = _fixture.Create<Qualification>();
+            var command = _fixture.Create<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand>();
 
             _qualificationFundingsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
                 .ReturnsAsync(new List<QualificationFundings>());
-            _qualificationsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationReference))
-                .ReturnsAsync(qualification);
 
             // Act
             var result = await _handler.Handle(command, CancellationToken.None);
@@ -79,7 +69,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         public async Task Handle_ReturnsFailureResponse_WhenExceptionIsThrown()
         {
             // Arrange
-            var command = _fixture.Create<CreateQualificationDiscussionHistoryCommand>();
+            var command = _fixture.Create<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand>();
             var exception = new Exception("Test exception");
 
             _qualificationFundingsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
@@ -95,23 +85,36 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         }
 
         [Fact]
-        public async Task Handle_ReturnsFailureResponse_WhenQualificationNotFound()
+        public async Task Handle_ReturnsFailureResponse_WhenQualificationReferenceIsEmpty()
         {
             // Arrange
-            var command = _fixture.Create<CreateQualificationDiscussionHistoryCommand>();
-
-            _qualificationFundingsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
-                .ReturnsAsync(new List<QualificationFundings>());
-            _qualificationsRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationReference))
-                .ReturnsAsync((Qualification)null);
+            var command = _fixture.Build<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand>()
+                .With(x => x.QualificationReference, string.Empty)
+                .Create();
 
             // Act
             var result = await _handler.Handle(command, CancellationToken.None);
 
             // Assert
             Assert.False(result.Success);
-            Assert.Equal("Qualification not found", ((Data.Exceptions.RecordWithNameNotFoundException)result.InnerException).Name);
-         }
+            Assert.Equal("Qualification reference is required", result.ErrorMessage);
+        }
+
+        [Fact]
+        public async Task Handle_ReturnsFailureResponse_WhenQualificationIdIsEmpty()
+        {
+            // Arrange
+            var command = _fixture.Build<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand>()
+                .With(x => x.QualificationId, Guid.Empty)
+                .Create();
+
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            Assert.False(result.Success);
+            Assert.Equal("Qualification Id is required", result.ErrorMessage);
+        }
     }
 
     public class DateOnlySpecimenBuilder : ISpecimenBuilder
@@ -127,6 +130,3 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         }
     }
 }
-
-
-
