@@ -34,6 +34,7 @@ public class GetQualificationDetailsQueryResponse
     public DateTime? CertificationEndDate { get; set; }
     public DateTime? ReviewDate { get; set; }
     public bool OfferedInEngland { get; set; }
+    public bool? FundedInEngland { get; set; }
     public bool OfferedInNi { get; set; }
     public bool? OfferedInternationally { get; set; }
     public string? Specialism { get; set; }
@@ -124,6 +125,7 @@ public class GetQualificationDetailsQueryResponse
         public DateTime? CertificationEndDate { get; set; }
         public DateTime? ReviewDate { get; set; }
         public bool OfferedInEngland { get; set; }
+        public bool? FundedInEngland { get; set; }
         public bool OfferedInNi { get; set; }
         public bool? OfferedInternationally { get; set; }
         public string? Specialism { get; set; }
@@ -181,7 +183,7 @@ public class GetQualificationDetailsQueryResponse
         public int? IsOutcomeDecision { get; set; }
     }
 
-    public static implicit operator GetQualificationDetailsQueryResponse(Data.Entities.Qualification.QualificationVersions entity)
+    public static implicit operator GetQualificationDetailsQueryResponse(QualificationVersions entity)
     {
         return new GetQualificationDetailsQueryResponse
         {
@@ -214,6 +216,7 @@ public class GetQualificationDetailsQueryResponse
             CertificationEndDate = entity.CertificationEndDate,
             ReviewDate = entity.ReviewDate,
             OfferedInEngland = entity.OfferedInEngland,
+            FundedInEngland = entity.FundedInEngland,
             OfferedInNi = entity.OfferedInNi,
             OfferedInternationally = entity.OfferedInternationally,
             Specialism = entity.Specialism,
