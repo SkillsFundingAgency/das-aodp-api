@@ -1,25 +1,22 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Data.Entities.Qualification;
-using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using System.Text;
 
 namespace SFA.DAS.AODP.Application.Commands.Qualifications
 {
-    public class CreateQualificationDiscussionHistoryCommandHandler : IRequestHandler<CreateQualificationDiscussionHistoryCommand, BaseMediatrResponse<EmptyResponse>>
+    public class CreateQualificationDiscussionHistoryNoteForFundingOffersCommandHandler : IRequestHandler<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand, BaseMediatrResponse<EmptyResponse>>
     {
-        private readonly IQualificationDiscussionHistoryRepository _repository;
+        private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
         private readonly IQualificationFundingsRepository _qualificationFundingsRepository;
-        private readonly IQualificationsRepository _qualificationsRepository;
 
-        public CreateQualificationDiscussionHistoryCommandHandler(IQualificationDiscussionHistoryRepository repository, IQualificationFundingsRepository qualificationFundingsRepository, IQualificationsRepository qualificationsRepository)
+        public CreateQualificationDiscussionHistoryNoteForFundingOffersCommandHandler(IQualificationDiscussionHistoryRepository repository, IQualificationFundingsRepository qualificationFundingsRepository)
         {
-            _repository = repository;
+            _qualificationDiscussionHistoryRepository = repository;
             _qualificationFundingsRepository = qualificationFundingsRepository;
-            _qualificationsRepository = qualificationsRepository;
         }
 
-        public async Task<BaseMediatrResponse<EmptyResponse>> Handle(CreateQualificationDiscussionHistoryCommand request, CancellationToken cancellationToken)
+        public async Task<BaseMediatrResponse<EmptyResponse>> Handle(CreateQualificationDiscussionHistoryNoteForFundingOffersCommand request, CancellationToken cancellationToken)
         {
             var response = new BaseMediatrResponse<EmptyResponse>();
 
@@ -31,9 +28,13 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                     response.Success = false;
                     return response;
                 }
-                var qualification = await _qualificationsRepository.GetByIdAsync(request.QualificationReference) ?? throw new RecordWithNameNotFoundException("Qualification not found"); ;
-                
-                request.QualificationId = qualification.Id;
+
+                if (request.QualificationId == Guid.Empty)
+                {
+                    response.ErrorMessage = "Qualification Id is required";
+                    response.Success = false;
+                    return response;
+                }
 
                 var qualificationFundings = await _qualificationFundingsRepository.GetByIdAsync(request.QualificationVersionId);
 
@@ -58,7 +59,7 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                     qualificationDiscussionHistoryNotes.AppendLine("No funding offers have been approved");
                 }
 
-                await _repository.CreateAsync(new QualificationDiscussionHistory
+                await _qualificationDiscussionHistoryRepository.CreateAsync(new QualificationDiscussionHistory
                 {
                     QualificationId = request.QualificationId,
                     UserDisplayName = request.UserDisplayName,

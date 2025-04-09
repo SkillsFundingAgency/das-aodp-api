@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.AODP.Api.Controllers.Qualification;
 using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Application.Commands;
 using SFA.DAS.AODP.Application.Commands.Qualification;
 using SFA.DAS.AODP.Application.Commands.Qualifications;
 using SFA.DAS.AODP.Application.Exceptions;
@@ -62,7 +61,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications(null, status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
+            var result = await _controller.GetQualifications(processStatusFilter: null, status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -86,7 +85,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications(null,status: "changed", skip: 0, take: 10, name: "", organisation: "", qan: "");
+            var result = await _controller.GetQualifications(processStatusFilter: null, status: "changed", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -113,7 +112,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications(null, status: "changed", skip: 0, take: 10, name: "", organisation: "", qan: "");
+            var result = await _controller.GetQualifications(processStatusFilter: null, status: "changed", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
             var notFoundResult = Assert.IsType<StatusCodeResult>(result);
@@ -131,7 +130,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications(null, status: "changed", skip: 0, take: 10, name: "", organisation: "", qan: "");
+            var result = await _controller.GetQualifications(processStatusFilter: null, status: "changed", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
             var notFoundResult = Assert.IsType<OkObjectResult>(result);
@@ -150,7 +149,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications(null, status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
+            var result = await _controller.GetQualifications(processStatusFilter: null, status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
             var notFoundResult = Assert.IsType<StatusCodeResult>(result);                   
@@ -204,7 +203,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                          .ReturnsAsync(queryResponse);
 
             // Act
-            var result = await _controller.GetQualifications(null, status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
+            var result = await _controller.GetQualifications(processStatusFilter: null, status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
             var notFoundResult = Assert.IsType<OkObjectResult>(result);            
@@ -260,6 +259,42 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             var badRequestValue = badRequestResult.Value?.GetType().GetProperty("message")?.GetValue(badRequestResult.Value, null);
             Assert.Equal("Qualification reference cannot be empty", badRequestValue);
         }
+
+        [Fact]
+        public async Task GetQualificationDetailWithVersions_ReturnsBadRequest_WhenQualificationReferenceIsEmpty()
+        {
+            // Act
+            var result = await _controller.GetQualificationDetailWithVersions(string.Empty);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var badRequestValue = badRequestResult.Value?.GetType().GetProperty("message")?.GetValue(badRequestResult.Value, null);
+            Assert.Equal("Qualification reference cannot be empty", badRequestValue);
+        }
+
+        [Fact]
+        public async Task GetQualificationDetailWithVersions_ReturnsNotFound_WhenQueryFails()
+        {
+            // Arrange
+            var queryResponse = _fixture.Create<BaseMediatrResponse<GetQualificationDetailsQueryResponse>>();
+//            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+//.ForEach(b => _fixture.Behaviors.Remove(b));
+//            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            queryResponse.Success = false;
+            queryResponse.ErrorMessage = "No details found for qualification reference: Ref123";
+            queryResponse.InnerException = new NotFoundWithNameException("Ref123");
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetQualificationDetailWithVersionsQuery>(), default))
+                         .ReturnsAsync(queryResponse);
+
+            // Act
+            var result = await _controller.GetQualificationDetailWithVersions("Ref123");
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundResult>(result);
+        }
+
+
 
         [Fact]
         public async Task GetQualificationDetailWithVersions_ReturnsBadRequest_WhenQualificationReferenceIsEmpty()
@@ -457,15 +492,15 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
         public async Task QualificationFundingOffersSummary_ReturnsOkResult()
         {
             // Arrange
-            var command = _fixture.Create<CreateQualificationDiscussionHistoryCommand>();
+            var command = _fixture.Create<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand>();
             var response = _fixture.Create<BaseMediatrResponse<EmptyResponse>>();
             response.Success = true;
 
-            _mediatorMock.Setup(m => m.Send(It.IsAny<CreateQualificationDiscussionHistoryCommand>(), default))
+            _mediatorMock.Setup(m => m.Send(It.IsAny<CreateQualificationDiscussionHistoryNoteForFundingOffersCommand>(), default))
                          .ReturnsAsync(response);
 
             // Act
-            var result = await _controller.QualificationFundingOffersSummary(command, command.QualificationVersionId);
+            var result = await _controller.CreateQualificationDiscussionHistoryNoteForFundingOffers(command, command.QualificationVersionId);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
