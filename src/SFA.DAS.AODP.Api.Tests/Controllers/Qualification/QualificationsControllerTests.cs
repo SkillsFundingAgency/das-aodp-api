@@ -259,7 +259,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             var badRequestValue = badRequestResult.Value?.GetType().GetProperty("message")?.GetValue(badRequestResult.Value, null);
             Assert.Equal("Qualification reference cannot be empty", badRequestValue);
         }
-
+        
         [Fact]
         public async Task GetQualificationDetailWithVersions_ReturnsBadRequest_WhenQualificationReferenceIsEmpty()
         {

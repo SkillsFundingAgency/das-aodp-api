@@ -120,7 +120,8 @@ public class QualificationsController : BaseController
                     Organisation = organisation,
                     QAN = qan,
                     Skip = skip,
-                    Take = take
+                    Take = take,
+                    ProcessStatusIds = validationResult.ProcessStatusIds
                 };
                 return await SendRequestAsync(query);
             }
@@ -167,7 +168,7 @@ public class QualificationsController : BaseController
         };
         return await SendRequestAsync(query);
     }
-
+   
     [HttpGet("{qualificationReference}/qualificationversions/{version}")]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetQualificationDetails(string? qualificationReference, int version)

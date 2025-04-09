@@ -44,7 +44,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                 query = query.Where(w => filter.ProcessStatusIds.Contains(w.ProcessStatusId ?? Guid.Empty));
                 countQuery = countQuery.Where(w => filter.ProcessStatusIds.Contains(w.ProcessStatusId ?? Guid.Empty));
             }
-                       
+
             query = query.OrderBy(o => o.QualificationTitle);
             var totalRecords = await countQuery.CountAsync();
 
