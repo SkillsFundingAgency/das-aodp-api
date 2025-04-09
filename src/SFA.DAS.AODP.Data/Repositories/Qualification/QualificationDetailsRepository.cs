@@ -28,7 +28,7 @@ public class QualificationDetailsRepository(IApplicationDbContext context) : IQu
         return qualVersion;
     }
 
-    public async Task<QualificationVersions> GetVersionByIdAsync(string qualificationReference,int version)
+    public async Task<QualificationVersions> GetVersionByIdAsync(string qualificationReference, int version)
     {
         var qualVersion = await _context.QualificationVersions
             .Include(v => v.LifecycleStage)
@@ -37,7 +37,7 @@ public class QualificationDetailsRepository(IApplicationDbContext context) : IQu
             .Include(v => v.VersionFieldChanges)
             .Include(v => v.Qualification)
             .OrderByDescending(v => v.Version)
-            .FirstOrDefaultAsync(v => v.Qualification.Qan == qualificationReference && v.Version==version);
+            .FirstOrDefaultAsync(v => v.Qualification.Qan == qualificationReference && v.Version == version);
 
         if (qualVersion == null)
         {

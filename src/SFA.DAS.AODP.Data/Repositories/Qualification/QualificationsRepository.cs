@@ -24,7 +24,7 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
             throw new RecordWithNameNotFoundException(qualificationReference);
         }
         qualificationDiscussionHistory.QualificationId = qual.Id;
-        qualificationDiscussionHistory.Timestamp = DateTime.Now;
+        qualificationDiscussionHistory.Timestamp = DateTime.UtcNow;
         qualificationDiscussionHistory.ActionTypeId = await GetActionTypeId(qual.Id);
         _context.QualificationDiscussionHistory.Add(qualificationDiscussionHistory);
         await _context.SaveChangesAsync();

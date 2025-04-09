@@ -7,6 +7,7 @@
         public bool NewMessage { get; set; }
         public string UserType { get; set; }
         public string? Comments { get; set; }
+        public Guid ApplicationId { get; set; }
 
         public List<Funding> FundedOffers { get; set; } = new();
 
@@ -29,7 +30,8 @@
                 NewMessage = feedback.NewMessage,
                 Owner = feedback.Owner,
                 Status = feedback.Status,
-                UserType = feedback.Type
+                UserType = feedback.Type,
+                ApplicationId = feedback.ApplicationReview.ApplicationId
             };
 
             foreach (var funding in feedback.ApplicationReview?.ApplicationReviewFundings ?? [])

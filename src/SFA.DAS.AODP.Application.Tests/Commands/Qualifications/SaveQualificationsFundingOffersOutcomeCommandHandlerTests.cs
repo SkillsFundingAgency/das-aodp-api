@@ -32,6 +32,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         {
             // Arrange
             var command = _fixture.Create<SaveQualificationsFundingOffersOutcomeCommand>();
+            command.UpdateDiscussionHistory = true;
             _qualificationFundingFeedbackRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))
                 .ReturnsAsync((QualificationFundingFeedbacks)null);
 
@@ -49,6 +50,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         {
             // Arrange
             var command = _fixture.Create<SaveQualificationsFundingOffersOutcomeCommand>();
+            command.UpdateDiscussionHistory = true;
             var existingFeedback = _fixture.Create<QualificationFundingFeedbacks>();
 
             _qualificationFundingFeedbackRepositoryMock.Setup(repo => repo.GetByIdAsync(command.QualificationVersionId))

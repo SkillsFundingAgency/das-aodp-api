@@ -41,28 +41,31 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                     await _qualificationFundingFeedbackRepository.UpdateAsync(qualificationFundingFeedback);
                 }
 
-                StringBuilder qualificationDiscussionHistoryNotes = new();
-                qualificationDiscussionHistoryNotes.AppendLine("Feedback from DfE:");
-                if (request != null && request.Approved.HasValue)
+                if (request.UpdateDiscussionHistory == true)
                 {
-                    qualificationDiscussionHistoryNotes.AppendLine("The funding qualification");
-                    qualificationDiscussionHistoryNotes.AppendLine($"overall outcome selected is: {(request.Approved == true ? "Approved" : "Rejected")}");
-                    qualificationDiscussionHistoryNotes.AppendLine($"Comments: {request.Comments}");
-                    qualificationDiscussionHistoryNotes.AppendLine();
-                }
-                else
-                {
-                    qualificationDiscussionHistoryNotes.AppendLine("The overall outcome for funding this qualification not been selected");
-                }
+                    StringBuilder qualificationDiscussionHistoryNotes = new();
+                    qualificationDiscussionHistoryNotes.AppendLine("Feedback from DfE:");
+                    if (request != null && request.Approved.HasValue)
+                    {
+                        qualificationDiscussionHistoryNotes.AppendLine("The funding qualification");
+                        qualificationDiscussionHistoryNotes.AppendLine($"overall outcome selected is: {(request.Approved == true ? "Approved" : "Rejected")}");
+                        qualificationDiscussionHistoryNotes.AppendLine($"Comments: {request.Comments}");
+                        qualificationDiscussionHistoryNotes.AppendLine();
+                    }
+                    else
+                    {
+                        qualificationDiscussionHistoryNotes.AppendLine("The overall outcome for funding this qualification not been selected");
+                    }
 
-                await _qualificationDiscussionHistoryRepository.CreateAsync(new QualificationDiscussionHistory
-                {
-                    QualificationId = request.QualificationId,
-                    UserDisplayName = request.UserDisplayName,
-                    Notes = qualificationDiscussionHistoryNotes.ToString(),
-                    ActionTypeId = request.ActionTypeId,
-                    Timestamp = DateTime.Now
-                });
+                    await _qualificationDiscussionHistoryRepository.CreateAsync(new QualificationDiscussionHistory
+                    {
+                        QualificationId = request.QualificationId,
+                        UserDisplayName = request.UserDisplayName,
+                        Notes = qualificationDiscussionHistoryNotes.ToString(),
+                        ActionTypeId = request.ActionTypeId,
+                        Timestamp = DateTime.Now
+                    });
+                }
                 response.Success = true;
             }
             catch (Exception ex)

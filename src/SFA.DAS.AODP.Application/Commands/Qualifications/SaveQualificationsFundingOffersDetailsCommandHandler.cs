@@ -35,34 +35,37 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
 
                 await _qualificationFundingsrepository.UpdateAsync(fundedOffers);
 
-                StringBuilder qualificationDiscussionHistoryNotes = new();
-                qualificationDiscussionHistoryNotes.AppendLine("Feedback from DfE:");
-                if (request.Details != null && request.Details.Count != 0)
+                if (request.UpdateDiscussionHistory == true)
                 {
-                    qualificationDiscussionHistoryNotes.AppendLine("The following offers details have been selected:");
-                    qualificationDiscussionHistoryNotes.AppendLine();
-
-                    foreach (var qf in request.Details)
+                    StringBuilder qualificationDiscussionHistoryNotes = new();
+                    qualificationDiscussionHistoryNotes.AppendLine("Feedback from DfE:");
+                    if (request.Details != null && request.Details.Count != 0)
                     {
-                        qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
+                        qualificationDiscussionHistoryNotes.AppendLine("The following offers details have been selected:");
                         qualificationDiscussionHistoryNotes.AppendLine();
-                    }
-                }
-                else
-                {
-                    qualificationDiscussionHistoryNotes.AppendLine("No funding offers have been selected");
-                }
 
-                await _qualificationDiscussionHistoryRepository.CreateAsync(new QualificationDiscussionHistory
-                {
-                    QualificationId = request.QualificationId,
-                    UserDisplayName = request.UserDisplayName,
-                    Notes = qualificationDiscussionHistoryNotes.ToString(),
-                    ActionTypeId = request.ActionTypeId,
-                    Timestamp = DateTime.Now
-                });
+                        foreach (var qf in request.Details)
+                        {
+                            qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
+                            qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
+                            qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
+                            qualificationDiscussionHistoryNotes.AppendLine();
+                        }
+                    }
+                    else
+                    {
+                        qualificationDiscussionHistoryNotes.AppendLine("No funding offers have been selected");
+                    }
+
+                    await _qualificationDiscussionHistoryRepository.CreateAsync(new QualificationDiscussionHistory
+                    {
+                        QualificationId = request.QualificationId,
+                        UserDisplayName = request.UserDisplayName,
+                        Notes = qualificationDiscussionHistoryNotes.ToString(),
+                        ActionTypeId = request.ActionTypeId,
+                        Timestamp = DateTime.Now
+                    });
+                }
                 response.Success = true;
             }
             catch (Exception ex)
