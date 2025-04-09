@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[proc_BulkDataCorrections] (@fileURL NVARCHAR(MAX), @WriteCommentFlag int)
+﻿Create PROCEDURE [dbo].[proc_BulkDataCorrections] (@fileURL NVARCHAR(MAX), @WriteCommentFlag int, @SASToken NVARCHAR(MAX), @LocalDeployment int)
 
 /*##################################################################################################
 	-Name:				proc_BulkDataCorrections
@@ -45,16 +45,38 @@ CREATE TABLE #MergeLog (
     NewProcessStatusId uniqueidentifier,
 	Notes NVARCHAR(MAX)
 )
-	
-/*Bulk import data FROM specified CSV and populate temporary staging table*/
-DECLARE @Bulk_SQL VARCHAR(MAX)
-SET @Bulk_SQL = 'BULK INSERT BulkInsertStaging
-FROM ''' + @fileURL + '''
-WITH (
-    FIELDTERMINATOR = '','',  -- Delimiter for columns
-    ROWTERMINATOR = ''\n'',   -- Delimiter for rows
-    FIRSTROW = 2 )'
 
+/*Bulk import data FROM specified CSV and populate staging table
+Can be run locally or in cloud using LocalDeployment flag*/
+DECLARE @Bulk_SQL VARCHAR(MAX)
+
+If @LocalDeployment = 1 
+	Begin
+	SET @Bulk_SQL = 'BULK INSERT BulkInsertStaging
+	FROM ''' + @fileURL + '''
+	WITH (
+		FIELDTERMINATOR = '','',  -- Delimiter for columns
+		ROWTERMINATOR = ''\n'',   -- Delimiter for rows
+		FIRSTROW = 2 )'
+	End
+ELSE 
+	Begin
+
+	/*Create credentials and access to blob
+	Create a database scoped credential*/
+	DECLARE @SASSQL VARCHAR(MAX)
+	SET @SASSQL = 'ALTER DATABASE SCOPED CREDENTIAL maintenance_cred
+	WITH IDENTITY = ''SHARED ACCESS SIGNATURE'',
+	SECRET = ''' + @SASToken + ''''
+
+	SET @Bulk_SQL = 'BULK INSERT BulkInsertStaging
+	FROM ''' + @fileURL +'''
+	WITH (DATA_SOURCE = ''ExternalCSVDataSource'', FORMAT = ''CSV'')'
+
+
+	End 
+
+Exec(@SASSQL) --Create database scoped credential
 Exec(@Bulk_SQL) --Execute above SQL statement to populate temp table BulkInsertStaging with CSV data
 
 /*Clean data by forcing into correct format (mainly used for dates) 
@@ -135,3 +157,4 @@ DROP TABLE #MissingQualifications;
 DROP TABLE #MergeLog;
 
 END
+GO
