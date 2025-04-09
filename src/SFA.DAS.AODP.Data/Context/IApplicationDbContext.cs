@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
+using SFA.DAS.AODP.Data.Entities.Feedback;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Entities.Jobs;
 using SFA.DAS.AODP.Data.Entities.Offer;
@@ -58,6 +59,7 @@ namespace SFA.DAS.AODP.Data.Context
 
         DbSet<QualificationFundingFeedbacks> QualificationFundingFeedbacks { get; set; }
         DbSet<QualificationFundings> QualificationFundings { get; set; }
+        DbSet<Survey> Surveys { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task BulkInsertAsync<T>(IEnumerable<T> entities, CancellationToken cancellationToken = default) where T : class;
         Task<IDbContextTransaction> StartTransactionAsync();

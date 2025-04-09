@@ -92,6 +92,8 @@ public class GetQualificationDetailsQueryResponse
         public string Qan { get; set; } = null!;
         public string? QualificationName { get; set; }
         public List<QualificationDiscussionHistory> QualificationDiscussionHistories { get; set; } = new List<QualificationDiscussionHistory>();
+
+        public List<GetQualificationDetailsQueryResponse> Versions { get; set; } = new List<GetQualificationDetailsQueryResponse>();
     }
 
     public class PreviousVersion
@@ -157,23 +159,7 @@ public class GetQualificationDetailsQueryResponse
         public AwardingOrganisation Organisation { get; set; } = null!;
         public Qualification Qualification { get; set; } = null!;
     }
-    public partial class QualificationDiscussionHistory
-    {
-        public Guid Id { get; set; }
-        public Guid QualificationId { get; set; }
-        public Guid ActionTypeId { get; set; }
-        public string? UserDisplayName { get; set; }
-        public string? Notes { get; set; }
-        public DateTime? Timestamp { get; set; }
-        public virtual ActionType ActionType { get; set; } = null!;
-    }
-
-    public class ActionType
-    {
-        public Guid Id { get; set; }
-        public string? Description { get; set; }
-    }
-
+  
     public partial class ProcessStatus
     {
         public Guid Id { get; set; }
@@ -280,7 +266,92 @@ public class GetQualificationDetailsQueryResponse
                             Id = v.ActionType.Id,
                             Description = v.ActionType.Description,
                         }
-                    }).ToList()
+                    }).ToList(),
+                Versions = entity.Qualification.QualificationVersions.ToList().Select(version => new GetQualificationDetailsQueryResponse()
+                {
+                    Id = version.Id,
+                    AgeGroup = GetAgeGroup(version),
+                    QualificationId = version.QualificationId,
+                    VersionFieldChangesId = version.VersionFieldChangesId,
+                    ProcessStatusId = version.ProcessStatusId,
+                    AdditionalKeyChangesReceivedFlag = version.AdditionalKeyChangesReceivedFlag,
+                    LifecycleStageId = version.LifecycleStageId,
+                    OutcomeJustificationNotes = version.OutcomeJustificationNotes,
+                    AwardingOrganisationId = version.AwardingOrganisationId,
+                    Status = version.Status,
+                    Type = version.Type,
+                    Ssa = version.Ssa,
+                    Level = version.Level,
+                    VersionFieldChanges = version.VersionFieldChanges.ChangedFieldNames,
+                    SubLevel = version.SubLevel,
+                    EqfLevel = version.EqfLevel,
+                    GradingType = version.GradingType,
+                    GradingScale = version.GradingScale,
+                    TotalCredits = version.TotalCredits,
+                    Tqt = version.Tqt,
+                    Glh = version.Glh,
+                    MinimumGlh = version.MinimumGlh,
+                    MaximumGlh = version.MaximumGlh,
+                    RegulationStartDate = version.RegulationStartDate,
+                    OperationalStartDate = version.OperationalStartDate,
+                    OperationalEndDate = version.OperationalEndDate,
+                    CertificationEndDate = version.CertificationEndDate,
+                    ReviewDate = version.ReviewDate,
+                    OfferedInEngland = version.OfferedInEngland,
+                    OfferedInNi = version.OfferedInNi,
+                    OfferedInternationally = version.OfferedInternationally,
+                    Specialism = version.Specialism,
+                    Pathways = version.Pathways,
+                    AssessmentMethods = version.AssessmentMethods,
+                    ApprovedForDelFundedProgramme = version.ApprovedForDelFundedProgramme,
+                    LinkToSpecification = version.LinkToSpecification,
+                    ApprenticeshipStandardReferenceNumber = version.ApprenticeshipStandardReferenceNumber,
+                    ApprenticeshipStandardTitle = version.ApprenticeshipStandardTitle,
+                    RegulatedByNorthernIreland = version.RegulatedByNorthernIreland,
+                    NiDiscountCode = version.NiDiscountCode,
+                    GceSizeEquivelence = version.GceSizeEquivelence,
+                    GcseSizeEquivelence = version.GcseSizeEquivelence,
+                    EntitlementFrameworkDesign = version.EntitlementFrameworkDesign,
+                    LastUpdatedDate = version.LastUpdatedDate,
+                    UiLastUpdatedDate = version.UiLastUpdatedDate,
+                    InsertedDate = version.InsertedDate,
+                    InsertedTimestamp = version.InsertedTimestamp,
+                    Version = version.Version,
+                    AppearsOnPublicRegister = version.AppearsOnPublicRegister,
+                    LevelId = version.LevelId,
+                    TypeId = version.TypeId,
+                    SsaId = version.SsaId,
+                    GradingTypeId = version.GradingTypeId,
+                    GradingScaleId = version.GradingScaleId,
+                    PreSixteen = version.PreSixteen,
+                    SixteenToEighteen = version.SixteenToEighteen,
+                    EighteenPlus = version.EighteenPlus,
+                    NineteenPlus = version.NineteenPlus,
+                    ImportStatus = version.ImportStatus,
+
+                    Stage = new LifecycleStage
+                    {
+                        Id = version.LifecycleStage.Id,
+                        Name = version.LifecycleStage.Name,
+                    },
+                    Organisation = new AwardingOrganisation
+                    {
+                        Id = version.Organisation.Id,
+                        Ukprn = version.Organisation.Ukprn,
+                        RecognitionNumber = version.Organisation.RecognitionNumber,
+                        NameLegal = version.Organisation.NameLegal,
+                        NameOfqual = version.Organisation.NameOfqual,
+                        NameGovUk = version.Organisation.NameGovUk,
+                        Name_Dsi = version.Organisation.Name_Dsi,
+                        Acronym = version.Organisation.Acronym,
+                    },
+                    Qual = new Qualification
+                    {
+                        Id = version.Qualification.Id,
+                        Qan = version.Qualification.Qan,
+                        QualificationName = version.Qualification.QualificationName,
+                    }
+                }).ToList()
             },
             ProcStatus = new ProcessStatus()
             {
