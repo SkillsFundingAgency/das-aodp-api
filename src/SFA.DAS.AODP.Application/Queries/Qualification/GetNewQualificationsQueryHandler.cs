@@ -25,7 +25,7 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
                     {
                         Name = request.Name,
                         Organisation = request.Organisation,
-                        QAN = request.QAN,
+                        QAN = request.QAN, 
                         ProcessStatusIds = request.ProcessStatusIds,
                     });
                 if (result != null)
