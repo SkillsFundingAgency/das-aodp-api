@@ -22,17 +22,15 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
         private readonly IQualificationDetailsRepository _qualificationDetailsRepository;
         private readonly IQualificationFundingsRepository _qualificationFundingsrepository;
         private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
-        private readonly IFundingOfferRepository _fundingOfferRepository;
         private readonly IQualificationsRepository _qualificationsRepository;
 
-        public SaveQfauFundingReviewDecisionCommandHandler(IApplicationReviewFeedbackRepository repository, IMediator mediator, IQualificationDetailsRepository qualificationDetailsRepository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository, IQualificationFundingsRepository qualificationFundingsRepository, IFundingOfferRepository fundingOfferRepository, IQualificationsRepository qualificationsRepository)
+        public SaveQfauFundingReviewDecisionCommandHandler(IApplicationReviewFeedbackRepository repository, IMediator mediator, IQualificationDetailsRepository qualificationDetailsRepository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository, IQualificationFundingsRepository qualificationFundingsRepository, IQualificationsRepository qualificationsRepository)
         {
             _reviewRepository = repository;
             _mediator = mediator;
             _qualificationDetailsRepository = qualificationDetailsRepository;
             _qualificationDiscussionHistoryRepository = qualificationDiscussionHistoryRepository;
             _qualificationFundingsrepository = qualificationFundingsRepository;
-            _fundingOfferRepository = fundingOfferRepository;
             _qualificationsRepository = qualificationsRepository;
         }
 
@@ -43,7 +41,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
             try
             {
                 var review = await _reviewRepository.GeyByReviewIdAndUserType(request.ApplicationReviewId, UserType.Qfau);
-                var qan = review.ApplicationReview.Application.QualificationNumber;
+                var qan = review.ApplicationReview?.Application?.QualificationNumber;
 
                 if (review.Status == ApplicationStatus.Approved.ToString() && string.IsNullOrWhiteSpace(qan))
                 {
@@ -63,7 +61,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                 }
 
 
-                if (review.Status == ApplicationStatus.NotApproved.ToString() && review.ApplicationReview.ApplicationReviewFundings.Any())
+                if (review.Status == ApplicationStatus.NotApproved.ToString() && review?.ApplicationReview?.ApplicationReviewFundings?.Any() == true)
                 {
                     throw new InvalidOperationException("The application has been rejected for funding but has approved offers associated.");
                 }
@@ -101,7 +99,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
             msgText.AppendLine("Feedback from DfE:");
             msgText.AppendLine(review.Comments);
             msgText.AppendLine();
-            if (review.ApplicationReview.ApplicationReviewFundings.Any())
+            if (review?.ApplicationReview?.ApplicationReviewFundings?.Any() == true)
             {
                 msgText.AppendLine("The following offers have been approved:");
                 msgText.AppendLine();
@@ -126,7 +124,6 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
         {
             // get the current state before the update for discussion history notes
             var qualificationfundedOffers = await _qualificationFundingsrepository.GetByIdAsync(qualVersion.Id);
-            var fundingOffers = await _fundingOfferRepository.GetFundingOffersAsync();
 
             var updateOutcome = await _mediator.Send(new SaveQualificationsFundingOffersOutcomeCommand()
             {
@@ -145,7 +142,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                 ActionTypeId = NoActionRequiredActionTypeId,
                 QualificationId = qualVersion.QualificationId,
                 QualificationVersionId = qualVersion.Id,
-                SelectedOfferIds = review.ApplicationReview.ApplicationReviewFundings.Select(review => review.FundingOfferId).ToList()
+                SelectedOfferIds = review.ApplicationReview.ApplicationReviewFundings?.Select(review => review.FundingOfferId).ToList() ?? []
             });
             if (updateOffers.Success == false) throw new Exception(updateOffers.ErrorMessage, updateOffers.InnerException);
 
@@ -156,19 +153,19 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                 ActionTypeId = NoActionRequiredActionTypeId,
                 QualificationId = qualVersion.QualificationId,
                 QualificationVersionId = qualVersion.Id,
-                Details = review.ApplicationReview.ApplicationReviewFundings.Select(review => new SaveQualificationsFundingOffersDetailsCommand.OfferFundingDetails()
+                Details = review.ApplicationReview.ApplicationReviewFundings?.Select(review => new SaveQualificationsFundingOffersDetailsCommand.OfferFundingDetails()
                 {
                     Comments = review.Comments,
                     StartDate = review.StartDate,
                     EndDate = review.EndDate,
                     FundingOfferId = review.FundingOfferId,
-                }).ToList()
+                }).ToList() ?? []
             });
             if (updateOfferDetails.Success == false) throw new Exception(updateOfferDetails.ErrorMessage, updateOfferDetails.InnerException);
 
             await _qualificationsRepository.UpdateQualificationStatus(qualVersion.Qualification.Qan, review.Status == ApplicationStatus.Approved.ToString() ? ApprovedProcessStatusId : RejectedProcessStatusId, qualVersion.Version);
 
-            var applicationOfferIds = review.ApplicationReview.ApplicationReviewFundings.Select(a => a.FundingOfferId);
+            var applicationOfferIds = review.ApplicationReview.ApplicationReviewFundings?.Select(a => a.FundingOfferId) ?? [];
             List<QualificationFundings> removedOffers = qualificationfundedOffers.Where(q => !applicationOfferIds.Contains(q.FundingOfferId)).ToList();
 
             StringBuilder qualificationDiscussionHistoryNotes = new();
@@ -179,7 +176,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
 
                 foreach (var qf in removedOffers)
                 {
-                    var fundingOffer = fundingOffers.FirstOrDefault(a => a.Id == qf.FundingOfferId);
+                    var fundingOffer = qf.FundingOffer;
                     if (fundingOffer != null)
                     {
                         qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
@@ -190,14 +187,14 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                     }
                 }
             }
-            if (review.ApplicationReview.ApplicationReviewFundings.Count > 0)
+            if (review.ApplicationReview.ApplicationReviewFundings?.Count > 0)
             {
                 qualificationDiscussionHistoryNotes.AppendLine("The following offers have been approved:");
                 qualificationDiscussionHistoryNotes.AppendLine();
 
                 foreach (var qf in review.ApplicationReview.ApplicationReviewFundings)
                 {
-                    var fundingOffer = fundingOffers.FirstOrDefault(a => a.Id == qf.FundingOfferId);
+                    var fundingOffer = qf.FundingOffer;
                     if (fundingOffer != null)
                     {
                         qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
