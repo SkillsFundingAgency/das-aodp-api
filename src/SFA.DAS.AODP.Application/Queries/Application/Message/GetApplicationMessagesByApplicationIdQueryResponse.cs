@@ -1,6 +1,6 @@
 ﻿namespace SFA.DAS.AODP.Application.Queries.Application.Message;
 
-public class GetApplicationMessagesByIdQueryResponse
+public class GetApplicationMessagesByApplicationIdQueryResponse
 {
     public List<ApplicationMessage> Messages { get; set; } = new();
     public class ApplicationMessage
@@ -19,9 +19,9 @@ public class GetApplicationMessagesByIdQueryResponse
         public DateTime SentAt { get; set; }
     }
 
-    public static implicit operator GetApplicationMessagesByIdQueryResponse(List<SFA.DAS.AODP.Data.Entities.Application.Message> messages)
+    public static implicit operator GetApplicationMessagesByApplicationIdQueryResponse(List<SFA.DAS.AODP.Data.Entities.Application.Message> messages)
     {
-        GetApplicationMessagesByIdQueryResponse response = new();
+        GetApplicationMessagesByApplicationIdQueryResponse response = new();
 
         foreach (var message in messages ?? [])
         {
