@@ -4,18 +4,18 @@ using SFA.DAS.AODP.Models.Application;
 
 namespace SFA.DAS.AODP.Application.Queries.Application.Message;
 
-public class GetApplicationMessagesByIdQueryHandler : IRequestHandler<GetApplicationMessagesByIdQuery, BaseMediatrResponse<GetApplicationMessagesByIdQueryResponse>>
+public class GetApplicationMessagesByApplicationIdQueryHandler : IRequestHandler<GetApplicationMessagesByApplicationIdQuery, BaseMediatrResponse<GetApplicationMessagesByApplicationIdQueryResponse>>
 {
     private readonly IApplicationMessagesRepository _messagesRepository;
 
-    public GetApplicationMessagesByIdQueryHandler(IApplicationMessagesRepository messagesRepository)
+    public GetApplicationMessagesByApplicationIdQueryHandler(IApplicationMessagesRepository messagesRepository)
     {
         _messagesRepository = messagesRepository;
     }
 
-    public async Task<BaseMediatrResponse<GetApplicationMessagesByIdQueryResponse>> Handle(GetApplicationMessagesByIdQuery request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<GetApplicationMessagesByApplicationIdQueryResponse>> Handle(GetApplicationMessagesByApplicationIdQuery request, CancellationToken cancellationToken)
     {
-        var response = new BaseMediatrResponse<GetApplicationMessagesByIdQueryResponse>();
+        var response = new BaseMediatrResponse<GetApplicationMessagesByApplicationIdQueryResponse>();
         response.Success = false;
         try
         {
