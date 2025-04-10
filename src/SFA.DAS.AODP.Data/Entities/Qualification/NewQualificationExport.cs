@@ -46,9 +46,9 @@ namespace SFA.DAS.AODP.Data.Entities.Qualification
         public bool? NineteenPlus { get; set; }
 
         // Funding Details (Placeholders)
-        public int? FundingInEngland { get; set; }              
-        public int? FundingInWales { get; set; }                // Placeholder
-        public int? FundingInNorthernIreland { get; set; }      // Placeholder
+        public bool? FundedInEngland { get; set; }              
+        public bool? FundingInWales { get; set; }                // Placeholder
+        public bool? FundingInNorthernIreland { get; set; }      // Placeholder
 
         // Qualification Size & Credit Information
         public string? GCSESizeEquivalence { get; set; }
