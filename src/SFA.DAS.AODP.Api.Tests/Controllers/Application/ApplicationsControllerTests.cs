@@ -416,5 +416,37 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
             var model = Assert.IsAssignableFrom<EmptyResponse>(okResult.Value);
             Assert.Equal(response, model);
         }
+
+        [Fact]
+        public async Task GetRelatedQualificationForApplicationAsync_ReturnsOkResult()
+        {
+            // Arrange
+            var request = _fixture.Create<GetRelatedQualificationForApplicationQuery>();
+            var response = _fixture.Create<GetRelatedQualificationForApplicationQueryResponse>();
+            BaseMediatrResponse<GetRelatedQualificationForApplicationQueryResponse> wrapper = new()
+            {
+                Value = response,
+                Success = true
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<GetRelatedQualificationForApplicationQuery>(), default))
+                .ReturnsAsync(wrapper);
+
+            // Act
+            var result = await _controller.GetRelatedQualificationForApplicationAsync(request.ApplicationId);
+
+            // Assert
+            _mediatorMock.Verify(m => m.Send(It.IsAny<GetRelatedQualificationForApplicationQuery>(), default), Times.Once());
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<GetRelatedQualificationForApplicationQuery>(q =>
+                        q.ApplicationId == request.ApplicationId
+            ), default), Times.Once());
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var model = Assert.IsAssignableFrom<GetRelatedQualificationForApplicationQueryResponse>(okResult.Value);
+            Assert.Equal(response, model);
+        }
+
     }
 }
