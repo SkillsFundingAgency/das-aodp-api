@@ -63,7 +63,7 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                         UserDisplayName = request.UserDisplayName,
                         Notes = qualificationDiscussionHistoryNotes.ToString(),
                         ActionTypeId = request.ActionTypeId,
-                        Timestamp = DateTime.Now
+                        Timestamp = DateTime.UtcNow
                     });
                 }
                 response.Success = true;
