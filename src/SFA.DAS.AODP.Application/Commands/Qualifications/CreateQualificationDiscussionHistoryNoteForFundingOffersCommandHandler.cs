@@ -50,7 +50,7 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                         qualificationDiscussionHistoryNotes.AppendLine($"Offer: {qf.FundingOffer.Name}");
                         qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
                         qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
+                        if (!string.IsNullOrWhiteSpace(qf.Comments)) qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
                         qualificationDiscussionHistoryNotes.AppendLine();
                     }
                 }

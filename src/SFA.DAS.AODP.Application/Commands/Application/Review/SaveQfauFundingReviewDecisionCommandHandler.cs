@@ -109,7 +109,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                     msgText.AppendLine($"Offer: {offer.FundingOffer.Name}");
                     msgText.AppendLine($"Start date: {offer.StartDate}");
                     msgText.AppendLine($"End date: {offer.EndDate}");
-                    msgText.AppendLine($"Comments: {offer.Comments}");
+                    if (!string.IsNullOrWhiteSpace(offer.Comments)) msgText.AppendLine($"Comments: {offer.Comments}");
                     msgText.AppendLine();
                 }
             }
@@ -182,7 +182,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                         qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
                         qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
                         qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
+                        if (!string.IsNullOrWhiteSpace(qf.Comments)) qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
                         qualificationDiscussionHistoryNotes.AppendLine();
                     }
                 }
@@ -200,7 +200,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                         qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
                         qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
                         qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
+                        if (!string.IsNullOrWhiteSpace(qf.Comments)) qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
                         qualificationDiscussionHistoryNotes.AppendLine();
                     }
                 }
