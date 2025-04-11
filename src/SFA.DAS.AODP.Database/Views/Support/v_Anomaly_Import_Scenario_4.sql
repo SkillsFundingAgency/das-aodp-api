@@ -1,4 +1,4 @@
-﻿CREATE View [dbo].[v_Anomaly_Import_Scenario_4] as
+﻿create View [dbo].[v_Anomaly_Import_Scenario_4] as
 
 /*##################################################################################################
 	-Name:				Anomaly_Import_Scenario_4
@@ -48,8 +48,21 @@ From CTE_LatestRegulatedVersion
 Where R_K = 1
 AND	Name = 'Approved'
 AND OperationalEndDate <= GetDate()
+),
+CTE_DeletedQualifications AS (
+
+Select F.QualificationId from funded.Qualifications F
+Where Not Exists (select QV.QualificationId From regulated.QualificationVersions QV)
 )
 
-/*List of latest regualted qualifications which dont appear in the funded based on criteria above*/
-Select REG.QualificationId from CTE_LRV_PastOpEndDate REG
+/*List of latest regualted qualifications which appear in the funded based on criteria above*/
+Select REG.QualificationId
+	   ,'In funded / Approved / Operation Date in past' as CurrentStatus
+from CTE_LRV_PastOpEndDate REG
 Inner Join CTE_CurrFundedQualifications FUN ON FUN.QualificationId = REG.QualificationId
+
+Union
+
+Select QualificationId 
+	   ,'Qualfication doesnt exist in AODP' As CurrentStatus
+From CTE_DeletedQualifications DQ
