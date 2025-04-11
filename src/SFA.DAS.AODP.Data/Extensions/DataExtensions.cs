@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Repositories.Application;
+using SFA.DAS.AODP.Data.Repositories.Feedback;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 using SFA.DAS.AODP.Data.Repositories.FundingOffer;
 using SFA.DAS.AODP.Data.Repositories.Jobs;
@@ -40,13 +41,15 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IRouteRepository, RouteRepository>();
             services.AddScoped<IFormRepository, FormRepository>();
             services.AddScoped<IQualificationsRepository, QualificationsRepository>();
+            services.AddScoped<IQualificationDetailsRepository, QualificationDetailsRepository>();
             services.AddScoped<IQualificationFundingFeedbackRepository, QualificationFundingFeedbackRepository>();
             services.AddScoped<IQualificationFundingsRepository, QualificationFundingsRepository>();
             services.AddScoped<IQualificationDiscussionHistoryRepository, QualificationDiscussionHistoryRepository>();
+            services.AddScoped<IChangedQualificationsRepository, ChangedQualificationsRepository>();
 
             services.AddScoped<IFundingOfferRepository, FundingOfferRepository>();
             services.AddScoped<IApplicationReviewFundingRepository, ApplicationReviewFundingRepository>();
-            services.AddScoped<IChangedQualificationsRepository, ChangedQualificationsRepository>();
+            services.AddScoped<ISurveyRepository, SurveyRepository>();
 
             services.AddScoped<IFundingOfferRepository, FundingOfferRepository>();
             services.AddScoped<IApplicationReviewFundingRepository, ApplicationReviewFundingRepository>();

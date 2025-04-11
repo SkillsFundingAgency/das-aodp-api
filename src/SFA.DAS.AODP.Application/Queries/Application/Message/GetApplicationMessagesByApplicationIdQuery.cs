@@ -2,9 +2,9 @@
 
 namespace SFA.DAS.AODP.Application.Queries.Application.Message;
 
-public class GetApplicationMessagesByIdQuery : IRequest<BaseMediatrResponse<GetApplicationMessagesByIdQueryResponse>>
+public class GetApplicationMessagesByApplicationIdQuery : IRequest<BaseMediatrResponse<GetApplicationMessagesByApplicationIdQueryResponse>>
 {
-    public GetApplicationMessagesByIdQuery(Guid applicationId, string userType)
+    public GetApplicationMessagesByApplicationIdQuery(Guid applicationId, string userType)
     {
         ApplicationId = applicationId;
         UserType = userType;

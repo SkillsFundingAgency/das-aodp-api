@@ -30,8 +30,6 @@ namespace SFA.DAS.AODP.Data.Tests.Repositories.Application.ApplicationPageReposi
             _context.SetupGet(c => c.ApplicationPages).ReturnsDbSet(dbSet);
 
             // Act
-            // var result = await _sut.IsApplicationPageEditable(v => v.Id == id && v.Application.Submitted == false);
-
             var result = await _sut.IsApplicationPageEditable(pageId);
 
             // Assert
