@@ -20,7 +20,7 @@ CREATE TABLE BulkInsertStaging (
 	,LifecycleStage NVARCHAR(MAX)
 	,OutcomeDecision NVARCHAR(MAX)
 	,Notes NVARCHAR(MAX)
-	,TIMESTAMP NVARCHAR(MAX)
+
 	)
 CREATE TABLE #Cleaned (
 	QualificationId uniqueidentifier
@@ -90,7 +90,7 @@ SELECT
     (SELECT L.Id FROM regulated.LifecycleStage L Where Cast(trim(stg.LifecycleStage) as nvarchar(max)) = L.Name) as LifecycleStageId,
 	(SELECT P.Id FROM regulated.ProcessStatus P Where Cast(trim(stg.OutcomeDecision) as nvarchar(max)) = P.Name) as ProcessStatusId,
 	stg.Notes AS Notes,
-    TRY_CONVERT(DATETIME, Timestamp,103) AS Timestamp
+    GetDate() AS Timestamp
 FROM BulkInsertStaging stg; 
 
 /*Create list of Qualfications returning only latest version 
