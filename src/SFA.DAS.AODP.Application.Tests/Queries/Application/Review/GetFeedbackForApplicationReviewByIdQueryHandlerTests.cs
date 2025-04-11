@@ -35,7 +35,11 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
             var response = new ApplicationReviewFeedback()
             {
                 Id = applicationReviewId,
-                Type = userTypeString
+                Type = userTypeString,
+                ApplicationReview = new()
+                {
+                    ApplicationId = Guid.NewGuid()
+                }
             };
 
             _repositoryMock.Setup(x => x.GeyByReviewIdAndUserType(applicationReviewId, userType))

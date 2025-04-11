@@ -12,12 +12,12 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Message
     {
         private readonly IFixture _fixture;
         private readonly Mock<IApplicationMessagesRepository> _repositoryMock;
-        private readonly GetApplicationMessagesByIdQueryHandler _handler;
+        private readonly GetApplicationMessagesByApplicationIdQueryHandler _handler;
         public GetApplicationMessagesByIdQueryHandlerTests()
         {
             _fixture = new Fixture().Customize(new AutoMoqCustomization());
             _repositoryMock = _fixture.Freeze<Mock<IApplicationMessagesRepository>>();
-            _handler = _fixture.Create<GetApplicationMessagesByIdQueryHandler>();
+            _handler = _fixture.Create<GetApplicationMessagesByApplicationIdQueryHandler>();
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Message
 
             Guid applicationId = Guid.NewGuid();
 
-            var query = new GetApplicationMessagesByIdQuery(applicationId, userTypeString);
+            var query = new GetApplicationMessagesByApplicationIdQuery(applicationId, userTypeString);
             var response = new List<Data.Entities.Application.Message>()
             {
                 new Data.Entities.Application.Message()
@@ -74,7 +74,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Message
 
             Guid applicationId = Guid.NewGuid();
 
-            var query = new GetApplicationMessagesByIdQuery(applicationId, userTypeString);
+            var query = new GetApplicationMessagesByApplicationIdQuery(applicationId, userTypeString);
 
             Exception ex = new Exception();
 
