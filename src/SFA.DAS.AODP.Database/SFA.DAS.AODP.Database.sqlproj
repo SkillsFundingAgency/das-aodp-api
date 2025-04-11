@@ -144,14 +144,11 @@
     </None>
     <Build Include="Tables\Feedback\Surveys.sql" />
     <Build Include="Views\Support\v_Anomaly_Import_Scenario_1.sql" />
-<<<<<<< HEAD
     <Build Include="Views\Support\v_Anomaly_Import_Scenario_5.sql" />
-=======
     <Build Include="Views\Support\v_Anomaly_Import_Scenario_2.sql" />
     <Build Include="Views\Support\v_Anomaly_Import_Scenario_3.sql" />
     <Build Include="Views\Support\v_AllQualificationDetails.sql" />
     <Build Include="Views\KPIs\v_MS_KPI_NQS_NQR_US_001.sql" />
->>>>>>> origin/AODP-Sprint7
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />

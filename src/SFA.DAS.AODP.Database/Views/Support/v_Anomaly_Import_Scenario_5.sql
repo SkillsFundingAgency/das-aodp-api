@@ -40,7 +40,7 @@ SELECT  QV.QualificationId
 FROM regulated.QualificationVersions QV
 Inner Join regulated.ProcessStatus PS on PS.Id = QV.ProcessStatusId
 ),
-/*List of Qualification Ids that are the latest regulated version, have not approved status
+/*List of Qualification Ids that are the latest regulated version, have approved status
 and have an Operational end date in the past*/
 CTE_LRV_PastOpEndDate As (
 Select QualificationId
@@ -49,8 +49,21 @@ From CTE_LatestRegulatedVersion
 Where R_K = 1
 AND	Name = 'Rejected'
 AND OperationalEndDate <= GetDate()
+),
+CTE_DeletedQualifications AS (
+
+Select F.QualificationId from funded.Qualifications F
+Where Not Exists (select QV.QualificationId From regulated.QualificationVersions QV)
 )
 
 /*List of latest regualted qualifications which dont appear in the funded based on criteria above*/
-Select REG.QualificationId from CTE_LRV_PastOpEndDate REG
+Select REG.QualificationId 
+		,'In funded / Approved / Operation Date in past' as CurrentStatus
+from CTE_LRV_PastOpEndDate REG
 Inner Join CTE_CurrFundedQualifications FUN ON FUN.QualificationId = REG.QualificationId
+
+Union
+
+Select QualificationId 
+	   ,'Qualfication doesnt exist in AODP' As CurrentStatus
+From CTE_DeletedQualifications DQ
