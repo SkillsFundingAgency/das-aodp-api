@@ -69,6 +69,8 @@ ELSE
 	WITH IDENTITY = ''SHARED ACCESS SIGNATURE'',
 	SECRET = ''' + @SASToken + ''''
 
+	Exec(@SASSQL) --Create database scoped credential
+
 	SET @Bulk_SQL = 'BULK INSERT BulkInsertStaging
 	FROM ''' + @fileURL +'''
 	WITH (DATA_SOURCE = ''ExternalCSVDataSource'', FORMAT = ''CSV'')'
@@ -76,7 +78,7 @@ ELSE
 
 	End 
 
-Exec(@SASSQL) --Create database scoped credential
+
 Exec(@Bulk_SQL) --Execute above SQL statement to populate temp table BulkInsertStaging with CSV data
 
 /*Clean data by forcing into correct format (mainly used for dates) 
