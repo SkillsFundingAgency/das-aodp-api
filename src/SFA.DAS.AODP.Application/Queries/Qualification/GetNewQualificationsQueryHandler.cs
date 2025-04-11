@@ -21,10 +21,13 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
                 var result = await _repository.GetAllNewQualificationsAsync(
                     request.Skip, 
                     request.Take, 
-                    new NewQualificationsFilter() {
+                    new NewQualificationsFilter() 
+                    {
                         Name = request.Name,
                         Organisation = request.Organisation,
-                        QAN = request.QAN});
+                        QAN = request.QAN,
+                        ProcessStatusIds = request.ProcessStatusIds,
+                    });
                 if (result != null)
                 {
                     response.Value = new GetNewQualificationsQueryResponse
@@ -32,7 +35,7 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
                         Data = result.Data,
                         Skip = result.Skip,
                         Take = result.Take,
-                        TotalRecords = result.TotalRecords                        
+                        TotalRecords = result.TotalRecords
                     };
                     response.Success = true;
                 }

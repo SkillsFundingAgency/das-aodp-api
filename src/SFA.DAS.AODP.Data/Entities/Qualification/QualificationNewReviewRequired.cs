@@ -10,6 +10,7 @@
         public string? AgeGroup { get; set; }
         public string? Subject { get; set; }
         public string? SectorSubjectArea { get; set; }
+        public Guid? ProcessStatusId { get; set; }
     }
 }
 
