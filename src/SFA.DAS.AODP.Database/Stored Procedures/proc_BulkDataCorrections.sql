@@ -10,6 +10,9 @@
 	Version No.			Updated By		Updated Date		Description of Change
 ####################################################################################################
 	1					Adam Leaver		26/03/2025			Original
+	2					Adam Leaver		16/04/2025			Changed
+															- Added in FIRSTROW = 2 to bulk insert
+															- Changed external data source name
 ##################################################################################################*/
 
 AS
@@ -73,7 +76,7 @@ ELSE
 
 	SET @Bulk_SQL = 'BULK INSERT BulkInsertStaging
 	FROM ''' + @fileURL +'''
-	WITH (DATA_SOURCE = ''ExternalCSVDataSource'', FORMAT = ''CSV'')'
+	WITH (DATA_SOURCE = ''maintenance_ds'', FORMAT = ''CSV'', FIRSTROW = 2 )'
 
 
 	End 
