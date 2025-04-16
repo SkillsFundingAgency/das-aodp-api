@@ -1,9 +1,9 @@
-﻿CREATE VIEW [dbo].[view_OutputNewQualifications] AS
+﻿CREATE VIEW [dbo].[view_OutputUnchangedQualifications] AS
 
 /*##################################################################################################
-	-Name:				Output New Qualifications
-	-Description:		All new qualifications that have been funded during the current review cycle
-	                    The must have a lifecycle stage of 'New' and a Process Status of 'Approved'
+	-Name:				Output Unchanged Qualifications
+	-Description:		All unchanged qualifications
+	                    The must have a lifecycle stage of 'Completed'
 						The latest qualification version must be used
 	-Date of Creation:	10/04/2025
 	-Created By:		Robert Rybnikar
@@ -21,8 +21,7 @@ WITH LatestQualificationGroup AS (
         ver.InsertedTimestamp,
         ROW_NUMBER() OVER (PARTITION BY ver.QualificationId ORDER BY ver.Version DESC) AS rn
     FROM regulated.QualificationVersions ver
-    WHERE ver.ProcessStatusId = '00000000-0000-0000-0000-000000000004' --approved
-      AND ver.LifecycleStageId = '00000000-0000-0000-0000-000000000001' --new
+    WHERE ver.LifecycleStageId = '00000000-0000-0000-0000-000000000003' --completed
 ),
 LatestQualifications AS (
     SELECT *
@@ -78,7 +77,7 @@ PivotEndDate AS (
     GROUP BY qf.QualificationVersionId
 ),
 CombinedPivotData AS (
-    SELECT
+    SELECT	    
         fa.QualificationVersionId,
         fa.AdvancedLearnerLoans_FundingAvailable,
         fs.AdvancedLearnerLoans_FundingApprovalStartDate,
@@ -112,7 +111,7 @@ CombinedPivotData AS (
     JOIN PivotEndDate fe ON fa.QualificationVersionId = fe.QualificationVersionId
 )
 SELECT
-    'ApprovedNew' AS Status,
+	'Unchanged' AS Status,
     latestversion.InsertedTimeStamp AS DateOfOfqualDataSnapshot,
     qual.QualificationName AS Title,
     ao.NameOfqual AS OrganisationName,
