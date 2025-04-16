@@ -145,10 +145,13 @@
     </None>
     <Build Include="Tables\Feedback\Surveys.sql" />
     <Build Include="Views\Support\v_Anomaly_Import_Scenario_1.sql" />
+    <Build Include="Views\Support\v_Anomaly_Import_Scenario_5.sql" />
     <Build Include="Views\Support\v_Anomaly_Import_Scenario_2.sql" />
     <Build Include="Views\Support\v_Anomaly_Import_Scenario_3.sql" />
-    <Build Include="Views\Support\v_AllQualificationDetails.sql" />
+    <Build Include="Views\Support\v_Anomaly_Import_Scenario_4.sql" />
+	<Build Include="Views\Support\v_AllQualificationDetails.sql" />
     <Build Include="Views\KPIs\v_MS_KPI_NQS_NQR_US_001.sql" />
+    <Build Include="Stored Procedures\proc_BulkDataCorrections.sql" />
     <Build Include="Views\Output\view_OutputNewQualifications.sql" />
     <Build Include="Views\Output\view_OutputChangedQualifications.sql" />
     <Build Include="Views\Output\view_OutputUnchangedQualifications.sql" />

@@ -54,58 +54,61 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                 if (remove.Count > 0) await _qualificationFundingsrepository.RemoveAsync(remove);
                 if (create.Count > 0) await _qualificationFundingsrepository.CreateAsync(create);
 
-                StringBuilder qualificationDiscussionHistoryNotes = new();
-                qualificationDiscussionHistoryNotes.AppendLine("Feedback from DfE:");
-                if (remove.Count > 0)
+                if (request.UpdateDiscussionHistory == true)
                 {
-                    qualificationDiscussionHistoryNotes.AppendLine("The following offers have been removed:");
-                    qualificationDiscussionHistoryNotes.AppendLine();
-
-                    foreach (var qf in remove)
+                    StringBuilder qualificationDiscussionHistoryNotes = new();
+                    qualificationDiscussionHistoryNotes.AppendLine("Feedback from DfE:");
+                    if (remove.Count > 0)
                     {
-                        var fundingOffer = fundingOffers.FirstOrDefault(a => a.Id == qf.FundingOfferId);
-                        if (fundingOffer != null)
+                        qualificationDiscussionHistoryNotes.AppendLine("The following offers have been removed:");
+                        qualificationDiscussionHistoryNotes.AppendLine();
+
+                        foreach (var qf in remove)
                         {
-                            qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
-                            qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
-                            qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
-                            qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
-                            qualificationDiscussionHistoryNotes.AppendLine();
+                            var fundingOffer = fundingOffers.FirstOrDefault(a => a.Id == qf.FundingOfferId);
+                            if (fundingOffer != null)
+                            {
+                                qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
+                                qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
+                                qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
+                                if (!string.IsNullOrWhiteSpace(qf.Comments)) qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
+                                qualificationDiscussionHistoryNotes.AppendLine();
+                            }
                         }
                     }
-                }
-                if (create.Count > 0)
-                {
-                    qualificationDiscussionHistoryNotes.AppendLine("The following offers have been selected:");
-                    qualificationDiscussionHistoryNotes.AppendLine();
-
-                    foreach (var qf in create)
+                    if (create.Count > 0)
                     {
-                        var fundingOffer = fundingOffers.FirstOrDefault(a => a.Id == qf.FundingOfferId);
-                        if (fundingOffer != null)
+                        qualificationDiscussionHistoryNotes.AppendLine("The following offers have been selected:");
+                        qualificationDiscussionHistoryNotes.AppendLine();
+
+                        foreach (var qf in create)
                         {
-                            qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
-                            qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
-                            qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
-                            qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
-                            qualificationDiscussionHistoryNotes.AppendLine();
+                            var fundingOffer = fundingOffers.FirstOrDefault(a => a.Id == qf.FundingOfferId);
+                            if (fundingOffer != null)
+                            {
+                                qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
+                                qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
+                                qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
+                                if (!string.IsNullOrWhiteSpace(qf.Comments)) qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
+                                qualificationDiscussionHistoryNotes.AppendLine();
+                            }
                         }
                     }
-                }
 
                 if (remove.Count == 0 && create.Count == 0)
                 {
                     qualificationDiscussionHistoryNotes.AppendLine("Funding has been approved but no offers have been selected");
                 }
 
-                await _qualificationDiscussionHistoryRepository.CreateAsync(new QualificationDiscussionHistory
-                {
-                    QualificationId = request.QualificationId,
-                    UserDisplayName = request.UserDisplayName,
-                    Notes = qualificationDiscussionHistoryNotes.ToString(),
-                    ActionTypeId = request.ActionTypeId,
-                    Timestamp = DateTime.Now
-                });
+                    await _qualificationDiscussionHistoryRepository.CreateAsync(new QualificationDiscussionHistory
+                    {
+                        QualificationId = request.QualificationId,
+                        UserDisplayName = request.UserDisplayName,
+                        Notes = qualificationDiscussionHistoryNotes.ToString(),
+                        ActionTypeId = request.ActionTypeId,
+                        Timestamp = DateTime.UtcNow
+                    });
+                }
 
                 response.Success = true;
             }

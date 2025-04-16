@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Application;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Models.Application;
 
 namespace SFA.DAS.AODP.Data.Repositories.Application;
@@ -18,7 +19,7 @@ public class ApplicationMessagesRepository : IApplicationMessagesRepository
     {
         IQueryable<Message> query = _context.Messages;
 
-        switch (userType) 
+        switch (userType)
         {
             case UserType.Qfau:
                 query = query.Where(m => m.ApplicationId == applicationId && m.SharedWithDfe == true);
@@ -35,6 +36,13 @@ public class ApplicationMessagesRepository : IApplicationMessagesRepository
         }
 
         return await query.ToListAsync();
+    }
+
+    public async Task<Message> GetByIdAsync(Guid messageId)
+    {
+        var message = await _context.Messages.FirstOrDefaultAsync(m => m.Id == messageId);
+        if (message == null) throw new RecordNotFoundException(messageId);
+        return message;
     }
 
     public async Task<Guid> CreateAsync(Message message)
