@@ -58,7 +58,7 @@ Where Not Exists (select QV.QualificationId From regulated.QualificationVersions
 
 /*List of latest regualted qualifications which dont appear in the funded based on criteria above*/
 Select REG.QualificationId 
-		,'In funded / Approved / Operation Date in past' as CurrentStatus
+		,'In funded / Rejected / Operation Date in past' as CurrentStatus
 from CTE_LRV_PastOpEndDate REG
 Inner Join CTE_CurrFundedQualifications FUN ON FUN.QualificationId = REG.QualificationId
 
