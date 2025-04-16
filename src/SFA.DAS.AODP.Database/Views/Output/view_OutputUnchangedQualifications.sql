@@ -42,6 +42,7 @@ PivotFundingAvailable AS (
         MAX(CASE WHEN offertype.Name = 'Age1416' THEN 1 END) AS Age1416_FundingAvailable
     FROM funded.QualificationFundings qf
     INNER JOIN dbo.FundingOffers offertype ON offertype.Id = qf.FundingOfferId
+    INNER JOIN LatestQualifications LQ ON qf.QualificationVersionId = LQ.Id
     GROUP BY qf.QualificationVersionId
 ),
 PivotStartDate AS (
@@ -58,6 +59,7 @@ PivotStartDate AS (
         MAX(CASE WHEN offertype.Name = 'Age1416' THEN StartDate END) AS Age1416_FundingApprovalStartDate
     FROM funded.QualificationFundings qf
     INNER JOIN dbo.FundingOffers offertype ON offertype.Id = qf.FundingOfferId
+    INNER JOIN LatestQualifications LQ ON qf.QualificationVersionId = LQ.Id
     GROUP BY qf.QualificationVersionId
 ),
 PivotEndDate AS (
@@ -74,6 +76,7 @@ PivotEndDate AS (
         MAX(CASE WHEN offertype.Name = 'Age1416' THEN EndDate END) AS Age1416_FundingApprovalEndDate
     FROM funded.QualificationFundings qf
     INNER JOIN dbo.FundingOffers offertype ON offertype.Id = qf.FundingOfferId
+    INNER JOIN LatestQualifications LQ ON qf.QualificationVersionId = LQ.Id
     GROUP BY qf.QualificationVersionId
 ),
 CombinedPivotData AS (
