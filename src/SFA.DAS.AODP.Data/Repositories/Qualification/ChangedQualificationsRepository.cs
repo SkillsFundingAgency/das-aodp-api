@@ -33,6 +33,12 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
             countQuery = countQuery.Where(w => w.QualificationReference.Equals(filter.QAN));
         }
 
+        if (filter?.ProcessStatusIds?.Any() ?? false)
+        {
+            query = query.Where(w => filter.ProcessStatusIds.Contains(w.ProcessStatusId ?? Guid.Empty));
+            countQuery = countQuery.Where(w => filter.ProcessStatusIds.Contains(w.ProcessStatusId ?? Guid.Empty));
+        }
+
         query = query.OrderBy(o => o.QualificationTitle);
         var totalRecords = await countQuery.CountAsync();
 
@@ -47,7 +53,7 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
                   .Select(q => new DAS.AODP.Models.Qualifications.ChangedQualification
                   {
                       QualificationTitle = q.QualificationTitle,
-                      QualificationReference= q.QualificationReference,
+                      QualificationReference = q.QualificationReference,
                       AwardingOrganisation = q.AwardingOrganisation,
                       ChangedFieldNames = q.ChangedFieldNames,
                       SectorSubjectArea = q.SectorSubjectArea,
@@ -69,6 +75,11 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
 
     public async Task<IEnumerable<ChangedQualificationExport>> GetChangedQualificationsCSVExport()
     {
-        return await _context.ChangedQualificationExport.ToListAsync();
+        return await _context.ChangedQualificationExport.ToListAsync<ChangedQualificationExport>();
+    }
+
+    public async Task<List<Entities.Qualification.ActionType>> GetActionTypes()
+    {
+        return await _context.ActionType.ToListAsync();
     }
 }

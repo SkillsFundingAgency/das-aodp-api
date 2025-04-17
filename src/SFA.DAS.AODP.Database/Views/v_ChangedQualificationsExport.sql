@@ -46,7 +46,7 @@ SELECT
     qv.EighteenPlus,
     qv.NineteenPlus,
     -- Funding Details
-    NULL AS FundingInEngland,          -- Placeholder
+    qv.FundedInEngland,
     NULL AS FundingInWales,            -- Placeholder
     NULL AS FundingInNorthernIreland,  -- Placeholder
     qv.GcseSizeEquivelence AS GCSESizeEquivalence,
@@ -76,5 +76,8 @@ Left Outer Join regulated.QualificationVersions qv ON q.Id = qv.QualificationId
 Left Outer Join dbo.AwardingOrganisation ao ON qv.AwardingOrganisationId = ao.Id
 Left Outer Join regulated.LifecycleStage ls ON qv.LifecycleStageId = ls.Id
  
-WHERE ls.Name = 'Changed';
+WHERE ls.Name = 'Changed'
+    and qv.EligibleForFunding = 1
+	and qv.Type != 'Alternative Academic Qualification'
+    and qv.Type != 'Technical Occupation Qualification';
 GO

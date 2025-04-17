@@ -23,7 +23,8 @@ public class GetChangedQualificationsQueryHandler(IChangedQualificationsReposito
                 {
                     Name = request.Name,
                     Organisation = request.Organisation,
-                    QAN = request.QAN
+                    QAN = request.QAN,
+                    ProcessStatusIds=request.ProcessStatusIds
                 });
             if (result != null)
             {

@@ -18,8 +18,7 @@ namespace SFA.DAS.AODP.Data.Tests.Repositories.JobRuns
         {
             _fixture = new Fixture();
             var options = new DbContextOptionsBuilder<ApplicationDbContext>().UseInMemoryDatabase("ApplicationDbContext" + Guid.NewGuid()).Options;
-            var configuration = new Mock<IConfiguration>();
-            _dbContext = new ApplicationDbContext(options, configuration.Object);
+            _dbContext = new ApplicationDbContext(options);
             _repository = new JobsRepository(_dbContext);
         }       
 

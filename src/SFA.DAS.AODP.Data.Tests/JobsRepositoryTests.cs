@@ -11,15 +11,14 @@ namespace SFA.DAS.AODP.Data.Tests
     public class JobsRepositoryTests
     {
         private ApplicationDbContext _dbContext;
-        private JobsRepository _repository;       
+        private JobsRepository _repository;
         private Fixture _fixture;
 
         public JobsRepositoryTests()
         {
-            _fixture = new Fixture();          
+            _fixture = new Fixture();
             var options = new DbContextOptionsBuilder<ApplicationDbContext>().UseInMemoryDatabase("ApplicationDbContext" + Guid.NewGuid()).Options;
-            var configuration = new Mock<IConfiguration>();
-            _dbContext = new ApplicationDbContext(options, configuration.Object);
+            _dbContext = new ApplicationDbContext(options);
             _repository = new JobsRepository(_dbContext);
         }
 
@@ -32,7 +31,7 @@ namespace SFA.DAS.AODP.Data.Tests
                 .With(w => w.JobConfigurations, new List<JobConfiguration>())
                 .CreateMany<Job>(3)
                 .ToList();
-            
+
             await PopulateDb(jobs);
 
             // Act

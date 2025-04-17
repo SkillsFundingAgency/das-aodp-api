@@ -145,6 +145,17 @@ public class ApplicationsController : BaseController
         return await SendRequestAsync(query);
     }
 
+    [HttpGet("/api/applications/{applicationId}/qualification")]
+    [ProducesResponseType(typeof(GetRelatedQualificationForApplicationQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetRelatedQualificationForApplicationAsync(Guid applicationId)
+    {
+        var query = new GetRelatedQualificationForApplicationQuery(applicationId);
+
+        return await SendRequestAsync(query);
+    }
+
     [HttpPut("/api/applications/{applicationId}/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}")]
     [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

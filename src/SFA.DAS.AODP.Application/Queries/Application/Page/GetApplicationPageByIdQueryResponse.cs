@@ -111,7 +111,6 @@ public class GetApplicationPageByIdQueryResponse
                 {
                     NumberOfFiles = entity.QuestionValidation?.NumberOfFiles,
                     FileNamePrefix = entity.QuestionValidation?.FileNamePrefix,
-                    MaxSize = entity.QuestionValidation?.FileMaxSize,
                 };
             }
 
@@ -174,7 +173,6 @@ public class GetApplicationPageByIdQueryResponse
 
     public class FileUploadOptions
     {
-        public int? MaxSize { get; set; }
         public string? FileNamePrefix { get; set; }
         public int? NumberOfFiles { get; set; }
     }

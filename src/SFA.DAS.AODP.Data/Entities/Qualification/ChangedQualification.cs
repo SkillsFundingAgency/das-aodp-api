@@ -13,4 +13,5 @@ public class ChangedQualification
     public string? SectorSubjectArea { get; set; } = string.Empty;
     public string? ChangedFieldNames { get; set; }
     public string? Status { get; set; }
+    public Guid? ProcessStatusId { get; set; }
 }

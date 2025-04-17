@@ -9,4 +9,6 @@ public class GetChangedQualificationsQuery : IRequest<BaseMediatrResponse<GetCha
     public string? QAN { get; set; }
     public int? Skip { get; set; }
     public int? Take { get; set; }
+    public List<Guid>? ProcessStatusIds { get; set; }
+
 }

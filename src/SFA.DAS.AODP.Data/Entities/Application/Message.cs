@@ -7,7 +7,6 @@ public class Message
     public Guid Id { get; set; }
     public Guid ApplicationId { get; set; }
     public string Text { get; set; }
-    public string? Status { get; set; }
     [Column(TypeName = "nvarchar(4000)")]
     public MessageType Type { get; set; }
     public string MessageHeader { get; set; }

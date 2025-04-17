@@ -87,6 +87,7 @@ public class UpdatePageAnswersCommandHandler : IRequestHandler<UpdatePageAnswers
         }
         catch (Exception ex)
         {
+            response.InnerException = ex;
             response.ErrorMessage = ex.Message;
             response.Success = false;
         }

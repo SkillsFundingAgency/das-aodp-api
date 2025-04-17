@@ -115,6 +115,9 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
                             .ThenInclude(a => a.ApplicationReviewFundings)
                             .ThenInclude(a => a.FundingOffer)
 
+                            .Include(r => r.ApplicationReview)
+                            .ThenInclude(r => r.Application)
+
                             .FirstOrDefaultAsync(v => v.ApplicationReviewId == applicationReviewId && v.Type == userType.ToString());
 
             return res is null ? throw new RecordNotFoundException(applicationReviewId) : res;
