@@ -149,13 +149,19 @@
     <Build Include="Views\Support\v_Anomaly_Import_Scenario_2.sql" />
     <Build Include="Views\Support\v_Anomaly_Import_Scenario_3.sql" />
     <Build Include="Views\Support\v_Anomaly_Import_Scenario_4.sql" />
-	<Build Include="Views\Support\v_AllQualificationDetails.sql" />
+    <Build Include="Views\Support\v_AllQualificationDetails.sql" />
     <Build Include="Views\KPIs\v_MS_KPI_NQS_NQR_US_001.sql" />
     <Build Include="Stored Procedures\proc_BulkDataCorrections.sql" />
     <Build Include="Views\Output\view_OutputNewQualifications.sql" />
     <Build Include="Views\Output\view_OutputChangedQualifications.sql" />
     <Build Include="Views\Output\view_OutputUnchangedQualifications.sql" />
     <Build Include="Views\Output\view_OutputUnapprovedQualifications.sql" />
+    <Build Include="Views\Support\v_Anomaly_Scenario_1_Dashboard.sql" />
+    <Build Include="Views\Support\v_Anomaly_Scenario_2_Dashboard.sql" />
+    <Build Include="Views\Support\v_Anomaly_Scenario_3_Dashboard.sql" />
+    <Build Include="Views\Support\v_Anomaly_Scenario_4_Dashboard.sql" />
+    <Build Include="Views\Support\v_Anomaly_Scenario_5_Dashboard.sql" />
+    <Build Include="Views\Support\v_AllAwardingOrganisations.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
