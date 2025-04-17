@@ -156,6 +156,7 @@
     <Build Include="Views\Output\view_OutputChangedQualifications.sql" />
     <Build Include="Views\Output\view_OutputUnchangedQualifications.sql" />
     <Build Include="Views\Output\view_OutputUnapprovedQualifications.sql" />
+    <Build Include="Stored Procedures\proc_CompleteOutputProcess.sql" />
     <Build Include="Views\Support\v_Anomaly_Scenario_1_Dashboard.sql" />
     <Build Include="Views\Support\v_Anomaly_Scenario_2_Dashboard.sql" />
     <Build Include="Views\Support\v_Anomaly_Scenario_3_Dashboard.sql" />
