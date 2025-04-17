@@ -78,11 +78,14 @@
         },
         "gbScanLimit": {
             "type": "int",
-            "defaultValue" : 10
+            "defaultValue": 10
         },
         "utcValue": {
             "type": "string",
             "defaultValue": "[utcNow()]"
+        },
+        "deployPrivateLinkedScopedResource": {
+            "type": "bool"
         }
     },
     "variables": {
@@ -92,7 +95,9 @@
         "appServiceName": "[concat(variables('resourceNamePrefix'), '-as')]",
         "databaseName": "[concat(replace(variables('resourceNamePrefix'), 'api', ''), '-db')]",
         "storageAccountName": "[concat(replace(replace(variables('resourceNamePrefix'), 'api', ''), '-', ''), 'str')]",
-        "configNames": "SFA.DAS.AODP.Api"
+        "storageAccount2Name": "[concat(replace(replace(variables('resourceNamePrefix'), 'api', ''), '-', ''), 'str2')]",
+        "configNames": "SFA.DAS.AODP.Api",
+        "privateLinkScopeName": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-shared-ampls'))]"
     },
     "resources": [
         {
@@ -297,6 +302,39 @@
             }
         },
         {
+            "apiVersion": "2020-06-01",
+            "name": "[concat(variables('storageAccount2Name'), '-storage-account-', parameters('utcValue'))]",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'), 'storage-account-arm.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "storageAccountName": {
+                        "value": "[variables('storageAccount2Name')]"
+                    },
+                    "allowBlobPublicAccess": {
+                        "value": true
+                    },
+                    "allowSharedKeyAccess": {
+                        "value": true
+                    },
+                    "storageKind": {
+                        "value": "BlobStorage"
+                    },
+                    "accessTier": {
+                        "value": "Hot"
+                    },
+                    "minimumTlsVersion": {
+                        "value": "[parameters('minimumTlsVersion')]"
+                    }
+                }
+            }
+        },
+        {
             "apiVersion": "2021-04-01",
             "name": "[concat('role-assignment-', variables('appServiceName'), '-', parameters('utcValue'))]",
             "type": "Microsoft.Resources/deployments",
@@ -321,6 +359,33 @@
             },
             "dependsOn": [
                 "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]"
+            ]
+        },
+        {
+            "apiVersion": "2021-04-01",
+            "name": "[concat('role-assignment-', variables('storageAccount2Name'), '-', parameters('utcValue'))]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'),'role-assignments/role-assignment-storage-account.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "principalId": {
+                        "value": "[reference(concat(variables('appServiceName'), '-', parameters('utcValue'))).outputs.managedServiceIdentityId.value]"
+                    },
+                    "assignmentType": {
+                        "value": "StorageBlobDataContributor"
+                    },
+                    "resourceName": {
+                        "value": "[variables('storageAccount2Name')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('storageAccount2Name'), '-storage-account-', parameters('utcValue'))]"
             ]
         },
         {
@@ -349,6 +414,31 @@
                     },
                     "enableSensitiveDataDiscovery": {
                         "value": true
+                    }
+                }
+            }
+        },
+        {
+            "condition": "[parameters('deployPrivateLinkedScopedResource')]",
+            "apiVersion": "2021-04-01",
+            "name": "[concat(variables('appServiceName'), '-private-link-scoped-', parameters('utcValue'))]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[parameters('sharedEnvResourceGroup')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'),'private-linked-scoped-resource.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "privateLinkScopeName": {
+                        "value": "[variables('privateLinkScopeName')]"
+                    },
+                    "scopedResourceName": {
+                        "value": "[variables('appServiceName')]"
+                    },
+                    "scopedResourceId": {
+                        "value": "[reference(concat(variables('appServiceName'), '-application-insights-', parameters('utcValue'))).outputs.AppInsightsResourceId.value]"
                     }
                 }
             }
