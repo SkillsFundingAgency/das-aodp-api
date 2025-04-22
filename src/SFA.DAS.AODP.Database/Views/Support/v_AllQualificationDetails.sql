@@ -10,6 +10,7 @@
 	Version No.			Updated By		Updated Date		Description of Change
 ####################################################################################################
 	1					Adam Leaver		07/04/2025			Original
+	2					Adam Leaver		22/04/2025			Removed check for outcome status
 ##################################################################################################*/
 
 With CTE_QualificationDetails AS (
@@ -33,7 +34,6 @@ From regulated.QualificationVersions QV
 Inner Join regulated.ProcessStatus PS ON PS.Id = QV.ProcessStatusId
 Inner Join regulated.LifecycleStage LS ON LS.Id = QV.LifecycleStageId
 Inner Join dbo.AwardingOrganisation AO ON AO.Id = QV.AwardingOrganisationId
-Where PS.IsOutcomeDecision = 1
 ),
 CTE_AggregatedOffers AS (
 
