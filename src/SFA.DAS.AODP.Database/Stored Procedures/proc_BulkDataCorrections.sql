@@ -1,4 +1,4 @@
-﻿Create PROCEDURE [dbo].[proc_BulkDataCorrections] (@fileURL NVARCHAR(MAX), @WriteCommentFlag int, @SASToken NVARCHAR(MAX), @LocalDeployment int)
+﻿CREATE PROCEDURE [dbo].[proc_BulkDataCorrections] (@fileURL NVARCHAR(MAX), @WriteCommentFlag int, @SASToken NVARCHAR(MAX), @LocalDeployment int)
 
 /*##################################################################################################
 	-Name:				proc_BulkDataCorrections
@@ -13,12 +13,16 @@
 	2					Adam Leaver		16/04/2025			Changed
 															- Added in FIRSTROW = 2 to bulk insert
 															- Changed external data source name
+	3					Adam Leaver		22/04/2025			Added checks for missing statuses in
+															CSV file
 ##################################################################################################*/
 
 AS
 BEGIN
 
-CREATE TABLE BulkInsertStaging (
+DROP TABLE IF EXISTS dbo.BulkInsertStaging;
+
+CREATE TABLE dbo.BulkInsertStaging (
 	QAN NVARCHAR(MAX)
 	,LifecycleStage NVARCHAR(MAX)
 	,OutcomeDecision NVARCHAR(MAX)
@@ -94,7 +98,8 @@ SELECT
 	(SELECT P.Id FROM regulated.ProcessStatus P Where Cast(trim(stg.OutcomeDecision) as nvarchar(max)) = P.Name) as ProcessStatusId,
 	stg.Notes AS Notes,
     GetDate() AS Timestamp
-FROM BulkInsertStaging stg; 
+FROM BulkInsertStaging stg
+Where (trim(stg.LifecycleStage) <> '' and trim(stg.OutcomeDecision) <> '') Or (stg.LifecycleStage is not null and stg.OutcomeDecision is not null); 
 
 /*Create list of Qualfications returning only latest version 
 and joining in the qualfication id for easy identification*/
@@ -154,6 +159,11 @@ SELECT * FROM dbo.BulkInsertStaging
 SELECT * FROM #Cleaned
 SELECT * FROM #MissingQualifications
 SELECT * FROM #MergeLog
+
+/*Qualifications in CSV which are missing a status*/
+SELECT MI.*, 'Missing Status' as Error FROM dbo.BulkInsertStaging Mi
+Where trim(LifecycleStage) = '' or trim(OutcomeDecision) = ''
+Or LifecycleStage is null or OutcomeDecision is null;
 
 /*Drop temporary tables*/
 DROP TABLE BulkInsertStaging;
