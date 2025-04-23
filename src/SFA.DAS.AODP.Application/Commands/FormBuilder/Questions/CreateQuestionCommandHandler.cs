@@ -1,12 +1,13 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application.Exceptions;
+using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 using Entities = SFA.DAS.AODP.Data.Entities;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
-public class CreateQuestionCommandHandler(IQuestionRepository _questionRepository, IPageRepository _pageRepository) : IRequestHandler<CreateQuestionCommand, BaseMediatrResponse<CreateQuestionCommandResponse>>
+public class CreateQuestionCommandHandler(IQuestionRepository _questionRepository, IPageRepository _pageRepository, IQuestionValidationRepository _questionValidationRepository) : IRequestHandler<CreateQuestionCommand, BaseMediatrResponse<CreateQuestionCommandResponse>>
 {
     public async Task<BaseMediatrResponse<CreateQuestionCommandResponse>> Handle(CreateQuestionCommand request, CancellationToken cancellationToken)
     {
@@ -27,6 +28,7 @@ public class CreateQuestionCommandHandler(IQuestionRepository _questionRepositor
             };
 
             var created = await _questionRepository.Create(questionToCreate);
+            await SetQuestionDefaultsAsync(created);
 
             response.Value.Id = created.Id;
             response.Success = true;
@@ -48,5 +50,19 @@ public class CreateQuestionCommandHandler(IQuestionRepository _questionRepositor
         }
 
         return response;
+    }
+
+    private async Task SetQuestionDefaultsAsync(Entities.FormBuilder.Question question)
+    {
+        if (question.Type == QuestionType.File.ToString())
+        {
+            var questionValidation = new QuestionValidation()
+            {
+                QuestionId = question.Id,
+                NumberOfFiles = 1
+            };
+
+            await _questionValidationRepository.UpsertAsync(questionValidation);
+        }
     }
 }

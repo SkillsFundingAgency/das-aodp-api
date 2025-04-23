@@ -6,8 +6,6 @@ namespace SFA.DAS.AODP.Data.Entities.Qualification;
 public partial class LifecycleStage
 {
     public Guid Id { get; set; }
-
     public string? Name { get; set; }
-
     public virtual ICollection<QualificationVersions> QualificationVersions { get; set; } = new List<QualificationVersions>();
 }

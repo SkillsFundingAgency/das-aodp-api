@@ -20,10 +20,10 @@
                    ,[Name]
                    ,[IsOutcomeDecision])
        VALUES ('00000000-0000-0000-0000-000000000001' ,'Decision Needed' ,0),
-	          ('00000000-0000-0000-0000-000000000002' ,'No Action Required' ,0),
+	          ('00000000-0000-0000-0000-000000000002' ,'No Action Required' ,1),
 	          ('00000000-0000-0000-0000-000000000003' ,'Hold' ,0),
-	          ('00000000-0000-0000-0000-000000000004' ,'Approved' ,0),
-	          ('00000000-0000-0000-0000-000000000005' ,'Rejected' ,0)
+	          ('00000000-0000-0000-0000-000000000004' ,'Approved' ,1),
+	          ('00000000-0000-0000-0000-000000000005' ,'Rejected' ,1)
 	  
        DELETE FROM [regulated].[LifecycleStage]
        INSERT INTO [regulated].[LifecycleStage]

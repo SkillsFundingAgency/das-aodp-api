@@ -28,4 +28,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="Helper" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="6433c872-0bb8-4796-9581-b15247e9a063" ChangeDateTime="03/28/2025 11:21:43">
+    <Property Name="ElementName" Value="[regulated].[QualificationVersions].[Title]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[regulated].[QualificationVersions]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Name" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d0d1f13a-20cc-489a-a346-c993c6a6295b" ChangeDateTime="03/31/2025 10:16:23">
+    <Property Name="ElementName" Value="[funded].[QualificationFundings].[IX_QualificationFundings_Column]" />
+    <Property Name="ElementType" Value="SqlIndex" />
+    <Property Name="ParentElementName" Value="[funded].[QualificationFundings]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[IX_QualificationFundings_QualificationVersion]" />
+  </Operation>
 </Operations>

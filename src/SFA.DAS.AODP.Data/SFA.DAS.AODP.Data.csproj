@@ -18,9 +18,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Z.EntityFramework.Extensions.EFCore" Version="9.103.6.4" />
-	  
+    </PackageReference> 
 	  
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>

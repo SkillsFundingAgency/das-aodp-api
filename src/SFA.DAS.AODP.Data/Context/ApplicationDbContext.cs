@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
+using SFA.DAS.AODP.Data.Entities.Feedback;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Entities.Jobs;
 using SFA.DAS.AODP.Data.Entities.Offer;
@@ -13,12 +14,9 @@ namespace SFA.DAS.AODP.Data.Context
 {
     public class ApplicationDbContext : DbContext, IApplicationDbContext
     {
-        private readonly IConfiguration _configuration;
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IConfiguration configuration)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
-        {
-            this._configuration = configuration;
-        }
+        { }
 
         public virtual DbSet<ApprovedQualificationsImport> ApprovedQualificationsImports { get; set; }
 
@@ -66,10 +64,11 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<Qualification> Qualification { get; set; }
         public virtual DbSet<FundedQualification> FundedQualifications { get; set; }
         public virtual DbSet<QualificationDiscussionHistory> QualificationDiscussionHistory { get; set; }
-        public virtual DbSet<QualificationOffer> QualificationOffers { get; set; }        
+        public virtual DbSet<QualificationOffer> QualificationOffers { get; set; }
         public virtual DbSet<VersionFieldChange> VersionFieldChanges { get; set; }
         public virtual DbSet<QualificationFundingFeedbacks> QualificationFundingFeedbacks { get; set; }
         public virtual DbSet<QualificationFundings> QualificationFundings { get; set; }
+        public virtual DbSet<Survey> Surveys { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<QualificationNewReviewRequired>().ToView("v_QualificationNewReviewRequired", "regulated").HasNoKey();
@@ -84,10 +83,14 @@ namespace SFA.DAS.AODP.Data.Context
 
             modelBuilder.Entity<Message>().Property(m => m.Type).HasConversion<string>();
             modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
-                .HasKey(v => v.QualificationReference);           
+                .HasKey(v => v.QualificationReference);
+
+            modelBuilder.Entity<Message>().Property(m => m.Type).HasConversion<string>();
+            modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
+                .HasKey(v => v.QualificationReference);
 
             modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
-                .HasKey(v => v.QualificationReference);            
+                .HasKey(v => v.QualificationReference);
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 
@@ -97,11 +100,6 @@ namespace SFA.DAS.AODP.Data.Context
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return base.SaveChangesAsync(cancellationToken);
-        }
-
-        public async Task BulkInsertAsync<T>(IEnumerable<T> entities, CancellationToken cancellationToken = default) where T : class
-        {
-            await this.BulkInsertAsync(entities.ToList(), options => options.BatchSize = 1000, cancellationToken: cancellationToken);
         }
 
         public async Task<IDbContextTransaction> StartTransactionAsync()
