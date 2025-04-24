@@ -1,4 +1,5 @@
 ﻿using Markdig;
+using Markdig.Syntax.Inlines;
 using MediatR;
 using Microsoft.Extensions.Options;
 using SFA.DAS.AODP.Application.Exceptions;
@@ -6,6 +7,7 @@ using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 using SFA.DAS.AODP.Models.Settings;
+using System;
 
 namespace SFA.DAS.AODP.Application.Commands.FormBuilder.Question;
 
@@ -132,12 +134,100 @@ public class UpdateQuestionCommandHandler(IQuestionRepository _questionRepositor
 
     private void ValidateQuestion(UpdateQuestionCommand request, Data.Entities.FormBuilder.Question question)
     {
+        List<Exception> exceptions = new List<Exception>();
+        if (question.Type == QuestionType.Radio.ToString()) { }
         if (question.Type == QuestionType.File.ToString())
         {
             if (request.FileUpload.NumberOfFiles > formBuilderSettings.MaxUploadNumberOfFiles)
             {
-                throw new Exception($"Max number of files allowed is {formBuilderSettings.MaxUploadNumberOfFiles}");
+                exceptions.Add(new Exception(message:$"Max number of files allowed is {formBuilderSettings.MaxUploadNumberOfFiles}"));
             }
         }
+        if (question.Type == QuestionType.Text.ToString())
+        {
+            exceptions.Concat(ValidateText(request, exceptions));
+        }
+        if (question.Type == QuestionType.TextArea.ToString())
+        {
+            exceptions.Concat(ValidateText(request, exceptions));
+        }
+        if (question.Type == QuestionType.Number.ToString())
+        {
+            if (request.NumberInput.LessThanOrEqualTo >= request.NumberInput.GreaterThanOrEqualTo)
+            {
+                exceptions.Add(new Exception(message:$"The number provided cannot be greater than or equal to {request.NumberInput.GreaterThanOrEqualTo}"));
+            }
+            if (request.NumberInput.GreaterThanOrEqualTo <= request.NumberInput.LessThanOrEqualTo)
+            {
+                exceptions.Add(new Exception(message:$"The number provided cannot be less than or equal to {request.NumberInput.LessThanOrEqualTo}"));
+            }
+            if (request.NumberInput.NotEqualTo <= request.NumberInput.LessThanOrEqualTo)
+            {
+                exceptions.Add(new Exception(message:$"The not allowed value/s provided cannot be less than or equal to {request.NumberInput.LessThanOrEqualTo}"));
+            }
+            if (request.NumberInput.NotEqualTo >= request.NumberInput.GreaterThanOrEqualTo)
+            {
+                exceptions.Add(new Exception(message:$"The not allowed value/s provided cannot be greater than or equal to {request.NumberInput.GreaterThanOrEqualTo}"));
+            }
+        }
+        if (question.Type == QuestionType.MultiChoice.ToString())
+        {
+            if (request.Checkbox.MinNumberOfOptions < 0)
+            {
+                exceptions.Add(new Exception(message:$"The minimum number of checkbox options must not be a negative number"));
+            }
+            if (request.Checkbox.MaxNumberOfOptions < 0)
+            {
+                exceptions.Add(new Exception(message:$"The maximum number of checkbox options must not be a negative number"));
+            }
+            if (request.Checkbox.MinNumberOfOptions > request.Checkbox.MaxNumberOfOptions)
+            {
+                exceptions.Add(new Exception(message:$"The minimum number of checkbox options must be less than {request.Checkbox.MaxNumberOfOptions}"));
+            }
+            if (request.Checkbox.MaxNumberOfOptions < request.Checkbox.MinNumberOfOptions)
+            {
+                exceptions.Add(new Exception(message:$"The maximum number of checkbox options must be greater than {request.Checkbox.MinNumberOfOptions}"));
+            }
+            if (request.Options.Count < request.Checkbox.MinNumberOfOptions)
+            {
+                exceptions.Add(new Exception(message:$"The number of checkbox options cannot be less than {request.Checkbox.MinNumberOfOptions}"));
+            }
+            if (request.Options.Count > request.Checkbox.MaxNumberOfOptions)
+            {
+                exceptions.Add(new Exception(message:$"The number of checkbox options cannot be greater than {request.Checkbox.MaxNumberOfOptions}"));
+            }
+        }
+        if (question.Type == QuestionType.Date.ToString())
+        {
+            if (request.DateInput.LessThanOrEqualTo >= request.DateInput.GreaterThanOrEqualTo)
+            {
+                exceptions.Add(new Exception(message:$"The date provided must be earlier than {request.DateInput.GreaterThanOrEqualTo}"));
+            }
+            if (request.DateInput.GreaterThanOrEqualTo <= request.DateInput.LessThanOrEqualTo)
+            {
+                exceptions.Add(new Exception(message:$"The date provided must be later than {request.DateInput.LessThanOrEqualTo}"));
+            }
+        }
+        if (question.Type == null)
+        {
+            exceptions.Add(new Exception(message: $"The type provided must be valid."));
+        }
+        if (exceptions.Count > 0)
+        {
+            throw new AggregateException(exceptions);
+        }
+    }
+
+    private static List<Exception> ValidateText(UpdateQuestionCommand request, List<Exception> exceptions)
+    {
+        if (request.TextInput.MinLength > request.TextInput.MaxLength)
+        {
+            exceptions.Add(new Exception(message:$"The minimum length cannot be greater than {request.TextInput.MaxLength}"));
+        }
+        if (request.TextInput.MaxLength < request.TextInput.MinLength)
+        {
+            exceptions.Add(new Exception(message:$"The maximum length cannot be less than {request.TextInput.MinLength}"));
+        }
+        return exceptions;
     }
 }
