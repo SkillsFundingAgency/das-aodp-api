@@ -15,6 +15,8 @@
 															- Changed external data source name
 	3					Adam Leaver		22/04/2025			Added checks for missing statuses in
 															CSV file
+	4					Adam Leaver		24/04/2025			Change to merge statement to look for 
+															NULL Process Status IDs
 ##################################################################################################*/
 
 AS
@@ -98,8 +100,7 @@ SELECT
 	(SELECT P.Id FROM regulated.ProcessStatus P Where Cast(trim(stg.OutcomeDecision) as nvarchar(max)) = P.Name) as ProcessStatusId,
 	stg.Notes AS Notes,
     GetDate() AS Timestamp
-FROM BulkInsertStaging stg
-Where (trim(stg.LifecycleStage) <> '' and trim(stg.OutcomeDecision) <> '') Or (stg.LifecycleStage is not null and stg.OutcomeDecision is not null); 
+FROM BulkInsertStaging stg;
 
 /*Create list of Qualfications returning only latest version 
 and joining in the qualfication id for easy identification*/
@@ -124,7 +125,10 @@ WHEN MATCHED AND Target.Version = (SELECT MAXVersionNo
                                       WHERE TargetMAXVersion.QualificationId = Source.QualificationId) THEN
     UPDATE SET 
         Target.LifecycleStageId = Source.LifecycleStageId,
-        Target.ProcessStatusId = Source.ProcessStatusId
+        Target.ProcessStatusId = Case when Source.ProcessStatusId is not null 
+									  then Source.ProcessStatusId 
+									  else Target.ProcessStatusId 
+									  end
 
 Output  $action AS Operation
 	   ,Source.QualificationId
@@ -162,8 +166,7 @@ SELECT * FROM #MergeLog
 
 /*Qualifications in CSV which are missing a status*/
 SELECT MI.*, 'Missing Status' as Error FROM dbo.BulkInsertStaging Mi
-Where trim(LifecycleStage) = '' or trim(OutcomeDecision) = ''
-Or LifecycleStage is null or OutcomeDecision is null;
+Where OutcomeDecision is null;
 
 /*Drop temporary tables*/
 DROP TABLE BulkInsertStaging;
