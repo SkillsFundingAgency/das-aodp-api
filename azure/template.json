@@ -389,7 +389,10 @@
                         "value": true
                     }
                 }
-            }
+            },
+            "dependsOn": [
+                "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]"
+            ]
         },
         {
             "condition": "[parameters('deployPrivateLinkedScopedResource')]",
