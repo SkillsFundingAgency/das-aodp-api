@@ -1,19 +1,20 @@
+# azure-pipelines.yml
+
 parameters:
 - name: OverrideBlockOnPossibleDataLoss
   displayName: Add /p:BlockOnPossibleDataLoss=false argument to DACPAC deployment
   type: boolean
   default: false
 - name: DeployEnvironments
-  displayName: Environments to Deploy
   type: object
   default:
     - AT
     - TEST
     - TEST2
+    - DEMO
+    - MO
     - PP
     - PROD
-    - MO
-    - DEMO
 
 trigger:
   batch: true
@@ -32,6 +33,8 @@ variables:
 - group: RELEASE das-aodp-api
 - name: Deploy
   value: $[or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.Reason'], 'Manual'), eq(variables['Build.Reason'], 'PullRequest'))]
+- name: DeployEnvironmentsVar
+  value: ${{ join(',', parameters.DeployEnvironments) }}
 
 resources:
   repositories:
@@ -67,7 +70,7 @@ stages:
 - stage: Deploy_AT
   displayName: Deploy to AT
   dependsOn: Build
-  condition: and(succeeded(), contains(parameters.DeployEnvironments, 'AT'))
+  condition: and(succeeded(), contains(variables['DeployEnvironmentsVar'], 'AT'))
   variables:
   - group: DevTest Management Resources
   - group: AT DevTest Shared Resources
@@ -82,7 +85,7 @@ stages:
 - stage: Deploy_TEST
   displayName: Deploy to TEST
   dependsOn: Build
-  condition: and(succeeded(), contains(parameters.DeployEnvironments, 'TEST'))
+  condition: and(succeeded(), contains(variables['DeployEnvironmentsVar'], 'TEST'))
   variables:
   - group: DevTest Management Resources
   - group: TEST DevTest Shared Resources
@@ -97,7 +100,7 @@ stages:
 - stage: Deploy_TEST2
   displayName: Deploy to TEST2
   dependsOn: Build
-  condition: and(succeeded(), contains(parameters.DeployEnvironments, 'TEST2'))
+  condition: and(succeeded(), contains(variables['DeployEnvironmentsVar'], 'TEST2'))
   variables:
   - group: DevTest Management Resources
   - group: TEST2 DevTest Shared Resources
@@ -112,7 +115,7 @@ stages:
 - stage: Deploy_PP
   displayName: Deploy to PP
   dependsOn: Build
-  condition: and(succeeded(), contains(parameters.DeployEnvironments, 'PP'))
+  condition: and(succeeded(), contains(variables['DeployEnvironmentsVar'], 'PP'))
   variables:
   - group: PreProd Management Resources
   - group: PreProd Shared Resources
@@ -128,7 +131,7 @@ stages:
 - stage: Deploy_PROD
   displayName: Deploy to PROD
   dependsOn: Build
-  condition: and(succeeded(), contains(parameters.DeployEnvironments, 'PROD'))
+  condition: and(succeeded(), contains(variables['DeployEnvironmentsVar'], 'PROD'))
   variables:
   - group: PROD Management Resources
   - group: PROD Shared Resources
@@ -144,7 +147,7 @@ stages:
 - stage: Deploy_MO
   displayName: Deploy to MO
   dependsOn: Build
-  condition: and(succeeded(), contains(parameters.DeployEnvironments, 'MO'))
+  condition: and(succeeded(), contains(variables['DeployEnvironmentsVar'], 'MO'))
   variables:
   - group: MO Management Resources
   - group: MO Shared Resources
@@ -160,7 +163,7 @@ stages:
 - stage: Deploy_DEMO
   displayName: Deploy to DEMO
   dependsOn: Build
-  condition: and(succeeded(), contains(parameters.DeployEnvironments, 'DEMO'))
+  condition: and(succeeded(), contains(variables['DeployEnvironmentsVar'], 'DEMO'))
   variables:
   - group: DevTest Management Resources
   - group: DEMO DevTest Shared Resources
