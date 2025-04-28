@@ -23,7 +23,6 @@ variables:
 - name: Deploy
   value: $[or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.Reason'], 'Manual'), eq(variables['Build.Reason'], 'PullRequest'))]
 
-
 resources:
   repositories:
   - repository: self
@@ -50,6 +49,7 @@ stages:
     parameters:
       SolutionBaseName: $(SolutionBaseName)
       BuildConfiguration: $(BuildConfiguration)
+
   - template: azure-pipelines-templates/build/job/dacpac-template.yml@das-platform-building-blocks
     parameters:
       SolutionBaseName: $(SolutionBaseName)
@@ -59,100 +59,149 @@ stages:
   dependsOn: Build
   displayName: Deploy to AT
   condition: and(succeeded(), eq(variables.Deploy, 'true'))
-  variables:
-  - group: DevTest Management Resources
-  - group: AT DevTest Shared Resources
   jobs:
-  - template: pipeline-templates/job/deploy.yml
-    parameters:
-      Environment: AT
-      SolutionBaseName: $(SolutionBaseName)
-      ServiceConnection: SFA-DAS-DevTest-ARM
-      OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss  }}
+  - deployment: DeployToAT
+    displayName: Deploy to AT
+    environment: AT
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: pipeline-templates/job/deploy.yml
+            parameters:
+              Environment: AT
+              SolutionBaseName: $(SolutionBaseName)
+              ServiceConnection: SFA-DAS-DevTest-ARM
+              OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    variables:
+    - group: DevTest Management Resources
+    - group: AT DevTest Shared Resources
 
 - stage: Deploy_TEST
   dependsOn: Build
   displayName: Deploy to TEST
-  variables:
-  - group: DevTest Management Resources
-  - group: TEST DevTest Shared Resources
   jobs:
-  - template: pipeline-templates/job/deploy.yml
-    parameters:
-      Environment: TEST
-      SolutionBaseName: $(SolutionBaseName)
-      ServiceConnection: SFA-DAS-DevTest-ARM
-      OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss  }}
+  - deployment: DeployToTEST
+    displayName: Deploy to TEST
+    environment: TEST
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: pipeline-templates/job/deploy.yml
+            parameters:
+              Environment: TEST
+              SolutionBaseName: $(SolutionBaseName)
+              ServiceConnection: SFA-DAS-DevTest-ARM
+              OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    variables:
+    - group: DevTest Management Resources
+    - group: TEST DevTest Shared Resources
 
 - stage: Deploy_TEST2
   dependsOn: Build
   displayName: Deploy to TEST2
-  variables:
-  - group: DevTest Management Resources
-  - group: TEST2 DevTest Shared Resources
   jobs:
-  - template: pipeline-templates/job/deploy.yml
-    parameters:
-      Environment: TEST2
-      SolutionBaseName: $(SolutionBaseName)
-      ServiceConnection: SFA-DAS-DevTest-ARM
-      OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss  }}
+  - deployment: DeployToTEST2
+    displayName: Deploy to TEST2
+    environment: TEST2
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: pipeline-templates/job/deploy.yml
+            parameters:
+              Environment: TEST2
+              SolutionBaseName: $(SolutionBaseName)
+              ServiceConnection: SFA-DAS-DevTest-ARM
+              OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    variables:
+    - group: DevTest Management Resources
+    - group: TEST2 DevTest Shared Resources
 
 - stage: Deploy_PP
   dependsOn: Build
   displayName: Deploy to PP
-  variables:
-  - group: PreProd Management Resources
-  - group: PreProd Shared Resources
-  - group: PREPROD das-aodp-api
   jobs:
-  - template: pipeline-templates/job/deploy.yml
-    parameters:
-      Environment: PP
-      SolutionBaseName: $(SolutionBaseName)
-      ServiceConnection: SFA-DIG-PreProd-ARM
-      OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss  }}
+  - deployment: DeployToPP
+    displayName: Deploy to PP
+    environment: PP
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: pipeline-templates/job/deploy.yml
+            parameters:
+              Environment: PP
+              SolutionBaseName: $(SolutionBaseName)
+              ServiceConnection: SFA-DIG-PreProd-ARM
+              OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    variables:
+    - group: PreProd Management Resources
+    - group: PreProd Shared Resources
+    - group: PREPROD das-aodp-api
 
 - stage: Deploy_PROD
   dependsOn: Build
   displayName: Deploy to PROD
-  variables:
-  - group: PROD Management Resources
-  - group: PROD Shared Resources
-  - group: PROD das-aodp-api
   jobs:
-  - template: pipeline-templates/job/deploy.yml
-    parameters:
-      Environment: PROD
-      SolutionBaseName: $(SolutionBaseName)
-      ServiceConnection: SFA-DIG-Prod-ARM
-      OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss  }}
+  - deployment: DeployToPROD
+    displayName: Deploy to PROD
+    environment: PROD
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: pipeline-templates/job/deploy.yml
+            parameters:
+              Environment: PROD
+              SolutionBaseName: $(SolutionBaseName)
+              ServiceConnection: SFA-DIG-Prod-ARM
+              OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    variables:
+    - group: PROD Management Resources
+    - group: PROD Shared Resources
+    - group: PROD das-aodp-api
 
 - stage: Deploy_MO
   dependsOn: Build
   displayName: Deploy to MO
-  variables:
-  - group: MO Management Resources
-  - group: MO Shared Resources
-  - group: MO das-aodp-api
   jobs:
-  - template: pipeline-templates/job/deploy.yml
-    parameters:
-      Environment: MO
-      SolutionBaseName: $(SolutionBaseName)
-      ServiceConnection: SFA-ASM-ModelOffice-ARM
-      OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss  }}
+  - deployment: DeployToMO
+    displayName: Deploy to MO
+    environment: MO
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: pipeline-templates/job/deploy.yml
+            parameters:
+              Environment: MO
+              SolutionBaseName: $(SolutionBaseName)
+              ServiceConnection: SFA-ASM-ModelOffice-ARM
+              OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    variables:
+    - group: MO Management Resources
+    - group: MO Shared Resources
+    - group: MO das-aodp-api
 
 - stage: Deploy_DEMO
   dependsOn: Build
   displayName: Deploy to DEMO
-  variables:
-  - group: DevTest Management Resources
-  - group: DEMO DevTest Shared Resources
   jobs:
-  - template: pipeline-templates/job/deploy.yml
-    parameters:
-      Environment: DEMO
-      SolutionBaseName: $(SolutionBaseName)
-      ServiceConnection: SFA-DAS-DevTest-ARM
-      OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss  }}
+  - deployment: DeployToDEMO
+    displayName: Deploy to DEMO
+    environment: DEMO
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - template: pipeline-templates/job/deploy.yml
+            parameters:
+              Environment: DEMO
+              SolutionBaseName: $(SolutionBaseName)
+              ServiceConnection: SFA-DAS-DevTest-ARM
+              OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    variables:
+    - group: DevTest Management Resources
+    - group: DEMO DevTest Shared Resources
