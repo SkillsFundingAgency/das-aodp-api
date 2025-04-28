@@ -41,11 +41,6 @@ resources:
     source: das-employer-config
     branch: master
 
-# Assigning a generic tag to the pipeline run
-tags:
-  - Deploy
-  - $(Build.SourceBranchName)
-
 stages:
 - stage: Build
   jobs:
@@ -72,9 +67,9 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
-    # Add a tag specifically for the AT environment to this job
-    tags:
-      - AT
+    environment:
+      name: AT
+      tags: "AT"
 
 - stage: Deploy_TEST
   dependsOn: Build
@@ -89,9 +84,9 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
-    # Add a tag specifically for the TEST environment to this job
-    tags:
-      - TEST
+    environment:
+      name: TEST
+      tags: "TEST"
 
 - stage: Deploy_TEST2
   dependsOn: Build
@@ -106,9 +101,9 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
-    # Add a tag specifically for the TEST2 environment to this job
-    tags:
-      - TEST2
+    environment:
+      name: TEST2
+      tags: "TEST2"
 
 - stage: Deploy_PP
   dependsOn: Build
@@ -124,9 +119,9 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DIG-PreProd-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
-    # Add a tag specifically for the PP environment to this job
-    tags:
-      - PP
+    environment:
+      name: PP
+      tags: "PP"
 
 - stage: Deploy_PROD
   dependsOn: Build
@@ -142,9 +137,9 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DIG-Prod-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
-    # Add a tag specifically for the PROD environment to this job
-    tags:
-      - PROD
+    environment:
+      name: PROD
+      tags: "PROD"
 
 - stage: Deploy_MO
   dependsOn: Build
@@ -160,9 +155,9 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-ASM-ModelOffice-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
-    # Add a tag specifically for the MO environment to this job
-    tags:
-      - MO
+    environment:
+      name: MO
+      tags: "MO"
 
 - stage: Deploy_DEMO
   dependsOn: Build
@@ -177,6 +172,6 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
-    # Add a tag specifically for the DEMO environment to this job
-    tags:
-      - DEMO
+    environment:
+      name: DEMO
+      tags: "DEMO"
