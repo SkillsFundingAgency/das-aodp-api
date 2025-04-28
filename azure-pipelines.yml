@@ -1,3 +1,51 @@
+parameters:
+- name: OverrideBlockOnPossibleDataLoss
+  displayName: Add /p:BlockOnPossibleDataLoss=false argument to DACPAC deployment
+  type: boolean
+  default: false
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - "main"
+
+variables:
+- name: SolutionBaseName
+  value: SFA.DAS.AODP
+- name: BuildConfiguration
+  value: release
+- name: BuildPlatform
+  value: any cpu
+- group: RELEASE Management Resources
+- group: RELEASE das-aodp-api
+- name: Deploy
+  value: $[or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.Reason'], 'Manual'), eq(variables['Build.Reason'], 'PullRequest'))]
+
+resources:
+  repositories:
+  - repository: self
+  - repository: das-platform-building-blocks
+    type: github
+    name: SkillsFundingAgency/das-platform-building-blocks
+    ref: refs/tags/3.0.0
+    endpoint: SkillsFundingAgency
+  - repository: das-platform-automation
+    type: github
+    name: SkillsFundingAgency/das-platform-automation
+    ref: refs/tags/5.1.15
+    endpoint: SkillsFundingAgency
+  pipelines:
+  - pipeline: das-employer-config
+    project: Digital Apprenticeship Service
+    source: das-employer-config
+    branch: master
+
+# Assigning a generic tag to the pipeline run
+tags:
+  - Deploy
+  - $(Build.SourceBranchName)
+
 stages:
 - stage: Build
   jobs:
@@ -24,9 +72,9 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    # Add a tag specifically for the AT environment to this job
     tags:
       - AT
-      - Deploy
 
 - stage: Deploy_TEST
   dependsOn: Build
@@ -41,9 +89,9 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    # Add a tag specifically for the TEST environment to this job
     tags:
       - TEST
-      - Deploy
 
 - stage: Deploy_TEST2
   dependsOn: Build
@@ -58,9 +106,9 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    # Add a tag specifically for the TEST2 environment to this job
     tags:
       - TEST2
-      - Deploy
 
 - stage: Deploy_PP
   dependsOn: Build
@@ -76,9 +124,9 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DIG-PreProd-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    # Add a tag specifically for the PP environment to this job
     tags:
       - PP
-      - Deploy
 
 - stage: Deploy_PROD
   dependsOn: Build
@@ -94,9 +142,9 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DIG-Prod-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    # Add a tag specifically for the PROD environment to this job
     tags:
       - PROD
-      - Deploy
 
 - stage: Deploy_MO
   dependsOn: Build
@@ -112,9 +160,9 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-ASM-ModelOffice-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    # Add a tag specifically for the MO environment to this job
     tags:
       - MO
-      - Deploy
 
 - stage: Deploy_DEMO
   dependsOn: Build
@@ -129,6 +177,6 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    # Add a tag specifically for the DEMO environment to this job
     tags:
       - DEMO
-      - Deploy
