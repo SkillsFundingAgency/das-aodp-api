@@ -1,60 +1,3 @@
-# azure-pipelines.yml
-
-parameters:
-- name: OverrideBlockOnPossibleDataLoss
-  displayName: Add /p:BlockOnPossibleDataLoss=false argument to DACPAC deployment
-  type: boolean
-  default: false
-- name: DeployEnvironments
-  type: object
-  default:
-    - AT
-    - TEST
-    - TEST2
-    - DEMO
-    - MO
-    - PP
-    - PROD
-
-trigger:
-  batch: true
-  branches:
-    include:
-      - "main"
-
-variables:
-- name: SolutionBaseName
-  value: SFA.DAS.AODP
-- name: BuildConfiguration
-  value: release
-- name: BuildPlatform
-  value: any cpu
-- group: RELEASE Management Resources
-- group: RELEASE das-aodp-api
-- name: Deploy
-  value: $[or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.Reason'], 'Manual'), eq(variables['Build.Reason'], 'PullRequest'))]
-- name: DeployEnvironmentsVar
-  value: ${{ join(',', parameters.DeployEnvironments) }}
-
-resources:
-  repositories:
-  - repository: self
-  - repository: das-platform-building-blocks
-    type: github
-    name: SkillsFundingAgency/das-platform-building-blocks
-    ref: refs/tags/3.0.0
-    endpoint: SkillsFundingAgency
-  - repository: das-platform-automation
-    type: github
-    name: SkillsFundingAgency/das-platform-automation
-    ref: refs/tags/5.1.15
-    endpoint: SkillsFundingAgency
-  pipelines:
-  - pipeline: das-employer-config
-    project: Digital Apprenticeship Service
-    source: das-employer-config
-    branch: master
-
 stages:
 - stage: Build
   jobs:
@@ -68,9 +11,9 @@ stages:
       SqlProjectPath: src/$(SolutionBaseName).Database/$(SolutionBaseName).Database.sqlproj
 
 - stage: Deploy_AT
-  displayName: Deploy to AT
   dependsOn: Build
-  condition: and(succeeded(), contains(variables['DeployEnvironmentsVar'], 'AT'))
+  displayName: Deploy to AT
+  condition: and(succeeded(), eq(variables.Deploy, 'true'))
   variables:
   - group: DevTest Management Resources
   - group: AT DevTest Shared Resources
@@ -81,11 +24,13 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    tags:
+      - AT
+      - Deploy
 
 - stage: Deploy_TEST
-  displayName: Deploy to TEST
   dependsOn: Build
-  condition: and(succeeded(), contains(variables['DeployEnvironmentsVar'], 'TEST'))
+  displayName: Deploy to TEST
   variables:
   - group: DevTest Management Resources
   - group: TEST DevTest Shared Resources
@@ -96,11 +41,13 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    tags:
+      - TEST
+      - Deploy
 
 - stage: Deploy_TEST2
-  displayName: Deploy to TEST2
   dependsOn: Build
-  condition: and(succeeded(), contains(variables['DeployEnvironmentsVar'], 'TEST2'))
+  displayName: Deploy to TEST2
   variables:
   - group: DevTest Management Resources
   - group: TEST2 DevTest Shared Resources
@@ -111,11 +58,13 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    tags:
+      - TEST2
+      - Deploy
 
 - stage: Deploy_PP
-  displayName: Deploy to PP
   dependsOn: Build
-  condition: and(succeeded(), contains(variables['DeployEnvironmentsVar'], 'PP'))
+  displayName: Deploy to PP
   variables:
   - group: PreProd Management Resources
   - group: PreProd Shared Resources
@@ -127,11 +76,13 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DIG-PreProd-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    tags:
+      - PP
+      - Deploy
 
 - stage: Deploy_PROD
-  displayName: Deploy to PROD
   dependsOn: Build
-  condition: and(succeeded(), contains(variables['DeployEnvironmentsVar'], 'PROD'))
+  displayName: Deploy to PROD
   variables:
   - group: PROD Management Resources
   - group: PROD Shared Resources
@@ -143,11 +94,13 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DIG-Prod-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    tags:
+      - PROD
+      - Deploy
 
 - stage: Deploy_MO
-  displayName: Deploy to MO
   dependsOn: Build
-  condition: and(succeeded(), contains(variables['DeployEnvironmentsVar'], 'MO'))
+  displayName: Deploy to MO
   variables:
   - group: MO Management Resources
   - group: MO Shared Resources
@@ -159,11 +112,13 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-ASM-ModelOffice-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    tags:
+      - MO
+      - Deploy
 
 - stage: Deploy_DEMO
-  displayName: Deploy to DEMO
   dependsOn: Build
-  condition: and(succeeded(), contains(variables['DeployEnvironmentsVar'], 'DEMO'))
+  displayName: Deploy to DEMO
   variables:
   - group: DevTest Management Resources
   - group: DEMO DevTest Shared Resources
@@ -174,3 +129,6 @@ stages:
       SolutionBaseName: $(SolutionBaseName)
       ServiceConnection: SFA-DAS-DevTest-ARM
       OverrideBlockOnPossibleDataLoss: ${{ parameters.OverrideBlockOnPossibleDataLoss }}
+    tags:
+      - DEMO
+      - Deploy
