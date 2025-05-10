@@ -24,9 +24,27 @@ WITH LatestQualificationGroup AS (
     WHERE ver.LifecycleStageId = '00000000-0000-0000-0000-000000000003' --completed
 ),
 LatestQualifications AS (
-    SELECT *
+    SELECT ID
+			,QualificationId
+			,AwardingOrganisationId
+			,Level
+			,QualificationType	
+			,Subcategory
+			,SectorSubjectArea
+			,InsertedTimestamp
     FROM LatestQualificationGroup
     WHERE rn = 1
+	Union
+	SELECT ID
+			,QualificationId
+			,AwardingOrganisationId
+			,Level
+			,QualificationType	
+			,Subcategory
+			,SectorSubjectArea
+			,DateOfOfqualDataSnapshot as InsertedTimestamp
+    FROM funded.Qualifications
+	Where QualificationId not in (Select QualificationId FROM LatestQualificationGroup)
 ),
 PivotFundingAvailable AS (
     SELECT
