@@ -226,6 +226,19 @@ public class QualificationsController : BaseController
     }
 
     [HttpGet("export")]
+    [ProducesResponseType(typeof(BaseMediatrResponse<GetQualificationExportFileResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BaseMediatrResponse<GetQualificationExportFileResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetQualificationCSVExportData()
+    {
+        var response = await _mediator.Send(new GetQualificationExportFileQuery());
+
+        return Ok(response);
+    }
+
+    [HttpGet("old-export")]
     [ProducesResponseType(typeof(BaseMediatrResponse<GetNewQualificationsCsvExportResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BaseMediatrResponse<GetChangedQualificationsCsvExportResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -54,6 +54,7 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<QualificationNewReviewRequired> QualificationNewReviewRequired { get; set; }
         DbSet<NewQualificationExport> NewQualificationExport { get; set; }
         DbSet<ChangedQualificationExport> ChangedQualificationExport { get; set; }
+        DbSet<QualificationExport> QualificationExport { get; set; }
 
         DbSet<QualificationFundingFeedbacks> QualificationFundingFeedbacks { get; set; }
         DbSet<QualificationFundings> QualificationFundings { get; set; }

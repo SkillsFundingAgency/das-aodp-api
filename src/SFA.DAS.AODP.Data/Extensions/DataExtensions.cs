@@ -64,6 +64,7 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IJobsRepository, JobsRepository>();
             services.AddScoped<IJobRunsRepository, JobRunsRepository>();
 
+            services.AddScoped<IExportQualificationsRepository, ExportQualificationsRepository>();
             return services;
         }
     }
