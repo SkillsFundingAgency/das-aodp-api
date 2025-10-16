@@ -175,11 +175,13 @@ SELECT
     pivotdata.LocalFlexibilities_FundingAvailable,
     pivotdata.LocalFlexibilities_FundingApprovalStartDate,
     pivotdata.LocalFlexibilities_FundingApprovalEndDate,
-    onp.LocalFlexibilities_Notes
+    onp.LocalFlexibilities_Notes,
+    fq.AwardingOrganisationUrl
 FROM LatestQualifications latestversion
-INNER JOIN dbo.Qualification qual ON qual.id = latestversion.QualificationId
+INNER JOIN dbo.Qualification qual ON qual.Id = latestversion.QualificationId
 INNER JOIN dbo.AwardingOrganisation ao ON ao.Id = latestversion.AwardingOrganisationId
 LEFT JOIN CombinedPivotData pivotdata ON pivotdata.QualificationVersionId = latestversion.Id
 LEFT JOIN PivotOfferNotes AS onp ON onp.QualificationId = latestversion.QualificationId
+LEFT JOIN funded.Qualifications fq ON fq.Id = latestversion.QualificationId
 
 GO
