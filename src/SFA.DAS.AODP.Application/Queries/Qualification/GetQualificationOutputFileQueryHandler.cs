@@ -79,13 +79,13 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
                     var approvedZipEntry = zip.CreateEntry(approvedCsvFileName);
                     await using (var approvedZipEntryStream = approvedZipEntry.Open())
                     {
-                        await approvedZipEntryStream.WriteAsync(approvedCsvFileBytes, 0, approvedCsvFileBytes.Length, cancellationToken);
+                        await approvedZipEntryStream.WriteAsync(approvedCsvFileBytes, cancellationToken);
                     }
 
                     var archivedZipEntry = zip.CreateEntry(archivedCsvFileName);
                     await using (var archivedZipEntryStream = archivedZipEntry.Open())
                     {
-                        await archivedZipEntryStream.WriteAsync(archivedCsvFileBytes, 0, archivedCsvFileBytes.Length, cancellationToken);
+                        await archivedZipEntryStream.WriteAsync(archivedCsvFileBytes, cancellationToken);
                     }
                 }
                 zipBytes = ms.ToArray();

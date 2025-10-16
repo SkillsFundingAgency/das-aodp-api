@@ -18,6 +18,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         private readonly Mock<IBlobStorageService> _blob;
         private readonly OutputFileBlobStorageSettings _settings;
         private readonly GetQualificationOutputFileQueryHandler _handler;
+        private static readonly string[] LineSeparators = { "\r\n", "\n" };
 
         public GetQualificationOutputFileQueryHandlerTests()
         {
@@ -188,7 +189,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 using var s = entry.Open();
                 using var r = new StreamReader(s, Encoding.UTF8, leaveOpen: false);
                 var all = await r.ReadToEndAsync();
-                var lines = all.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                var lines = all.Split(LineSeparators, StringSplitOptions.None);
+
                 // one header + maybe trailing empty line from newline at end => <= 2 lines
                 Assert.StartsWith("DateOfOfqualDataSnapshot,QualificationName", lines[0]);
                 Assert.True(lines.Length <= 2);
