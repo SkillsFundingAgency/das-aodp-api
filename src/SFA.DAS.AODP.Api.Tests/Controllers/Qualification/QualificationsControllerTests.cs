@@ -12,6 +12,7 @@ using SFA.DAS.AODP.Application.Commands.Qualifications;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
+using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
 using ChangedQualification = SFA.DAS.AODP.Models.Qualifications.ChangedQualification;
 
@@ -23,6 +24,10 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
         private readonly Mock<ILogger<QualificationsController>> _loggerMock;
         private readonly Mock<IMediator> _mediatorMock;
         private readonly QualificationsController _controller;
+
+        #region Test data
+        private static readonly string _userName = "Aalam Adams";
+        #endregion
 
         public QualificationsControllerTests()
         {
@@ -472,24 +477,129 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
         }
 
         [Fact]
-        public async Task GetQualificationOutputFile_ReturnsOk_WithResponse()
+        public async Task GetQualificationOutputFile_ReturnsOk_WithSuccess()
         {
-            // Arrange
-            var expected = _fixture.Create<BaseMediatrResponse<GetQualificationOutputFileResponse>>();
-            expected.Success = true;
+            // arrange
+            var expected = new BaseMediatrResponse<GetQualificationOutputFileResponse>
+            {
+                Success = true,
+                Value = new GetQualificationOutputFileResponse { FileName = "2025-10-17_qualifications_export.zip", ZipFileContent = new byte[] { 1, 2, 3 } }
+            };
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetQualificationOutputFileQuery>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(expected);
 
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<GetQualificationOutputFileQuery>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(expected);
+            // act
+            var result = await _controller.GetQualificationOutputFile(_userName);
 
-            // Act
-            var result = await _controller.GetQualificationOutputFile();
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var model = Assert.IsAssignableFrom<BaseMediatrResponse<GetQualificationOutputFileResponse>>(okResult.Value);
-            Assert.Same(expected, model); 
+            // assert
+            Assert.Multiple(() =>
+            {
+                var ok = Assert.IsType<OkObjectResult>(result);
+                var body = Assert.IsType<BaseMediatrResponse<GetQualificationOutputFileResponse>>(ok.Value);
+                Assert.True(body.Success);
+                Assert.NotNull(body.Value);
+                Assert.Equal("2025-10-17_qualifications_export.zip", body.Value!.FileName);
+            });
         }
+
+        [Fact]
+        public async Task GetQualificationOutputFile_ReturnsOk_WithFailure()
+        {
+            // arrange
+            var expected = new BaseMediatrResponse<GetQualificationOutputFileResponse>
+            {
+                Success = false,
+                ErrorMessage = "No qualifications found for output file."
+            };
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetQualificationOutputFileQuery>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(expected);
+
+            // act
+            var result = await _controller.GetQualificationOutputFile(_userName);
+
+            // assert
+            Assert.Multiple(() =>
+            {
+                var ok = Assert.IsType<OkObjectResult>(result);
+                var body = Assert.IsType<BaseMediatrResponse<GetQualificationOutputFileResponse>>(ok.Value);
+                Assert.False(body.Success);
+                Assert.Equal("No qualifications found for output file.", body.ErrorMessage);
+            });
+        }
+
+        [Fact]
+        public async Task GetQualificationOutputFile_ForwardsUsernameToMediator()
+        {
+            var captured = default(GetQualificationOutputFileQuery);
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetQualificationOutputFileQuery>(), It.IsAny<CancellationToken>()))
+                    .Callback<object, CancellationToken>((q, _) => captured = (GetQualificationOutputFileQuery)q)
+                    .ReturnsAsync(new BaseMediatrResponse<GetQualificationOutputFileResponse> { Success = true, Value = new() });
+
+
+            await _controller.GetQualificationOutputFile(_userName);
+
+            Assert.NotNull(captured);
+            Assert.Equal(_userName, captured!.CurrentUsername);
+        }
+
+        [Fact]
+        public async Task GetQualificationOutputFileLogs_ReturnsOk_WithSuccess()
+        {
+            // arrange
+            var expected = new BaseMediatrResponse<GetQualificationOutputFileLogResponse>
+            {
+                Success = true,
+                Value = new GetQualificationOutputFileLogResponse
+                {
+                    OutputFileLogs = new List<QualificationOutputFileLog> 
+                    { 
+                        new() { Timestamp = DateTime.Now.AddDays(-3), UserDisplayName = _userName, ApprovedFileName = "a.csv", ArchivedFileName = "b.csv" } 
+                    }
+                }
+            };
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetQualificationOutputFileLogQuery>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(expected);
+
+            // act
+            var result = await _controller.GetQualificationOutputFileLogs();
+
+            // assert
+            Assert.Multiple(()=>
+            { 
+                var ok = Assert.IsType<OkObjectResult>(result);
+                var body = Assert.IsType<BaseMediatrResponse<GetQualificationOutputFileLogResponse>>(ok.Value);
+                Assert.True(body.Success);
+                Assert.NotNull(body.Value);
+                Assert.NotEmpty(body.Value!.OutputFileLogs);
+            });
+        }
+
+        [Fact]
+        public async Task GetQualificationOutputFileLogs_ReturnsOk_WithFailure()
+        {
+            // arrange
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetQualificationOutputFileLogQuery>(), It.IsAny<CancellationToken>()))
+                    .ReturnsAsync(new BaseMediatrResponse<GetQualificationOutputFileLogResponse>
+                    {
+                        Success = false,
+                        ErrorMessage = "Failed to fetch logs."
+                    });
+
+            // act
+            var result = await _controller.GetQualificationOutputFileLogs();
+
+            // assert
+            Assert.Multiple(() =>
+            {
+                var ok = Assert.IsType<OkObjectResult>(result);
+                var body = Assert.IsType<BaseMediatrResponse<GetQualificationOutputFileLogResponse>>(ok.Value);
+                Assert.False(body.Success);
+                Assert.Equal("Failed to fetch logs.", body.ErrorMessage);
+            });
+        }
+
+
+
     }
 }
 

@@ -2,6 +2,7 @@
 using AutoFixture.AutoMoq;
 using Moq;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
+using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Infrastructure;
@@ -15,10 +16,15 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
     {
         private readonly IFixture _fixture;
         private readonly Mock<IQualificationOutputFileRepository> _repo;
+        private readonly Mock<IQualificationOutputFileLogRepository> _logRepo;
         private readonly Mock<IBlobStorageService> _blob;
         private readonly OutputFileBlobStorageSettings _settings;
         private readonly GetQualificationOutputFileQueryHandler _handler;
         private static readonly string[] LineSeparators = { "\r\n", "\n" };
+
+        #region Test data
+        private static readonly string _username = "Aalam Adams";
+        #endregion
 
         public GetQualificationOutputFileQueryHandlerTests()
         {
@@ -26,8 +32,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 
             _repo = _fixture.Freeze<Mock<IQualificationOutputFileRepository>>();
             _blob = _fixture.Freeze<Mock<IBlobStorageService>>();
+            _logRepo = _fixture.Freeze<Mock<IQualificationOutputFileLogRepository>>(); 
 
-            // Freeze settings so handler receives a concrete instance with a known container name
             _settings = _fixture.Freeze<OutputFileBlobStorageSettings>();
             _settings.ContainerName = "unit-test-container";
 
@@ -83,7 +89,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                  .Returns(Task.CompletedTask);
 
             // Act
-            var result = await _handler.Handle(new GetQualificationOutputFileQuery(), CancellationToken.None);
+            var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
 
             // Assert – repository
             _repo.Verify(x => x.GetQualificationOutputFile(), Times.Once);
@@ -121,6 +127,16 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 var firstLine = await r.ReadLineAsync();
                 Assert.StartsWith("DateOfOfqualDataSnapshot,QualificationName,AwardingOrganisation,QualificationNumber,Level", firstLine);
             }
+
+            _logRepo.Verify(x => x.CreateAsync(
+                It.Is<QualificationOutputFileLog>(h =>
+                    h.UserDisplayName == _username &&
+                    h.ApprovedFileName == expectedApproved &&
+                    h.ArchivedFileName == expectedArchived &&
+                    h.Timestamp <= DateTime.UtcNow.AddSeconds(5) &&
+                    h.Timestamp >= DateTime.UtcNow.AddMinutes(-1)
+                ),
+                It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -131,37 +147,39 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                  .ReturnsAsync(new List<QualificationOutputFile>());
 
             // Act
-            var result = await _handler.Handle(new GetQualificationOutputFileQuery(), CancellationToken.None);
+            var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
 
             // Assert
             _repo.Verify(x => x.GetQualificationOutputFile(), Times.Once);
             Assert.False(result.Success);
             Assert.Equal("No qualifications found for output file.", result.ErrorMessage);
             _blob.Verify(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+            _logRepo.Verify(x => x.CreateAsync(It.IsAny<QualificationOutputFileLog>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
         public async Task Then_Exception_Is_Handled_And_Failure_Returned_No_Uploads()
         {
             // Arrange
-            var ex = new Exception("boom");
+            var ex = new Exception("oops");
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ThrowsAsync(ex);
 
             // Act
-            var result = await _handler.Handle(new GetQualificationOutputFileQuery(), CancellationToken.None);
+            var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
 
             // Assert
             _repo.Verify(x => x.GetQualificationOutputFile(), Times.Once);
             Assert.False(result.Success);
-            Assert.Equal("boom", result.ErrorMessage);
+            Assert.Equal("oops", result.ErrorMessage);
             _blob.Verify(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+            _logRepo.Verify(x => x.CreateAsync(It.IsAny<QualificationOutputFileLog>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
-        public async Task Then_Record_With_EndDate_Today_Goes_To_Neither_List_But_Zip_Still_Has_Both_Headers()
+        public async Task Then_Record_With_EndDate_Today_Goes_To_Archived_Not_Active()
         {
-            // Arrange: exactly today is neither > nor < (edge case)
+            // Arrange: exactly today should be archived (since active is strictly > today)
             var todayUtc = DateTime.UtcNow.Date;
             var edge = new QualificationOutputFile
             {
@@ -172,29 +190,43 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ReturnsAsync(new List<QualificationOutputFile> { edge });
 
-            // Accept uploads but we only care that they exist
             _blob.Setup(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                  .Returns(Task.CompletedTask);
 
-            // Act
-            var result = await _handler.Handle(new GetQualificationOutputFileQuery(), CancellationToken.None);
+            var datePrefix = DateTime.Now.ToString("yy-MM-dd");
+            var expectedApproved = $"{datePrefix}-AOdPApprovedOutputFile.csv";
+            var expectedArchived = $"{datePrefix}-AOdPArchivedOutputFile.csv";
 
-            // Assert: success and both CSVs present with only header lines
+            // Act
+            var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
+
+            // Assert: success and both CSVs present
             Assert.True(result.Success);
             using var ms = new MemoryStream(result.Value!.ZipFileContent);
             using var zip = new ZipArchive(ms, ZipArchiveMode.Read, leaveOpen: false, Encoding.UTF8);
 
-            foreach (var entry in zip.Entries)
+            // Active file should be headers only
+            var activeEntry = zip.Entries.Single(e => e.FullName == expectedApproved);
+            using (var s = activeEntry.Open())
+            using (var r = new StreamReader(s, Encoding.UTF8, leaveOpen: false))
             {
-                using var s = entry.Open();
-                using var r = new StreamReader(s, Encoding.UTF8, leaveOpen: false);
                 var all = await r.ReadToEndAsync();
                 var lines = all.Split(LineSeparators, StringSplitOptions.None);
-
-                // one header + maybe trailing empty line from newline at end => <= 2 lines
                 Assert.StartsWith("DateOfOfqualDataSnapshot,QualificationName", lines[0]);
-                Assert.True(lines.Length <= 2);
+                Assert.True(lines.Length <= 2); // header only
+            }
+
+            // Archived file should contain the data row
+            var archivedEntry = zip.Entries.Single(e => e.FullName == expectedArchived);
+            using (var s = archivedEntry.Open())
+            using (var r = new StreamReader(s, Encoding.UTF8, leaveOpen: false))
+            {
+                var all = await r.ReadToEndAsync();
+                var lines = all.Split(LineSeparators, StringSplitOptions.RemoveEmptyEntries);
+                Assert.StartsWith("DateOfOfqualDataSnapshot,QualificationName", lines[0]);
+                Assert.True(lines.Length >= 2); // header + at least one row
             }
         }
+
     }
 }
