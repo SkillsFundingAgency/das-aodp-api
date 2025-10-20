@@ -54,10 +54,10 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 
             Assert.Multiple(() =>
             {
-                Assert.True(result.Success);
-                Assert.NotNull(result.Value);
-                Assert.NotNull(result.Value!.OutputFileLogs);
-                Assert.Single(result.Value.OutputFileLogs);
+            Assert.True(result.Success);
+            Assert.NotNull(result.Value);
+            Assert.NotNull(result.Value!.OutputFileLogs);
+            Assert.Single(result.Value.OutputFileLogs);
             });
         }
 
@@ -76,10 +76,10 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 
             Assert.Multiple(() =>
             {
-                Assert.True(result.Success);
-                Assert.NotNull(result.Value);
-                Assert.NotNull(result.Value!.OutputFileLogs);
-                Assert.Empty(result.Value.OutputFileLogs);
+            Assert.True(result.Success);
+            Assert.NotNull(result.Value);
+            Assert.NotNull(result.Value!.OutputFileLogs);
+            Assert.Empty(result.Value.OutputFileLogs);
             });
         }
 
@@ -98,7 +98,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 
             Assert.Multiple(() =>
             {
-                Assert.False(result.Success);
+            Assert.False(result.Success);
                 Assert.Equal(ErrorNoLogs, result.ErrorMessage);
                 Assert.NotNull(result.Value);
             });
@@ -119,7 +119,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 
             Assert.Multiple(() =>
             {
-                Assert.False(result.Success);
+            Assert.False(result.Success);
                 Assert.Equal(ExceptionMessage, result.ErrorMessage);
                 Assert.NotNull(result.Value);
             });
