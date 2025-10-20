@@ -225,15 +225,19 @@ public class QualificationsController : BaseController
         return await SendRequestAsync(new GetDiscussionHistoriesForQualificationQuery { QualificationReference = qualificationReference });
     }
 
-    [HttpGet("output-file")]
+    [HttpGet("outputfile")]
     [ProducesResponseType(typeof(BaseMediatrResponse<GetQualificationOutputFileResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetQualificationOutputFile()
+    public async Task<IActionResult> GetQualificationOutputFile([FromQuery]string username)
     {
-        var response = await _mediator.Send(new GetQualificationOutputFileQuery());
+        var response = await _mediator.Send(new GetQualificationOutputFileQuery(username));
+        return Ok(response);
+    }
 
+    [HttpGet("outputfile/logs")]
+    [ProducesResponseType(typeof(BaseMediatrResponse<GetQualificationOutputFileLogResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetQualificationOutputFileLogs ()
+    {
+        var response = await _mediator.Send(new GetQualificationOutputFileLogQuery());
         return Ok(response);
     }
 
