@@ -42,4 +42,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[IX_QualificationFundings_QualificationVersion]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="bd812ca6-c2e7-4850-87f8-c62b72b013a9" ChangeDateTime="10/16/2025 13:43:00">
+    <Property Name="ElementName" Value="[dbo].[OutputFileHistory].[ApprovedFile]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[OutputFileHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ApprovedFileName" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4eeb0efc-7d94-4ce8-88a3-0d70ea25b47d" ChangeDateTime="10/16/2025 13:43:03">
+    <Property Name="ElementName" Value="[dbo].[OutputFileHistory].[ArchivedFile]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[OutputFileHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ArchivedFilename" />
+  </Operation>
 </Operations>
