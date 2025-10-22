@@ -9,6 +9,7 @@ using SFA.DAS.AODP.Infrastructure;
 using SFA.DAS.AODP.Models.Settings;
 using System.IO.Compression;
 using System.Text;
+using Xunit;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 {
@@ -20,7 +21,18 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         private readonly Mock<IBlobStorageService> _blob;
         private readonly OutputFileBlobStorageSettings _settings;
         private readonly GetQualificationOutputFileQueryHandler _handler;
+
         private static readonly string[] LineSeparators = { "\r\n", "\n" };
+
+        private const string ContainerName = "unit-test-container";
+        private const string CsvContentType = "text/csv";
+        private const string ErrorNoQualifications = "No qualifications found for output file.";
+        private const string ErrorGeneric = "Exception message";
+        private const string ZipFileSuffix = "_qualifications_export.zip";
+        private const string ApprovedCsvSuffix = "-AOdPApprovedOutputFile.csv";
+        private const string ArchivedCsvSuffix = "-AOdPArchivedOutputFile.csv";
+        private const string CsvHeaderPrefixLong = "DateOfOfqualDataSnapshot,QualificationName,AwardingOrganisation,QualificationNumber,Level";
+        private const string CsvHeaderPrefixShort = "DateOfOfqualDataSnapshot,QualificationName";
 
         #region Test data
         private static readonly string _username = "Aalam Adams";
@@ -32,10 +44,10 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 
             _repo = _fixture.Freeze<Mock<IQualificationOutputFileRepository>>();
             _blob = _fixture.Freeze<Mock<IBlobStorageService>>();
-            _logRepo = _fixture.Freeze<Mock<IQualificationOutputFileLogRepository>>(); 
+            _logRepo = _fixture.Freeze<Mock<IQualificationOutputFileLogRepository>>();
 
             _settings = _fixture.Freeze<OutputFileBlobStorageSettings>();
-            _settings.ContainerName = "unit-test-container";
+            _settings.ContainerName = ContainerName;
 
             _handler = _fixture.Create<GetQualificationOutputFileQueryHandler>();
         }
@@ -60,11 +72,11 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                  .ReturnsAsync(new List<QualificationOutputFile> { active, archived });
 
             var datePrefix = DateTime.Now.ToString("yy-MM-dd");
-            var expectedApproved = $"{datePrefix}-AOdPApprovedOutputFile.csv";
-            var expectedArchived = $"{datePrefix}-AOdPArchivedOutputFile.csv";
+            var expectedApproved = $"{datePrefix}{ApprovedCsvSuffix}";
+            var expectedArchived = $"{datePrefix}{ArchivedCsvSuffix}";
 
-            // Capture what was uploaded so we can do a light content assertion
-            var uploaded = new List<(string FileName, MemoryStream Copy)>();
+            // capture uploaded streams for later assertions
+            var uploaded = new List<(string Container, string FileName, string ContentType, MemoryStream Copy)>();
 
             _blob.Setup(x => x.UploadFileAsync(
                         It.IsAny<string>(),
@@ -74,50 +86,58 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                         It.IsAny<CancellationToken>()))
                  .Callback<string, string, Stream, string, CancellationToken>((container, name, stream, contentType, _) =>
                  {
-                     // copy the stream to inspect outside the handler's using scope
                      var ms = new MemoryStream();
                      stream.Position = 0;
                      stream.CopyTo(ms);
                      ms.Position = 0;
-                     uploaded.Add((name, ms));
-
-                     // quick guards on each call
-                     Assert.Equal("unit-test-container", container);
-                     Assert.Equal("text/csv", contentType);
-                     Assert.True(ms.Length > 0);
+                     uploaded.Add((container, name, contentType, ms));
                  })
                  .Returns(Task.CompletedTask);
 
             // Act
             var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
 
-            // Assert – repository
+            // Assert – repository called
             _repo.Verify(x => x.GetQualificationOutputFile(), Times.Once);
 
             // Assert – high level response
-            Assert.True(result.Success);
-            Assert.NotNull(result.Value);
-            Assert.StartsWith(datePrefix, result.Value!.FileName);
-            Assert.EndsWith("_qualifications_export.zip", result.Value.FileName);
-            Assert.NotNull(result.Value.ZipFileContent);
-            Assert.NotEmpty(result.Value.ZipFileContent);
+            Assert.Multiple(() =>
+            {
+                Assert.True(result.Success);
+                Assert.NotNull(result.Value);
+                Assert.StartsWith(datePrefix, result.Value!.FileName);
+                Assert.EndsWith(ZipFileSuffix, result.Value.FileName);
+                Assert.NotNull(result.Value.ZipFileContent);
+                Assert.NotEmpty(result.Value.ZipFileContent);
+            });
 
-            // Assert – blob uploads (two calls, correct names)
+            // Assert – blob uploads (two calls, correct names, container, content type)
             _blob.Verify(x => x.UploadFileAsync(_settings.ContainerName, expectedApproved,
-                                                It.IsAny<Stream>(), "text/csv", It.IsAny<CancellationToken>()), Times.Once);
+                                                It.IsAny<Stream>(), CsvContentType, It.IsAny<CancellationToken>()), Times.Once);
             _blob.Verify(x => x.UploadFileAsync(_settings.ContainerName, expectedArchived,
-                                                It.IsAny<Stream>(), "text/csv", It.IsAny<CancellationToken>()), Times.Once);
-            Assert.Equal(2, uploaded.Count);
-            Assert.Contains(uploaded, u => u.FileName == expectedApproved);
-            Assert.Contains(uploaded, u => u.FileName == expectedArchived);
+                                                It.IsAny<Stream>(), CsvContentType, It.IsAny<CancellationToken>()), Times.Once);
+
+            Assert.Multiple(() =>
+            {
+                Assert.Equal(2, uploaded.Count);
+                Assert.All(uploaded, u => Assert.Equal(ContainerName, u.Container));
+                Assert.All(uploaded, u => Assert.Equal(CsvContentType, u.ContentType));
+                Assert.Contains(uploaded, u => u.FileName == expectedApproved);
+                Assert.Contains(uploaded, u => u.FileName == expectedArchived);
+                Assert.All(uploaded, u => Assert.True(u.Copy.Length > 0));
+            });
 
             // Assert – zip has exactly the two entries with expected names
             using var ms = new MemoryStream(result.Value.ZipFileContent);
             using var zip = new ZipArchive(ms, ZipArchiveMode.Read, leaveOpen: false, Encoding.UTF8);
             var names = zip.Entries.Select(e => e.FullName).ToList();
-            Assert.Contains(expectedApproved, names);
-            Assert.Contains(expectedArchived, names);
-            Assert.Equal(2, names.Count);
+
+            Assert.Multiple(() =>
+            {
+                Assert.Contains(expectedApproved, names);
+                Assert.Contains(expectedArchived, names);
+                Assert.Equal(2, names.Count);
+            });
 
             // Light CSV sanity: first line is header for both
             foreach (var entry in zip.Entries)
@@ -125,7 +145,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 using var s = entry.Open();
                 using var r = new StreamReader(s, Encoding.UTF8, leaveOpen: false);
                 var firstLine = await r.ReadLineAsync();
-                Assert.StartsWith("DateOfOfqualDataSnapshot,QualificationName,AwardingOrganisation,QualificationNumber,Level", firstLine);
+                Assert.StartsWith(CsvHeaderPrefixLong, firstLine);
             }
 
             _logRepo.Verify(x => x.CreateAsync(
@@ -151,8 +171,13 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 
             // Assert
             _repo.Verify(x => x.GetQualificationOutputFile(), Times.Once);
-            Assert.False(result.Success);
-            Assert.Equal("No qualifications found for output file.", result.ErrorMessage);
+
+            Assert.Multiple(() =>
+            {
+                Assert.False(result.Success);
+                Assert.Equal(ErrorNoQualifications, result.ErrorMessage);
+            });
+
             _blob.Verify(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
             _logRepo.Verify(x => x.CreateAsync(It.IsAny<QualificationOutputFileLog>(), It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -161,7 +186,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         public async Task Then_Exception_Is_Handled_And_Failure_Returned_No_Uploads()
         {
             // Arrange
-            var ex = new Exception("oops");
+            var ex = new Exception(ErrorGeneric);
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ThrowsAsync(ex);
 
@@ -170,8 +195,13 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 
             // Assert
             _repo.Verify(x => x.GetQualificationOutputFile(), Times.Once);
-            Assert.False(result.Success);
-            Assert.Equal("oops", result.ErrorMessage);
+
+            Assert.Multiple(() =>
+            {
+                Assert.False(result.Success);
+                Assert.Equal(ErrorGeneric, result.ErrorMessage);
+            });
+
             _blob.Verify(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
             _logRepo.Verify(x => x.CreateAsync(It.IsAny<QualificationOutputFileLog>(), It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -194,14 +224,15 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                  .Returns(Task.CompletedTask);
 
             var datePrefix = DateTime.Now.ToString("yy-MM-dd");
-            var expectedApproved = $"{datePrefix}-AOdPApprovedOutputFile.csv";
-            var expectedArchived = $"{datePrefix}-AOdPArchivedOutputFile.csv";
+            var expectedApproved = $"{datePrefix}{ApprovedCsvSuffix}";
+            var expectedArchived = $"{datePrefix}{ArchivedCsvSuffix}";
 
             // Act
             var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
 
-            // Assert: success and both CSVs present
+            // Assert
             Assert.True(result.Success);
+
             using var ms = new MemoryStream(result.Value!.ZipFileContent);
             using var zip = new ZipArchive(ms, ZipArchiveMode.Read, leaveOpen: false, Encoding.UTF8);
 
@@ -212,8 +243,12 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             {
                 var all = await r.ReadToEndAsync();
                 var lines = all.Split(LineSeparators, StringSplitOptions.None);
-                Assert.StartsWith("DateOfOfqualDataSnapshot,QualificationName", lines[0]);
-                Assert.True(lines.Length <= 2); // header only
+
+                Assert.Multiple(() =>
+                {
+                    Assert.StartsWith(CsvHeaderPrefixShort, lines[0]);
+                    Assert.True(lines.Length <= 2); // header only
+                });
             }
 
             // Archived file should contain the data row
@@ -223,10 +258,13 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             {
                 var all = await r.ReadToEndAsync();
                 var lines = all.Split(LineSeparators, StringSplitOptions.RemoveEmptyEntries);
-                Assert.StartsWith("DateOfOfqualDataSnapshot,QualificationName", lines[0]);
-                Assert.True(lines.Length >= 2); // header + at least one row
+
+                Assert.Multiple(() =>
+                {
+                    Assert.StartsWith(CsvHeaderPrefixShort, lines[0]);
+                    Assert.True(lines.Length >= 2); // header + at least one row
+                });
             }
         }
-
     }
 }
