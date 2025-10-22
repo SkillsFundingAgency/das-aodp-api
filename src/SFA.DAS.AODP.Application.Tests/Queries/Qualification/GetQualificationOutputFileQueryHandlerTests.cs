@@ -243,8 +243,12 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             {
                 var all = await r.ReadToEndAsync();
                 var lines = all.Split(LineSeparators, StringSplitOptions.None);
-                Assert.StartsWith("DateOfOfqualDataSnapshot,QualificationName", lines[0]);
-                Assert.True(lines.Length <= 2); // header only
+
+                Assert.Multiple(() =>
+                {
+                    Assert.StartsWith(CsvHeaderPrefixShort, lines[0]);
+                    Assert.True(lines.Length <= 2); // header only
+                });
             }
 
                 Assert.Multiple(() =>
@@ -269,6 +273,5 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 });
             }
         }
-
     }
 }
