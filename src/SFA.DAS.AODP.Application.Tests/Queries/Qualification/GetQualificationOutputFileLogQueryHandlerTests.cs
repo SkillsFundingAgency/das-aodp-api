@@ -43,14 +43,14 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 }
             };
 
-            _repo.Setup(r => r.ListAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            _repo.Setup(r => r.ListAsync(null, It.IsAny<CancellationToken>()))
                  .ReturnsAsync(logs);
 
             // Act
             var result = await _handler.Handle(new GetQualificationOutputFileLogQuery(), CancellationToken.None);
 
             // Assert
-            _repo.Verify(r => r.ListAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+            _repo.Verify(r => r.ListAsync(null, It.IsAny<CancellationToken>()), Times.Once);
 
             Assert.Multiple(() =>
             {
@@ -65,14 +65,14 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         public async Task Then_Repository_Is_Called_And_Returns_Success_With_Empty_List()
         {
             // Arrange
-            _repo.Setup(r => r.ListAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            _repo.Setup(r => r.ListAsync(null, It.IsAny<CancellationToken>()))
                  .ReturnsAsync(new List<QualificationOutputFileLog>());
 
             // Act
             var result = await _handler.Handle(new GetQualificationOutputFileLogQuery(), CancellationToken.None);
 
             // Assert
-            _repo.Verify(r => r.ListAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+            _repo.Verify(r => r.ListAsync(null, It.IsAny<CancellationToken>()), Times.Once);
 
             Assert.Multiple(() =>
             {
@@ -87,20 +87,20 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         public async Task Then_Null_From_Repository_Returns_Failure()
         {
             // Arrange
-            _repo.Setup(r => r.ListAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            _repo.Setup(r => r.ListAsync(null, It.IsAny<CancellationToken>()))
                  .ReturnsAsync((List<QualificationOutputFileLog>?)null!);
 
             // Act
             var result = await _handler.Handle(new GetQualificationOutputFileLogQuery(), CancellationToken.None);
 
             // Assert
-            _repo.Verify(r => r.ListAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+            _repo.Verify(r => r.ListAsync(null, It.IsAny<CancellationToken>()), Times.Once);
 
             Assert.Multiple(() =>
             {
                 Assert.False(result.Success);
                 Assert.Equal(ErrorNoLogs, result.ErrorMessage);
-                Assert.Null(result.Value);
+                Assert.NotNull(result.Value);
             });
         }
 
@@ -108,20 +108,20 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         public async Task Then_Exception_Is_Handled_And_Failure_Returned()
         {
             // Arrange
-            _repo.Setup(r => r.ListAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            _repo.Setup(r => r.ListAsync(null, It.IsAny<CancellationToken>()))
                  .ThrowsAsync(new Exception(ExceptionMessage));
 
             // Act
             var result = await _handler.Handle(new GetQualificationOutputFileLogQuery(), CancellationToken.None);
 
             // Assert
-            _repo.Verify(r => r.ListAsync(It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Once);
+            _repo.Verify(r => r.ListAsync(null, It.IsAny<CancellationToken>()), Times.Once);
 
             Assert.Multiple(() =>
             {
                 Assert.False(result.Success);
                 Assert.Equal(ExceptionMessage, result.ErrorMessage);
-                Assert.Null(result.Value);
+                Assert.NotNull(result.Value);
             });
         }
     }
