@@ -328,6 +328,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             Assert.Equal("Qualification reference cannot be empty", badRequestValue);
 
         }
+        [Fact]
         public async Task GetQualificationCSVExportData_ReturnsOkResult_WithCSVData()
         {
             // Arrange
@@ -468,6 +469,26 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task GetQualificationOutputFile_ReturnsOk_WithResponse()
+        {
+            // Arrange
+            var expected = _fixture.Create<BaseMediatrResponse<GetQualificationOutputFileResponse>>();
+            expected.Success = true;
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<GetQualificationOutputFileQuery>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(expected);
+
+            // Act
+            var result = await _controller.GetQualificationOutputFile();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var model = Assert.IsAssignableFrom<BaseMediatrResponse<GetQualificationOutputFileResponse>>(okResult.Value);
+            Assert.Same(expected, model); 
         }
     }
 }

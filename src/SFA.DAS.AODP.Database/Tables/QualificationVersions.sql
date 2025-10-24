@@ -83,3 +83,8 @@ CREATE INDEX [IX_QualificationVersions_LifeCycle] ON [regulated].[QualificationV
 GO
 
 CREATE INDEX [IX_QualificationVersions_AwardingOrganisation] ON [regulated].[QualificationVersions] ([AwardingOrganisationId])
+
+GO
+
+CREATE INDEX [IX_QualificationVersions_Status_Lifecycle_QualificationId_Version] ON [regulated].[QualificationVersions] ( ProcessStatusId, LifecycleStageId, QualificationId, Version DESC ) 
+INCLUDE (Id, AwardingOrganisationId, [Level], [Type], SubLevel, Ssa, InsertedTimestamp);

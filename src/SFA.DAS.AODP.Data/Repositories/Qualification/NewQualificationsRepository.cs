@@ -46,12 +46,15 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             }
 
             query = query.OrderBy(o => o.QualificationTitle);
+            query = query.AsNoTracking();
+            countQuery = countQuery.AsNoTracking();
+
             var totalRecords = await countQuery.CountAsync();
 
             var skipChecked = skip ?? 0;
             var takeChecked = take ?? 500;
-            var executed = await query
-                        .Skip(skipChecked)
+
+            var executed = await query.Skip(skipChecked)
                         .Take(takeChecked)
                         .ToListAsync();
 

@@ -27,3 +27,8 @@ ALTER TABLE [funded].[QualificationFundings] CHECK CONSTRAINT [FK_QualificationF
 GO
 
 CREATE INDEX [IX_QualificationFundings_QualificationVersion] ON [funded].[QualificationFundings] ([QualificationVersionId])
+GO
+
+CREATE INDEX [IX_QualificationFunding_Version_Offer] ON [funded].[QualificationFundings] (QualificationVersionId, FundingOfferId)
+INCLUDE (StartDate, EndDate)
+
