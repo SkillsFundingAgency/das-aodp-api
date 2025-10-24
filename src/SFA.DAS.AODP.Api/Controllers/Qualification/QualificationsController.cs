@@ -225,7 +225,7 @@ public class QualificationsController : BaseController
         return await SendRequestAsync(new GetDiscussionHistoriesForQualificationQuery { QualificationReference = qualificationReference });
     }
 
-    [HttpGet("output-file")]
+    [HttpGet("outputfile")]
     [ProducesResponseType(typeof(BaseMediatrResponse<GetQualificationOutputFileResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -233,7 +233,6 @@ public class QualificationsController : BaseController
     public async Task<IActionResult> GetQualificationOutputFile()
     {
         var response = await _mediator.Send(new GetQualificationOutputFileQuery());
-
         return Ok(response);
     }
 
