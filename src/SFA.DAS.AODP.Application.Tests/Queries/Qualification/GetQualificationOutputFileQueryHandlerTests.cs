@@ -251,13 +251,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 });
             }
 
-                Assert.Multiple(() =>
-                {
-                    Assert.StartsWith(CsvHeaderPrefixShort, lines[0]);
-                    Assert.True(lines.Length <= 2); // header only
-                });
-            }
-
             // Archived file should contain the data row
             var archivedEntry = zip.Entries.Single(e => e.FullName == expectedArchived);
             using (var s = archivedEntry.Open())
