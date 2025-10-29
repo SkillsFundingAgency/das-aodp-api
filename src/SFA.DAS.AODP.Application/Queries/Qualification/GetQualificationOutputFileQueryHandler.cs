@@ -17,6 +17,8 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
     private readonly IBlobStorageService _blobStorageService;
     private readonly OutputFileBlobStorageSettings _storageSettings;
 
+    public const string NoQualificationsFound = "No qualifications found for the output file.";
+    public const string UnexpectedErrorGeneratingFile = "An unexpected error occurred while generating the output file.";
     public GetQualificationOutputFileQueryHandler(IQualificationOutputFileRepository outputFileRepository, IQualificationOutputFileLogRepository outputFileLogRepository, IBlobStorageService blobStorageService, OutputFileBlobStorageSettings blobStorageSettings )
     {
         _outputFileRepository = outputFileRepository;
@@ -34,17 +36,28 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
         try
         {
             var qualifications = await _outputFileRepository.GetQualificationOutputFile();
-            if (qualifications == null || !qualifications.Any())
+
+            if (qualifications is null)
             {
                 response.Success = false;
-                response.ErrorMessage = "No qualifications found for output file.";
+                response.ErrorMessage = UnexpectedErrorGeneratingFile;
+                response.ErrorCode = ErrorCodes.UnexpectedError;
+                response.InnerException = new InvalidOperationException(UnexpectedErrorGeneratingFile);
+                return response;
+            }
+
+            if (!qualifications.Any())
+            {
+                response.Success = false;
+                response.ErrorMessage = NoQualificationsFound;
+                response.ErrorCode = ErrorCodes.NoData;
                 return response;
             }
 
             var active = qualifications.Where(q => GetMaxFundingEndDate(q) > DateTime.UtcNow.Date);
             var archived = qualifications.Where(q => GetMaxFundingEndDate(q) <= DateTime.UtcNow.Date);
 
-            var currentDate = DateTime.UtcNow.ToString("yy-MM-dd");
+            var currentDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
 
             var approvedCsvFileName = $"{currentDate}-AOdPApprovedOutputFile.csv";
             var archivedCsvFileName = $"{currentDate}-AOdPArchivedOutputFile.csv";
@@ -116,7 +129,9 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
         catch (Exception ex)
         {
             response.Success = false;
-            response.ErrorMessage = ex.Message;
+            response.ErrorMessage = UnexpectedErrorGeneratingFile;
+            response.ErrorCode = ErrorCodes.UnexpectedError;
+            response.InnerException = ex;
             return response;
         }
     }

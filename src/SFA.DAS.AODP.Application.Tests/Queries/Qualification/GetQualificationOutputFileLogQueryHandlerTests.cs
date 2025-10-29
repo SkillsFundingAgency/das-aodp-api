@@ -30,7 +30,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         public async Task Then_Repository_Is_Called_And_Returns_Success_With_Logs()
         {
             // Arrange
-            var datePrefix = DateTime.Now.ToString("yy-MM-dd");
+            var datePrefix = DateTime.UtcNow.ToString("yyyy-MM-dd");
             var logs = new List<QualificationOutputFileLog>
             {
                 new()

@@ -227,11 +227,12 @@ public class QualificationsController : BaseController
 
     [HttpGet("outputfile/{username}")]
     [ProducesResponseType(typeof(BaseMediatrResponse<GetQualificationOutputFileResponse>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetQualificationOutputFile([FromRoute]string username)
+    public async Task<IActionResult> GetQualificationOutputFile([FromRoute] string username)
     {
-        var response = await _mediator.Send(new GetQualificationOutputFileQuery(username));
-        return Ok(response);
+        var result = await _mediator.Send(new GetQualificationOutputFileQuery(username));
+        return Ok(result);
     }
+
 
     [HttpGet("outputfile/logs")]
     [ProducesResponseType(typeof(BaseMediatrResponse<GetQualificationOutputFileLogResponse>), StatusCodes.Status200OK)]

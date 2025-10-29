@@ -26,8 +26,9 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 
         private const string ContainerName = "unit-test-container";
         private const string CsvContentType = "text/csv";
-        private const string ErrorNoQualifications = "No qualifications found for output file.";
+        private const string ErrorNoQualifications = "No qualifications found for the output file.";
         private const string ErrorGeneric = "Exception message";
+        private const string ErrorUnexpected = "An unexpected error occurred while generating the output file.";
         private const string ZipFileSuffix = "_qualifications_export.zip";
         private const string ApprovedCsvSuffix = "-AOdPApprovedOutputFile.csv";
         private const string ArchivedCsvSuffix = "-AOdPArchivedOutputFile.csv";
@@ -71,7 +72,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ReturnsAsync(new List<QualificationOutputFile> { active, archived });
 
-            var datePrefix = DateTime.Now.ToString("yy-MM-dd");
+            var datePrefix = DateTime.UtcNow.ToString("yyyy-MM-dd");
             var expectedApproved = $"{datePrefix}{ApprovedCsvSuffix}";
             var expectedArchived = $"{datePrefix}{ArchivedCsvSuffix}";
 
@@ -139,7 +140,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 Assert.Equal(2, names.Count);
             });
 
-            // Light CSV sanity: first line is header for both
             foreach (var entry in zip.Entries)
             {
                 using var s = entry.Open();
@@ -176,6 +176,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             {
                 Assert.False(result.Success);
                 Assert.Equal(ErrorNoQualifications, result.ErrorMessage);
+                Assert.Null(result.InnerException);          
+                Assert.NotNull(result.Value);                  
             });
 
             _blob.Verify(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
@@ -187,8 +189,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         {
             // Arrange
             var ex = new Exception(ErrorGeneric);
-            _repo.Setup(x => x.GetQualificationOutputFile())
-                 .ThrowsAsync(ex);
+            _repo.Setup(x => x.GetQualificationOutputFile()).ThrowsAsync(ex);
 
             // Act
             var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
@@ -199,9 +200,29 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             Assert.Multiple(() =>
             {
                 Assert.False(result.Success);
-                Assert.Equal(ErrorGeneric, result.ErrorMessage);
+                Assert.Equal(ErrorUnexpected, result.ErrorMessage);
+                Assert.NotNull(result.InnerException);      
+                Assert.Equal(ex, result.InnerException);
+                Assert.NotNull(result.Value);                   
             });
 
+            _blob.Verify(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+            _logRepo.Verify(x => x.CreateAsync(It.IsAny<QualificationOutputFileLog>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Then_Null_From_Repository_Is_Treated_As_Fault()
+        {
+            // Arrange
+            _repo.Setup(x => x.GetQualificationOutputFile()).ReturnsAsync((List<QualificationOutputFile>?)null!);
+
+            // Act
+            var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
+
+            // Assert
+            Assert.False(result.Success);
+            Assert.Equal(ErrorCodes.UnexpectedError, result.ErrorCode);
+            Assert.NotNull(result.InnerException); 
             _blob.Verify(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
             _logRepo.Verify(x => x.CreateAsync(It.IsAny<QualificationOutputFileLog>(), It.IsAny<CancellationToken>()), Times.Never);
         }
@@ -223,7 +244,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             _blob.Setup(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                  .Returns(Task.CompletedTask);
 
-            var datePrefix = DateTime.Now.ToString("yy-MM-dd");
+            var datePrefix = DateTime.UtcNow.ToString("yyyy-MM-dd");
             var expectedApproved = $"{datePrefix}{ApprovedCsvSuffix}";
             var expectedArchived = $"{datePrefix}{ArchivedCsvSuffix}";
 

@@ -2,6 +2,7 @@
 using AutoFixture.AutoMoq;
 using AutoFixture.Kernel;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -26,7 +27,10 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
         private readonly QualificationsController _controller;
 
         #region Test data
-        private static readonly string _userName = "Aalam Adams";
+        private const string _userName = "Aalam Adams";
+        private const string ErrorNoQualifications = "No qualifications found for the output file.";
+        private const string outputFileErrorMessage = "what?";
+        private const string unexpectedErrorMessage = "Unexpected error when generating the output file.";
         #endregion
 
         public QualificationsControllerTests()
@@ -503,30 +507,61 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
         }
 
         [Fact]
-        public async Task GetQualificationOutputFile_ReturnsOk_WithFailure()
+        public async Task GetQualificationOutputFile_ReturnsNoDataErrorCode()
         {
-            // arrange
+            // Arrange
             var expected = new BaseMediatrResponse<GetQualificationOutputFileResponse>
             {
                 Success = false,
-                ErrorMessage = "No qualifications found for output file."
+                ErrorMessage = outputFileErrorMessage,
+                ErrorCode = "NO_DATA"
             };
-            _mediatorMock.Setup(m => m.Send(It.IsAny<GetQualificationOutputFileQuery>(), It.IsAny<CancellationToken>()))
-                    .ReturnsAsync(expected);
 
-            // act
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetQualificationOutputFileQuery>(), It.IsAny<CancellationToken>()))
+                         .ReturnsAsync(expected);
+
+            // Act
             var result = await _controller.GetQualificationOutputFile(_userName);
 
-            // assert
+            // Assert
             Assert.Multiple(() =>
             {
-                var ok = Assert.IsType<OkObjectResult>(result);
-                var body = Assert.IsType<BaseMediatrResponse<GetQualificationOutputFileResponse>>(ok.Value);
+                var obj = Assert.IsType<OkObjectResult>(result);
+                var body = Assert.IsType<BaseMediatrResponse<GetQualificationOutputFileResponse>>(obj.Value);
                 Assert.False(body.Success);
-                Assert.Equal("No qualifications found for output file.", body.ErrorMessage);
+                Assert.Equal("NO_DATA", body.ErrorCode);
+                Assert.Equal(outputFileErrorMessage, body.ErrorMessage);
             });
         }
 
+        [Fact]
+        public async Task GetQualificationOutputFile_ReturnsUnexpectedErrorCode()
+        {
+            // Arrange
+            var expected = new BaseMediatrResponse<GetQualificationOutputFileResponse>
+            {
+                Success = false,
+                ErrorMessage = unexpectedErrorMessage,
+                ErrorCode = "UNEXPECTED_ERROR",
+                InnerException = new Exception(unexpectedErrorMessage)
+            };
+
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetQualificationOutputFileQuery>(), It.IsAny<CancellationToken>()))
+                         .ReturnsAsync(expected);
+
+            // Act
+            var result = await _controller.GetQualificationOutputFile(_userName);
+
+            // Assert
+            Assert.Multiple(() =>
+            {
+                var obj = Assert.IsType<OkObjectResult>(result);
+                var body = Assert.IsType<BaseMediatrResponse<GetQualificationOutputFileResponse>>(obj.Value);
+                Assert.False(body.Success);
+                Assert.Equal("UNEXPECTED_ERROR", body.ErrorCode);
+                Assert.False(string.IsNullOrWhiteSpace(body.ErrorMessage));
+            });
+        }
         [Fact]
         public async Task GetQualificationOutputFile_ForwardsUsernameToMediator()
         {
@@ -535,11 +570,12 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                     .Callback<object, CancellationToken>((q, _) => captured = (GetQualificationOutputFileQuery)q)
                     .ReturnsAsync(new BaseMediatrResponse<GetQualificationOutputFileResponse> { Success = true, Value = new() });
 
-
             await _controller.GetQualificationOutputFile(_userName);
 
-            Assert.NotNull(captured);
-            Assert.Equal(_userName, captured!.CurrentUsername);
+            Assert.Multiple(() => { 
+                Assert.NotNull(captured);
+                Assert.Equal(_userName, captured!.CurrentUsername);
+            });
         }
 
         [Fact]
