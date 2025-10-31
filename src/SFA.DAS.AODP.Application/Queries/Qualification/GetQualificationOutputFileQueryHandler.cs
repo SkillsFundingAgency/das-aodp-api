@@ -7,19 +7,22 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO.Compression;
 using System.Text;
-
 namespace SFA.DAS.AODP.Application.Queries.Qualifications;
 
 
 public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualificationOutputFileQuery, BaseMediatrResponse<GetQualificationOutputFileResponse>>
 {
-    private readonly IQualificationOutputFileRepository _repository;
+    private readonly IQualificationOutputFileRepository _outputFileRepository;
+    private readonly IQualificationOutputFileLogRepository _outputFileLogRepository;
     private readonly IBlobStorageService _blobStorageService;
     private readonly OutputFileBlobStorageSettings _storageSettings;
 
-    public GetQualificationOutputFileQueryHandler(IQualificationOutputFileRepository repository, IBlobStorageService blobStorageService, OutputFileBlobStorageSettings blobStorageSettings )
+    public const string NoQualificationsFound = "No qualifications found for the output file.";
+    public const string UnexpectedErrorGeneratingFile = "An unexpected error occurred while generating the output file.";
+    public GetQualificationOutputFileQueryHandler(IQualificationOutputFileRepository outputFileRepository, IQualificationOutputFileLogRepository outputFileLogRepository, IBlobStorageService blobStorageService, OutputFileBlobStorageSettings blobStorageSettings )
     {
-        _repository = repository;
+        _outputFileRepository = outputFileRepository;
+        _outputFileLogRepository = outputFileLogRepository;
         _blobStorageService = blobStorageService;
         _storageSettings = blobStorageSettings;
     }
@@ -32,18 +35,29 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
 
         try
         {
-            var qualifications = await _repository.GetQualificationOutputFile();
-            if (qualifications == null || !qualifications.Any())
+            var qualifications = await _outputFileRepository.GetQualificationOutputFile();
+
+            if (qualifications is null)
             {
                 response.Success = false;
-                response.ErrorMessage = "No qualifications found for output file.";
+                response.ErrorMessage = UnexpectedErrorGeneratingFile;
+                response.ErrorCode = ErrorCodes.UnexpectedError;
+                response.InnerException = new InvalidOperationException(UnexpectedErrorGeneratingFile);
+                return response;
+            }
+
+            if (!qualifications.Any())
+            {
+                response.Success = false;
+                response.ErrorMessage = NoQualificationsFound;
+                response.ErrorCode = ErrorCodes.NoData;
                 return response;
             }
 
             var active = qualifications.Where(q => GetMaxFundingEndDate(q) > DateTime.UtcNow.Date);
-            var archived = qualifications.Where(q => GetMaxFundingEndDate(q) < DateTime.UtcNow.Date);
+            var archived = qualifications.Where(q => GetMaxFundingEndDate(q) <= DateTime.UtcNow.Date);
 
-            var currentDate = DateTime.Now.ToString("yy-MM-dd");
+            var currentDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
 
             var approvedCsvFileName = $"{currentDate}-AOdPApprovedOutputFile.csv";
             var archivedCsvFileName = $"{currentDate}-AOdPArchivedOutputFile.csv";
@@ -91,6 +105,17 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
                 zipBytes = ms.ToArray();
             }
 
+            var history = new QualificationOutputFileLog
+            {
+                Id = Guid.NewGuid(),
+                UserDisplayName = request.CurrentUsername, 
+                Timestamp = DateTime.UtcNow,
+                ApprovedFileName = approvedCsvFileName,
+                ArchivedFileName = archivedCsvFileName,
+
+            };
+            await _outputFileLogRepository.CreateAsync(history, cancellationToken);
+
             var zipFileName = $"{currentDate}_qualifications_export.zip";
 
             response.Success = true;
@@ -104,7 +129,9 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
         catch (Exception ex)
         {
             response.Success = false;
-            response.ErrorMessage = ex.Message;
+            response.ErrorMessage = UnexpectedErrorGeneratingFile;
+            response.ErrorCode = ErrorCodes.UnexpectedError;
+            response.InnerException = ex;
             return response;
         }
     }
@@ -224,93 +251,73 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
         await using var w = new StreamWriter(output, Encoding.UTF8, leaveOpen: true);
         await w.WriteLineAsync(CsvHeader);
 
-        int rowNumber = 0;
-
         foreach (var q in rows)
         {
-
-            rowNumber++;
-
-            try
+            var line = string.Join(",", new[]
             {
-                Debug.WriteLine($"Processing row {rowNumber} – QN: {q.QualificationNumber}, Name: {q.QualificationName}");
+                Csv(q.DateOfOfqualDataSnapshot),
+                Csv(q.QualificationName),
+                Csv(q.AwardingOrganisation),
+                Csv(q.QualificationNumber),
+                Csv(q.Level),
+                Csv(q.QualificationType),
+                Csv(q.Subcategory),
+                Csv(q.SectorSubjectArea),
+                Csv(q.Status),
 
-                var line = string.Join(",", new[]
-                {
-                    Csv(q.DateOfOfqualDataSnapshot),
-                    Csv(q.QualificationName),
-                    Csv(q.AwardingOrganisation),
-                    Csv(q.QualificationNumber),
-                    Csv(q.Level),
-                    Csv(q.QualificationType),
-                    Csv(q.Subcategory),
-                    Csv(q.SectorSubjectArea),
-                    Csv(q.Status),
+                Csv(q.Age1416_FundingAvailable?.ToString()),
+                Csv(q.Age1416_FundingApprovalStartDate),
+                Csv(q.Age1416_FundingApprovalEndDate),
+                Csv(q.Age1416_Notes),
 
-                    Csv(q.Age1416_FundingAvailable?.ToString()),
-                    Csv(q.Age1416_FundingApprovalStartDate),
-                    Csv(q.Age1416_FundingApprovalEndDate),
-                    Csv(q.Age1416_Notes),
+                Csv(q.Age1619_FundingAvailable?.ToString()),
+                Csv(q.Age1619_FundingApprovalStartDate),
+                Csv(q.Age1619_FundingApprovalEndDate),
+                Csv(q.Age1619_Notes),
 
-                    Csv(q.Age1619_FundingAvailable?.ToString()),
-                    Csv(q.Age1619_FundingApprovalStartDate),
-                    Csv(q.Age1619_FundingApprovalEndDate),
-                    Csv(q.Age1619_Notes),
+                Csv(q.LocalFlexibilities_FundingAvailable?.ToString()),
+                Csv(q.LocalFlexibilities_FundingApprovalStartDate),
+                Csv(q.LocalFlexibilities_FundingApprovalEndDate),
+                Csv(q.LocalFlexibilities_Notes),
 
-                    Csv(q.LocalFlexibilities_FundingAvailable?.ToString()),
-                    Csv(q.LocalFlexibilities_FundingApprovalStartDate),
-                    Csv(q.LocalFlexibilities_FundingApprovalEndDate),
-                    Csv(q.LocalFlexibilities_Notes),
+                Csv(q.LegalEntitlementL2L3_FundingAvailable?.ToString()),
+                Csv(q.LegalEntitlementL2L3_FundingApprovalStartDate),
+                Csv(q.LegalEntitlementL2L3_FundingApprovalEndDate),
+                Csv(q.LegalEntitlementL2L3_Notes),
 
-                    Csv(q.LegalEntitlementL2L3_FundingAvailable?.ToString()),
-                    Csv(q.LegalEntitlementL2L3_FundingApprovalStartDate),
-                    Csv(q.LegalEntitlementL2L3_FundingApprovalEndDate),
-                    Csv(q.LegalEntitlementL2L3_Notes),
+                Csv(q.LegalEntitlementEnglishandMaths_FundingAvailable?.ToString()),
+                Csv(q.LegalEntitlementEnglishandMaths_FundingApprovalStartDate),
+                Csv(q.LegalEntitlementEnglishandMaths_FundingApprovalEndDate),
+                Csv(q.LegalEntitlementEnglishandMaths_Notes),
 
-                    Csv(q.LegalEntitlementEnglishandMaths_FundingAvailable?.ToString()),
-                    Csv(q.LegalEntitlementEnglishandMaths_FundingApprovalStartDate),
-                    Csv(q.LegalEntitlementEnglishandMaths_FundingApprovalEndDate),
-                    Csv(q.LegalEntitlementEnglishandMaths_Notes),
+                Csv(q.DigitalEntitlement_FundingAvailable?.ToString()),
+                Csv(q.DigitalEntitlement_FundingApprovalStartDate),
+                Csv(q.DigitalEntitlement_FundingApprovalEndDate),
+                Csv(q.DigitalEntitlement_Notes),
 
-                    Csv(q.DigitalEntitlement_FundingAvailable?.ToString()),
-                    Csv(q.DigitalEntitlement_FundingApprovalStartDate),
-                    Csv(q.DigitalEntitlement_FundingApprovalEndDate),
-                    Csv(q.DigitalEntitlement_Notes),
+                Csv(q.LifelongLearningEntitlement_FundingAvailable?.ToString()),
+                Csv(q.LifelongLearningEntitlement_FundingApprovalStartDate),
+                Csv(q.LifelongLearningEntitlement_FundingApprovalEndDate),
+                Csv(q.LifelongLearningEntitlement_Notes),
 
-                    Csv(q.LifelongLearningEntitlement_FundingAvailable?.ToString()),
-                    Csv(q.LifelongLearningEntitlement_FundingApprovalStartDate),
-                    Csv(q.LifelongLearningEntitlement_FundingApprovalEndDate),
-                    Csv(q.LifelongLearningEntitlement_Notes),
+                Csv(q.AdvancedLearnerLoans_FundingAvailable?.ToString()),
+                Csv(q.AdvancedLearnerLoans_FundingApprovalStartDate),
+                Csv(q.AdvancedLearnerLoans_FundingApprovalEndDate),
+                Csv(q.AdvancedLearnerLoans_Notes),
 
-                    Csv(q.AdvancedLearnerLoans_FundingAvailable?.ToString()),
-                    Csv(q.AdvancedLearnerLoans_FundingApprovalStartDate),
-                    Csv(q.AdvancedLearnerLoans_FundingApprovalEndDate),
-                    Csv(q.AdvancedLearnerLoans_Notes),
+                Csv(q.AwardingOrganisationURL),
 
-                    Csv(q.AwardingOrganisationURL),
+                Csv(q.FreeCoursesForJobs_FundingAvailable?.ToString()),
+                Csv(q.FreeCoursesForJobs_FundingApprovalStartDate),
+                Csv(q.FreeCoursesForJobs_FundingApprovalEndDate),
+                Csv(q.FreeCoursesForJobs_Notes),
+            });
 
-                    Csv(q.FreeCoursesForJobs_FundingAvailable?.ToString()),
-                    Csv(q.FreeCoursesForJobs_FundingApprovalStartDate),
-                    Csv(q.FreeCoursesForJobs_FundingApprovalEndDate),
-                    Csv(q.FreeCoursesForJobs_Notes),
-                });
-
-                await w.WriteLineAsync(line);
-            }
-            catch (Exception ex)
-            {
-                // Catch individual record failures, but let the main process keep going or stop, as you prefer
-                Debug.WriteLine($"⚠️  Error processing row {rowNumber} ({q.QualificationNumber} - {q.QualificationName})");
-                Debug.WriteLine($"   Message: {ex.Message}");
-                Debug.WriteLine($"   Stack: {ex.StackTrace}");
-
-                // You can choose: skip and continue, or rethrow to stop immediately
-                throw;
-            }
-
-            await w.FlushAsync();
+            await w.WriteLineAsync(line);
         }
 
+        await w.FlushAsync();
+        
     }
 }
 
