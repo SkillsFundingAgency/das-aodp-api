@@ -88,3 +88,39 @@ GO
 
 CREATE INDEX [IX_QualificationVersions_Status_Lifecycle_QualificationId_Version] ON [regulated].[QualificationVersions] ( ProcessStatusId, LifecycleStageId, QualificationId, Version DESC ) 
 INCLUDE (Id, AwardingOrganisationId, [Level], [Type], SubLevel, Ssa, InsertedTimestamp);
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_QualificationVersions_EligibleForFunding_Type] ON [regulated].[QualificationVersions] ([EligibleForFunding], [Type])
+INCLUDE ([QualificationId], [VersionFieldChangesId], [LifecycleStageId]);
+
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_QualificationVersions_LifecycleStage_Reporting]
+ON [regulated].[QualificationVersions] ([LifecycleStageId])
+INCLUDE (
+    [QualificationId],
+    [AwardingOrganisationId],
+    [Type],
+    [Ssa],
+    [Level],
+    [SubLevel],
+    [Version],
+    [InsertedTimestamp]
+);
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_QualificationVersions_ProcessStatus_Operational]
+ON [regulated].[QualificationVersions] ([ProcessStatusId])
+INCLUDE (
+    [QualificationId],
+    [OperationalEndDate],
+    [Version]
+);
+
+
+
+
+

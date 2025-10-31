@@ -15,3 +15,6 @@ CREATE TABLE [funded].[Qualifications](
 	CONSTRAINT FK_Qualification FOREIGN KEY (QualificationId) REFERENCES dbo.Qualification (Id)
 ) ON [PRIMARY]
 GO
+
+CREATE NONCLUSTERED INDEX [IX_Qualifications_QualificationId]
+ON [funded].[Qualifications] ([QualificationId]);
