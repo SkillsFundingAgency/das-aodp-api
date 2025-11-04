@@ -69,6 +69,9 @@ CREATE TABLE [regulated].[QualificationVersions](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 
+CREATE INDEX IX_QualificationVersions_QualificationId ON [regulated].[QualificationVersions] ([QualificationId]) INCLUDE ([VersionFieldChangesId]);
+
+GO
 
 CREATE INDEX [IX_QualificationVersions_EligibleForFunding] ON [regulated].[QualificationVersions] ([EligibleForFunding])
 
@@ -78,7 +81,9 @@ CREATE INDEX [IX_QualificationVersions_ProcessStatus] ON [regulated].[Qualificat
 
 GO
 
-CREATE INDEX [IX_QualificationVersions_LifeCycle] ON [regulated].[QualificationVersions] ([LifecycleStageId])
+CREATE INDEX IX_QualificationVersions_LifeCycle ON [regulated].[QualificationVersions] (LifecycleStageId)
+INCLUDE (QualificationId, ProcessStatusId, AwardingOrganisationId, [Type], Ssa, [Level], [Version],
+    PreSixteen, SixteenToEighteen, EighteenPlus, NineteenPlus, OperationalEndDate, CertificationEndDate)
 
 GO
 
