@@ -10,3 +10,7 @@ CREATE TABLE [funded].[QualificationOffers](
 	CONSTRAINT FK_Qualifications FOREIGN KEY (QualificationId) REFERENCES [funded].[Qualifications] (Id)
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
+
+
+CREATE INDEX IX_QualificationOffers_QualificationId ON funded.QualificationOffers (QualificationId)      
+INCLUDE ([Name], Notes);                                
