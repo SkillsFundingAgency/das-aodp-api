@@ -4,6 +4,7 @@ using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.Feedback;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
+using SFA.DAS.AODP.Data.Entities.Import;
 using SFA.DAS.AODP.Data.Entities.Jobs;
 using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.Qualification;
@@ -57,6 +58,8 @@ namespace SFA.DAS.AODP.Data.Context
 
         DbSet<QualificationFundingFeedbacks> QualificationFundingFeedbacks { get; set; }
         DbSet<QualificationFundings> QualificationFundings { get; set; }
+
+        DbSet<DefundingList> DefundingLists { get; set; }
         DbSet<Survey> Surveys { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task<IDbContextTransaction> StartTransactionAsync();

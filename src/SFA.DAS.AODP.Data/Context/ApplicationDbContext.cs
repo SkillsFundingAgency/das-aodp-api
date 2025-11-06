@@ -5,6 +5,7 @@ using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.Feedback;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
+using SFA.DAS.AODP.Data.Entities.Import;
 using SFA.DAS.AODP.Data.Entities.Jobs;
 using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.Qualification;
@@ -69,6 +70,8 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<QualificationFundingFeedbacks> QualificationFundingFeedbacks { get; set; }
         public virtual DbSet<QualificationFundings> QualificationFundings { get; set; }
         public virtual DbSet<Survey> Surveys { get; set; }
+        public virtual DbSet<DefundingList> DefundingLists { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<QualificationNewReviewRequired>().ToView("v_QualificationNewReviewRequired", "regulated").HasNoKey();

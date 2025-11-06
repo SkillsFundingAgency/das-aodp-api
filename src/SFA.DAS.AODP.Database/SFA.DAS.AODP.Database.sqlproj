@@ -72,6 +72,7 @@
     <Folder Include="Tables\Feedback" />
     <Folder Include="Views\Support" />
     <Folder Include="Views\Output" />
+    <Folder Include="Tables\Import" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Schemas\FundedSchema.sql" />
@@ -164,6 +165,8 @@
     <Build Include="Views\Support\v_Anomaly_Scenario_5_Dashboard.sql" />
     <Build Include="Views\Support\v_AllAwardingOrganisations.sql" />
     <Build Include="Views\Output\v_Output_CombinedStatuses.sql" />
+    <Build Include="Tables\Import\DefundingList.sql" />
+    <Build Include="Stored Procedures\proc_DeleteDuplicateDefundingLists.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
