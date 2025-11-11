@@ -16,8 +16,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
         public async Task<Guid> CreateAsync(QualificationOutputFileLog entity, CancellationToken ct)
         {
             entity.Id = Guid.NewGuid();
-            entity.Timestamp = DateTime.UtcNow;
-
             _context.QualificationOutputFileLog.Add(entity);
             await _context.SaveChangesAsync(ct);
             return entity.Id;
@@ -29,7 +27,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
         {
             IQueryable<QualificationOutputFileLog> query = _context.QualificationOutputFileLog
                 .AsNoTracking()
-                .OrderByDescending(x => x.Timestamp);
+                .OrderByDescending(x => x.DownloadDate);
 
             if (take.HasValue)
                 query = query.Take(take.Value);

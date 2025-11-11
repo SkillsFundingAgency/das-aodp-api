@@ -3,7 +3,6 @@ using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Infrastructure;
 using SFA.DAS.AODP.Models.Settings;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO.Compression;
 using System.Text;
@@ -54,8 +53,9 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
                 return response;
             }
 
-            var active = qualifications.Where(q => GetMaxFundingEndDate(q) > DateTime.UtcNow.Date);
-            var archived = qualifications.Where(q => GetMaxFundingEndDate(q) <= DateTime.UtcNow.Date);
+
+            var active = qualifications.Where(q => GetMaxFundingEndDate(q) > request.PublicationDate);
+            var archived = qualifications.Where(q => GetMaxFundingEndDate(q) <= request.PublicationDate);
 
             var currentDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
 
@@ -109,7 +109,8 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
             {
                 Id = Guid.NewGuid(),
                 UserDisplayName = request.CurrentUsername, 
-                Timestamp = DateTime.UtcNow,
+                DownloadDate = DateTime.UtcNow,
+                PublicationDate = request.PublicationDate,
                 ApprovedFileName = approvedCsvFileName,
                 ArchivedFileName = archivedCsvFileName,
 
@@ -129,8 +130,8 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
         catch (Exception ex)
         {
             response.Success = false;
-            response.ErrorMessage = UnexpectedErrorGeneratingFile;
-            response.ErrorCode = ErrorCodes.UnexpectedError;
+                response.ErrorMessage = UnexpectedErrorGeneratingFile;
+                response.ErrorCode = ErrorCodes.UnexpectedError;
             response.InnerException = ex;
             return response;
         }

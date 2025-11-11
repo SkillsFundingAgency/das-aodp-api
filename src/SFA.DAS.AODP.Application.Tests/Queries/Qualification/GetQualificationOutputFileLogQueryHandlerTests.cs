@@ -37,7 +37,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 {
                     Id = Guid.NewGuid(),
                     UserDisplayName = "Alice",
-                    Timestamp = DateTime.UtcNow.AddMinutes(-5),
+                    DownloadDate = DateTime.UtcNow.AddMinutes(-5),
+                    PublicationDate = DateTime.UtcNow.AddDays(3),
                     ApprovedFileName = $"{datePrefix}{ApprovedSuffix}",
                     ArchivedFileName = $"{datePrefix}{ArchivedSuffix}"
                 }

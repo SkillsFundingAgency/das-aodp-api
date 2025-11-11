@@ -36,7 +36,11 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         private const string CsvHeaderPrefixShort = "DateOfOfqualDataSnapshot,QualificationName";
 
         #region Test data
-        private static readonly string _username = "Aalam Adams";
+        private GetQualificationOutputFileQuery _testRequest = new()
+        {
+            CurrentUsername = "Alaam Adams",
+            PublicationDate = DateTime.UtcNow.AddDays(23)
+        };
         #endregion
 
         public GetQualificationOutputFileQueryHandlerTests()
@@ -96,7 +100,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                  .Returns(Task.CompletedTask);
 
             // Act
-            var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
+            var result = await _handler.Handle(_testRequest, CancellationToken.None);
 
             // Assert – repository called
             _repo.Verify(x => x.GetQualificationOutputFile(), Times.Once);
@@ -150,11 +154,12 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 
             _logRepo.Verify(x => x.CreateAsync(
                 It.Is<QualificationOutputFileLog>(h =>
-                    h.UserDisplayName == _username &&
+                    h.UserDisplayName == _testRequest.CurrentUsername &&
                     h.ApprovedFileName == expectedApproved &&
                     h.ArchivedFileName == expectedArchived &&
-                    h.Timestamp <= DateTime.UtcNow.AddSeconds(5) &&
-                    h.Timestamp >= DateTime.UtcNow.AddMinutes(-1)
+                    h.PublicationDate == _testRequest.PublicationDate &&
+                    h.DownloadDate <= DateTime.UtcNow.AddSeconds(5) &&
+                    h.DownloadDate >= DateTime.UtcNow.AddMinutes(-1)
                 ),
                 It.IsAny<CancellationToken>()), Times.Once);
         }
@@ -167,7 +172,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                  .ReturnsAsync(new List<QualificationOutputFile>());
 
             // Act
-            var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
+            var result = await _handler.Handle(_testRequest, CancellationToken.None);
 
             // Assert
             _repo.Verify(x => x.GetQualificationOutputFile(), Times.Once);
@@ -192,7 +197,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             _repo.Setup(x => x.GetQualificationOutputFile()).ThrowsAsync(ex);
 
             // Act
-            var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
+            var result = await _handler.Handle(_testRequest, CancellationToken.None);
 
             // Assert
             _repo.Verify(x => x.GetQualificationOutputFile(), Times.Once);
@@ -217,7 +222,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             _repo.Setup(x => x.GetQualificationOutputFile()).ReturnsAsync((List<QualificationOutputFile>?)null!);
 
             // Act
-            var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
+            var result = await _handler.Handle(_testRequest, CancellationToken.None);
 
             // Assert
             Assert.False(result.Success);
@@ -249,7 +254,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             var expectedArchived = $"{datePrefix}{ArchivedCsvSuffix}";
 
             // Act
-            var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
+            var result = await _handler.Handle(_testRequest, CancellationToken.None);
 
             // Assert
             Assert.True(result.Success);
