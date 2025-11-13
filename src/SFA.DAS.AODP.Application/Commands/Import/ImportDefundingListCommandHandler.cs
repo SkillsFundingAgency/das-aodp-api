@@ -213,7 +213,7 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
             {
                 if (int.TryParse(value, out var sstIndex) && sharedStrings != null)
                 {
-                    var ssi = sharedStrings.ElementAtOrDefault(sstIndex);
+                    var ssi = sharedStrings.Elements().ElementAtOrDefault(sstIndex);
                     if (ssi == null) return string.Empty;
 
                     var text = ssi.InnerText?.ToString();
