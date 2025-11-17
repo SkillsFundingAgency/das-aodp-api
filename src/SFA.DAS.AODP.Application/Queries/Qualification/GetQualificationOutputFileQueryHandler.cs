@@ -53,56 +53,30 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
                 return response;
             }
 
-
-            var active = qualifications.Where(q => GetMaxFundingEndDate(q) > request.PublicationDate);
-            var archived = qualifications.Where(q => GetMaxFundingEndDate(q) <= request.PublicationDate);
-
+            var qualificationsWithPublicationStatus = qualifications
+                .Select(q =>
+                {
+                    q.PublicationStatus = GetMaxFundingEndDate(q) > request.PublicationDate
+                        ? "Approved"
+                        : "Archived";
+                    return q;
+                })
+                .ToList();
+           
             var currentDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
 
-            var approvedCsvFileName = $"{currentDate}-AOdPApprovedOutputFile.csv";
-            var archivedCsvFileName = $"{currentDate}-AOdPArchivedOutputFile.csv";
+            var csvFileName = $"{currentDate}-AOdPOutputFile.csv";
 
-            var approvedCsvFileBytes = await BuildCsvBytesAsync(active);
-            var archivedCsvFileBytes = await BuildCsvBytesAsync(archived);
+            var csvFileBytes = await BuildCsvBytesAsync(qualificationsWithPublicationStatus);
 
-            using (var approvedCsvStream = new MemoryStream(approvedCsvFileBytes, writable: false))
+            using (var csvStream = new MemoryStream(csvFileBytes, writable: false))
             {
                 await _blobStorageService.UploadFileAsync(
                     containerName: _storageSettings.ContainerName,
-                    fileName: approvedCsvFileName,
-                    content: approvedCsvStream,
+                    fileName: csvFileName,
+                    content: csvStream,
                     contentType: "text/csv",
                     cancellationToken: cancellationToken);
-            }
-
-            using (var archivedCsvStream = new MemoryStream(archivedCsvFileBytes, writable: false))
-            {
-                await _blobStorageService.UploadFileAsync(
-                    containerName: _storageSettings.ContainerName,
-                    fileName: archivedCsvFileName,
-                    content: archivedCsvStream,
-                    contentType: "text/csv",
-                    cancellationToken: cancellationToken);
-            }
-
-            byte[] zipBytes;
-            using (var ms = new MemoryStream())
-            {
-                using (var zip = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true, Encoding.UTF8))
-                {
-                    var approvedZipEntry = zip.CreateEntry(approvedCsvFileName);
-                    await using (var approvedZipEntryStream = approvedZipEntry.Open())
-                    {
-                        await approvedZipEntryStream.WriteAsync(approvedCsvFileBytes, cancellationToken);
-                    }
-
-                    var archivedZipEntry = zip.CreateEntry(archivedCsvFileName);
-                    await using (var archivedZipEntryStream = archivedZipEntry.Open())
-                    {
-                        await archivedZipEntryStream.WriteAsync(archivedCsvFileBytes, cancellationToken);
-                    }
-                }
-                zipBytes = ms.ToArray();
             }
 
             var history = new QualificationOutputFileLog
@@ -111,19 +85,16 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
                 UserDisplayName = request.CurrentUsername, 
                 DownloadDate = DateTime.UtcNow,
                 PublicationDate = request.PublicationDate,
-                ApprovedFileName = approvedCsvFileName,
-                ArchivedFileName = archivedCsvFileName,
+                FileName = csvFileName
 
             };
             await _outputFileLogRepository.CreateAsync(history, cancellationToken);
 
-            var zipFileName = $"{currentDate}_qualifications_export.zip";
-
             response.Success = true;
             response.Value = new GetQualificationOutputFileResponse
             {
-                FileName = zipFileName,
-                ZipFileContent = zipBytes
+                FileName = csvFileName,
+                FileContent = csvFileBytes
             };
             return response;
         }
@@ -264,7 +235,7 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
                 Csv(q.QualificationType),
                 Csv(q.Subcategory),
                 Csv(q.SectorSubjectArea),
-                Csv(q.Status),
+                Csv(q.PublicationStatus),
 
                 Csv(q.Age1416_FundingAvailable?.ToString()),
                 Csv(q.Age1416_FundingApprovalStartDate),

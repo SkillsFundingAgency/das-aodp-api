@@ -14,8 +14,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         private readonly Mock<IQualificationOutputFileLogRepository> _repo;
         private readonly GetQualificationOutputFileLogQueryHandler _handler;
 
-        private const string ApprovedSuffix = "-AOdPApprovedOutputFile.csv";
-        private const string ArchivedSuffix = "-AOdPArchivedOutputFile.csv";
+        private const string FileSuffix = "-AOdPOutputFile.csv";
         private const string ErrorNoLogs = "No logs found.";
         private const string ExceptionMessage = "Problem found";
 
@@ -39,8 +38,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                     UserDisplayName = "Alice",
                     DownloadDate = DateTime.UtcNow.AddMinutes(-5),
                     PublicationDate = DateTime.UtcNow.AddDays(3),
-                    ApprovedFileName = $"{datePrefix}{ApprovedSuffix}",
-                    ArchivedFileName = $"{datePrefix}{ArchivedSuffix}"
+                    FileName = $"{datePrefix}{FileSuffix}",
                 }
             };
 

@@ -493,7 +493,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                 Value = new GetQualificationOutputFileResponse
                 {
                     FileName = "2025-10-17_qualifications_export.zip",
-                    ZipFileContent = new byte[] { 1, 2, 3 }
+                    FileContent = new byte[] { 1, 2, 3 }
                 }
             };
 
@@ -595,7 +595,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                 {
                     OutputFileLogs = new List<QualificationOutputFileLog> 
                     { 
-                        new() { DownloadDate = DateTime.Now.AddDays(-3), PublicationDate= _getOutputFileRequest.PublicationDate,  UserDisplayName = _getOutputFileRequest.CurrentUsername, ApprovedFileName = "a.csv", ArchivedFileName = "b.csv" } 
+                        new() { DownloadDate = DateTime.Now.AddDays(-3), PublicationDate= _getOutputFileRequest.PublicationDate,  UserDisplayName = _getOutputFileRequest.CurrentUsername, FileName = "a.csv" } 
                     }
                 }
             };
