@@ -69,6 +69,9 @@ CREATE TABLE [regulated].[QualificationVersions](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 
+CREATE INDEX IX_QualificationVersions_QualificationId ON [regulated].[QualificationVersions] ([QualificationId]) INCLUDE ([VersionFieldChangesId]);
+
+GO
 
 CREATE INDEX [IX_QualificationVersions_EligibleForFunding] ON [regulated].[QualificationVersions] ([EligibleForFunding])
 
@@ -78,8 +81,51 @@ CREATE INDEX [IX_QualificationVersions_ProcessStatus] ON [regulated].[Qualificat
 
 GO
 
-CREATE INDEX [IX_QualificationVersions_LifeCycle] ON [regulated].[QualificationVersions] ([LifecycleStageId])
+CREATE INDEX IX_QualificationVersions_LifeCycle ON [regulated].[QualificationVersions] (LifecycleStageId)
+INCLUDE (QualificationId, ProcessStatusId, AwardingOrganisationId, [Type], Ssa, [Level], [Version],
+    PreSixteen, SixteenToEighteen, EighteenPlus, NineteenPlus, OperationalEndDate, CertificationEndDate)
 
 GO
 
 CREATE INDEX [IX_QualificationVersions_AwardingOrganisation] ON [regulated].[QualificationVersions] ([AwardingOrganisationId])
+
+GO
+
+CREATE INDEX [IX_QualificationVersions_Status_Lifecycle_QualificationId_Version] ON [regulated].[QualificationVersions] ( ProcessStatusId, LifecycleStageId, QualificationId, Version DESC ) 
+INCLUDE (Id, AwardingOrganisationId, [Level], [Type], SubLevel, Ssa, InsertedTimestamp);
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_QualificationVersions_EligibleForFunding_Type] ON [regulated].[QualificationVersions] ([EligibleForFunding], [Type])
+INCLUDE ([QualificationId], [VersionFieldChangesId], [LifecycleStageId]);
+
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_QualificationVersions_LifecycleStage_Reporting]
+ON [regulated].[QualificationVersions] ([LifecycleStageId])
+INCLUDE (
+    [QualificationId],
+    [AwardingOrganisationId],
+    [Type],
+    [Ssa],
+    [Level],
+    [SubLevel],
+    [Version],
+    [InsertedTimestamp]
+);
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_QualificationVersions_ProcessStatus_Operational]
+ON [regulated].[QualificationVersions] ([ProcessStatusId])
+INCLUDE (
+    [QualificationId],
+    [OperationalEndDate],
+    [Version]
+);
+
+
+
+
+

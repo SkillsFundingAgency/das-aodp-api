@@ -225,6 +225,23 @@ public class QualificationsController : BaseController
         return await SendRequestAsync(new GetDiscussionHistoriesForQualificationQuery { QualificationReference = qualificationReference });
     }
 
+    [HttpGet("outputfile/{username}")]
+    [ProducesResponseType(typeof(BaseMediatrResponse<GetQualificationOutputFileResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetQualificationOutputFile([FromRoute] string username)
+    {
+        var result = await _mediator.Send(new GetQualificationOutputFileQuery(username));
+        return Ok(result);
+    }
+
+
+    [HttpGet("outputfile/logs")]
+    [ProducesResponseType(typeof(BaseMediatrResponse<GetQualificationOutputFileLogResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetQualificationOutputFileLogs ()
+    {
+        var response = await _mediator.Send(new GetQualificationOutputFileLogQuery());
+        return Ok(response);
+    }
+
     [HttpGet("export")]
     [ProducesResponseType(typeof(BaseMediatrResponse<GetNewQualificationsCsvExportResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BaseMediatrResponse<GetChangedQualificationsCsvExportResponse>), StatusCodes.Status200OK)]

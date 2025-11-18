@@ -165,6 +165,8 @@
     <Build Include="Views\Support\v_Anomaly_Scenario_5_Dashboard.sql" />
     <Build Include="Views\Support\v_AllAwardingOrganisations.sql" />
     <Build Include="Views\Output\v_Output_CombinedStatuses.sql" />
+    <Build Include="Views\Output\view_Output_OutputFile.sql" />
+    <Build Include="Tables\QualificationOutputFileLog.sql" />
     <Build Include="Tables\Import\DefundingList.sql" />
     <Build Include="Stored Procedures\proc_DeleteDuplicateDefundingLists.sql" />
   </ItemGroup>

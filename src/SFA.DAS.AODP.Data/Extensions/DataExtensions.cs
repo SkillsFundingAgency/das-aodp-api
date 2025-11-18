@@ -65,6 +65,8 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IJobsRepository, JobsRepository>();
             services.AddScoped<IJobRunsRepository, JobRunsRepository>();
 
+            services.AddScoped<IQualificationOutputFileRepository, QualificationOutputFileRepository>();
+            services.AddScoped<IQualificationOutputFileLogRepository, QualificationOutputFileLogRepository>();
             services.AddScoped<IDefundingListRepository, DefundingListRepository>();
 
             return services;

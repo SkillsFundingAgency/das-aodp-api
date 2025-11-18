@@ -112,6 +112,22 @@ CombinedPivotData AS (
     FROM PivotFundingAvailable fa
     JOIN PivotStartDate fs ON fa.QualificationVersionId = fs.QualificationVersionId
     JOIN PivotEndDate fe ON fa.QualificationVersionId = fe.QualificationVersionId
+),
+PivotOfferNotes AS
+(
+    SELECT
+        qo.QualificationId,
+        MAX(CASE WHEN qo.Name = 'Age1416' THEN qo.Notes END)                  AS Age1416_Notes,
+        MAX(CASE WHEN qo.Name = 'Age1619' THEN qo.Notes END)                  AS Age1619_Notes,
+        MAX(CASE WHEN qo.Name = 'AdvancedLearnerLoans' THEN qo.Notes END)     AS AdvancedLearnerLoans_Notes,
+        MAX(CASE WHEN qo.Name = 'DigitalEntitlement' THEN qo.Notes END)       AS DigitalEntitlement_Notes,
+        MAX(CASE WHEN qo.Name = 'L3FreeCoursesForJobs' THEN qo.Notes END)     AS L3FreeCoursesForJobs_Notes,
+        MAX(CASE WHEN qo.Name = 'LegalEntitlementEnglishandMaths' THEN qo.Notes END) AS LegalEntitlementEnglishandMaths_Notes,
+        MAX(CASE WHEN qo.Name = 'LegalEntitlementL2L3' THEN qo.Notes END)     AS LegalEntitlementL2L3_Notes,
+        MAX(CASE WHEN qo.Name = 'LifelongLearningEntitlement' THEN qo.Notes END) AS LifelongLearningEntitlement_Notes,
+        MAX(CASE WHEN qo.Name = 'LocalFlexibilities' THEN qo.Notes END)       AS LocalFlexibilities_Notes
+    FROM funded.QualificationOffers qo
+    GROUP BY qo.QualificationId
 )
 SELECT
 	'Unchanged' AS Status,
@@ -126,32 +142,44 @@ SELECT
     pivotdata.AdvancedLearnerLoans_FundingAvailable,
     pivotdata.AdvancedLearnerLoans_FundingApprovalStartDate,
     pivotdata.AdvancedLearnerLoans_FundingApprovalEndDate,
+    onp.AdvancedLearnerLoans_Notes,
     pivotdata.Age1416_FundingAvailable,
     pivotdata.Age1416_FundingApprovalStartDate,
     pivotdata.Age1416_FundingApprovalEndDate,
+    onp.Age1416_Notes,
     pivotdata.Age1619_FundingAvailable,
     pivotdata.Age1619_FundingApprovalStartDate,
     pivotdata.Age1619_FundingApprovalEndDate,
+    onp.Age1619_Notes,
     pivotdata.DigitalEntitlement_FundingAvailable,
     pivotdata.DigitalEntitlement_FundingApprovalStartDate,
     pivotdata.DigitalEntitlement_FundingApprovalEndDate,
+    onp.DigitalEntitlement_Notes,
     pivotdata.L3FreeCoursesForJobs_FundingAvailable,
     pivotdata.L3FreeCoursesForJobs_FundingApprovalStartDate,
     pivotdata.L3FreeCoursesForJobs_FundingApprovalEndDate,
+    onp.L3FreeCoursesForJobs_Notes,
     pivotdata.LegalEntitlementEnglishandMaths_FundingAvailable,
     pivotdata.LegalEntitlementEnglishandMaths_FundingApprovalStartDate,
     pivotdata.LegalEntitlementEnglishandMaths_FundingApprovalEndDate,
+    onp.LegalEntitlementEnglishandMaths_Notes,
     pivotdata.LegalEntitlementL2L3_FundingAvailable,
     pivotdata.LegalEntitlementL2L3_FundingApprovalStartDate,
     pivotdata.LegalEntitlementL2L3_FundingApprovalEndDate,
+    onp.LegalEntitlementL2L3_Notes,
     pivotdata.LifelongLearningEntitlement_FundingAvailable,
     pivotdata.LifelongLearningEntitlement_FundingApprovalStartDate,
     pivotdata.LifelongLearningEntitlement_FundingApprovalEndDate,
+    onp.LifelongLearningEntitlement_Notes,
     pivotdata.LocalFlexibilities_FundingAvailable,
     pivotdata.LocalFlexibilities_FundingApprovalStartDate,
-    pivotdata.LocalFlexibilities_FundingApprovalEndDate
+    pivotdata.LocalFlexibilities_FundingApprovalEndDate,
+    onp.LocalFlexibilities_Notes,
+    fq.AwardingOrganisationUrl
 FROM LatestQualifications latestversion
-INNER JOIN dbo.Qualification qual ON qual.id = latestversion.QualificationId
+INNER JOIN dbo.Qualification qual ON qual.Id = latestversion.QualificationId
 INNER JOIN dbo.AwardingOrganisation ao ON ao.Id = latestversion.AwardingOrganisationId
-LEFT JOIN CombinedPivotData pivotdata ON pivotdata.QualificationVersionId = latestversion.Id;
+LEFT JOIN CombinedPivotData pivotdata ON pivotdata.QualificationVersionId = latestversion.Id
+LEFT JOIN PivotOfferNotes AS onp ON onp.QualificationId = latestversion.QualificationId
+LEFT JOIN funded.Qualifications fq ON fq.Id = latestversion.QualificationId;
 GO

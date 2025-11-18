@@ -55,12 +55,15 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<QualificationNewReviewRequired> QualificationNewReviewRequired { get; set; }
         DbSet<NewQualificationExport> NewQualificationExport { get; set; }
         DbSet<ChangedQualificationExport> ChangedQualificationExport { get; set; }
+        DbSet<QualificationOutputFile> QualificationExport { get; set; }
 
         DbSet<QualificationFundingFeedbacks> QualificationFundingFeedbacks { get; set; }
         DbSet<QualificationFundings> QualificationFundings { get; set; }
 
         DbSet<DefundingList> DefundingLists { get; set; }
         DbSet<Survey> Surveys { get; set; }
+        DbSet<QualificationOutputFileLog> QualificationOutputFileLog { get; set; }
+
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task<IDbContextTransaction> StartTransactionAsync();
     }
