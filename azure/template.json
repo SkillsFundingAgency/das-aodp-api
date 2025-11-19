@@ -358,8 +358,7 @@
                 }
             },
             "dependsOn": [
-                "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]",
-                "[concat('role-assignment-', variables('appServiceName'), '-', parameters('utcValue'))]"
+                "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]"
             ]
         },
         {
@@ -392,7 +391,7 @@
                 }
             },
             "dependsOn": [
-                "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]"
+                "[concat('role-assignment-', variables('appServiceName'), '-', parameters('utcValue'))]"
             ]
         },
         {
