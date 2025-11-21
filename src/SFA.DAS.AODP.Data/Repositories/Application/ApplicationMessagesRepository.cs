@@ -54,4 +54,12 @@ public class ApplicationMessagesRepository : IApplicationMessagesRepository
 
         return message.Id;
     }
+
+    public async Task<Message?> GetLatestByTypeAsync(Guid applicationId, MessageType type)
+    {
+        return await _context.Messages
+            .Where(m => m.ApplicationId == applicationId && m.Type == type)
+            .OrderByDescending(m => m.SentAt)
+            .FirstOrDefaultAsync();
+    }
 }
