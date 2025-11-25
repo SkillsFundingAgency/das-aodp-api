@@ -58,7 +58,6 @@ CREATE TABLE [regulated].[QualificationVersions](
 	[InsertedTimestamp] [datetime] NULL,
 	[EligibleForFunding] BIT NULL, 
     [Name] VARCHAR(250) NULL, 
-	[FundedInEngland] BIT NULL,
     CONSTRAINT PK_QualificationVersions PRIMARY KEY CLUSTERED (Id ASC),
 	CONSTRAINT FK_AwardingOrganisation FOREIGN KEY (AwardingOrganisationId) REFERENCES [dbo].[AwardingOrganisation] ([Id]),
 	CONSTRAINT FK_LifecycleStage FOREIGN KEY (LifecycleStageId) REFERENCES [regulated].[LifecycleStage] ([Id]),
