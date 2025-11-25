@@ -63,9 +63,9 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
                 })
                 .ToList();
            
-            var currentDate = DateTime.UtcNow.ToString("yyyy-MM-dd");
+            var formattedPublicationDate = request.PublicationDate.ToString("yyyy-MM-dd");
 
-            var csvFileName = $"{currentDate}-AOdPOutputFile.csv";
+            var csvFileName = $"{formattedPublicationDate}-AOdPOutputFile.csv";
 
             var csvFileBytes = await BuildCsvBytesAsync(qualificationsWithPublicationStatus);
 
