@@ -132,18 +132,18 @@ public class ImportControllerTests
     }
 
     [Fact]
-    public async Task ImportPLDNS_ReturnsBadRequest_WhenFileIsNull()
+    public async Task ImportPldns_ReturnsBadRequest_WhenFileIsNull()
     {
         // Arrange
         var controller = new ImportController(mockMediator.Object, mockLogger.Object);
 
-        var request = new ImportPLDNSRequest
+        var request = new ImportPldnsRequest
         {
             File = null
         };
 
         // Act
-        var result = await controller.ImportPLDNS(request);
+        var result = await controller.ImportPldns(request);
 
         // Assert
         var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -154,13 +154,13 @@ public class ImportControllerTests
         var message = messageProp?.GetValue(value)?.ToString();
         Assert.Equal("No file uploaded.", message);
         mockMediator.Verify(m => m.Send(
-                        It.IsAny<IRequest<BaseMediatrResponse<ImportPLDNSCommandResponse>>>(),
+                        It.IsAny<IRequest<BaseMediatrResponse<ImportPldnsCommandResponse>>>(),
                         It.IsAny<CancellationToken>()),
                         Times.Never);
     }
 
     [Fact]
-    public async Task ImportPLDNS_ReturnsBadRequest_WhenFileLengthIsZero()
+    public async Task ImportPldns_ReturnsBadRequest_WhenFileLengthIsZero()
     {
         // Arrange
         var controller = new ImportController(mockMediator.Object, mockLogger.Object);
@@ -168,13 +168,13 @@ public class ImportControllerTests
         var emptyStream = new MemoryStream();
         var formFile = new FormFile(emptyStream, 0, 0, "file", "empty.csv");
 
-        var request = new ImportPLDNSRequest
+        var request = new ImportPldnsRequest
         {
             File = formFile
         };
 
         // Act
-        var result = await controller.ImportPLDNS(request);
+        var result = await controller.ImportPldns(request);
 
         // Assert
         var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -185,13 +185,13 @@ public class ImportControllerTests
         var message = messageProp?.GetValue(value)?.ToString();
         Assert.Equal("No file uploaded.", message);
         mockMediator.Verify(m => m.Send(
-                        It.IsAny<IRequest<BaseMediatrResponse<ImportPLDNSCommandResponse>>>(),
+                        It.IsAny<IRequest<BaseMediatrResponse<ImportPldnsCommandResponse>>>(),
                         It.IsAny<CancellationToken>()),
                         Times.Never);
     }
 
     [Fact]
-    public async Task ImportPLDNS_CallsMediatorAndReturnsOk_WhenFileProvided()
+    public async Task ImportPldns_CallsMediatorAndReturnsOk_WhenFileProvided()
     {
         // Arrange
         var controller = new ImportController(mockMediator.Object, mockLogger.Object);
@@ -205,34 +205,34 @@ public class ImportControllerTests
 
         var formFile = new FormFile(stream, 0, stream.Length, "file", "pldns.csv");
 
-        var request = new ImportPLDNSRequest
+        var request = new ImportPldnsRequest
         {
             File = formFile
         };
 
-        var expectedResponse = new BaseMediatrResponse<ImportPLDNSCommandResponse>
+        var expectedResponse = new BaseMediatrResponse<ImportPldnsCommandResponse>
         {
             Success = true,
-            Value = new ImportPLDNSCommandResponse { ImportedCount = 1 }
+            Value = new ImportPldnsCommandResponse { ImportedCount = 1 }
         };
 
-        ImportPLDNSCommand? capturedCommand = null;
+        ImportPldnsCommand? capturedCommand = null;
 
         mockMediator
             .Setup(m => m.Send(
-                            It.IsAny<IRequest<BaseMediatrResponse<ImportPLDNSCommandResponse>>>(),
+                            It.IsAny<IRequest<BaseMediatrResponse<ImportPldnsCommandResponse>>>(),
                             It.IsAny<CancellationToken>()))
-            .Callback<IRequest<BaseMediatrResponse<ImportPLDNSCommandResponse>>, CancellationToken>((r, ct) =>
+            .Callback<IRequest<BaseMediatrResponse<ImportPldnsCommandResponse>>, CancellationToken>((r, ct) =>
             {
-                capturedCommand = r as ImportPLDNSCommand;
+                capturedCommand = r as ImportPldnsCommand;
             })
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await controller.ImportPLDNS(request);
+        var result = await controller.ImportPldns(request);
 
         mockMediator.Verify(m => m.Send(
-                        It.IsAny<IRequest<BaseMediatrResponse<ImportPLDNSCommandResponse>>>(),
+                        It.IsAny<IRequest<BaseMediatrResponse<ImportPldnsCommandResponse>>>(),
                         It.IsAny<CancellationToken>()),
                         Times.Once);
 
@@ -242,7 +242,7 @@ public class ImportControllerTests
 
         var okResult = Assert.IsType<OkObjectResult>(result);
 
-        var response = Assert.IsType<ImportPLDNSCommandResponse>(okResult.Value);
+        var response = Assert.IsType<ImportPldnsCommandResponse>(okResult.Value);
         Assert.NotNull(response);
         Assert.Equal(1, response.ImportedCount);
     }

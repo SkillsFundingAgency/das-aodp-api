@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.AODP.Api.Requests;
 
-public class ImportPLDNSRequest
+public class ImportPldnsRequest
 {
     [FromForm(Name = "file")]
     public IFormFile? File { get; set; }

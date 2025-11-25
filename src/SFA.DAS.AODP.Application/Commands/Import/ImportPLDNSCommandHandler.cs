@@ -8,19 +8,19 @@ using System.Text;
 
 namespace SFA.DAS.AODP.Application.Commands.Import
 {
-    public class ImportPLDNSCommandHandler : IRequestHandler<ImportPLDNSCommand, BaseMediatrResponse<ImportPLDNSCommandResponse>>
+    public class ImportPldnsCommandHandler : IRequestHandler<ImportPldnsCommand, BaseMediatrResponse<ImportPldnsCommandResponse>>
     {
-        private readonly IPLDNSRepository _repository;
+        private readonly IImportRepository _repository;
         private const int BatchSize = 3000;
 
-        public ImportPLDNSCommandHandler(IPLDNSRepository repository)
+        public ImportPldnsCommandHandler(IImportRepository repository)
         {
             _repository = repository;
         }
 
-        public async Task<BaseMediatrResponse<ImportPLDNSCommandResponse>> Handle(ImportPLDNSCommand request, CancellationToken cancellationToken)
+        public async Task<BaseMediatrResponse<ImportPldnsCommandResponse>> Handle(ImportPldnsCommand request, CancellationToken cancellationToken)
         {
-            var response = new BaseMediatrResponse<ImportPLDNSCommandResponse>();
+            var response = new BaseMediatrResponse<ImportPldnsCommandResponse>();
 
             try
             {
@@ -30,7 +30,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
                 {
                     response.Success = Success;
                     response.ErrorMessage = ErrorMessage;
-                    response.Value = new ImportPLDNSCommandResponse { ImportedCount = 0 };
+                    response.Value = new ImportPldnsCommandResponse { ImportedCount = 0 };
                     return response;
                 }
 
@@ -46,7 +46,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
                 if (sheet == null)
                 {
                     response.Success = true;
-                    response.Value = new ImportPLDNSCommandResponse { ImportedCount = 0 };
+                    response.Value = new ImportPldnsCommandResponse { ImportedCount = 0 };
                     return response;
                 }
 
@@ -55,7 +55,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
                 if (sheetData == null)
                 {
                     response.Success = true;
-                    response.Value = new ImportPLDNSCommandResponse { ImportedCount = 0 };
+                    response.Value = new ImportPldnsCommandResponse { ImportedCount = 0 };
                     return response;
                 }
 
@@ -63,7 +63,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
                 if (rows.Count <= 1)
                 {
                     response.Success = true;
-                    response.Value = new ImportPLDNSCommandResponse { ImportedCount = 0 };
+                    response.Value = new ImportPldnsCommandResponse { ImportedCount = 0 };
                     return response;
                 }
 
@@ -80,16 +80,16 @@ namespace SFA.DAS.AODP.Application.Commands.Import
                 if (!items.Any())
                 {
                     response.Success = true;
-                    response.Value = new ImportPLDNSCommandResponse { ImportedCount = 0 };
+                    response.Value = new ImportPldnsCommandResponse { ImportedCount = 0 };
                     return response;
                 }
 
                 var totalImported = await InsertBatchesAsync(items, cancellationToken);
 
-                await _repository.DeleteDuplicatePLDNSAsync(null, cancellationToken);
+                await _repository.DeleteDuplicateAsync("[dbo].[proc_DeleteDuplicatePldns]", null, cancellationToken);
 
                 response.Success = true;
-                response.Value = new ImportPLDNSCommandResponse { ImportedCount = totalImported };
+                response.Value = new ImportPldnsCommandResponse { ImportedCount = totalImported };
             }
             catch (Exception ex)
             {
@@ -101,7 +101,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
             return response;
         }
 
-        private static (bool IsValid, bool Success, string? ErrorMessage) ValidateRequest(ImportPLDNSCommand request)
+        private static (bool IsValid, bool Success, string? ErrorMessage) ValidateRequest(ImportPldnsCommand request)
         {
             if (request.File == null || request.File.Length == 0)
                 return (false, true, null);
@@ -234,7 +234,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
             );
         }
 
-        private static List<PLDNS> ParseRowsToEntities(
+        private static List<Pldns> ParseRowsToEntities(
             List<Row> rows,
             int startIndex,
             SharedStringTable? sharedStrings,
@@ -243,7 +243,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
             CultureInfo culture,
             string[] dateFormats)
         {
-            var items = new List<PLDNS>();
+            var items = new List<Pldns>();
             for (int i = startIndex; i < rows.Count; i++)
             {
                 var row = rows[i];
@@ -265,7 +265,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
                 if (!cellMap.TryGetValue(columns.Qan, out var qNumber) || string.IsNullOrWhiteSpace(qNumber))
                     continue;
 
-                PLDNS CreateEntity() => new PLDNS
+                Pldns CreateEntity() => new Pldns
                 {
                     Qan = qNumber!.Trim(),
 
@@ -317,7 +317,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
             return items;
         }
 
-        private async Task<int> InsertBatchesAsync(List<PLDNS> items, CancellationToken cancellationToken)
+        private async Task<int> InsertBatchesAsync(List<Pldns> items, CancellationToken cancellationToken)
         {
             var totalImported = 0;
             var batches = (int)Math.Ceiling(items.Count / (double)BatchSize);

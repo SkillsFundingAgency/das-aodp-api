@@ -12,11 +12,13 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Import;
 public class ImportDefundingListCommandHandlerTests
 {
     private const string TargetSheetName = "Approval not extended";
-    private readonly Mock<IDefundingListRepository> mockRepo = new();
+    private readonly Mock<IImportRepository> mockRepo = new();
     private readonly ImportDefundingListCommandHandler importHandler;
 
     private static readonly string[] HeaderCols_AB = new[] { "A", "B" };
     private static readonly string[] HeaderTexts_Q_Title = new[] { "Qualification number", "Title" };
+    private static readonly string[] HeaderCols_A = new[] { "A" };
+    private static readonly string[] HeaderTexts_Q = new[] { "Qualification number"};
 
     public ImportDefundingListCommandHandlerTests() => 
         importHandler = new(mockRepo.Object);
@@ -105,8 +107,8 @@ public class ImportDefundingListCommandHandlerTests
         var bytes = CreateExcel(
             sheetName: TargetSheetName,
             headerRowIndexOneBased: 1,
-            headerColumns: new[] { "A" },
-            headerTexts: new[] { "Qualification number" },
+            headerColumns: HeaderCols_A,
+            headerTexts: HeaderTexts_Q,
             dataRows: Array.Empty<Dictionary<string, string>>()
         );
 
@@ -172,7 +174,7 @@ public class ImportDefundingListCommandHandlerTests
             .Callback<IEnumerable<DefundingList>, CancellationToken>((items, ct) => captured = items)
             .Returns(Task.CompletedTask)
             .Verifiable();
-        mockRepo.Setup(r => r.DeleteDuplicateDefundingListsAsync(null, It.IsAny<CancellationToken>()))
+        mockRepo.Setup(r => r.DeleteDuplicateAsync(It.IsAny<string>(), null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
 
         var ms = new MemoryStream(bytes);
@@ -191,7 +193,7 @@ public class ImportDefundingListCommandHandlerTests
         Assert.True(result.Success);
         Assert.Equal(2, result.Value.ImportedCount);
         mockRepo.Verify(r => r.BulkInsertAsync(It.IsAny<IEnumerable<DefundingList>>(), It.IsAny<CancellationToken>()), Times.Once);
-        mockRepo.Verify(r => r.DeleteDuplicateDefundingListsAsync(null, It.IsAny<CancellationToken>()), Times.Once);
+        mockRepo.Verify(r => r.DeleteDuplicateAsync(It.IsAny<string>(), null, It.IsAny<CancellationToken>()), Times.Once);
         Assert.NotNull(captured);
         var list = captured!.ToList();
         Assert.Equal(2, list.Count);

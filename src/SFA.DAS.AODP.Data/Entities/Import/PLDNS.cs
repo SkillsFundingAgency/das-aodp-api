@@ -2,8 +2,8 @@
 
 namespace SFA.DAS.AODP.Data.Entities.Import;
 
-[Table("PLDNS")]
-public partial class PLDNS
+[Table("Pldns")]
+public partial class Pldns
 {
     public int Id { get; set; }
 

@@ -5,31 +5,39 @@ using System.Data;
 
 namespace SFA.DAS.AODP.Data.Repositories.Import;
 
-public class PLDNSRepository : IPLDNSRepository
+public class ImportRepository : IImportRepository
 {
     private readonly IApplicationDbContext _context;
 
-    public PLDNSRepository(IApplicationDbContext context)
+    public ImportRepository(IApplicationDbContext context)
     {
         _context = context;
     }
 
-    public async Task BulkInsertAsync(IEnumerable<PLDNS> items, CancellationToken cancellationToken = default)
+    public async Task BulkInsertAsync<T>(IEnumerable<T> items, CancellationToken cancellationToken = default)
     {
         if (items == null) return;
 
-        _context.PLDNS.AddRange(items);
+        if (typeof(T) == typeof(DefundingList))
+        { 
+            _context.DefundingLists.AddRange((List<DefundingList>)items);
+        }
+        else
+        {
+            _context.Pldns.AddRange((List<Pldns>)items);
+        }
+        
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<int> DeleteDuplicatePLDNSAsync(string? qan = null, CancellationToken cancellationToken = default)
+    public async Task<int> DeleteDuplicateAsync(string spName, string? qan = null, CancellationToken cancellationToken = default)
     {
         if (!(_context is ApplicationDbContext dbContext))
             throw new InvalidOperationException("Unable to execute stored procedure: unexpected DbContext type.");
 
         var conn = dbContext.Database.GetDbConnection();
         await using var cmd = conn.CreateCommand();
-        cmd.CommandText = "[dbo].[proc_DeleteDuplicatePLDNS]";
+        cmd.CommandText = spName;
         cmd.CommandType = CommandType.StoredProcedure;
 
         var param = cmd.CreateParameter();

@@ -5,7 +5,7 @@
 -- from PLDNS table and keep the latest one (by Id) per Qan.
 -- ==================================================
 
-CREATE PROCEDURE [dbo].[proc_DeleteDuplicatePLDNS]
+CREATE PROCEDURE [dbo].[proc_DeleteDuplicatePldns]
 	@Qan VARCHAR(100) = NULL
 AS
 BEGIN
@@ -18,7 +18,7 @@ BEGIN
 		(
 			SELECT Id, Qan,
 				ROW_NUMBER() OVER (PARTITION BY Qan ORDER BY Id DESC) AS rn
-			FROM dbo.PLDNS
+			FROM dbo.Pldns
 			WHERE (@Qan IS NULL OR Qan = @Qan)
 		)
 		DELETE FROM Ranked
@@ -37,7 +37,7 @@ BEGIN
         DECLARE @ErrSeverity INT = ERROR_SEVERITY();
         DECLARE @ErrState INT = ERROR_STATE();
 
-        RAISERROR('proc_DeleteDuplicatePLDNS failed: %s', 
+        RAISERROR('proc_DeleteDuplicatePldns failed: %s', 
                   @ErrSeverity, @ErrState, @ErrMsg);
 	END CATCH
 END

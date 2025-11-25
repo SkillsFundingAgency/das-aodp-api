@@ -39,7 +39,7 @@ public class ImportController : BaseController
     [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> ImportPLDNS([FromForm] ImportPLDNSRequest request)
+    public async Task<IActionResult> ImportPldns([FromForm] ImportPldnsRequest request)
     {
         var file = request.File;
         if (file == null || file.Length == 0)
@@ -47,7 +47,7 @@ public class ImportController : BaseController
             return BadRequest(new { message = "No file uploaded." });
         }
 
-        var command = new ImportPLDNSCommand
+        var command = new ImportPldnsCommand
         {
             File = file,
             FileName = file.FileName

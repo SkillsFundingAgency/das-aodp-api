@@ -9,16 +9,16 @@ using SFA.DAS.AODP.Data.Repositories.Import;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Commands.Import;
 
-public class ImportPLDNSCommandHandlerTests
+public class ImportPldnsCommandHandlerTests
 {
     [Fact]
     public async Task Handle_FileNull_ReturnsZero()
     {
         // Arrange
-        var repoMock = new Mock<IPLDNSRepository>(MockBehavior.Strict);
-        var handler = new ImportPLDNSCommandHandler(repoMock.Object);
+        var repoMock = new Mock<IImportRepository>(MockBehavior.Strict);
+        var handler = new ImportPldnsCommandHandler(repoMock.Object);
 
-        var request = new ImportPLDNSCommand { File = null };
+        var request = new ImportPldnsCommand { File = null };
 
         // Act
         var result = await handler.Handle(request, CancellationToken.None);
@@ -34,15 +34,15 @@ public class ImportPLDNSCommandHandlerTests
     [Fact]
     public async Task Handle_SheetNotFound_ReturnsZero()
     {
-        var repoMock = new Mock<IPLDNSRepository>(MockBehavior.Strict);
+        var repoMock = new Mock<IImportRepository>(MockBehavior.Strict);
         var headers = new List<string> { "Text QAN" };
         var data = new List<IList<object>>();
         var bytes = CreateExcelBytes("SomeOtherSheet", headers, data);
 
         var file = CreateMockFormFile(bytes);
 
-        var handler = new ImportPLDNSCommandHandler(repoMock.Object);
-        var request = new ImportPLDNSCommand { File = file, FileName = "file.xlsx" };
+        var handler = new ImportPldnsCommandHandler(repoMock.Object);
+        var request = new ImportPldnsCommand { File = file, FileName = "file.xlsx" };
 
         var result = await handler.Handle(request, CancellationToken.None);
 
@@ -54,19 +54,19 @@ public class ImportPLDNSCommandHandlerTests
     [Fact]
     public async Task Handle_ImportsRows_CallsRepositoryAndReturnsCount()
     {
-        var repoMock = new Mock<IPLDNSRepository>();
+        var repoMock = new Mock<IImportRepository>();
 
-        List<PLDNS>? capturedItems = null;
+        List<Pldns>? capturedItems = null;
         repoMock
-            .Setup(r => r.BulkInsertAsync(It.IsAny<IEnumerable<PLDNS>>(), It.IsAny<CancellationToken>()))
-            .Returns<IEnumerable<PLDNS>, CancellationToken>((items, ct) =>
+            .Setup(r => r.BulkInsertAsync(It.IsAny<IEnumerable<Pldns>>(), It.IsAny<CancellationToken>()))
+            .Returns<IEnumerable<Pldns>, CancellationToken>((items, ct) =>
             {
                 capturedItems = items.ToList();
                 return Task.CompletedTask;
             });
 
         repoMock
-            .Setup(r => r.DeleteDuplicatePLDNSAsync(null, It.IsAny<CancellationToken>()))
+            .Setup(r => r.DeleteDuplicateAsync(It.IsAny<string>(), null, It.IsAny<CancellationToken>()))
             .ReturnsAsync(0);
 
         var headers = new List<string>
@@ -86,15 +86,15 @@ public class ImportPLDNSCommandHandlerTests
         var bytes = CreateExcelBytes("PLDNS V12F", headers, dataRows);
         var file = CreateMockFormFile(bytes);
 
-        var handler = new ImportPLDNSCommandHandler(repoMock.Object);
-        var request = new ImportPLDNSCommand { File = file, FileName = "file.xlsx" };
+        var handler = new ImportPldnsCommandHandler(repoMock.Object);
+        var request = new ImportPldnsCommand { File = file, FileName = "file.xlsx" };
 
         var result = await handler.Handle(request, CancellationToken.None);
 
         Assert.True(result.Success);
         Assert.Equal(1, result.Value.ImportedCount);
-        repoMock.Verify(r => r.BulkInsertAsync(It.IsAny<IEnumerable<PLDNS>>(), It.IsAny<CancellationToken>()), Times.Once);
-        repoMock.Verify(r => r.DeleteDuplicatePLDNSAsync(null, It.IsAny<CancellationToken>()), Times.Once);
+        repoMock.Verify(r => r.BulkInsertAsync(It.IsAny<IEnumerable<Pldns>>(), It.IsAny<CancellationToken>()), Times.Once);
+        repoMock.Verify(r => r.DeleteDuplicateAsync(It.IsAny<string>(), null, It.IsAny<CancellationToken>()), Times.Once);
 
         Assert.NotNull(capturedItems);
         var item = capturedItems!.Single();
@@ -107,10 +107,10 @@ public class ImportPLDNSCommandHandlerTests
     [Fact]
     public async Task Handle_RepositoryThrows_ReturnsFailureAndSetsInnerException()
     {
-        var repoMock = new Mock<IPLDNSRepository>();
+        var repoMock = new Mock<IImportRepository>();
 
         repoMock
-            .Setup(r => r.BulkInsertAsync(It.IsAny<IEnumerable<PLDNS>>(), It.IsAny<CancellationToken>()))
+            .Setup(r => r.BulkInsertAsync(It.IsAny<IEnumerable<Pldns>>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("insert failed"));
 
         var headers = new List<string> { "Text QAN" };
@@ -119,8 +119,8 @@ public class ImportPLDNSCommandHandlerTests
         var bytes = CreateExcelBytes("PLDNS V12F", headers, dataRows);
         var file = CreateMockFormFile(bytes);
 
-        var handler = new ImportPLDNSCommandHandler(repoMock.Object);
-        var request = new ImportPLDNSCommand { File = file, FileName = "file.xlsx" };
+        var handler = new ImportPldnsCommandHandler(repoMock.Object);
+        var request = new ImportPldnsCommand { File = file, FileName = "file.xlsx" };
 
         var result = await handler.Handle(request, CancellationToken.None);
 
@@ -129,8 +129,8 @@ public class ImportPLDNSCommandHandlerTests
         Assert.Contains("insert failed", result.ErrorMessage);
         Assert.NotNull(result.InnerException);
         Assert.IsType<InvalidOperationException>(result.InnerException);
-        repoMock.Verify(r => r.BulkInsertAsync(It.IsAny<IEnumerable<PLDNS>>(), It.IsAny<CancellationToken>()), Times.Once);
-        repoMock.Verify(r => r.DeleteDuplicatePLDNSAsync(It.IsAny<string?>(), It.IsAny<CancellationToken>()), Times.Never);
+        repoMock.Verify(r => r.BulkInsertAsync(It.IsAny<IEnumerable<Pldns>>(), It.IsAny<CancellationToken>()), Times.Once);
+        repoMock.Verify(r => r.DeleteDuplicateAsync(It.IsAny<string>(), null, It.IsAny<CancellationToken>()), Times.Never);
     }
 
     private static byte[] CreateExcelBytes(string sheetName, IList<string> headers, IList<IList<object>> dataRows)

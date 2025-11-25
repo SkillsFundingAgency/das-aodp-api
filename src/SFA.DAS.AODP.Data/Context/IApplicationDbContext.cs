@@ -61,7 +61,7 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<QualificationFundings> QualificationFundings { get; set; }
 
         DbSet<DefundingList> DefundingLists { get; set; }
-        DbSet<PLDNS> PLDNS { get; set; }
+        DbSet<Pldns> Pldns { get; set; }
         DbSet<Survey> Surveys { get; set; }
         DbSet<QualificationOutputFileLog> QualificationOutputFileLog { get; set; }
 
