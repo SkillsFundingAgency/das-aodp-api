@@ -42,7 +42,7 @@ public class ImportPLDNSCommandHandlerTests
         var file = CreateMockFormFile(bytes);
 
         var handler = new ImportPLDNSCommandHandler(repoMock.Object);
-        var request = new ImportPLDNSCommand { File = file };
+        var request = new ImportPLDNSCommand { File = file, FileName = "file.xlsx" };
 
         var result = await handler.Handle(request, CancellationToken.None);
 
@@ -87,7 +87,7 @@ public class ImportPLDNSCommandHandlerTests
         var file = CreateMockFormFile(bytes);
 
         var handler = new ImportPLDNSCommandHandler(repoMock.Object);
-        var request = new ImportPLDNSCommand { File = file };
+        var request = new ImportPLDNSCommand { File = file, FileName = "file.xlsx" };
 
         var result = await handler.Handle(request, CancellationToken.None);
 
@@ -120,13 +120,13 @@ public class ImportPLDNSCommandHandlerTests
         var file = CreateMockFormFile(bytes);
 
         var handler = new ImportPLDNSCommandHandler(repoMock.Object);
-        var request = new ImportPLDNSCommand { File = file };
+        var request = new ImportPLDNSCommand { File = file, FileName = "file.xlsx" };
 
         var result = await handler.Handle(request, CancellationToken.None);
 
         Assert.False(result.Success);
         Assert.NotNull(result.ErrorMessage);
-        Assert.Contains("Failed inserting batch", result.ErrorMessage);
+        Assert.Contains("insert failed", result.ErrorMessage);
         Assert.NotNull(result.InnerException);
         Assert.IsType<InvalidOperationException>(result.InnerException);
         repoMock.Verify(r => r.BulkInsertAsync(It.IsAny<IEnumerable<PLDNS>>(), It.IsAny<CancellationToken>()), Times.Once);

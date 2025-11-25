@@ -15,6 +15,9 @@ public class ImportDefundingListCommandHandlerTests
     private readonly Mock<IDefundingListRepository> mockRepo = new();
     private readonly ImportDefundingListCommandHandler importHandler;
 
+    private static readonly string[] HeaderCols_AB = new[] { "A", "B" };
+    private static readonly string[] HeaderTexts_Q_Title = new[] { "Qualification number", "Title" };
+
     public ImportDefundingListCommandHandlerTests() => 
         importHandler = new(mockRepo.Object);
 
@@ -72,8 +75,8 @@ public class ImportDefundingListCommandHandlerTests
         var bytes = CreateExcel(
             sheetName: "Other sheet",
             headerRowIndexOneBased: 1,
-            headerColumns: new[] { "A", "B" },
-            headerTexts: new[] { "Qualification number", "Title" },
+            headerColumns: HeaderCols_AB,
+            headerTexts: HeaderTexts_Q_Title,
             dataRows: Array.Empty<Dictionary<string, string>>()
         );
 

@@ -9,13 +9,9 @@ namespace SFA.DAS.AODP.Api.Controllers.Import;
 [Route("api/[controller]")]
 public class ImportController : BaseController
 {
-    private readonly IMediator _mediator;
-    private readonly ILogger<ImportController> _logger;
 
     public ImportController(IMediator mediator, ILogger<ImportController> logger) : base(mediator, logger)
     {
-        _mediator = mediator;
-        _logger = logger;
     }
 
     [HttpPost("defunding-list")]

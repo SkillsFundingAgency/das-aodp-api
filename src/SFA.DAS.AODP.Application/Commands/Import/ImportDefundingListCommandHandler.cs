@@ -23,32 +23,28 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
 
         try
         {
-            if (request.File == null || request.File.Length == 0)
+            // Validate request and file type
+            var (IsValid, Success, ErrorMessage) = ValidateRequest(request);
+            if (!IsValid)
             {
-                response.Success = true;
+                response.Success = Success;
+                response.ErrorMessage = ErrorMessage;
                 response.Value = new ImportDefundingListCommandResponse { ImportedCount = 0 };
                 return response;
             }
 
-            if (string.IsNullOrWhiteSpace(request.FileName) || !request.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
-            {
-                response.Success = false;
-                response.ErrorMessage = "Unsupported file type. Only .xlsx files are accepted.";
-                return response;
-            }
-
-            var items = new List<DefundingList>();
-
+            // Load file into memory
             await using var ms = new MemoryStream();
-            await request.File.CopyToAsync(ms, cancellationToken);
+            await request.File!.CopyToAsync(ms, cancellationToken);
             ms.Position = 0;
 
             using var document = SpreadsheetDocument.Open(ms, false);
             var workbookPart = document.WorkbookPart ?? throw new InvalidOperationException("Workbook part missing.");
             var sharedStrings = workbookPart.SharedStringTablePart?.SharedStringTable;
 
+            // Get target sheet
             var targetSheetName = "Approval not extended";
-            Sheet? chosenSheet = workbookPart.Workbook.Sheets!
+            var chosenSheet = workbookPart.Workbook.Sheets!
                 .Cast<Sheet?>()
                 .FirstOrDefault(s => string.Equals((s?.Name!.Value ?? string.Empty).Trim(), targetSheetName, StringComparison.OrdinalIgnoreCase));
 
@@ -60,15 +56,7 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
             }
 
             var worksheetPart = (WorksheetPart)workbookPart.GetPartById(chosenSheet.Id!);
-            var sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
-            if (sheetData == null)
-            {
-                response.Success = true;
-                response.Value = new ImportDefundingListCommandResponse { ImportedCount = 0 };
-                return response;
-            }
-
-            var rows = sheetData.Elements<Row>().ToList();
+            var rows = GetRowsFromWorksheet(worksheetPart).ToList();
             if (rows.Count <= 1)
             {
                 response.Success = true;
@@ -76,75 +64,16 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
                 return response;
             }
 
-            Row headerRow = rows.Count > 6 ? rows[6] : rows[0];
-            int headerListIndex = rows.IndexOf(headerRow);
+            // Detect header row
+            var (headerRow, headerIndex) = DetectHeaderRow(rows, sharedStrings);
 
-            var headerKeywords = new[] { "qualification", "qan", "title", "award", "guided", "sector", "route", "funding", "in scope", "comments" };
-            for (int r = 0; r < Math.Min(rows.Count, 12); r++)
-            {
-                var cellTexts = rows[r].Elements<Cell>()
-                    .Select(c => GetCellText(c, sharedStrings).Trim())
-                    .Where(t => !string.IsNullOrWhiteSpace(t))
-                    .Select(t => t.ToLowerInvariant())
-                    .ToList();
+            // Build header map
+            var headerMap = BuildHeaderMap(headerRow, sharedStrings);
 
-                if (cellTexts.Count == 0) continue;
+            // Parse data rows into items
+            var items = ParseDataRows(rows, headerIndex + 1, headerMap, worksheetPart, sharedStrings);
 
-                var matches = cellTexts.Count(ct => headerKeywords.Any(k => ct.Contains(k)));
-                if (matches >= 2)
-                {
-                    headerRow = rows[r];
-                    headerListIndex = r;
-                    break;
-                }
-            }
-
-            var headerMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            foreach (var cell in headerRow.Elements<Cell>())
-            {
-                var col = GetColumnName(cell.CellReference?.Value);
-                var txt = GetCellText(cell, sharedStrings);
-                if (!string.IsNullOrWhiteSpace(col) && !string.IsNullOrWhiteSpace(txt))
-                    headerMap[col!] = txt.Trim();
-            }
-
-            var dataStartIndex = headerListIndex + 1;
-            for (int i = dataStartIndex; i < rows.Count; i++)
-            {
-                var row = rows[i];
-                var rowIndex = row.RowIndex?.Value.ToString() ?? (i + 1).ToString();
-
-                var qNumber = GetCellTextByColumn(worksheetPart, rowIndex, FindColumn(headerMap, "Qualification number"), sharedStrings);
-                if (string.IsNullOrWhiteSpace(qNumber))
-                    continue;
-
-                var title = GetCellTextByColumn(worksheetPart, rowIndex, FindColumn(headerMap, "Title"), sharedStrings);
-                var awardingOrg = GetCellTextByColumn(worksheetPart, rowIndex, FindColumn(headerMap, "Awarding organisation"), sharedStrings);
-                var glh = GetCellTextByColumn(worksheetPart, rowIndex, FindColumn(headerMap, "Guided Learning Hours"), sharedStrings);
-                var ssa = GetCellTextByColumn(worksheetPart, rowIndex, FindColumn(headerMap, "Sector Subject Area Tier 2"), sharedStrings);
-                var route = GetCellTextByColumn(worksheetPart, rowIndex, FindColumn(headerMap, "Relevant route"), sharedStrings);
-                var fundingOffer = GetCellTextByColumn(worksheetPart, rowIndex, FindColumn(headerMap, "Funding offer"), sharedStrings);
-                var inScopeStr = GetCellTextByColumn(worksheetPart, rowIndex, FindColumn(headerMap, "InScope", "In Scope"), sharedStrings);
-                var comments = GetCellTextByColumn(worksheetPart, rowIndex, FindColumn(headerMap, "Comments"), sharedStrings);
-
-                bool inScope = ParseInScope(inScopeStr);
-
-                items.Add(new DefundingList
-                {
-                    Qan = qNumber,
-                    Title = string.IsNullOrWhiteSpace(title) ? null : title,
-                    AwardingOrganisation = string.IsNullOrWhiteSpace(awardingOrg) ? null : awardingOrg,
-                    GuidedLearningHours = string.IsNullOrWhiteSpace(glh) ? null : glh,
-                    SectorSubjectArea = string.IsNullOrWhiteSpace(ssa) ? null : ssa,
-                    RelevantRoute = string.IsNullOrWhiteSpace(route) ? null : route,
-                    FundingOffer = string.IsNullOrWhiteSpace(fundingOffer) ? null : fundingOffer,
-                    InScope = inScope,
-                    Comments = string.IsNullOrWhiteSpace(comments) ? null : comments,
-                    ImportDate = DateTime.UtcNow
-                });
-            }
-
-            if (!items.Any())
+            if (items.Count == 0)
             {
                 response.Success = true;
                 response.Value = new ImportDefundingListCommandResponse { ImportedCount = 0 };
@@ -152,8 +81,8 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
             }
 
             await _repository.BulkInsertAsync(items, cancellationToken);
+            await _repository.DeleteDuplicateDefundingListsAsync(null, cancellationToken);
 
-            var deletedRows = await _repository.DeleteDuplicateDefundingListsAsync(null, cancellationToken);
             response.Success = true;
             response.Value = new ImportDefundingListCommandResponse { ImportedCount = items.Count };
         }
@@ -165,6 +94,119 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
         }
 
         return response;
+    }
+
+    private static (bool IsValid, bool Success, string? ErrorMessage) ValidateRequest(ImportDefundingListCommand request)
+    {
+        if (request.File == null || request.File.Length == 0)
+            return (false, true, null);
+
+        if (string.IsNullOrWhiteSpace(request.FileName) || !request.FileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+            return (false, false, "Unsupported file type. Only .xlsx files are accepted.");
+
+        return (true, false, null);
+    }
+
+    private static IEnumerable<Row> GetRowsFromWorksheet(WorksheetPart worksheetPart)
+    {
+        var sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
+        if (sheetData == null) yield break;
+        foreach (var row in sheetData.Elements<Row>()) yield return row;
+    }
+
+    private static (Row headerRow, int headerIndex) DetectHeaderRow(List<Row> rows, SharedStringTable? sharedStrings)
+    {
+        Row headerRow = rows.Count > 6 ? rows[6] : rows[0];
+        int headerListIndex = rows.IndexOf(headerRow);
+
+        var headerKeywords = new[] { "qualification", "qan", "title", "award", "guided", "sector", "route", "funding", "in scope", "comments" };
+
+        for (int r = 0; r < Math.Min(rows.Count, 12); r++)
+        {
+            var cellTexts = rows[r].Elements<Cell>()
+                .Select(c => GetCellText(c, sharedStrings).Trim())
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Select(t => t.ToLowerInvariant())
+                .ToList();
+
+            if (cellTexts.Count == 0) continue;
+
+            var matches = cellTexts.Count(ct => headerKeywords.Any(k => ct.Contains(k)));
+            if (matches >= 2)
+            {
+                headerRow = rows[r];
+                headerListIndex = r;
+                break;
+            }
+        }
+
+        return (headerRow, headerListIndex);
+    }
+
+    private static Dictionary<string, string> BuildHeaderMap(Row headerRow, SharedStringTable? sharedStrings)
+    {
+        var headerMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var cell in headerRow.Elements<Cell>())
+        {
+            var col = GetColumnName(cell.CellReference?.Value);
+            var txt = GetCellText(cell, sharedStrings);
+            if (!string.IsNullOrWhiteSpace(col) && !string.IsNullOrWhiteSpace(txt))
+                headerMap[col!] = txt.Trim();
+        }
+        return headerMap;
+    }
+
+    private static List<DefundingList> ParseDataRows(List<Row> rows, int startIndex, IDictionary<string, string> headerMap, WorksheetPart worksheetPart, SharedStringTable? sharedStrings)
+    {
+        var items = new List<DefundingList>();
+        if (startIndex < 0) startIndex = 0;
+
+        string? qCol = FindColumn(headerMap, "Qualification number");
+        string? titleCol = FindColumn(headerMap, "Title");
+        string? awardingCol = FindColumn(headerMap, "Awarding organisation");
+        string? glhCol = FindColumn(headerMap, "Guided Learning Hours");
+        string? ssaCol = FindColumn(headerMap, "Sector Subject Area Tier 2");
+        string? routeCol = FindColumn(headerMap, "Relevant route");
+        string? fundingCol = FindColumn(headerMap, "Funding offer");
+        string? inScopeCol = FindColumn(headerMap, "InScope", "In Scope");
+        string? commentsCol = FindColumn(headerMap, "Comments");
+
+        for (int i = startIndex; i < rows.Count; i++)
+        {
+            var row = rows[i];
+            var rowIndex = row.RowIndex?.Value.ToString() ?? (i + 1).ToString();
+
+            var qNumber = GetCellTextByColumn(worksheetPart, rowIndex, qCol, sharedStrings);
+            if (string.IsNullOrWhiteSpace(qNumber))
+                continue;
+
+            var title = GetCellTextByColumn(worksheetPart, rowIndex, titleCol, sharedStrings);
+            var awardingOrg = GetCellTextByColumn(worksheetPart, rowIndex, awardingCol, sharedStrings);
+            var glh = GetCellTextByColumn(worksheetPart, rowIndex, glhCol, sharedStrings);
+            var ssa = GetCellTextByColumn(worksheetPart, rowIndex, ssaCol, sharedStrings);
+            var route = GetCellTextByColumn(worksheetPart, rowIndex, routeCol, sharedStrings);
+            var fundingOffer = GetCellTextByColumn(worksheetPart, rowIndex, fundingCol, sharedStrings);
+            var inScopeStr = GetCellTextByColumn(worksheetPart, rowIndex, inScopeCol, sharedStrings);
+            var comments = GetCellTextByColumn(worksheetPart, rowIndex, commentsCol, sharedStrings);
+
+            bool inScope = ParseInScope(inScopeStr);
+
+            items.Add(new DefundingList
+            {
+                Qan = qNumber,
+                Title = string.IsNullOrWhiteSpace(title) ? null : title,
+                AwardingOrganisation = string.IsNullOrWhiteSpace(awardingOrg) ? null : awardingOrg,
+                GuidedLearningHours = string.IsNullOrWhiteSpace(glh) ? null : glh,
+                SectorSubjectArea = string.IsNullOrWhiteSpace(ssa) ? null : ssa,
+                RelevantRoute = string.IsNullOrWhiteSpace(route) ? null : route,
+                FundingOffer = string.IsNullOrWhiteSpace(fundingOffer) ? null : fundingOffer,
+                InScope = inScope,
+                Comments = string.IsNullOrWhiteSpace(comments) ? null : comments,
+                ImportDate = DateTime.UtcNow
+            });
+        }
+
+        return items;
     }
 
     private static string? FindColumn(IDictionary<string, string> headerMap, params string[] variants)
@@ -227,7 +269,12 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
             }
             else if (cell.DataType.Value == CellValues.Boolean)
             {
-                return value == "1" ? "TRUE" : value == "0" ? "FALSE" : value;
+                return value switch
+                {
+                    "1" => "TRUE",
+                    "0" => "FALSE",
+                    _ => value
+                };
             }
             else
             {
