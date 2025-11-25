@@ -10,6 +10,7 @@ using SFA.DAS.AODP.Data.Repositories.Import;
 using SFA.DAS.AODP.Data.Repositories.Jobs;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.Security;
 
 namespace SFA.DAS.AODP.Data.Extensions
 {
@@ -68,6 +69,7 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IQualificationOutputFileRepository, QualificationOutputFileRepository>();
             services.AddScoped<IQualificationOutputFileLogRepository, QualificationOutputFileLogRepository>();
             services.AddScoped<IDefundingListRepository, DefundingListRepository>();
+            services.AddScoped<IPLDNSRepository, PLDNSRepository>();
 
             return services;
         }

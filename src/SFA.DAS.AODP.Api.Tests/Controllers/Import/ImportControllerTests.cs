@@ -12,12 +12,13 @@ namespace SFA.DAS.AODP.Api.UnitTests.Controllers.Import;
 
 public class ImportControllerTests
 {
+    private readonly Mock<ILogger<ImportController>> mockLogger = new();
+    private readonly Mock<IMediator> mockMediator = new();
+
     [Fact]
     public async Task ImportDefundingList_ReturnsBadRequest_WhenFileIsNull()
     {
         // Arrange
-        var mockMediator = new Mock<IMediator>();
-        var mockLogger = new Mock<ILogger<ImportController>>();
         var controller = new ImportController(mockMediator.Object, mockLogger.Object);
 
         var request = new ImportDefundingListRequest
@@ -46,8 +47,6 @@ public class ImportControllerTests
     public async Task ImportDefundingList_ReturnsBadRequest_WhenFileLengthIsZero()
     {
         // Arrange
-        var mockMediator = new Mock<IMediator>();
-        var mockLogger = new Mock<ILogger<ImportController>>();
         var controller = new ImportController(mockMediator.Object, mockLogger.Object);
 
         var emptyStream = new MemoryStream();
@@ -79,8 +78,6 @@ public class ImportControllerTests
     public async Task ImportDefundingList_CallsMediatorAndReturnsOk_WhenFileProvided()
     {
         // Arrange
-        var mockMediator = new Mock<IMediator>();
-        var mockLogger = new Mock<ILogger<ImportController>>();
         var controller = new ImportController(mockMediator.Object, mockLogger.Object);
 
         var content = "id,name\n1,Test";
@@ -130,6 +127,122 @@ public class ImportControllerTests
         var okResult = Assert.IsType<OkObjectResult>(result);
 
         var response = Assert.IsType<ImportDefundingListCommandResponse>(okResult.Value);
+        Assert.NotNull(response);
+        Assert.Equal(1, response.ImportedCount);
+    }
+
+    [Fact]
+    public async Task ImportPLDNS_ReturnsBadRequest_WhenFileIsNull()
+    {
+        // Arrange
+        var controller = new ImportController(mockMediator.Object, mockLogger.Object);
+
+        var request = new ImportPLDNSRequest
+        {
+            File = null
+        };
+
+        // Act
+        var result = await controller.ImportPLDNS(request);
+
+        // Assert
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.NotNull(badRequest.Value);
+
+        var value = badRequest.Value as dynamic;
+        var messageProp = value.GetType().GetProperty("message");
+        var message = messageProp?.GetValue(value)?.ToString();
+        Assert.Equal("No file uploaded.", message);
+        mockMediator.Verify(m => m.Send(
+                        It.IsAny<IRequest<BaseMediatrResponse<ImportPLDNSCommandResponse>>>(),
+                        It.IsAny<CancellationToken>()),
+                        Times.Never);
+    }
+
+    [Fact]
+    public async Task ImportPLDNS_ReturnsBadRequest_WhenFileLengthIsZero()
+    {
+        // Arrange
+        var controller = new ImportController(mockMediator.Object, mockLogger.Object);
+
+        var emptyStream = new MemoryStream();
+        var formFile = new FormFile(emptyStream, 0, 0, "file", "empty.csv");
+
+        var request = new ImportPLDNSRequest
+        {
+            File = formFile
+        };
+
+        // Act
+        var result = await controller.ImportPLDNS(request);
+
+        // Assert
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.NotNull(badRequest.Value);
+
+        var value = badRequest.Value as dynamic;
+        var messageProp = value.GetType().GetProperty("message");
+        var message = messageProp?.GetValue(value)?.ToString();
+        Assert.Equal("No file uploaded.", message);
+        mockMediator.Verify(m => m.Send(
+                        It.IsAny<IRequest<BaseMediatrResponse<ImportPLDNSCommandResponse>>>(),
+                        It.IsAny<CancellationToken>()),
+                        Times.Never);
+    }
+
+    [Fact]
+    public async Task ImportPLDNS_CallsMediatorAndReturnsOk_WhenFileProvided()
+    {
+        // Arrange
+        var controller = new ImportController(mockMediator.Object, mockLogger.Object);
+
+        var content = "id,name\n1,Test";
+        var stream = new MemoryStream();
+        var writer = new StreamWriter(stream);
+        writer.Write(content);
+        writer.Flush();
+        stream.Position = 0;
+
+        var formFile = new FormFile(stream, 0, stream.Length, "file", "pldns.csv");
+
+        var request = new ImportPLDNSRequest
+        {
+            File = formFile
+        };
+
+        var expectedResponse = new BaseMediatrResponse<ImportPLDNSCommandResponse>
+        {
+            Success = true,
+            Value = new ImportPLDNSCommandResponse { ImportedCount = 1 }
+        };
+
+        ImportPLDNSCommand? capturedCommand = null;
+
+        mockMediator
+            .Setup(m => m.Send(
+                            It.IsAny<IRequest<BaseMediatrResponse<ImportPLDNSCommandResponse>>>(),
+                            It.IsAny<CancellationToken>()))
+            .Callback<IRequest<BaseMediatrResponse<ImportPLDNSCommandResponse>>, CancellationToken>((r, ct) =>
+            {
+                capturedCommand = r as ImportPLDNSCommand;
+            })
+            .ReturnsAsync(expectedResponse);
+
+        // Act
+        var result = await controller.ImportPLDNS(request);
+
+        mockMediator.Verify(m => m.Send(
+                        It.IsAny<IRequest<BaseMediatrResponse<ImportPLDNSCommandResponse>>>(),
+                        It.IsAny<CancellationToken>()),
+                        Times.Once);
+
+        Assert.NotNull(capturedCommand);
+        Assert.Same(formFile, capturedCommand!.File);
+        Assert.Equal(formFile.FileName, capturedCommand.FileName);
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+
+        var response = Assert.IsType<ImportPLDNSCommandResponse>(okResult.Value);
         Assert.NotNull(response);
         Assert.Equal(1, response.ImportedCount);
     }

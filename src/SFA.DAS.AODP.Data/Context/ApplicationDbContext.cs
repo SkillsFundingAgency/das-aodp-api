@@ -75,6 +75,7 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<QualificationOutputFileLog> QualificationOutputFileLog { get; set; }
 
         public virtual DbSet<DefundingList> DefundingLists { get; set; }
+        public virtual DbSet<PLDNS> PLDNS { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
