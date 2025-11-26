@@ -19,8 +19,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         private readonly OutputFileBlobStorageSettings _settings;
         private readonly GetQualificationOutputFileQueryHandler _handler;
 
-        private static readonly string[] LineSeparators = { "\r\n", "\n" };
-
         private const string ContainerName = "unit-test-container";
         private const string CsvContentType = "text/csv";
         private const string ErrorNoQualifications = "No qualifications found for the output file.";
@@ -53,25 +51,25 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         }
 
         [Fact]
-        public async Task Then_Repository_Is_Called_Uploads_Both_CSVs_And_Returns_Zip_With_Two_Entries()
+        public async Task Then_Repository_Is_Called_Uploads_CSV_And_Returns_CSV_With_Two_Entries()
         {
             // Arrange
-            var todayUtc = DateTime.UtcNow.Date;
+            var publicationDate = DateTime.UtcNow.Date;
             var active = new QualificationOutputFile
             {
                 QualificationName = "Active Q",
-                Age1619_FundingApprovalEndDate = todayUtc.AddDays(2)
+                Age1619_FundingApprovalEndDate = publicationDate.AddDays(2)
             };
             var archived = new QualificationOutputFile
             {
                 QualificationName = "Archived Q",
-                Age1619_FundingApprovalEndDate = todayUtc.AddDays(-2)
+                Age1619_FundingApprovalEndDate = publicationDate.AddDays(-2)
             };
 
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ReturnsAsync(new List<QualificationOutputFile> { active, archived });
 
-            var datePrefix = DateTime.UtcNow.ToString("yyyy-MM-dd");
+            var datePrefix = publicationDate.ToString("yyyy-MM-dd");
             var expectedFile = $"{datePrefix}{FileSuffix}";
 
             // capture uploaded streams for later assertions
@@ -321,6 +319,39 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             Assert.DoesNotContain(",Archived,", row);
         }
 
+        [Fact]
+        public async Task Then_PublicationDate_Different_From_RunDate_Is_Handled_Correctly()
+        {
+            // Arrange
+            var publicationDate = DateTime.UtcNow.AddDays(-7).Date;
+            var request = new GetQualificationOutputFileQuery
+            {
+                CurrentUsername = "Tester",
+                PublicationDate = publicationDate
+            };
 
+            var qualification = new QualificationOutputFile
+            {
+                QualificationName = "Test Q",
+                Age1619_FundingApprovalEndDate = publicationDate.AddDays(1)
+            };
+
+            _repo.Setup(x => x.GetQualificationOutputFile())
+                 .ReturnsAsync(new List<QualificationOutputFile> { qualification });
+
+            // Act
+            var result = await _handler.Handle(request, CancellationToken.None);
+
+            // Assert
+            Assert.True(result.Success);
+            Assert.StartsWith(publicationDate.ToString("yyyy-MM-dd"), result.Value!.FileName);
+            Assert.EndsWith("-AOdPOutputFile.csv", result.Value.FileName);
+
+            _logRepo.Verify(x => x.CreateAsync(
+                It.Is<QualificationOutputFileLog>(h =>
+                    h.PublicationDate == publicationDate &&
+                    h.DownloadDate.Date == DateTime.UtcNow.Date),
+                It.IsAny<CancellationToken>()), Times.Once);
+        }
     }
 }
