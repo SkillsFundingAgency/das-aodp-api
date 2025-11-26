@@ -77,7 +77,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
                 var dateFormats = new[] { "dd/MM/yyyy", "d/M/yyyy", "yyyy-MM-dd", "dd MMM yyyy" };
 
                 var items = ParseRowsToEntities(rows, headerIndex + 1, sharedStrings, headerMap, columns, culture, dateFormats);
-                if (!items.Any())
+                if (items.Count == 0)
                 {
                     response.Success = true;
                     response.Value = new ImportPldnsCommandResponse { ImportedCount = 0 };
@@ -135,7 +135,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
             for (int r = 0; r < Math.Min(rows.Count, 12); r++)
             {
                 var cellTexts = rows[r].Elements<Cell>()
-                    .Select(c => GetCellText(c, sharedStrings).Trim())
+                    .Select(c => ImportHelper.GetCellText(c, sharedStrings).Trim())
                     .Where(t => !string.IsNullOrWhiteSpace(t))
                     .Select(t => t.ToLowerInvariant())
                     .ToList();
@@ -159,7 +159,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
             foreach (var cell in headerRow.Elements<Cell>())
             {
                 var col = GetColumnName(cell.CellReference?.Value);
-                var txt = GetCellText(cell, sharedStrings);
+                var txt = ImportHelper.GetCellText(cell, sharedStrings);
                 if (!string.IsNullOrWhiteSpace(col) && !string.IsNullOrWhiteSpace(txt))
                     headerMap[col!] = txt.Trim();
             }
@@ -198,39 +198,34 @@ namespace SFA.DAS.AODP.Application.Commands.Import
 
         private static ColumnNames MapColumns(IDictionary<string, string> headerMap)
         {
-            string? Find(params string[] variants) => FindColumn(headerMap, variants);
-
-            var qanCol = Find("text QAN", "QAN", "Qualification number", "Qualification")
-                          ?? headerMap.FirstOrDefault(kv => (kv.Value ?? string.Empty).ToLowerInvariant().Contains("qan")).Key;
-
             return new ColumnNames(
-                qanCol,
-                Find("Date PLDNS list updated", "Date PLDNS list updated", "list updated"),
-                Find("NOTE", "Notes", "NOTE: OED at rollover before 01/08/2019. not for 19/20 or 20/21 offer"),
-                Find("PLDNS 14-16"),
-                Find("NOTES PLDNS 14-16", "NOTES PLDNS 14-16 :"),
-                Find("PLDNS 16-19"),
-                Find("NOTES PLDNS 16-19", "NOTES PLDNS 16-19:"),
-                Find("PLDNS Local flex"),
-                Find("NOTES PLDNS Local flex"),
-                Find("PLDNS Legal entitlement L2/L3"),
-                Find("NOTES PLDNS Legal entitlement L2/L3"),
-                Find("PLDNS Legal entitlement Eng/Maths"),
-                Find("NOTES PLDNS Legal entitlement Eng/Maths"),
-                Find("PLDNS Digital entitlement"),
-                Find("NOTES PLDNS Digital entitlement"),
-                Find("PLDNS ESF L3/L4"),
-                Find("NOTES PLDNS ESF L3/L4"),
-                Find("PLDNS Loans"),
-                Find("NOTES PLDNS Loans"),
-                Find("PLDNS Lifelong Learning Entitlement"),
-                Find("NOTES PLDNS Lifelong Learning Entitlement"),
-                Find("PLDNS Level 3 Free Courses for Jobs"),
-                Find("Level 3 Free Courses for Jobs (Previously known as National skills fund L3 extended entitlement)"),
-                Find("PLDNS CoF"),
-                Find("NOTES  PLDNS CoF"),
-                Find("Start date"),
-                Find("NOTES Start date")
+                ImportHelper.FindColumn(headerMap, "text QAN"),
+                ImportHelper.FindColumn(headerMap, "Date PLDNS list updated", "list updated"),
+                ImportHelper.FindColumn(headerMap, "NOTE", "Notes"),
+                ImportHelper.FindColumn(headerMap, "PLDNS 14-16"),
+                ImportHelper.FindColumn(headerMap, "NOTES PLDNS 14-16"),
+                ImportHelper.FindColumn(headerMap, "PLDNS 16-19"),
+                ImportHelper.FindColumn(headerMap, "NOTES PLDNS 16-19"),
+                ImportHelper.FindColumn(headerMap, "PLDNS Local flex"),
+                ImportHelper.FindColumn(headerMap, "NOTES PLDNS Local flex"),
+                ImportHelper.FindColumn(headerMap, "PLDNS Legal entitlement L2/L3"),
+                ImportHelper.FindColumn(headerMap, "NOTES PLDNS Legal entitlement L2/L3"),
+                ImportHelper.FindColumn(headerMap, "PLDNS Legal entitlement Eng/Maths"),
+                ImportHelper.FindColumn(headerMap, "NOTES PLDNS Legal entitlement Eng/Maths"),
+                ImportHelper.FindColumn(headerMap, "PLDNS Digital entitlement"),
+                ImportHelper.FindColumn(headerMap, "NOTES PLDNS Digital entitlement"),
+                ImportHelper.FindColumn(headerMap, "PLDNS ESF L3/L4"),
+                ImportHelper.FindColumn(headerMap, "NOTES PLDNS ESF L3/L4"),
+                ImportHelper.FindColumn(headerMap, "PLDNS Loans"),
+                ImportHelper.FindColumn(headerMap, "NOTES PLDNS Loans"),
+                ImportHelper.FindColumn(headerMap, "PLDNS Lifelong Learning Entitlement"),
+                ImportHelper.FindColumn(headerMap, "NOTES PLDNS Lifelong Learning Entitlement"),
+                ImportHelper.FindColumn(headerMap, "PLDNS Level 3 Free Courses for Jobs"),
+                ImportHelper.FindColumn(headerMap, "Level 3 Free Courses for Jobs (Previously known as National skills fund L3 extended entitlement)"),
+                ImportHelper.FindColumn(headerMap, "PLDNS CoF"),
+                ImportHelper.FindColumn(headerMap, "NOTES  PLDNS CoF"),
+                ImportHelper.FindColumn(headerMap, "Start date"),
+                ImportHelper.FindColumn(headerMap, "NOTES Start date")
             );
         }
 
@@ -255,7 +250,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
                 {
                     var col = GetColumnName(cell.CellReference?.Value);
                     if (string.IsNullOrWhiteSpace(col)) continue;
-                    var text = GetCellText(cell, sharedStrings)?.Trim() ?? string.Empty;
+                    var text = ImportHelper.GetCellText(cell, sharedStrings)?.Trim() ?? string.Empty;
                     if (!cellMap.ContainsKey(col)) cellMap[col] = text;
                 }
 
@@ -335,64 +330,6 @@ namespace SFA.DAS.AODP.Application.Commands.Import
         private static string? GetValue(IDictionary<string, string> map, string? column) =>
                         string.IsNullOrWhiteSpace(column) ? null : (map.TryGetValue(column!, out var v) ? v : null);
 
-        private static string? FindColumn(IDictionary<string, string> headerMap, params string[] variants)
-        {
-            if (headerMap == null || variants == null || variants.Length == 0) return null;
-
-            // exact match first
-            foreach (var kv in headerMap)
-            {
-                var header = kv.Value?.Trim();
-                if (string.IsNullOrEmpty(header)) continue;
-
-                if (variants.Any(v => string.Equals(v.Trim(), header, StringComparison.OrdinalIgnoreCase)))
-                    return kv.Key;
-            }
-
-            // contains match
-            foreach (var kv in headerMap)
-            {
-                var header = kv.Value?.Trim().ToLowerInvariant() ?? string.Empty;
-                foreach (var v in variants)
-                {
-                    var variant = v?.Trim().ToLowerInvariant() ?? string.Empty;
-                    if (!string.IsNullOrEmpty(variant) && header.Contains(variant))
-                        return kv.Key;
-                }
-            }
-
-            return null;
-        }
-
-        private static string GetCellText(Cell cell, SharedStringTable? sharedStrings)
-        {
-            if (cell == null) return string.Empty;
-
-            if (cell.DataType != null && cell.DataType.Value == CellValues.InlineString)
-                return cell.InnerText ?? string.Empty;
-
-            var value = cell.CellValue?.InnerText ?? string.Empty;
-
-            if (cell.DataType != null && cell.DataType.Value == CellValues.SharedString)
-            {
-                if (int.TryParse(value, out var sstIndex) && sharedStrings != null)
-                {
-                    var ssi = sharedStrings.Elements().ElementAtOrDefault(sstIndex);
-                    if (ssi == null) return string.Empty;
-                    var text = ssi.InnerText?.ToString();
-                    if (!string.IsNullOrEmpty(text)) return text;
-                    var runText = ssi.Elements<Run>().SelectMany(r => r.Elements<Text>()).Select(t => t.Text).FirstOrDefault();
-                    if (!string.IsNullOrEmpty(runText)) return runText;
-                    return ssi.InnerText ?? string.Empty;
-                }
-            }
-
-            if (cell.DataType != null && cell.DataType.Value == CellValues.Boolean)
-                return value == "1" ? "TRUE" : value == "0" ? "FALSE" : value;
-
-            return value;
-        }
-
         private static string? GetColumnName(string? cellReference)
         {
             if (string.IsNullOrWhiteSpace(cellReference)) return null;
@@ -413,7 +350,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
             if (DateTime.TryParseExact(txt, formats, culture, DateTimeStyles.None, out dt)) return dt.Date;
             if (double.TryParse(txt, NumberStyles.Any, CultureInfo.InvariantCulture, out var oa))
             {
-                try { return DateTime.FromOADate(oa); } catch { }
+                return DateTime.FromOADate(oa); 
             }
             return null;
         }

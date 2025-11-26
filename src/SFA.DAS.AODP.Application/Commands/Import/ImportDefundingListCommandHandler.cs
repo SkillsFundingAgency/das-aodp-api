@@ -124,7 +124,7 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
         for (int r = 0; r < Math.Min(rows.Count, 12); r++)
         {
             var cellTexts = rows[r].Elements<Cell>()
-                .Select(c => GetCellText(c, sharedStrings).Trim())
+                .Select(c => ImportHelper.GetCellText(c, sharedStrings).Trim())
                 .Where(t => !string.IsNullOrWhiteSpace(t))
                 .Select(t => t.ToLowerInvariant())
                 .ToList();
@@ -149,7 +149,7 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
         foreach (var cell in headerRow.Elements<Cell>())
         {
             var col = GetColumnName(cell.CellReference?.Value);
-            var txt = GetCellText(cell, sharedStrings);
+            var txt = ImportHelper.GetCellText(cell, sharedStrings);
             if (!string.IsNullOrWhiteSpace(col) && !string.IsNullOrWhiteSpace(txt))
                 headerMap[col!] = txt.Trim();
         }
@@ -163,142 +163,23 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
         if (rows == null || rows.Count == 0) return items;
 
         // resolve columns once
-        string? qCol = FindColumn(headerMap, "Qualification number");
-        string? titleCol = FindColumn(headerMap, "Title");
-        string? awardingCol = FindColumn(headerMap, "Awarding organisation");
-        string? glhCol = FindColumn(headerMap, "Guided Learning Hours");
-        string? ssaCol = FindColumn(headerMap, "Sector Subject Area Tier 2");
-        string? routeCol = FindColumn(headerMap, "Relevant route");
-        string? fundingCol = FindColumn(headerMap, "Funding offer");
-        string? inScopeCol = FindColumn(headerMap, "InScope", "In Scope");
-        string? commentsCol = FindColumn(headerMap, "Comments");
-
-        // helper: get cell text by rowIndex and column name
-        static string GetValue(WorksheetPart worksheetPart, string rowIndex, string? column, SharedStringTable? sharedStrings)
-        {
-            if (string.IsNullOrWhiteSpace(column) || string.IsNullOrWhiteSpace(rowIndex)) return string.Empty;
-            return GetCellTextByColumn(worksheetPart, rowIndex, column, sharedStrings)?.Trim() ?? string.Empty;
-        }
-
-        static string? ToNull(string? s) => string.IsNullOrWhiteSpace(s) ? null : s;
-
-        DefundingList? TryCreateItem(int i)
-        {
-            var row = rows[i];
-            var rowIndex = row.RowIndex?.Value.ToString() ?? (i + 1).ToString();
-
-            var qNumber = GetValue(worksheetPart, rowIndex, qCol, sharedStrings);
-            if (string.IsNullOrWhiteSpace(qNumber)) return null;
-
-            var title = GetValue(worksheetPart, rowIndex, titleCol, sharedStrings);
-            var awardingOrg = GetValue(worksheetPart, rowIndex, awardingCol, sharedStrings);
-            var glh = GetValue(worksheetPart, rowIndex, glhCol, sharedStrings);
-            var ssa = GetValue(worksheetPart, rowIndex, ssaCol, sharedStrings);
-            var route = GetValue(worksheetPart, rowIndex, routeCol, sharedStrings);
-            var fundingOffer = GetValue(worksheetPart, rowIndex, fundingCol, sharedStrings);
-            var inScopeStr = GetValue(worksheetPart, rowIndex, inScopeCol, sharedStrings);
-            var comments = GetValue(worksheetPart, rowIndex, commentsCol, sharedStrings);
-
-            var inScope = ParseInScope(inScopeStr);
-
-            return new DefundingList
-            {
-                Qan = qNumber,
-                Title = ToNull(title),
-                AwardingOrganisation = ToNull(awardingOrg),
-                GuidedLearningHours = ToNull(glh),
-                SectorSubjectArea = ToNull(ssa),
-                RelevantRoute = ToNull(route),
-                FundingOffer = ToNull(fundingOffer),
-                InScope = inScope,
-                Comments = ToNull(comments),
-                ImportDate = DateTime.UtcNow
-            };
-        }
+        string? qCol = ImportHelper.FindColumn(headerMap, "Qualification number");
+        string? titleCol = ImportHelper.FindColumn(headerMap, "Title");
+        string? awardingCol = ImportHelper.FindColumn(headerMap, "Awarding organisation");
+        string? glhCol = ImportHelper.FindColumn(headerMap, "Guided Learning Hours");
+        string? ssaCol = ImportHelper.FindColumn(headerMap, "Sector Subject Area Tier 2");
+        string? routeCol = ImportHelper.FindColumn(headerMap, "Relevant route");
+        string? fundingCol = ImportHelper.FindColumn(headerMap, "Funding offer");
+        string? inScopeCol = ImportHelper.FindColumn(headerMap, "InScope", "In Scope");
+        string? commentsCol = ImportHelper.FindColumn(headerMap, "Comments");
 
         for (int i = startIndex; i < rows.Count; i++)
         {
-            var item = TryCreateItem(i);
+            var item = CreateItemFromRow(rows, i, qCol, titleCol, awardingCol, glhCol, ssaCol, routeCol, fundingCol, inScopeCol, commentsCol, worksheetPart, sharedStrings);
             if (item != null) items.Add(item);
         }
 
         return items;
-    }
-
-    private static string? FindColumn(IDictionary<string, string> headerMap, params string[] variants)
-    {
-        if (headerMap == null || variants == null || variants.Length == 0) return null;
-
-        // exact match first
-        foreach (var kv in headerMap)
-        {
-            var header = kv.Value?.Trim();
-            if (string.IsNullOrEmpty(header)) continue;
-
-            if (variants.Any(v => string.Equals(v.Trim(), header, StringComparison.OrdinalIgnoreCase)))
-                return kv.Key;
-        }
-
-        // contains match
-        foreach (var kv in headerMap)
-        {
-            var header = kv.Value?.Trim().ToLowerInvariant() ?? string.Empty;
-            foreach (var v in variants)
-            {
-                var variant = v?.Trim().ToLowerInvariant() ?? string.Empty;
-                if (!string.IsNullOrEmpty(variant) && header.Contains(variant))
-                    return kv.Key;
-            }
-        }
-
-        return null;
-    }
-
-    private static string GetCellText(Cell cell, SharedStringTable? sharedStrings)
-    {
-        if (cell == null) return string.Empty;
-
-        if (cell.DataType != null && cell.DataType.Value == CellValues.InlineString)
-        {
-            return cell.InnerText ?? string.Empty;
-        }
-
-        var value = cell.CellValue?.InnerText ?? string.Empty;
-
-        if (cell.DataType != null)
-        {
-            if (cell.DataType.Value == CellValues.SharedString)
-            {
-                if (int.TryParse(value, out var sstIndex) && sharedStrings != null)
-                {
-                    var ssi = sharedStrings.Elements().ElementAtOrDefault(sstIndex);
-                    if (ssi == null) return string.Empty;
-
-                    var text = ssi.InnerText?.ToString();
-                    if (!string.IsNullOrEmpty(text)) return text;
-
-                    var runText = ssi.Elements<Run>().SelectMany(r => r.Elements<Text>()).Select(t => t.Text).FirstOrDefault();
-                    if (!string.IsNullOrEmpty(runText)) return runText;
-
-                    return ssi.InnerText ?? string.Empty;
-                }
-            }
-            else if (cell.DataType.Value == CellValues.Boolean)
-            {
-                return value switch
-                {
-                    "1" => "TRUE",
-                    "0" => "FALSE",
-                    _ => value
-                };
-            }
-            else
-            {
-                return value;
-            }
-        }
-
-        return value;
     }
 
     private static bool ParseInScope(string? inScopeStr)
@@ -330,6 +211,63 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
         var address = $"{column}{rowIndex}";
         var cell = worksheetPart.Worksheet.Descendants<Cell>().FirstOrDefault(c => string.Equals((c.CellReference ?? "").Value, address, StringComparison.OrdinalIgnoreCase));
         if (cell == null) return string.Empty;
-        return GetCellText(cell, sharedStrings)?.Trim() ?? string.Empty;
+        return ImportHelper.GetCellText(cell, sharedStrings)?.Trim() ?? string.Empty;
+    }
+
+    private static DefundingList? CreateItemFromRow(
+        List<Row> rows,
+        int i,
+        string? qCol,
+        string? titleCol,
+        string? awardingCol,
+        string? glhCol,
+        string? ssaCol,
+        string? routeCol,
+        string? fundingCol,
+        string? inScopeCol,
+        string? commentsCol,
+        WorksheetPart worksheetPart,
+        SharedStringTable? sharedStrings)
+    {
+        if (rows == null || i < 0 || i >= rows.Count) return null;
+
+        var row = rows[i];
+        var rowIndex = row.RowIndex?.Value.ToString() ?? (i + 1).ToString();
+
+        var qNumber = GetValue(worksheetPart, rowIndex, qCol, sharedStrings);
+        if (string.IsNullOrWhiteSpace(qNumber)) return null;
+
+        var title = GetValue(worksheetPart, rowIndex, titleCol, sharedStrings);
+        var awardingOrg = GetValue(worksheetPart, rowIndex, awardingCol, sharedStrings);
+        var glh = GetValue(worksheetPart, rowIndex, glhCol, sharedStrings);
+        var ssa = GetValue(worksheetPart, rowIndex, ssaCol, sharedStrings);
+        var route = GetValue(worksheetPart, rowIndex, routeCol, sharedStrings);
+        var fundingOffer = GetValue(worksheetPart, rowIndex, fundingCol, sharedStrings);
+        var inScopeStr = GetValue(worksheetPart, rowIndex, inScopeCol, sharedStrings);
+        var comments = GetValue(worksheetPart, rowIndex, commentsCol, sharedStrings);
+
+        var inScope = ParseInScope(inScopeStr);
+
+        static string? ToNull(string? s) => string.IsNullOrWhiteSpace(s) ? null : s;
+
+        return new DefundingList
+        {
+            Qan = qNumber,
+            Title = ToNull(title),
+            AwardingOrganisation = ToNull(awardingOrg),
+            GuidedLearningHours = ToNull(glh),
+            SectorSubjectArea = ToNull(ssa),
+            RelevantRoute = ToNull(route),
+            FundingOffer = ToNull(fundingOffer),
+            InScope = inScope,
+            Comments = ToNull(comments),
+            ImportDate = DateTime.UtcNow
+        };
+    }
+
+    private static string GetValue(WorksheetPart worksheetPart, string rowIndex, string? column, SharedStringTable? sharedStrings)
+    {
+        if (string.IsNullOrWhiteSpace(column) || string.IsNullOrWhiteSpace(rowIndex)) return string.Empty;
+        return GetCellTextByColumn(worksheetPart, rowIndex, column, sharedStrings)?.Trim() ?? string.Empty;
     }
 }

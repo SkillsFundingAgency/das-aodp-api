@@ -68,8 +68,6 @@ namespace SFA.DAS.AODP.Data.Extensions
 
             services.AddScoped<IQualificationOutputFileRepository, QualificationOutputFileRepository>();
             services.AddScoped<IQualificationOutputFileLogRepository, QualificationOutputFileLogRepository>();
-            //services.AddScoped<IDefundingListRepository, DefundingListRepository>();
-            //services.AddScoped<IPLDNSRepository, PLDNSRepository>();
             services.AddScoped<IImportRepository, ImportRepository>();
             return services;
         }
