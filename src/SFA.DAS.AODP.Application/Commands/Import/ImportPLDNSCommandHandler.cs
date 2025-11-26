@@ -359,7 +359,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
             return null;
         }
 
-        private static void PopulateCellMap(IEnumerable<Cell> rowCells, SharedStringTable? sharedStrings, IDictionary<string, string> cellMap)
+        private static void PopulateCellMap(IEnumerable<Cell> rowCells, SharedStringTable? sharedStrings, Dictionary<string, string> cellMap)
         {
             foreach (var cell in rowCells)
             {

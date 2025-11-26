@@ -58,36 +58,45 @@ public static class ImportHelper
 
     private static string GetTypedCellValue(Cell cell, string value, SharedStringTable? sharedStrings)
     {
-        if (cell.DataType!.Value == CellValues.SharedString)
-        {
-            if (int.TryParse(value, out var sstIndex) && sharedStrings != null)
-            {
-                var ssi = sharedStrings.Elements().ElementAtOrDefault(sstIndex);
-                if (ssi == null) return string.Empty;
+        var dataType = cell.DataType?.Value;
 
-                var text = ssi.InnerText?.ToString();
-                if (!string.IsNullOrEmpty(text)) return text;
+        if (dataType != null && dataType.Equals(CellValues.SharedString))
+            return GetSharedStringValue(value, sharedStrings);
+        if (dataType != null && dataType.Equals(CellValues.Boolean))
+            return MapBooleanValue(value);
 
-                var runText = ssi.Elements<Run>().SelectMany(r => r.Elements<Text>()).Select(t => t.Text).FirstOrDefault();
-                if (!string.IsNullOrEmpty(runText)) return runText;
-
-                return ssi.InnerText ?? string.Empty;
-            }
-
-            return value;
-        }
-        else if (cell.DataType.Value == CellValues.Boolean)
-        {
-            return value switch
-            {
-                "1" => "TRUE",
-                "0" => "FALSE",
-                _ => value
-            };
-        }
-        else
-        {
-            return value;
-        }
+        return value;
     }
+
+    private static string GetSharedStringValue(string value, SharedStringTable? sharedStrings)
+    {
+        if (!int.TryParse(value, out var sstIndex) || sharedStrings == null)
+            return value;
+
+        var ssi = sharedStrings.Elements<SharedStringItem>().ElementAtOrDefault(sstIndex);
+        if (ssi == null)
+            return string.Empty;
+
+        // Prefer straightforward inner text if available
+        var directText = ssi.InnerText;
+        if (!string.IsNullOrEmpty(directText))
+            return directText;
+
+        // Otherwise try to compose text from runs
+        var runText = ssi
+            .Elements<Run>()
+            .SelectMany(r => r.Elements<Text>())
+            .Select(t => t.Text)
+            .FirstOrDefault();
+
+        return runText ?? string.Empty;
+    }
+
+    private static string MapBooleanValue(string value) =>
+        value switch
+        {
+            "1" => "TRUE",
+            "0" => "FALSE",
+            _ => value
+        };
 }
