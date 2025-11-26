@@ -18,37 +18,39 @@ public static class ImportHelper
 
         var value = cell.CellValue?.InnerText ?? string.Empty;
 
-        if (cell.DataType != null)
+        if (cell.DataType == null)
         {
-            if (cell.DataType.Value == CellValues.SharedString)
-            {
-                if (int.TryParse(value, out var sstIndex) && sharedStrings != null)
-                {
-                    var ssi = sharedStrings.Elements().ElementAtOrDefault(sstIndex);
-                    if (ssi == null) return string.Empty;
+            return value;
+        }
 
-                    var text = ssi.InnerText?.ToString();
-                    if (!string.IsNullOrEmpty(text)) return text;
-
-                    var runText = ssi.Elements<Run>().SelectMany(r => r.Elements<Text>()).Select(t => t.Text).FirstOrDefault();
-                    if (!string.IsNullOrEmpty(runText)) return runText;
-
-                    return ssi.InnerText ?? string.Empty;
-                }
-            }
-            else if (cell.DataType.Value == CellValues.Boolean)
+        if (cell.DataType.Value == CellValues.SharedString)
+        {
+            if (int.TryParse(value, out var sstIndex) && sharedStrings != null)
             {
-                return value switch
-                {
-                    "1" => "TRUE",
-                    "0" => "FALSE",
-                    _ => value
-                };
+                var ssi = sharedStrings.Elements().ElementAtOrDefault(sstIndex);
+                if (ssi == null) return string.Empty;
+
+                var text = ssi.InnerText?.ToString();
+                if (!string.IsNullOrEmpty(text)) return text;
+
+                var runText = ssi.Elements<Run>().SelectMany(r => r.Elements<Text>()).Select(t => t.Text).FirstOrDefault();
+                if (!string.IsNullOrEmpty(runText)) return runText;
+
+                return ssi.InnerText ?? string.Empty;
             }
-            else
+        }
+        else if (cell.DataType.Value == CellValues.Boolean)
+        {
+            return value switch
             {
-                return value;
-            }
+                "1" => "TRUE",
+                "0" => "FALSE",
+                _ => value
+            };
+        }
+        else
+        {
+            return value;
         }
 
         return value;

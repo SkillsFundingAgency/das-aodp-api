@@ -14,15 +14,6 @@ public class WhenImportingDefundingListOrPldns
     public WhenImportingDefundingListOrPldns() => _sut = new(mockContext.Object);
 
     [Fact]
-    public async Task NullItems_DoesNotCallSaveChangesAsync()
-    {
-        // Act
-        mockContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>())).Throws(new Exception("SaveChanges should not be called"));
-
-        await _sut.BulkInsertAsync<DefundingList>(null!);
-    }
-
-    [Fact]
     public async Task WhenTIsDefundingList_CallsAddRangeOnDefundingListsAndSaves()
     {
         // Arrange

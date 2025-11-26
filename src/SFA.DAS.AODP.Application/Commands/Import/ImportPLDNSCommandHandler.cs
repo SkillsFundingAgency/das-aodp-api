@@ -76,7 +76,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
                 var culture = new CultureInfo("en-GB");
                 var dateFormats = new[] { "dd/MM/yyyy", "d/M/yyyy", "yyyy-MM-dd", "dd MMM yyyy" };
 
-                var items = ParseRowsToEntities(rows, headerIndex + 1, sharedStrings, headerMap, columns, culture, dateFormats);
+                var items = ParseRowsToEntities(rows, headerIndex + 1, sharedStrings, columns, culture, dateFormats);
                 if (items.Count == 0)
                 {
                     response.Success = true;
@@ -233,12 +233,12 @@ namespace SFA.DAS.AODP.Application.Commands.Import
             List<Row> rows,
             int startIndex,
             SharedStringTable? sharedStrings,
-            IDictionary<string, string> headerMap,
             ColumnNames columns,
             CultureInfo culture,
             string[] dateFormats)
         {
             var items = new List<Pldns>();
+            var item = new Pldns();
             for (int i = startIndex; i < rows.Count; i++)
             {
                 var row = rows[i];
@@ -260,7 +260,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
                 if (!cellMap.TryGetValue(columns.Qan, out var qNumber) || string.IsNullOrWhiteSpace(qNumber))
                     continue;
 
-                Pldns CreateEntity() => new Pldns
+                item = new Pldns
                 {
                     Qan = qNumber!.Trim(),
 
@@ -306,7 +306,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
                     ImportDate = DateTime.UtcNow
                 };
 
-                items.Add(CreateEntity());
+                items.Add(item);
             }
 
             return items;
@@ -327,8 +327,20 @@ namespace SFA.DAS.AODP.Application.Commands.Import
             return totalImported;
         }
 
-        private static string? GetValue(IDictionary<string, string> map, string? column) =>
-                        string.IsNullOrWhiteSpace(column) ? null : (map.TryGetValue(column!, out var v) ? v : null);
+        private static string? GetValue(Dictionary<string, string> map, string? column)
+        {
+            if (string.IsNullOrWhiteSpace(column))
+            {
+                return null;
+            }
+
+            if (map.TryGetValue(column!, out var v))
+            {
+                return v;
+            }
+
+            return null;
+        }
 
         private static string? GetColumnName(string? cellReference)
         {
