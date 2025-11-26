@@ -73,7 +73,7 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
             // Parse data rows into items
             var items = ParseDataRows(rows, headerIndex + 1, headerMap, worksheetPart, sharedStrings);
 
-            if (items?.Count == 0)
+            if (items.Count == 0)
             {
                 response.Success = true;
                 response.Value = new ImportDefundingListCommandResponse { ImportedCount = 0 };
@@ -159,10 +159,13 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
     private static List<DefundingList> ParseDataRows(List<Row> rows, int startIndex, IDictionary<string, string> headerMap, WorksheetPart worksheetPart, SharedStringTable? sharedStrings)
     {
         var items = new List<DefundingList>();
-        var item = new DefundingList();
 
+        // normalize start index
         if (startIndex < 0) startIndex = 0;
-        if (rows == null || rows.Count == 0) return items;
+
+        var localRows = rows ?? new List<Row>();
+        var total = localRows.Count;
+        if (total == 0 || startIndex >= total) return items;
 
         // resolve columns once
         string? qCol = ImportHelper.FindColumn(headerMap, "Qualification number");
@@ -175,20 +178,15 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
         string? inScopeCol = ImportHelper.FindColumn(headerMap, "InScope", "In Scope");
         string? commentsCol = ImportHelper.FindColumn(headerMap, "Comments");
 
-        for (int i = startIndex; i < rows.Count; i++)
+        for (int i = startIndex; i < total; i++)
         {
-            if (rows == null || i < 0 || i >= rows.Count)
-            {
-                continue;
-            }
-
-            var row = rows[i];
+            var row = localRows[i];
             var rowIndex = row.RowIndex?.Value.ToString() ?? (i + 1).ToString();
 
             var qNumber = GetValue(worksheetPart, rowIndex, qCol, sharedStrings);
             if (string.IsNullOrWhiteSpace(qNumber))
             {
-                return items;
+                continue;
             }
 
             var title = GetValue(worksheetPart, rowIndex, titleCol, sharedStrings);
@@ -204,7 +202,7 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
 
             static string? ToNull(string? s) => string.IsNullOrWhiteSpace(s) ? null : s;
 
-            item = new DefundingList
+            var item = new DefundingList
             {
                 Qan = qNumber,
                 Title = ToNull(title),
@@ -254,57 +252,6 @@ public class ImportDefundingListCommandHandler : IRequestHandler<ImportDefunding
         if (cell == null) return string.Empty;
         return ImportHelper.GetCellText(cell, sharedStrings)?.Trim() ?? string.Empty;
     }
-
-    //private static DefundingList? CreateItemFromRow(
-    //    List<Row> rows,
-    //    int i,
-    //    string? qCol,
-    //    string? titleCol,
-    //    string? awardingCol,
-    //    string? glhCol,
-    //    string? ssaCol,
-    //    string? routeCol,
-    //    string? fundingCol,
-    //    string? inScopeCol,
-    //    string? commentsCol,
-    //    WorksheetPart worksheetPart,
-    //    SharedStringTable? sharedStrings)
-    //{
-    //    if (rows == null || i < 0 || i >= rows.Count) return null;
-
-    //    var row = rows[i];
-    //    var rowIndex = row.RowIndex?.Value.ToString() ?? (i + 1).ToString();
-
-    //    var qNumber = GetValue(worksheetPart, rowIndex, qCol, sharedStrings);
-    //    if (string.IsNullOrWhiteSpace(qNumber)) return null;
-
-    //    var title = GetValue(worksheetPart, rowIndex, titleCol, sharedStrings);
-    //    var awardingOrg = GetValue(worksheetPart, rowIndex, awardingCol, sharedStrings);
-    //    var glh = GetValue(worksheetPart, rowIndex, glhCol, sharedStrings);
-    //    var ssa = GetValue(worksheetPart, rowIndex, ssaCol, sharedStrings);
-    //    var route = GetValue(worksheetPart, rowIndex, routeCol, sharedStrings);
-    //    var fundingOffer = GetValue(worksheetPart, rowIndex, fundingCol, sharedStrings);
-    //    var inScopeStr = GetValue(worksheetPart, rowIndex, inScopeCol, sharedStrings);
-    //    var comments = GetValue(worksheetPart, rowIndex, commentsCol, sharedStrings);
-
-    //    var inScope = ParseInScope(inScopeStr);
-
-    //    static string? ToNull(string? s) => string.IsNullOrWhiteSpace(s) ? null : s;
-
-    //    return new DefundingList
-    //    {
-    //        Qan = qNumber,
-    //        Title = ToNull(title),
-    //        AwardingOrganisation = ToNull(awardingOrg),
-    //        GuidedLearningHours = ToNull(glh),
-    //        SectorSubjectArea = ToNull(ssa),
-    //        RelevantRoute = ToNull(route),
-    //        FundingOffer = ToNull(fundingOffer),
-    //        InScope = inScope,
-    //        Comments = ToNull(comments),
-    //        ImportDate = DateTime.UtcNow
-    //    };
-    //}
 
     private static string GetValue(WorksheetPart worksheetPart, string rowIndex, string? column, SharedStringTable? sharedStrings)
     {

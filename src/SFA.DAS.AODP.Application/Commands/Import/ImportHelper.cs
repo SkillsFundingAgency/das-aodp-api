@@ -23,37 +23,8 @@ public static class ImportHelper
             return value;
         }
 
-        if (cell.DataType.Value == CellValues.SharedString)
-        {
-            if (int.TryParse(value, out var sstIndex) && sharedStrings != null)
-            {
-                var ssi = sharedStrings.Elements().ElementAtOrDefault(sstIndex);
-                if (ssi == null) return string.Empty;
+        return GetTypedCellValue(cell, value, sharedStrings);
 
-                var text = ssi.InnerText?.ToString();
-                if (!string.IsNullOrEmpty(text)) return text;
-
-                var runText = ssi.Elements<Run>().SelectMany(r => r.Elements<Text>()).Select(t => t.Text).FirstOrDefault();
-                if (!string.IsNullOrEmpty(runText)) return runText;
-
-                return ssi.InnerText ?? string.Empty;
-            }
-        }
-        else if (cell.DataType.Value == CellValues.Boolean)
-        {
-            return value switch
-            {
-                "1" => "TRUE",
-                "0" => "FALSE",
-                _ => value
-            };
-        }
-        else
-        {
-            return value;
-        }
-
-        return value;
     }
 
     public static string? FindColumn(IDictionary<string, string> headerMap, params string[] variants)
@@ -83,5 +54,40 @@ public static class ImportHelper
         }
 
         return null;
+    }
+
+    private static string GetTypedCellValue(Cell cell, string value, SharedStringTable? sharedStrings)
+    {
+        if (cell.DataType!.Value == CellValues.SharedString)
+        {
+            if (int.TryParse(value, out var sstIndex) && sharedStrings != null)
+            {
+                var ssi = sharedStrings.Elements().ElementAtOrDefault(sstIndex);
+                if (ssi == null) return string.Empty;
+
+                var text = ssi.InnerText?.ToString();
+                if (!string.IsNullOrEmpty(text)) return text;
+
+                var runText = ssi.Elements<Run>().SelectMany(r => r.Elements<Text>()).Select(t => t.Text).FirstOrDefault();
+                if (!string.IsNullOrEmpty(runText)) return runText;
+
+                return ssi.InnerText ?? string.Empty;
+            }
+
+            return value;
+        }
+        else if (cell.DataType.Value == CellValues.Boolean)
+        {
+            return value switch
+            {
+                "1" => "TRUE",
+                "0" => "FALSE",
+                _ => value
+            };
+        }
+        else
+        {
+            return value;
+        }
     }
 }

@@ -238,21 +238,13 @@ namespace SFA.DAS.AODP.Application.Commands.Import
             string[] dateFormats)
         {
             var items = new List<Pldns>();
-            var item = new Pldns();
+
             for (int i = startIndex; i < rows.Count; i++)
             {
                 var row = rows[i];
-                var rowCells = row.Elements<Cell>();
-                if (rowCells == null) continue;
 
                 var cellMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                foreach (var cell in rowCells)
-                {
-                    var col = GetColumnName(cell.CellReference?.Value);
-                    if (string.IsNullOrWhiteSpace(col)) continue;
-                    var text = ImportHelper.GetCellText(cell, sharedStrings)?.Trim() ?? string.Empty;
-                    if (!cellMap.ContainsKey(col)) cellMap[col] = text;
-                }
+                PopulateCellMap(row.Elements<Cell>(), sharedStrings, cellMap);
 
                 if (string.IsNullOrWhiteSpace(columns.Qan))
                     break;
@@ -260,7 +252,7 @@ namespace SFA.DAS.AODP.Application.Commands.Import
                 if (!cellMap.TryGetValue(columns.Qan, out var qNumber) || string.IsNullOrWhiteSpace(qNumber))
                     continue;
 
-                item = new Pldns
+                var item = new Pldns
                 {
                     Qan = qNumber!.Trim(),
 
@@ -365,6 +357,17 @@ namespace SFA.DAS.AODP.Application.Commands.Import
                 return DateTime.FromOADate(oa); 
             }
             return null;
+        }
+
+        private static void PopulateCellMap(IEnumerable<Cell> rowCells, SharedStringTable? sharedStrings, IDictionary<string, string> cellMap)
+        {
+            foreach (var cell in rowCells)
+            {
+                var col = GetColumnName(cell.CellReference?.Value);
+                if (string.IsNullOrWhiteSpace(col)) continue;
+                var text = ImportHelper.GetCellText(cell, sharedStrings)?.Trim() ?? string.Empty;
+                if (!cellMap.ContainsKey(col)) cellMap[col] = text;
+            }
         }
     }
 }
