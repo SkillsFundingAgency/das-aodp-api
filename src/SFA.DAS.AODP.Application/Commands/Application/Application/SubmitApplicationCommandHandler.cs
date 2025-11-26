@@ -1,29 +1,36 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Commands.Application;
 using SFA.DAS.AODP.Application.Commands.Application.Message;
+using SFA.DAS.AODP.Application.Services;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Models.Application;
 
-public class SubmitApplicationCommandHandler : IRequestHandler<SubmitApplicationCommand, BaseMediatrResponse<EmptyResponse>>
+namespace SFA.DAS.AODP.Application.Commands.Application;
+
+public class SubmitApplicationCommandHandler : IRequestHandler<SubmitApplicationCommand, BaseMediatrResponse<SubmitApplicationCommandResponse>>
 {
     private readonly IApplicationRepository _applicationRepository;
     private readonly IApplicationReviewRepository _applicationReviewRepository;
     private readonly IApplicationReviewFeedbackRepository _applicationReviewFeedbackRepository;
     private readonly IMediator _mediator;
+    private readonly INotificationDefinitionFactory _notificationDefinitionFactory;
 
-    public SubmitApplicationCommandHandler(IApplicationRepository applicationRepository, IApplicationReviewRepository applicationReviewRepository, IApplicationReviewFeedbackRepository applicationReviewFeedbackRepository, IMediator mediator)
+    public SubmitApplicationCommandHandler(IApplicationRepository applicationRepository, IApplicationReviewRepository applicationReviewRepository, IApplicationReviewFeedbackRepository applicationReviewFeedbackRepository, IMediator mediator,
+        INotificationDefinitionFactory notificationDefinitionFactory)
     {
         _applicationRepository = applicationRepository;
         _applicationReviewRepository = applicationReviewRepository;
         _applicationReviewFeedbackRepository = applicationReviewFeedbackRepository;
         _mediator = mediator;
+        _notificationDefinitionFactory = notificationDefinitionFactory;
     }
 
-    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(SubmitApplicationCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<SubmitApplicationCommandResponse>> Handle(SubmitApplicationCommand request, CancellationToken cancellationToken)
     {
-        var response = new BaseMediatrResponse<EmptyResponse>();
+        var response = new BaseMediatrResponse<SubmitApplicationCommandResponse>();
 
         try
         {
@@ -83,6 +90,10 @@ public class SubmitApplicationCommandHandler : IRequestHandler<SubmitApplication
                 UserType = UserType.AwardingOrganisation.ToString()
             });
             if (!msgResult.Success) throw new Exception(msgResult.ErrorMessage, msgResult.InnerException);
+
+            var notifications = await _notificationDefinitionFactory.BuildForMessage(request.ApplicationId, MessageType.ApplicationSubmitted);
+
+            response.Value = new() { Notifications = notifications };
             response.Success = true;
         }
         catch (Exception ex)

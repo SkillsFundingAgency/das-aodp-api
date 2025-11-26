@@ -1,5 +1,8 @@
 ﻿using MediatR;
 using Moq;
+using SFA.DAS.AODP.Application.Commands.Application;
+using SFA.DAS.AODP.Application.Commands.Application.Message;
+using SFA.DAS.AODP.Application.Services;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
@@ -15,11 +18,36 @@ public class SubmitApplicationCommandHandlerTests
     private readonly Mock<IApplicationReviewFeedbackRepository> _applicationReviewFeedbackRepository = new();
     private readonly SubmitApplicationCommandHandler _submitApplicationCommandHandler;
     private readonly Mock<IMediator> _mediator = new();
+    private readonly Mock<INotificationDefinitionFactory> _notificationDefinitionFactory = new();
 
     public SubmitApplicationCommandHandlerTests()
     {
         _submitApplicationCommandHandler = new(_applicationRepository.Object,
-            _applicationReviewRepository.Object, _applicationReviewFeedbackRepository.Object, _mediator.Object);
+            _applicationReviewRepository.Object, _applicationReviewFeedbackRepository.Object, _mediator.Object,
+            _notificationDefinitionFactory.Object);
+
+        _mediator
+            .Setup(m => m.Send(
+                It.IsAny<CreateApplicationMessageCommand>(),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new BaseMediatrResponse<CreateApplicationMessageCommandResponse>
+            {
+                Success = true,
+                Value = new CreateApplicationMessageCommandResponse()
+            });
+
+        _notificationDefinitionFactory
+        .Setup(f => f.BuildForMessage(
+            It.IsAny<Guid>(),
+            MessageType.ApplicationSubmitted))
+        .ReturnsAsync(new List<NotificationDefinition>
+        {
+            new()
+            {
+                TemplateName = EmailTemplateNames.QFASTApplicationSubmittedNotification,
+                RecipientKind = NotificationRecipientKind.QfauMailbox,
+            }
+        });
     }
 
     [Fact]
@@ -54,7 +82,7 @@ public class SubmitApplicationCommandHandlerTests
 
 
     [Fact]
-    public async Task Test_Application_Submitted_And_Review_Feedback_Updated()
+    public async Task Test_Application_Submitted_Review_Feedback_Updated_Notification_Definition_Returned()
     {
         // Arrange
         var application = new Data.Entities.Application.Application()
@@ -89,8 +117,27 @@ public class SubmitApplicationCommandHandlerTests
         }, default);
 
         // Assert
-        _applicationReviewFeedbackRepository.Verify(a => a.UpdateAsync(It.Is<List<ApplicationReviewFeedback>>(a => a.All(r => r.NewMessage))));
-        _applicationReviewFeedbackRepository.Verify(a => a.UpdateAsync(It.Is<List<ApplicationReviewFeedback>>(a => a.All(r => r.Status == ApplicationStatus.InReview.ToString()))));
+
+        Assert.Multiple(() => 
+        {
+            _applicationReviewFeedbackRepository.Verify(a => a.UpdateAsync(It.Is<List<ApplicationReviewFeedback>>(a => a.All(r => r.NewMessage))));
+            _applicationReviewFeedbackRepository.Verify(a => a.UpdateAsync(It.Is<List<ApplicationReviewFeedback>>(a => a.All(r => r.Status == ApplicationStatus.InReview.ToString()))));
+
+            Assert.True(response.Success);
+            Assert.NotNull(response.Value);
+            Assert.NotNull(response.Value.Notifications);
+
+            var notifications = response.Value.Notifications;
+            Assert.Single(notifications);
+
+            var notification = notifications[0];
+            Assert.Equal(EmailTemplateNames.QFASTApplicationSubmittedNotification, notification.TemplateName);
+            Assert.Equal(NotificationRecipientKind.QfauMailbox, notification.RecipientKind);
+
+            _notificationDefinitionFactory.Verify(f =>
+                f.BuildForMessage(application.Id, MessageType.ApplicationSubmitted),
+                Times.Once);
+        });
     }
 
 

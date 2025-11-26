@@ -26,8 +26,8 @@ public enum NotificationRecipientKind
 {
     // Outer API uses config to resolve these to actual addresses:
     QfauMailbox,
-    //OfqualMailbox,
-    //SkillsEnglandMailbox,
+    OfqualMailbox,
+    SkillsEnglandMailbox,
 
     // Inner API must provide EmailAddress:
     DirectEmail
@@ -39,6 +39,5 @@ public static class EmailTemplateNames
     public const string QFASTApplicationSubmittedNotification = nameof(QFASTApplicationSubmittedNotification);
     public const string QFASTSubmittedApplicationChangedNotification = nameof(QFASTSubmittedApplicationChangedNotification);
     public const string QFASTApplicationWithdrawnNotification = nameof(QFASTApplicationWithdrawnNotification);
-    public const string x = nameof(x);
 }
 
