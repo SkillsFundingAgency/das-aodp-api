@@ -2,7 +2,6 @@
 using AutoFixture.AutoMoq;
 using AutoFixture.Kernel;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -27,7 +26,11 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
         private readonly QualificationsController _controller;
 
         #region Test data
-        private const string _userName = "Aalam Adams";
+        private GetQualificationOutputFileQuery _getOutputFileRequest = new()
+        { 
+            CurrentUsername = "Alaam Adams",
+            PublicationDate = DateTime.UtcNow.AddDays(1)
+        };
         private const string ErrorNoQualifications = "No qualifications found for the output file.";
         private const string outputFileErrorMessage = "what?";
         private const string unexpectedErrorMessage = "Unexpected error when generating the output file.";
@@ -483,21 +486,26 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
         [Fact]
         public async Task GetQualificationOutputFile_ReturnsOk_WithSuccess()
         {
-            // arrange
+            // Arrange
             var expected = new BaseMediatrResponse<GetQualificationOutputFileResponse>
             {
                 Success = true,
-                Value = new GetQualificationOutputFileResponse { FileName = "2025-10-17_qualifications_export.zip", ZipFileContent = new byte[] { 1, 2, 3 } }
+                Value = new GetQualificationOutputFileResponse
+                {
+                    FileName = "2025-10-17_qualifications_export.zip",
+                    FileContent = new byte[] { 1, 2, 3 }
+                }
             };
-            _mediatorMock.Setup(m => m.Send(It.IsAny<GetQualificationOutputFileQuery>(), It.IsAny<CancellationToken>()))
-                    .ReturnsAsync(expected);
 
-            // act
-            var result = await _controller.GetQualificationOutputFile(_userName);
+            _mediatorMock.Setup(m => m.Send(It.IsAny<GetQualificationOutputFileQuery>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(expected);
+
+            // Act
+            var result = await _controller.GetQualificationOutputFile(_getOutputFileRequest);
 
             // assert
             Assert.Multiple(() =>
-            {
+            { 
                 var ok = Assert.IsType<OkObjectResult>(result);
                 var body = Assert.IsType<BaseMediatrResponse<GetQualificationOutputFileResponse>>(ok.Value);
                 Assert.True(body.Success);
@@ -509,7 +517,6 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
         [Fact]
         public async Task GetQualificationOutputFile_ReturnsNoDataErrorCode()
         {
-            // Arrange
             var expected = new BaseMediatrResponse<GetQualificationOutputFileResponse>
             {
                 Success = false,
@@ -518,10 +525,9 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             };
 
             _mediatorMock.Setup(m => m.Send(It.IsAny<GetQualificationOutputFileQuery>(), It.IsAny<CancellationToken>()))
-                         .ReturnsAsync(expected);
+                .ReturnsAsync(expected);
 
-            // Act
-            var result = await _controller.GetQualificationOutputFile(_userName);
+            var result = await _controller.GetQualificationOutputFile(_getOutputFileRequest);
 
             // Assert
             Assert.Multiple(() =>
@@ -547,10 +553,9 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             };
 
             _mediatorMock.Setup(m => m.Send(It.IsAny<GetQualificationOutputFileQuery>(), It.IsAny<CancellationToken>()))
-                         .ReturnsAsync(expected);
+                .ReturnsAsync(expected);
 
-            // Act
-            var result = await _controller.GetQualificationOutputFile(_userName);
+            var result = await _controller.GetQualificationOutputFile(_getOutputFileRequest);
 
             // Assert
             Assert.Multiple(() =>
@@ -562,6 +567,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                 Assert.False(string.IsNullOrWhiteSpace(body.ErrorMessage));
             });
         }
+
         [Fact]
         public async Task GetQualificationOutputFile_ForwardsUsernameToMediator()
         {
@@ -570,11 +576,11 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                     .Callback<object, CancellationToken>((q, _) => captured = (GetQualificationOutputFileQuery)q)
                     .ReturnsAsync(new BaseMediatrResponse<GetQualificationOutputFileResponse> { Success = true, Value = new() });
 
-            await _controller.GetQualificationOutputFile(_userName);
+            await _controller.GetQualificationOutputFile(_getOutputFileRequest);
 
             Assert.Multiple(() => { 
                 Assert.NotNull(captured);
-                Assert.Equal(_userName, captured!.CurrentUsername);
+                Assert.Equal(_getOutputFileRequest.CurrentUsername, captured!.CurrentUsername);
             });
         }
 
@@ -589,7 +595,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                 {
                     OutputFileLogs = new List<QualificationOutputFileLog> 
                     { 
-                        new() { Timestamp = DateTime.Now.AddDays(-3), UserDisplayName = _userName, ApprovedFileName = "a.csv", ArchivedFileName = "b.csv" } 
+                        new() { DownloadDate = DateTime.Now.AddDays(-3), PublicationDate= _getOutputFileRequest.PublicationDate,  UserDisplayName = _getOutputFileRequest.CurrentUsername, FileName = "a.csv" } 
                     }
                 }
             };
@@ -633,9 +639,6 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                 Assert.Equal("Failed to fetch logs.", body.ErrorMessage);
             });
         }
-
-
-
     }
 }
 

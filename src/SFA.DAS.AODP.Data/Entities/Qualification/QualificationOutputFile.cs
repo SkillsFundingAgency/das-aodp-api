@@ -1,4 +1,6 @@
-﻿namespace SFA.DAS.AODP.Data.Entities.Qualification
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SFA.DAS.AODP.Data.Entities.Qualification
 {
     public class QualificationOutputFile
     {
@@ -11,6 +13,8 @@
         public string? QualificationType { get; set; }
         public string? Subcategory { get; set; }
         public string? SectorSubjectArea { get; set; }
+        [NotMapped]
+        public string? PublicationStatus { get; set; }
         public string? Status { get; set; }
 
         public bool? Age1416_FundingAvailable { get; set; }
