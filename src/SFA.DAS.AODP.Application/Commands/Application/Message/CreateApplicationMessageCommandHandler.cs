@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using SFA.DAS.AODP.Application.Services;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Models.Application;
@@ -11,13 +12,15 @@ public class CreateApplicationMessageCommandHandler : IRequestHandler<CreateAppl
     private readonly IApplicationReviewFeedbackRepository _feedbackRepository;
     private readonly IApplicationMessagesRepository _messageRepository;
     private readonly IApplicationRepository _applicationRepository;
+    private readonly INotificationDefinitionFactory _notificationDefinitionFactory;
 
-    public CreateApplicationMessageCommandHandler(IApplicationMessagesRepository messageRepository, IApplicationRepository applicationRepository, IApplicationReviewFeedbackRepository feedbackRepository, IApplicationReviewRepository reviewRepository)
+    public CreateApplicationMessageCommandHandler(IApplicationMessagesRepository messageRepository, IApplicationRepository applicationRepository, IApplicationReviewFeedbackRepository feedbackRepository, IApplicationReviewRepository reviewRepository, INotificationDefinitionFactory notificationDefinitionFactory)
     {
         _messageRepository = messageRepository;
         _applicationRepository = applicationRepository;
         _feedbackRepository = feedbackRepository;
         _reviewRepository = reviewRepository;
+        _notificationDefinitionFactory = notificationDefinitionFactory;
     }
 
     public async Task<BaseMediatrResponse<CreateApplicationMessageCommandResponse>> Handle(CreateApplicationMessageCommand request, CancellationToken cancellationToken)
@@ -61,7 +64,9 @@ public class CreateApplicationMessageCommandHandler : IRequestHandler<CreateAppl
             await HandleReviewUpdate(application.Id, messageTypeConfiguration, messageType, userType);
             await _applicationRepository.UpdateAsync(application);
 
-            response.Value = new() { Id = messageId };
+            var notifications = await _notificationDefinitionFactory.BuildForMessage(request.ApplicationId, messageType);
+
+            response.Value = new() { Id = messageId, Notifications = notifications};
             response.Success = true;
         }
         catch (Exception ex)

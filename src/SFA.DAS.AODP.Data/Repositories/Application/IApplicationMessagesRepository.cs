@@ -8,4 +8,5 @@ public interface IApplicationMessagesRepository
     Task<List<Message>> GetMessagesByApplicationIdAndUserTypeAsync(Guid applicationId, UserType userType);
     Task<Guid> CreateAsync(Message message);
     Task<Message> GetByIdAsync(Guid messageId);
+    Task<Message?> GetLatestByTypeAsync(Guid applicationId, MessageType type);
 }

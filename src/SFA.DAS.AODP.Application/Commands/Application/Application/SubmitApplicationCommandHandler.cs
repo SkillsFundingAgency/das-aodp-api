@@ -1,12 +1,16 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Commands.Application;
 using SFA.DAS.AODP.Application.Commands.Application.Message;
+using SFA.DAS.AODP.Application.Services;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Models.Application;
 
-public class SubmitApplicationCommandHandler : IRequestHandler<SubmitApplicationCommand, BaseMediatrResponse<EmptyResponse>>
+namespace SFA.DAS.AODP.Application.Commands.Application;
+
+public class SubmitApplicationCommandHandler : IRequestHandler<SubmitApplicationCommand, BaseMediatrResponse<SubmitApplicationCommandResponse>>
 {
     private readonly IApplicationRepository _applicationRepository;
     private readonly IApplicationReviewRepository _applicationReviewRepository;
@@ -21,9 +25,9 @@ public class SubmitApplicationCommandHandler : IRequestHandler<SubmitApplication
         _mediator = mediator;
     }
 
-    public async Task<BaseMediatrResponse<EmptyResponse>> Handle(SubmitApplicationCommand request, CancellationToken cancellationToken)
+    public async Task<BaseMediatrResponse<SubmitApplicationCommandResponse>> Handle(SubmitApplicationCommand request, CancellationToken cancellationToken)
     {
-        var response = new BaseMediatrResponse<EmptyResponse>();
+        var response = new BaseMediatrResponse<SubmitApplicationCommandResponse>();
 
         try
         {
@@ -83,6 +87,8 @@ public class SubmitApplicationCommandHandler : IRequestHandler<SubmitApplication
                 UserType = UserType.AwardingOrganisation.ToString()
             });
             if (!msgResult.Success) throw new Exception(msgResult.ErrorMessage, msgResult.InnerException);
+
+            response.Value = new() { Notifications = msgResult.Value.Notifications };
             response.Success = true;
         }
         catch (Exception ex)

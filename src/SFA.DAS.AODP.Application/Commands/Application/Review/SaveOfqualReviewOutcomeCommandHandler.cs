@@ -5,7 +5,7 @@ using SFA.DAS.AODP.Models.Application;
 
 namespace SFA.DAS.AODP.Application.Commands.Application.Review
 {
-    public class SaveOfqualReviewOutcomeCommandHandler : IRequestHandler<SaveOfqualReviewOutcomeCommand, BaseMediatrResponse<EmptyResponse>>
+    public class SaveOfqualReviewOutcomeCommandHandler : IRequestHandler<SaveOfqualReviewOutcomeCommand, BaseMediatrResponse<SaveOfqualReviewOutcomeCommandResponse>>
     {
         private readonly IApplicationReviewFeedbackRepository _repository;
         private readonly IMediator _mediator;
@@ -16,9 +16,9 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
             _mediator = mediator;
         }
 
-        public async Task<BaseMediatrResponse<EmptyResponse>> Handle(SaveOfqualReviewOutcomeCommand request, CancellationToken cancellationToken)
+        public async Task<BaseMediatrResponse<SaveOfqualReviewOutcomeCommandResponse>> Handle(SaveOfqualReviewOutcomeCommand request, CancellationToken cancellationToken)
         {
-            var response = new BaseMediatrResponse<EmptyResponse>();
+            var response = new BaseMediatrResponse<SaveOfqualReviewOutcomeCommandResponse>();
 
             try
             {
@@ -42,6 +42,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                 });
                 if (!msgResult.Success) throw new Exception(msgResult.ErrorMessage, msgResult.InnerException);
 
+                response.Value = new() { Notifications = msgResult.Value.Notifications };
                 response.Success = true;
             }
             catch (Exception ex)
