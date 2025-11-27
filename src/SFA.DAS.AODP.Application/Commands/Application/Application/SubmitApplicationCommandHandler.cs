@@ -16,16 +16,13 @@ public class SubmitApplicationCommandHandler : IRequestHandler<SubmitApplication
     private readonly IApplicationReviewRepository _applicationReviewRepository;
     private readonly IApplicationReviewFeedbackRepository _applicationReviewFeedbackRepository;
     private readonly IMediator _mediator;
-    private readonly INotificationDefinitionFactory _notificationDefinitionFactory;
 
-    public SubmitApplicationCommandHandler(IApplicationRepository applicationRepository, IApplicationReviewRepository applicationReviewRepository, IApplicationReviewFeedbackRepository applicationReviewFeedbackRepository, IMediator mediator,
-        INotificationDefinitionFactory notificationDefinitionFactory)
+    public SubmitApplicationCommandHandler(IApplicationRepository applicationRepository, IApplicationReviewRepository applicationReviewRepository, IApplicationReviewFeedbackRepository applicationReviewFeedbackRepository, IMediator mediator)
     {
         _applicationRepository = applicationRepository;
         _applicationReviewRepository = applicationReviewRepository;
         _applicationReviewFeedbackRepository = applicationReviewFeedbackRepository;
         _mediator = mediator;
-        _notificationDefinitionFactory = notificationDefinitionFactory;
     }
 
     public async Task<BaseMediatrResponse<SubmitApplicationCommandResponse>> Handle(SubmitApplicationCommand request, CancellationToken cancellationToken)
@@ -91,9 +88,7 @@ public class SubmitApplicationCommandHandler : IRequestHandler<SubmitApplication
             });
             if (!msgResult.Success) throw new Exception(msgResult.ErrorMessage, msgResult.InnerException);
 
-            var notifications = await _notificationDefinitionFactory.BuildForMessage(request.ApplicationId, MessageType.ApplicationSubmitted);
-
-            response.Value = new() { Notifications = notifications };
+            response.Value = new() { Notifications = msgResult.Value.Notifications };
             response.Success = true;
         }
         catch (Exception ex)

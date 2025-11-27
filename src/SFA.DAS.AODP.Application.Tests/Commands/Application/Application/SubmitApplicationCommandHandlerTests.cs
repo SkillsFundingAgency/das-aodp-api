@@ -18,13 +18,20 @@ public class SubmitApplicationCommandHandlerTests
     private readonly Mock<IApplicationReviewFeedbackRepository> _applicationReviewFeedbackRepository = new();
     private readonly SubmitApplicationCommandHandler _submitApplicationCommandHandler;
     private readonly Mock<IMediator> _mediator = new();
-    private readonly Mock<INotificationDefinitionFactory> _notificationDefinitionFactory = new();
 
     public SubmitApplicationCommandHandlerTests()
     {
         _submitApplicationCommandHandler = new(_applicationRepository.Object,
-            _applicationReviewRepository.Object, _applicationReviewFeedbackRepository.Object, _mediator.Object,
-            _notificationDefinitionFactory.Object);
+            _applicationReviewRepository.Object, _applicationReviewFeedbackRepository.Object, _mediator.Object);
+
+        var submittedNotifications = new List<NotificationDefinition>
+        {
+            new()
+            {
+                TemplateName = EmailTemplateNames.QFASTApplicationSubmittedNotification,
+                RecipientKind = NotificationRecipientKind.QfauMailbox,
+            }
+        };
 
         _mediator
             .Setup(m => m.Send(
@@ -33,21 +40,11 @@ public class SubmitApplicationCommandHandlerTests
             .ReturnsAsync(new BaseMediatrResponse<CreateApplicationMessageCommandResponse>
             {
                 Success = true,
-                Value = new CreateApplicationMessageCommandResponse()
+                Value = new CreateApplicationMessageCommandResponse
+                {
+                    Notifications = submittedNotifications
+                }
             });
-
-        _notificationDefinitionFactory
-        .Setup(f => f.BuildForMessage(
-            It.IsAny<Guid>(),
-            MessageType.ApplicationSubmitted))
-        .ReturnsAsync(new List<NotificationDefinition>
-        {
-            new()
-            {
-                TemplateName = EmailTemplateNames.QFASTApplicationSubmittedNotification,
-                RecipientKind = NotificationRecipientKind.QfauMailbox,
-            }
-        });
     }
 
     [Fact]
@@ -133,10 +130,6 @@ public class SubmitApplicationCommandHandlerTests
             var notification = notifications[0];
             Assert.Equal(EmailTemplateNames.QFASTApplicationSubmittedNotification, notification.TemplateName);
             Assert.Equal(NotificationRecipientKind.QfauMailbox, notification.RecipientKind);
-
-            _notificationDefinitionFactory.Verify(f =>
-                f.BuildForMessage(application.Id, MessageType.ApplicationSubmitted),
-                Times.Once);
         });
     }
 
