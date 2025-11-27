@@ -2,14 +2,11 @@
 using AutoFixture.AutoMoq;
 using Moq;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
-using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Infrastructure;
 using SFA.DAS.AODP.Models.Settings;
-using System.IO.Compression;
 using System.Text;
-using Xunit;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 {
@@ -22,21 +19,21 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         private readonly OutputFileBlobStorageSettings _settings;
         private readonly GetQualificationOutputFileQueryHandler _handler;
 
-        private static readonly string[] LineSeparators = { "\r\n", "\n" };
-
         private const string ContainerName = "unit-test-container";
         private const string CsvContentType = "text/csv";
         private const string ErrorNoQualifications = "No qualifications found for the output file.";
         private const string ErrorGeneric = "Exception message";
         private const string ErrorUnexpected = "An unexpected error occurred while generating the output file.";
-        private const string ZipFileSuffix = "_qualifications_export.zip";
-        private const string ApprovedCsvSuffix = "-AOdPApprovedOutputFile.csv";
-        private const string ArchivedCsvSuffix = "-AOdPArchivedOutputFile.csv";
+        private const string FileSuffix = "-AOdPOutputFile.csv";
         private const string CsvHeaderPrefixLong = "DateOfOfqualDataSnapshot,QualificationName,AwardingOrganisation,QualificationNumber,Level";
         private const string CsvHeaderPrefixShort = "DateOfOfqualDataSnapshot,QualificationName";
 
         #region Test data
-        private static readonly string _username = "Aalam Adams";
+        private GetQualificationOutputFileQuery _testRequest = new()
+        {
+            CurrentUsername = "Alaam Adams",
+            PublicationDate = DateTime.UtcNow
+        };
         #endregion
 
         public GetQualificationOutputFileQueryHandlerTests()
@@ -54,27 +51,26 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         }
 
         [Fact]
-        public async Task Then_Repository_Is_Called_Uploads_Both_CSVs_And_Returns_Zip_With_Two_Entries()
+        public async Task Then_Repository_Is_Called_Uploads_CSV_And_Returns_CSV_With_Two_Entries()
         {
             // Arrange
-            var todayUtc = DateTime.UtcNow.Date;
+            var publicationDate = DateTime.UtcNow.Date;
             var active = new QualificationOutputFile
             {
                 QualificationName = "Active Q",
-                Age1619_FundingApprovalEndDate = todayUtc.AddDays(2)
+                Age1619_FundingApprovalEndDate = publicationDate.AddDays(2)
             };
             var archived = new QualificationOutputFile
             {
                 QualificationName = "Archived Q",
-                Age1619_FundingApprovalEndDate = todayUtc.AddDays(-2)
+                Age1619_FundingApprovalEndDate = publicationDate.AddDays(-2)
             };
 
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ReturnsAsync(new List<QualificationOutputFile> { active, archived });
 
-            var datePrefix = DateTime.UtcNow.ToString("yyyy-MM-dd");
-            var expectedApproved = $"{datePrefix}{ApprovedCsvSuffix}";
-            var expectedArchived = $"{datePrefix}{ArchivedCsvSuffix}";
+            var datePrefix = publicationDate.ToString("yyyy-MM-dd");
+            var expectedFile = $"{datePrefix}{FileSuffix}";
 
             // capture uploaded streams for later assertions
             var uploaded = new List<(string Container, string FileName, string ContentType, MemoryStream Copy)>();
@@ -96,7 +92,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                  .Returns(Task.CompletedTask);
 
             // Act
-            var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
+            var result = await _handler.Handle(_testRequest, CancellationToken.None);
 
             // Assert – repository called
             _repo.Verify(x => x.GetQualificationOutputFile(), Times.Once);
@@ -107,54 +103,50 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 Assert.True(result.Success);
                 Assert.NotNull(result.Value);
                 Assert.StartsWith(datePrefix, result.Value!.FileName);
-                Assert.EndsWith(ZipFileSuffix, result.Value.FileName);
-                Assert.NotNull(result.Value.ZipFileContent);
-                Assert.NotEmpty(result.Value.ZipFileContent);
+                Assert.EndsWith(FileSuffix, result.Value.FileName);
+                Assert.NotNull(result.Value.FileContent);
+                Assert.NotEmpty(result.Value.FileContent);
             });
 
-            // Assert – blob uploads (two calls, correct names, container, content type)
-            _blob.Verify(x => x.UploadFileAsync(_settings.ContainerName, expectedApproved,
-                                                It.IsAny<Stream>(), CsvContentType, It.IsAny<CancellationToken>()), Times.Once);
-            _blob.Verify(x => x.UploadFileAsync(_settings.ContainerName, expectedArchived,
+            // Assert – blob upload (one call, correct name, container, content type)
+            _blob.Verify(x => x.UploadFileAsync(_settings.ContainerName, expectedFile,
                                                 It.IsAny<Stream>(), CsvContentType, It.IsAny<CancellationToken>()), Times.Once);
 
             Assert.Multiple(() =>
             {
-                Assert.Equal(2, uploaded.Count);
+                Assert.Single(uploaded);
                 Assert.All(uploaded, u => Assert.Equal(ContainerName, u.Container));
                 Assert.All(uploaded, u => Assert.Equal(CsvContentType, u.ContentType));
-                Assert.Contains(uploaded, u => u.FileName == expectedApproved);
-                Assert.Contains(uploaded, u => u.FileName == expectedArchived);
+                Assert.Contains(uploaded, u => u.FileName == expectedFile);
                 Assert.All(uploaded, u => Assert.True(u.Copy.Length > 0));
             });
 
-            // Assert – zip has exactly the two entries with expected names
-            using var ms = new MemoryStream(result.Value.ZipFileContent);
-            using var zip = new ZipArchive(ms, ZipArchiveMode.Read, leaveOpen: false, Encoding.UTF8);
-            var names = zip.Entries.Select(e => e.FullName).ToList();
+            // Assert – CSV content
+            var csvText = Encoding.UTF8.GetString(result.Value.FileContent);
+            var lines = csvText.Replace("\r", "").Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
 
             Assert.Multiple(() =>
             {
-                Assert.Contains(expectedApproved, names);
-                Assert.Contains(expectedArchived, names);
-                Assert.Equal(2, names.Count);
-            });
+                Assert.True(lines.Length >= 3, "CSV should contain header + two rows");
+                Assert.StartsWith(CsvHeaderPrefixLong, lines[0]);
 
-            foreach (var entry in zip.Entries)
-            {
-                using var s = entry.Open();
-                using var r = new StreamReader(s, Encoding.UTF8, leaveOpen: false);
-                var firstLine = await r.ReadLineAsync();
-                Assert.StartsWith(CsvHeaderPrefixLong, firstLine);
-            }
+                // Row checks: names present and statuses correct
+                var body = string.Join("\n", lines.Skip(1));
+                Assert.Contains("Active Q", body);
+                Assert.Contains(",Approved,", body);
+
+                Assert.Contains("Archived Q", body);
+                Assert.Contains(",Archived,", body);
+            });
 
             _logRepo.Verify(x => x.CreateAsync(
                 It.Is<QualificationOutputFileLog>(h =>
-                    h.UserDisplayName == _username &&
-                    h.ApprovedFileName == expectedApproved &&
-                    h.ArchivedFileName == expectedArchived &&
-                    h.Timestamp <= DateTime.UtcNow.AddSeconds(5) &&
-                    h.Timestamp >= DateTime.UtcNow.AddMinutes(-1)
+                    h.UserDisplayName == _testRequest.CurrentUsername &&
+                    h.FileName == expectedFile &&
+                    h.PublicationDate == _testRequest.PublicationDate &&
+                    h.DownloadDate <= DateTime.UtcNow.AddSeconds(5) &&
+                    h.DownloadDate >= DateTime.UtcNow.AddMinutes(-1)
                 ),
                 It.IsAny<CancellationToken>()), Times.Once);
         }
@@ -167,7 +159,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                  .ReturnsAsync(new List<QualificationOutputFile>());
 
             // Act
-            var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
+            var result = await _handler.Handle(_testRequest, CancellationToken.None);
 
             // Assert
             _repo.Verify(x => x.GetQualificationOutputFile(), Times.Once);
@@ -192,7 +184,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             _repo.Setup(x => x.GetQualificationOutputFile()).ThrowsAsync(ex);
 
             // Act
-            var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
+            var result = await _handler.Handle(_testRequest, CancellationToken.None);
 
             // Assert
             _repo.Verify(x => x.GetQualificationOutputFile(), Times.Once);
@@ -217,7 +209,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             _repo.Setup(x => x.GetQualificationOutputFile()).ReturnsAsync((List<QualificationOutputFile>?)null!);
 
             // Act
-            var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
+            var result = await _handler.Handle(_testRequest, CancellationToken.None);
 
             // Assert
             Assert.False(result.Success);
@@ -228,7 +220,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         }
 
         [Fact]
-        public async Task Then_Record_With_EndDate_Today_Goes_To_Archived_Not_Active()
+        public async Task Then_Record_With_EndDate_Today_Set_To_PublicationStatus_Archive()
         {
             // Arrange: exactly today should be archived (since active is strictly > today)
             var todayUtc = DateTime.UtcNow.Date;
@@ -245,47 +237,121 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                  .Returns(Task.CompletedTask);
 
             var datePrefix = DateTime.UtcNow.ToString("yyyy-MM-dd");
-            var expectedApproved = $"{datePrefix}{ApprovedCsvSuffix}";
-            var expectedArchived = $"{datePrefix}{ArchivedCsvSuffix}";
+            var expectedFilename = $"{datePrefix}{FileSuffix}";
 
             // Act
-            var result = await _handler.Handle(new GetQualificationOutputFileQuery(_username), CancellationToken.None);
+            var result = await _handler.Handle(_testRequest, CancellationToken.None);
 
             // Assert
             Assert.True(result.Success);
+            Assert.NotNull(result.Value);
+            Assert.StartsWith(datePrefix, result.Value!.FileName);
+            Assert.EndsWith("-AOdPOutputFile.csv", result.Value.FileName);
+            Assert.NotEmpty(result.Value.FileContent);
 
-            using var ms = new MemoryStream(result.Value!.ZipFileContent);
-            using var zip = new ZipArchive(ms, ZipArchiveMode.Read, leaveOpen: false, Encoding.UTF8);
+            _blob.Verify(x => x.UploadFileAsync(
+                _settings.ContainerName,
+                expectedFilename,
+                It.IsAny<Stream>(),
+                "text/csv",
+                It.IsAny<CancellationToken>()),
+                Times.Once);
 
-            // Active file should be headers only
-            var activeEntry = zip.Entries.Single(e => e.FullName == expectedApproved);
-            using (var s = activeEntry.Open())
-            using (var r = new StreamReader(s, Encoding.UTF8, leaveOpen: false))
+            // Assert – CSV has header + one data row, and row is Archived (not Approved)
+            var csv = Encoding.UTF8.GetString(result.Value.FileContent);
+            var lines = csv.Replace("\r", "").Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+            // Header check: use whichever prefix your suite already uses
+            Assert.True(lines.Length >= 2, "CSV should contain header + one row");
+            Assert.StartsWith(CsvHeaderPrefixShort, lines[0]); // or CsvHeaderPrefixLong, whichever you use
+
+            var data = lines.Skip(1).ToArray();
+            Assert.Single(data);
+
+            var row = data[0];
+            Assert.Contains("Edge Q", row);
+            Assert.Contains(",Archived,", row);   // status should be Archived
+            Assert.DoesNotContain(",Approved,", row); // must not be Approved
+
+        }
+
+        [Fact]
+        public async Task Then_Record_With_EndDate_After_PublicationDate_Is_Set_To_Approved()
+        {
+            // Arrange: future end date -> should be Approved
+            var todayUtc = DateTime.UtcNow.Date;
+            var future = new QualificationOutputFile
             {
-                var all = await r.ReadToEndAsync();
-                var lines = all.Split(LineSeparators, StringSplitOptions.None);
+                QualificationName = "Future Q",
+                Age1619_FundingApprovalEndDate = todayUtc.AddDays(5)
+            };
 
-                Assert.Multiple(() =>
-                {
-                    Assert.StartsWith(CsvHeaderPrefixShort, lines[0]);
-                    Assert.True(lines.Length <= 2); // header only
-                });
-            }
+            _repo.Setup(x => x.GetQualificationOutputFile())
+                 .ReturnsAsync(new List<QualificationOutputFile> { future });
 
-            // Archived file should contain the data row
-            var archivedEntry = zip.Entries.Single(e => e.FullName == expectedArchived);
-            using (var s = archivedEntry.Open())
-            using (var r = new StreamReader(s, Encoding.UTF8, leaveOpen: false))
+            _blob.Setup(x => x.UploadFileAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<Stream>(),
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()))
+                 .Returns(Task.CompletedTask);
+
+            var datePrefix = DateTime.UtcNow.ToString("yyyy-MM-dd");
+            var expectedFilename = $"{datePrefix}{FileSuffix}";
+
+            // Act
+            var result = await _handler.Handle(_testRequest, CancellationToken.None);
+
+            // Assert – success and file basics
+            Assert.True(result.Success);
+            Assert.EndsWith(FileSuffix, result.Value!.FileName);
+
+            // Assert – CSV content
+            var csv = Encoding.UTF8.GetString(result.Value.FileContent);
+            var lines = csv.Replace("\r", "").Split('\n', StringSplitOptions.RemoveEmptyEntries);
+
+            Assert.True(lines.Length >= 2, "CSV should contain header + one row");
+            var row = lines.Skip(1).Single();
+
+            Assert.Contains("Future Q", row);
+            Assert.Contains(",Approved,", row);
+            Assert.DoesNotContain(",Archived,", row);
+        }
+
+        [Fact]
+        public async Task Then_PublicationDate_Different_From_RunDate_Is_Handled_Correctly()
+        {
+            // Arrange
+            var publicationDate = DateTime.UtcNow.AddDays(-7).Date;
+            var request = new GetQualificationOutputFileQuery
             {
-                var all = await r.ReadToEndAsync();
-                var lines = all.Split(LineSeparators, StringSplitOptions.RemoveEmptyEntries);
+                CurrentUsername = "Tester",
+                PublicationDate = publicationDate
+            };
 
-                Assert.Multiple(() =>
-                {
-                    Assert.StartsWith(CsvHeaderPrefixShort, lines[0]);
-                    Assert.True(lines.Length >= 2); // header + at least one row
-                });
-            }
+            var qualification = new QualificationOutputFile
+            {
+                QualificationName = "Test Q",
+                Age1619_FundingApprovalEndDate = publicationDate.AddDays(1)
+            };
+
+            _repo.Setup(x => x.GetQualificationOutputFile())
+                 .ReturnsAsync(new List<QualificationOutputFile> { qualification });
+
+            // Act
+            var result = await _handler.Handle(request, CancellationToken.None);
+
+            // Assert
+            Assert.True(result.Success);
+            Assert.StartsWith(publicationDate.ToString("yyyy-MM-dd"), result.Value!.FileName);
+            Assert.EndsWith("-AOdPOutputFile.csv", result.Value.FileName);
+
+            _logRepo.Verify(x => x.CreateAsync(
+                It.Is<QualificationOutputFileLog>(h =>
+                    h.PublicationDate == publicationDate &&
+                    h.DownloadDate.Date == DateTime.UtcNow.Date),
+                It.IsAny<CancellationToken>()), Times.Once);
         }
     }
 }
