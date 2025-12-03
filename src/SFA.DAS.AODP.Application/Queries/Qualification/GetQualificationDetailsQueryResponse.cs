@@ -34,7 +34,6 @@ public class GetQualificationDetailsQueryResponse
     public DateTime? CertificationEndDate { get; set; }
     public DateTime? ReviewDate { get; set; }
     public bool OfferedInEngland { get; set; }
-    public bool? FundedInEngland { get; set; }
     public bool OfferedInNi { get; set; }
     public bool? OfferedInternationally { get; set; }
     public string? Specialism { get; set; }
@@ -127,7 +126,6 @@ public class GetQualificationDetailsQueryResponse
         public DateTime? CertificationEndDate { get; set; }
         public DateTime? ReviewDate { get; set; }
         public bool OfferedInEngland { get; set; }
-        public bool? FundedInEngland { get; set; }
         public bool OfferedInNi { get; set; }
         public bool? OfferedInternationally { get; set; }
         public string? Specialism { get; set; }
@@ -202,7 +200,6 @@ public class GetQualificationDetailsQueryResponse
             CertificationEndDate = entity.CertificationEndDate,
             ReviewDate = entity.ReviewDate,
             OfferedInEngland = entity.OfferedInEngland,
-            FundedInEngland = entity.FundedInEngland,
             OfferedInNi = entity.OfferedInNi,
             OfferedInternationally = entity.OfferedInternationally,
             Specialism = entity.Specialism,
