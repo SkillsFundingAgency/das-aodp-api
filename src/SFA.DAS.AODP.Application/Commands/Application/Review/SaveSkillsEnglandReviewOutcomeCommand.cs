@@ -2,7 +2,7 @@
 
 namespace SFA.DAS.AODP.Application.Commands.Application.Review
 {
-    public class SaveSkillsEnglandReviewOutcomeCommand : IRequest<BaseMediatrResponse<EmptyResponse>>
+    public class SaveSkillsEnglandReviewOutcomeCommand : IRequest<BaseMediatrResponse<SaveSkillsEnglandReviewOutcomeCommandResponse>>
     {
         public Guid ApplicationReviewId { get; set; }
         public string? Comments { get; set; }
