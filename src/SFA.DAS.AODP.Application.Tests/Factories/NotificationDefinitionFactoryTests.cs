@@ -169,6 +169,29 @@ namespace SFA.DAS.AODP.Application.Tests.Services
         }
 
         [Fact]
+        public async Task BuildForMessage_ApplicationWithdrawn_ReturnsApplicationWithdrawnNotification()
+        {
+            // Arrange
+            var messageType = MessageType.ApplicationWithdrawn;
+
+            // Act
+            var result = await _factory.BuildForMessage(ApplicationId, messageType);
+
+            // Assert
+            Assert.Multiple(() =>
+            {
+                Assert.NotNull(result);
+                Assert.Single(result);
+
+                var notification = result.Single();
+
+                Assert.Equal(EmailTemplateNames.QFASTApplicationWithdrawnNotification, notification.TemplateName);
+                Assert.Equal(NotificationRecipientKind.QfauMailbox, notification.RecipientKind);
+                Assert.Null(notification.EmailAddress);
+            });
+        }
+
+        [Fact]
         public async Task BuildForMessage_UnhandledMessageType_ReturnsEmptyList()
         {
             // Arrange
