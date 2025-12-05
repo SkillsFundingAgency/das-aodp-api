@@ -1,7 +1,8 @@
-﻿using SFA.DAS.AODP.Data.Extensions;
+﻿using SFA.DAS.AODP.Application.Services;
+using SFA.DAS.AODP.Data.Extensions;
+using SFA.DAS.AODP.Infrastructure.Extensions;
 using SFA.DAS.AODP.Models.Settings;
 using System.Diagnostics.CodeAnalysis;
-using SFA.DAS.AODP.Infrastructure.Extensions;
 
 namespace SFA.DAS.AODP.Api.Extensions;
 
@@ -21,6 +22,9 @@ public static class AddServiceRegistrationsExtension
         services.ConfigureDatabase(configuration);
 
         services.AddBlobStorage(configuration);
+
+        services.AddScoped<INotificationDefinitionFactory, NotificationDefinitionFactory>();
+
         return services;
     }
 }
