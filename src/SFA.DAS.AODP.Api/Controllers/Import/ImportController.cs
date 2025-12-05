@@ -14,7 +14,7 @@ public class ImportController : BaseController
     {
     }
 
-    [HttpPost("defunding-list")]
+    [HttpPost("/api/Import/defunding-list")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -35,7 +35,7 @@ public class ImportController : BaseController
         return await SendRequestAsync(command);
     }
 
-    [HttpPost("pldns")]
+    [HttpPost("/api/Import/pldns")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
