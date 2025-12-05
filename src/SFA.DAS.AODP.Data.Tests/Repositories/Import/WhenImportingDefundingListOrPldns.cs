@@ -36,37 +36,4 @@ public class WhenImportingDefundingListOrPldns
         mockDefundingSet.Verify(d => d.AddRange(It.Is<IEnumerable<DefundingList>>(x => x.SequenceEqual(items))), Times.Once);
         mockContext.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
-
-    [Fact]
-    public async Task WhenTIsPldns_CallsAddRangeOnPldnsAndSaves()
-    {
-        // Arrange
-        var items = new List<Pldns>
-            {
-                new Pldns { Qan = "P1" },
-                new Pldns { Qan = "P2" }
-            };
-
-        var mockPldnsSet = new Mock<DbSet<Pldns>>();
-        mockPldnsSet.Setup(d => d.AddRange(It.IsAny<IEnumerable<Pldns>>())).Verifiable();
-
-        mockContext.SetupGet(c => c.Pldns).Returns(mockPldnsSet.Object);
-        mockContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>())).ReturnsAsync(1).Verifiable();
-
-        // Act
-        await _sut.BulkInsertAsync(items);
-
-        // Assert
-        mockPldnsSet.Verify(d => d.AddRange(It.Is<IEnumerable<Pldns>>(x => x.SequenceEqual(items))), Times.Once);
-        mockContext.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task DeleteDuplicateAsync_WhenContextIsNotApplicationDbContext_ThrowsInvalidOperationException()
-    {
-        // Arrange
-
-        // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.DeleteDuplicateAsync("spName"));
-    }
 }

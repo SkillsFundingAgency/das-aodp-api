@@ -34,25 +34,4 @@ public class ImportController : BaseController
 
         return await SendRequestAsync(command);
     }
-
-    [HttpPost("/api/Import/pldns")]
-    [Consumes("multipart/form-data")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> ImportPldns([FromForm] ImportPldnsRequest request)
-    {
-        var file = request.File;
-        if (file == null || file.Length == 0)
-        {
-            return BadRequest(new { message = "No file uploaded." });
-        }
-
-        var command = new ImportPldnsCommand
-        {
-            File = file,
-            FileName = file.FileName
-        };
-
-        return await SendRequestAsync(command);
-    }
 }

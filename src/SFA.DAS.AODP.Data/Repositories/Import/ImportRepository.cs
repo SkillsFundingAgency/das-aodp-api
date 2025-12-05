@@ -14,19 +14,12 @@ public class ImportRepository : IImportRepository
         _context = context;
     }
 
-    public async Task BulkInsertAsync<T>(IEnumerable<T> items, CancellationToken cancellationToken = default)
+    public async Task BulkInsertAsync(List<DefundingList> items, CancellationToken cancellationToken = default)
     {
         if (items == null) return;
 
-        if (typeof(T) == typeof(DefundingList))
-        { 
-            _context.DefundingLists.AddRange((List<DefundingList>)items);
-        }
-        else
-        {
-            _context.Pldns.AddRange((List<Pldns>)items);
-        }
-        
+        _context.DefundingLists.AddRange((List<DefundingList>)items);
+       
         await _context.SaveChangesAsync(cancellationToken);
     }
 

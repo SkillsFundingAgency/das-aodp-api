@@ -44,7 +44,7 @@ public class ImportDefundingListCommandHandlerTests
         Assert.True(result.Success);
         Assert.NotNull(result.Value);
         Assert.Equal(0, result.Value.ImportedCount);
-        mockRepo.Verify(r => r.BulkInsertAsync(It.IsAny<IEnumerable<DefundingList>>(), It.IsAny<CancellationToken>()), Times.Never);
+        mockRepo.Verify(r => r.BulkInsertAsync(It.IsAny<List<DefundingList>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class ImportDefundingListCommandHandlerTests
         // Act
         Assert.False(result.Success);
         Assert.Contains("Unsupported file type", result.ErrorMessage ?? string.Empty);
-        mockRepo.Verify(r => r.BulkInsertAsync(It.IsAny<IEnumerable<DefundingList>>(), It.IsAny<CancellationToken>()), Times.Never);
+        mockRepo.Verify(r => r.BulkInsertAsync(It.IsAny<List<DefundingList>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class ImportDefundingListCommandHandlerTests
         // Assert
         Assert.True(result.Success);
         Assert.Equal(0, result.Value.ImportedCount);
-        mockRepo.Verify(r => r.BulkInsertAsync(It.IsAny<IEnumerable<DefundingList>>(), It.IsAny<CancellationToken>()), Times.Never);
+        mockRepo.Verify(r => r.BulkInsertAsync(It.IsAny<List<DefundingList>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -127,7 +127,7 @@ public class ImportDefundingListCommandHandlerTests
         // Assert
         Assert.True(result.Success);
         Assert.Equal(0, result.Value.ImportedCount);
-        mockRepo.Verify(r => r.BulkInsertAsync(It.IsAny<IEnumerable<DefundingList>>(), It.IsAny<CancellationToken>()), Times.Never);
+        mockRepo.Verify(r => r.BulkInsertAsync(It.IsAny<List<DefundingList>>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -170,7 +170,7 @@ public class ImportDefundingListCommandHandlerTests
         var bytes = CreateExcel(TargetSheetName, 1, headerCols, headerTexts, dataRows);
 
         IEnumerable<DefundingList>? captured = null;
-        mockRepo.Setup(r => r.BulkInsertAsync(It.IsAny<IEnumerable<DefundingList>>(), It.IsAny<CancellationToken>()))
+        mockRepo.Setup(r => r.BulkInsertAsync(It.IsAny<List<DefundingList>>(), It.IsAny<CancellationToken>()))
             .Callback<IEnumerable<DefundingList>, CancellationToken>((items, ct) => captured = items)
             .Returns(Task.CompletedTask)
             .Verifiable();
@@ -192,7 +192,7 @@ public class ImportDefundingListCommandHandlerTests
         // Assert
         Assert.True(result.Success);
         Assert.Equal(2, result.Value.ImportedCount);
-        mockRepo.Verify(r => r.BulkInsertAsync(It.IsAny<IEnumerable<DefundingList>>(), It.IsAny<CancellationToken>()), Times.Once);
+        mockRepo.Verify(r => r.BulkInsertAsync(It.IsAny<List<DefundingList>>(), It.IsAny<CancellationToken>()), Times.Once);
         mockRepo.Verify(r => r.DeleteDuplicateAsync(It.IsAny<string>(), null, It.IsAny<CancellationToken>()), Times.Once);
         Assert.NotNull(captured);
         var list = captured!.ToList();
@@ -241,7 +241,7 @@ public class ImportDefundingListCommandHandlerTests
         var bytes = CreateExcel(TargetSheetName, 7, headerCols, headerTexts, dataRows);
 
         IEnumerable<DefundingList>? captured = null;
-        mockRepo.Setup(r => r.BulkInsertAsync(It.IsAny<IEnumerable<DefundingList>>(), It.IsAny<CancellationToken>()))
+        mockRepo.Setup(r => r.BulkInsertAsync(It.IsAny<List<DefundingList>>(), It.IsAny<CancellationToken>()))
             .Callback<IEnumerable<DefundingList>, CancellationToken>((items, ct) => captured = items)
             .Returns(Task.CompletedTask);
 
@@ -281,7 +281,7 @@ public class ImportDefundingListCommandHandlerTests
 
         var bytes = CreateExcel(TargetSheetName, 1, headerCols, headerTexts, dataRows);
 
-        mockRepo.Setup(r => r.BulkInsertAsync(It.IsAny<IEnumerable<DefundingList>>(), It.IsAny<CancellationToken>()))
+        mockRepo.Setup(r => r.BulkInsertAsync(It.IsAny<List<DefundingList>>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(new InvalidOperationException("DB error"));
 
         var ms = new MemoryStream(bytes);
