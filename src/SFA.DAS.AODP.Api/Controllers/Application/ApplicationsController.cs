@@ -19,7 +19,6 @@ public class ApplicationsController : BaseController
         _logger = logger;
     }
 
-
     [HttpGet("/api/applications/forms")]
     [ProducesResponseType(typeof(GetApplicationFormsQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -211,5 +210,15 @@ public class ApplicationsController : BaseController
     {
         submitApplicationCommand.ApplicationId = applicationId;
         return await SendRequestAsync(submitApplicationCommand);
+    }
+
+    [HttpPost("/api/applications/{applicationId}/withdraw")]
+    [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> WithdrawApplicationByIdAsync(Guid applicationId, WithdrawApplicationCommand withdrawApplicationCommand)
+    {
+        withdrawApplicationCommand.ApplicationId = applicationId;
+        return await SendRequestAsync(withdrawApplicationCommand);
     }
 }
