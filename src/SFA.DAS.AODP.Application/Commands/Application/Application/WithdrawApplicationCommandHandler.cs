@@ -1,5 +1,7 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Logging;
 using SFA.DAS.AODP.Application.Commands.Application.Message;
+using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Models.Application;
@@ -10,7 +12,7 @@ public class WithdrawApplicationCommandHandler : IRequestHandler<WithdrawApplica
 {
     private readonly IApplicationRepository _applicationRepository;
     private readonly IMediator _mediator;
-
+    
     public WithdrawApplicationCommandHandler(IApplicationRepository applicationRepository, IMediator mediator)
     {
         _applicationRepository = applicationRepository;
@@ -41,8 +43,8 @@ public class WithdrawApplicationCommandHandler : IRequestHandler<WithdrawApplica
                 SentByEmail = request.WithdrawnByEmail,
                 SentByName = request.WithdrawnBy,
                 UserType = UserType.AwardingOrganisation.ToString()
-            });
-            if (!msgResult.Success) throw new Exception(msgResult.ErrorMessage, msgResult.InnerException);
+            }, cancellationToken);
+            if (!msgResult.Success) throw new ApplicationMessageException(msgResult.ErrorMessage, msgResult.InnerException);
 
             response.Value = new() { Notifications = msgResult.Value.Notifications };
             response.Success = true;
@@ -53,7 +55,6 @@ public class WithdrawApplicationCommandHandler : IRequestHandler<WithdrawApplica
             response.Success = false;
             response.ErrorMessage = ex.Message;
         }
-
         return response;
     }
 }

@@ -491,7 +491,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
                     default), Times.Once);
 
                 var okResult = Assert.IsType<OkObjectResult>(result);
-                Assert.Equal(okResult.StatusCode, StatusCodes.Status200OK);
+                Assert.Equal(StatusCodes.Status200OK, okResult.StatusCode);
             });
         }
 
