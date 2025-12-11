@@ -1,11 +1,11 @@
 ﻿using MediatR;
-using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.AODP.Application.Commands.Application;
 using SFA.DAS.AODP.Application.Commands.Application.Message;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Models.Application;
+using System.Linq;
 
 namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Application;
 
@@ -45,16 +45,45 @@ public class WithdrawApplicationCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ValidApplication_UpdatesStatus_AndCreatesMessage()
+    public async Task Handle_ValidApplication_UpdatesStatus_WithdrawsFeedbacks_AndCreatesMessage()
     {
+        var qfauFeedback = new Data.Entities.Application.ApplicationReviewFeedback
+        {
+            Status = nameof(ApplicationStatus.InReview),
+            Type = UserType.Qfau.ToString()
+        };
+
+        var ofqualFeedback = new Data.Entities.Application.ApplicationReviewFeedback
+        {
+            Status = nameof(ApplicationStatus.InReview),
+            Type = UserType.Ofqual.ToString()
+        };
+
+        var awardingOrgFeedback = new Data.Entities.Application.ApplicationReviewFeedback
+        {
+            Status = nameof(ApplicationStatus.InReview),
+            Type = UserType.AwardingOrganisation.ToString()
+        };
+
         var application = new Data.Entities.Application.Application
         {
             Id = ApplicationId,
             Submitted = true,
-            Status = nameof(ApplicationStatus.InReview)
+            Status = nameof(ApplicationStatus.InReview),
+            ApplicationReview = new Data.Entities.Application.ApplicationReview
+            {
+                ApplicationReviewFeedbacks = new List<Data.Entities.Application.ApplicationReviewFeedback>
+                {
+                    qfauFeedback,
+                    ofqualFeedback,
+                    awardingOrgFeedback
+                }
+            }
         };
 
-        _applicationRepository.Setup(r => r.GetByIdAsync(ApplicationId)).ReturnsAsync(application);
+        _applicationRepository
+            .Setup(r => r.GetWithReviewFeedbacksByIdAsync(ApplicationId))
+            .ReturnsAsync(application);
 
         var response = await _handler.Handle(new WithdrawApplicationCommand
         {
@@ -74,7 +103,12 @@ public class WithdrawApplicationCommandHandlerTests
                 a.Id == ApplicationId &&
                 a.Status == ApplicationStatus.Withdrawn.ToString() &&
                 a.WithdrawnBy == WithdrawnBy &&
-                a.WithdrawnAt.HasValue)), Times.Once);
+                a.WithdrawnAt.HasValue &&
+                a.ApplicationReview != null &&
+                a.ApplicationReview.ApplicationReviewFeedbacks != null &&
+                a.ApplicationReview.ApplicationReviewFeedbacks.All(f =>
+                    f.Status == ApplicationStatus.Withdrawn.ToString())
+            )), Times.Once);
 
             _mediator.Verify(m => m.Send(It.Is<CreateApplicationMessageCommand>(c =>
                 c.ApplicationId == ApplicationId &&
@@ -93,7 +127,9 @@ public class WithdrawApplicationCommandHandlerTests
             Status = nameof(ApplicationStatus.Withdrawn)
         };
 
-        _applicationRepository.Setup(r => r.GetByIdAsync(ApplicationId)).ReturnsAsync(application);
+        _applicationRepository
+            .Setup(r => r.GetWithReviewFeedbacksByIdAsync(ApplicationId))
+            .ReturnsAsync(application);
 
         var response = await _handler.Handle(new WithdrawApplicationCommand
         {
@@ -115,11 +151,13 @@ public class WithdrawApplicationCommandHandlerTests
         var application = new Data.Entities.Application.Application
         {
             Id = ApplicationId,
-            Submitted = true, 
+            Submitted = true,
             Status = nameof(ApplicationStatus.InReview)
         };
 
-        _applicationRepository.Setup(r => r.GetByIdAsync(ApplicationId)).ReturnsAsync(application);
+        _applicationRepository
+            .Setup(r => r.GetWithReviewFeedbacksByIdAsync(ApplicationId))
+            .ReturnsAsync(application);
 
         const string InnerError = "Message send failed";
 
@@ -152,7 +190,7 @@ public class WithdrawApplicationCommandHandlerTests
         const string ExceptionMessage = "Repository exception";
 
         _applicationRepository
-            .Setup(r => r.GetByIdAsync(ApplicationId))
+            .Setup(r => r.GetWithReviewFeedbacksByIdAsync(ApplicationId))
             .ThrowsAsync(new InvalidOperationException(ExceptionMessage));
 
         var response = await _handler.Handle(new WithdrawApplicationCommand

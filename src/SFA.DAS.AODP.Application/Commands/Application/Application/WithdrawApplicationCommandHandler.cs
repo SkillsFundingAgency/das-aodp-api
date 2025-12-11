@@ -25,13 +25,23 @@ public class WithdrawApplicationCommandHandler : IRequestHandler<WithdrawApplica
 
         try
         {
-            var application = await _applicationRepository.GetByIdAsync(request.ApplicationId);
+            var application = await _applicationRepository.GetWithReviewFeedbacksByIdAsync(request.ApplicationId);
             if (application.Status == nameof(ApplicationStatus.Withdrawn)) throw new RecordLockedException();
 
             application.Status = ApplicationStatus.Withdrawn.ToString();
             application.WithdrawnBy = request.WithdrawnBy;
             application.WithdrawnAt = DateTime.UtcNow;
             application.UpdatedAt = DateTime.UtcNow;
+
+            if (application.ApplicationReview?.ApplicationReviewFeedbacks != null)
+            {
+                var feedbacksToWithdraw = application.ApplicationReview.ApplicationReviewFeedbacks;
+                  
+                foreach (var feedback in feedbacksToWithdraw)
+                {
+                    feedback.Status = ApplicationStatus.Withdrawn.ToString();
+                }
+            }
 
             await _applicationRepository.UpdateAsync(application);
 
