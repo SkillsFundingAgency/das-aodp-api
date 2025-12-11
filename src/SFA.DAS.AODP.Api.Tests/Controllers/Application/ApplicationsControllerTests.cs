@@ -1,11 +1,13 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoMoq;
 using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
-using Microsoft.AspNetCore.Routing;
+using SFA.DAS.AODP.Application.Commands.Application;
 
 namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
 {
@@ -15,6 +17,10 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
         private readonly Mock<ILogger<Api.Controllers.Application.ApplicationsController>> _loggerMock;
         private readonly Mock<IMediator> _mediatorMock;
         private readonly Api.Controllers.Application.ApplicationsController _controller;
+
+        const string WithdrawErrorMessage = "There was a problem withdrawing the application.";
+        const string UserDisplayName = "Bob Brown";
+        const string UserEmail = "bob@bobmail.com";
 
         public ApplicationsControllerTests()
         {
@@ -294,9 +300,6 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
                 Questions = new()
             };
 
-            //var response = _fixture.Create<GetApplicationPageAnswersByPageIdQueryResponse>
-            //    (
-            //    );
             BaseMediatrResponse<GetApplicationPageAnswersByPageIdQueryResponse> wrapper = new()
             {
                 Value = response,
@@ -355,7 +358,6 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
         public async Task UpdateAsync_ReturnsOkResult()
         {
             // Arrange
-            //var request = _fixture.Create<UpdatePageAnswersCommand>();
             var request = new UpdatePageAnswersCommand()
             {
                 ApplicationId = Guid.NewGuid(),
@@ -448,6 +450,84 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
             var model = Assert.IsAssignableFrom<GetRelatedQualificationForApplicationQueryResponse>(okResult.Value);
             Assert.Equal(response, model);
         }
+
+        [Fact]
+        public async Task WithdrawApplicationByIdAsync_ReturnsOkResult()
+        {
+            var request = new WithdrawApplicationCommand
+            {
+                ApplicationId = Guid.NewGuid(),
+                WithdrawnBy = UserDisplayName,
+                WithdrawnByEmail = UserEmail
+            };
+
+            var notifications = _fixture.Build<NotificationDefinition>()
+                .With(n => n.TemplateName, EmailTemplateNames.QFASTApplicationWithdrawnNotification)
+                .With(n => n.RecipientKind, NotificationRecipientKind.QfauMailbox)
+                .CreateMany(1)
+                .ToList();
+
+            var response = new BaseMediatrResponse<WithdrawApplicationCommandResponse>
+            {
+                Value = _fixture.Build<WithdrawApplicationCommandResponse>()
+                .With(r => r.Notifications, notifications)
+                .Create(),
+                Success = true
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<WithdrawApplicationCommand>(), default))
+                .ReturnsAsync(response);
+
+            var result = await _controller.WithdrawApplicationByIdAsync(request.ApplicationId, request);
+
+            Assert.Multiple(() =>
+            {
+                _mediatorMock.Verify(m => m.Send(
+                    It.Is<WithdrawApplicationCommand>(c =>
+                        c.ApplicationId == request.ApplicationId &&
+                        c.WithdrawnBy == UserDisplayName &&
+                        c.WithdrawnByEmail == UserEmail),
+                    default), Times.Once);
+
+                var okResult = Assert.IsType<OkObjectResult>(result);
+                Assert.Equal(StatusCodes.Status200OK, okResult.StatusCode);
+            });
+        }
+
+        [Fact]
+        public async Task WithdrawApplicationByIdAsync_WhenMediatorFails_ReturnsInternalServerError()
+        {
+            var request = new WithdrawApplicationCommand
+            {
+                ApplicationId = Guid.NewGuid(),
+                WithdrawnBy = UserDisplayName,
+                WithdrawnByEmail = UserEmail
+            };
+
+            var wrapper = new BaseMediatrResponse<WithdrawApplicationCommandResponse>
+            {
+                Success = false,
+                ErrorMessage = WithdrawErrorMessage
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<WithdrawApplicationCommand>(), default))
+                .ReturnsAsync(wrapper);
+
+            var result = await _controller.WithdrawApplicationByIdAsync(request.ApplicationId, request);
+
+            Assert.Multiple(() =>
+            {
+                _mediatorMock.Verify(m => m.Send(
+                    It.Is<WithdrawApplicationCommand>(c => c.ApplicationId == request.ApplicationId),
+                    default), Times.Once);
+
+                var statusResult = Assert.IsType<StatusCodeResult>(result);
+                Assert.Equal(StatusCodes.Status500InternalServerError, statusResult.StatusCode);
+            });
+        }
+
 
     }
 }

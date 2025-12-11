@@ -19,6 +19,9 @@ public class SubmitApplicationCommandHandlerTests
     private readonly SubmitApplicationCommandHandler _submitApplicationCommandHandler;
     private readonly Mock<IMediator> _mediator = new();
 
+    private const string submittedBy = "SubmitUser";
+    private const string submittedByEmail = "submitted@edmail.com";
+
     public SubmitApplicationCommandHandlerTests()
     {
         _submitApplicationCommandHandler = new(_applicationRepository.Object,
@@ -69,6 +72,8 @@ public class SubmitApplicationCommandHandlerTests
         var response = await _submitApplicationCommandHandler.Handle(new()
         {
             ApplicationId = application.Id,
+            SubmittedBy= submittedBy,
+            SubmittedByEmail = submittedByEmail,
         }, default);
 
         // Assert
@@ -76,7 +81,6 @@ public class SubmitApplicationCommandHandlerTests
         _applicationReviewFeedbackRepository.Verify(a => a.CreateAsync(It.Is<ApplicationReviewFeedback>(a => a.Type == UserType.Qfau.ToString())));
         _applicationRepository.Verify(a => a.UpdateAsync(application));
     }
-
 
     [Fact]
     public async Task Test_Application_Submitted_Review_Feedback_Updated_Notification_Definition_Returned()
@@ -111,6 +115,8 @@ public class SubmitApplicationCommandHandlerTests
         var response = await _submitApplicationCommandHandler.Handle(new()
         {
             ApplicationId = application.Id,
+            SubmittedBy = submittedBy,
+            SubmittedByEmail = submittedByEmail,
         }, default);
 
         // Assert
@@ -157,6 +163,8 @@ public class SubmitApplicationCommandHandlerTests
         var response = await _submitApplicationCommandHandler.Handle(new()
         {
             ApplicationId = application.Id,
+            SubmittedBy = submittedBy,
+            SubmittedByEmail = submittedByEmail,
         }, default);
 
         // Assert
@@ -187,6 +195,8 @@ public class SubmitApplicationCommandHandlerTests
         var response = await _submitApplicationCommandHandler.Handle(new()
         {
             ApplicationId = application.Id,
+            SubmittedBy = submittedBy,
+            SubmittedByEmail = submittedByEmail,
         }, default);
 
         // Assert

@@ -22,7 +22,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
 
         }
 
-
         public async Task<Data.Entities.Application.Application> Create(Data.Entities.Application.Application application)
         {
             application.Id = Guid.NewGuid();
@@ -64,6 +63,16 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
                 .Where(a => a.Id == applicationId)
                 .Select(a => a.FormVersionId)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<Entities.Application.Application> GetWithReviewFeedbacksByIdAsync(Guid applicationId)
+        {
+            var res = await _context.Applications
+                .Include(a => a.ApplicationReview)
+                    .ThenInclude(r => r.ApplicationReviewFeedbacks)
+                .FirstOrDefaultAsync(a => a.Id == applicationId);
+
+            return res is null ? throw new RecordNotFoundException(applicationId) : res;
         }
     }
 }
