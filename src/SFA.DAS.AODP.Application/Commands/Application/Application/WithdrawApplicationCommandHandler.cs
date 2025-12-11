@@ -54,8 +54,14 @@ public class WithdrawApplicationCommandHandler : IRequestHandler<WithdrawApplica
                 SentByName = request.WithdrawnBy,
                 UserType = UserType.AwardingOrganisation.ToString()
             }, cancellationToken);
-            if (!msgResult.Success) throw new ApplicationMessageException(msgResult.ErrorMessage, msgResult.InnerException);
 
+            if (!msgResult.Success)
+            {
+                throw new ApplicationMessageException(
+                    msgResult.ErrorMessage ?? "Unknown error while creating application message.",
+                    msgResult.InnerException
+                );
+            }
             response.Value = new() { Notifications = msgResult.Value.Notifications };
             response.Success = true;
         }

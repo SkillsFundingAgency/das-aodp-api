@@ -3,6 +3,7 @@
 public class ApplicationMessageException : ApplicationExceptionBase
 {
     public ApplicationMessageException(string message, Exception? inner = null)
-        : base(message, inner) { }
+        : base(message, inner ?? new Exception("Inner exception not provided")) { }
+
 }
 
