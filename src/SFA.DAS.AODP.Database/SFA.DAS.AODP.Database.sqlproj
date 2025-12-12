@@ -171,6 +171,9 @@
     <Build Include="Stored Procedures\proc_DeleteDuplicateDefundingLists.sql" />
     <Build Include="Tables\Import\PLDNS.sql" />
     <Build Include="Stored Procedures\proc_DeleteDuplicatePLDNS.sql" />
+    <None Include="MigrationScripts\MVS2_AWARD_901_Jobs_Data_Seed.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />

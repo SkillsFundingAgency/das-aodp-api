@@ -6,11 +6,9 @@ using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Data.Repositories.Feedback;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 using SFA.DAS.AODP.Data.Repositories.FundingOffer;
-using SFA.DAS.AODP.Data.Repositories.Import;
 using SFA.DAS.AODP.Data.Repositories.Jobs;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using System.Diagnostics.CodeAnalysis;
-using System.Net.Security;
 
 namespace SFA.DAS.AODP.Data.Extensions
 {
@@ -68,7 +66,6 @@ namespace SFA.DAS.AODP.Data.Extensions
 
             services.AddScoped<IQualificationOutputFileRepository, QualificationOutputFileRepository>();
             services.AddScoped<IQualificationOutputFileLogRepository, QualificationOutputFileLogRepository>();
-            services.AddScoped<IImportRepository, ImportRepository>();
             return services;
         }
     }
