@@ -8,6 +8,7 @@ using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 using SFA.DAS.AODP.Data.Repositories.FundingOffer;
 using SFA.DAS.AODP.Data.Repositories.Jobs;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
+using SFA.DAS.AODP.Data.Search;
 using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Data.Extensions
@@ -63,6 +64,10 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<INewQualificationsRepository, NewQualificationsRepository>();
             services.AddScoped<IJobsRepository, JobsRepository>();
             services.AddScoped<IJobRunsRepository, JobRunsRepository>();
+
+            services.AddScoped<IDirectoryFactory, DirectoryFactory>();
+            services.AddScoped<IIndexBuilder, QualificationsIndexBuilder>();
+            services.AddScoped<ISearchManager, QualificationsSearchManager>();
 
             return services;
         }
