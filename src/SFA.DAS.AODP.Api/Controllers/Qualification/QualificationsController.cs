@@ -282,7 +282,7 @@ public class QualificationsController : BaseController
             _logger.LogWarning("Search term is empty");
             return BadRequest(new { message = "Search term cannot be empty" });
         }
-        var results = await _qualificationsSearchService.SearchQualificationsAsync(searchTerm.Trim());
+        var results = await _qualificationsSearchService.SearchQualificationsByKeywordAsync(searchTerm.Trim());
         return Ok(results);
     }
 

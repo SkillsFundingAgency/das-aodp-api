@@ -9,7 +9,7 @@ namespace SFA.DAS.AODP.Data.Search
 {
     public interface IQualificationsSearchService
     {
-        Task<IReadOnlyList<QualificationSearchResult>> SearchQualificationsAsync(string input, int take = 25, CancellationToken ct = default);
+        Task<IEnumerable<QualificationSearchResult>> SearchQualificationsByKeywordAsync(string input, int take = 25, CancellationToken ct = default);
 
         //IEnumerable<QualificationSearchResultDto> SearchQualificationsByKeyword(string keyword);
     }

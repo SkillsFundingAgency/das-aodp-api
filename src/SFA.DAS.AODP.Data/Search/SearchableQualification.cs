@@ -25,11 +25,11 @@ namespace SFA.DAS.AODP.Data.Search
 
         // phrase
         public static string QualificationNamePhrase => $"{nameof(Qualification.QualificationName)}-{PhraseSuffix}";
-        //public static string QanPhrase => $"{nameof(Qualification.Qan)}-{PhraseSuffix}";
+        public static string QanPhrase => $"{nameof(Qualification.Qan)}-{PhraseSuffix}";
         
         // term
         public static string QualificationNameTerm => $"{nameof(Qualification.QualificationName)}-{TermSuffix}";
-        //public static string QanTerm => $"{nameof(Qualification.Qan)}-{TermSuffix}";
+        public static string QanTerm => $"{nameof(Qualification.Qan)}-{TermSuffix}";
         
         // n-gram
         public static string QualificationNameNGram => $"{nameof(Qualification.QualificationName)}-{NGramSuffix}";
@@ -40,12 +40,14 @@ namespace SFA.DAS.AODP.Data.Search
             return new Field[]
             {
                 new StringField(nameof(Id), Id.ToString(), Field.Store.YES),
+                new StringField(nameof(QualificationName), QualificationName, Field.Store.YES),
+                new StringField(nameof(Qan), Qan, Field.Store.YES),
                 // phrase
                 new TextField(QualificationNamePhrase, QualificationName ?? "", Field.Store.NO) {Boost = 1000f},
-                //new TextField(QanPhrase, Qan ?? "", Field.Store.NO) {Boost = 500f},
+                new TextField(QanPhrase, Qan ?? "", Field.Store.NO) {Boost = 500f},
                 // term
                 new TextField(QualificationNameTerm, QualificationName ?? "", Field.Store.NO) {Boost = 40f},
-                //new TextField(QanTerm, Qan ?? "", Field.Store.NO) {Boost = 20f},
+                new TextField(QanTerm, Qan ?? "", Field.Store.NO) {Boost = 20f},
                 // ngram
                 new TextField(QualificationNameNGram, QualificationName ?? "", Field.Store.NO) {Boost = 10f}
             };

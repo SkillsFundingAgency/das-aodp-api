@@ -10,11 +10,13 @@ namespace SFA.DAS.AODP.Data.Search
             float score)
         {
             Id = document.GetField(nameof(Id)).GetStringValue();
-            Score = score;
+            QualificationName = document.GetField(nameof(QualificationName)).GetStringValue();
+            Qan = document.GetField(nameof(Qan)).GetStringValue();
         }
 
         public string Id { get; set; }
-        public float Score { get; set; }
+        public string QualificationName { get; set; }
+        public string Qan { get; set; }
     }
 
 }
