@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
-using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Exceptions;
+using SFA.DAS.AODP.Data.Search;
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification;
 
@@ -81,4 +82,12 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
                     .FirstOrDefaultAsync();
 
     }
+
+    // Add a new method to fetch all qualifications that match the list of QANs the 
+    //public async Task<IEnumerable<QualificationSearchResultDto> GetByQans(IEnumerable<string> qualificationQans)
+    //{
+    //    return await _context
+    //                .Qualification
+    //                
+    //}
 }

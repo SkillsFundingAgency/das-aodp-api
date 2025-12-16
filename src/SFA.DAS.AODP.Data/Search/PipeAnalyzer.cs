@@ -3,6 +3,7 @@ using Lucene.Net.Analysis.Core;
 using Lucene.Net.Util;
 
 namespace SFA.DAS.AODP.Data.Search
+
 {
     public class PipeAnalyzer : Analyzer
     {

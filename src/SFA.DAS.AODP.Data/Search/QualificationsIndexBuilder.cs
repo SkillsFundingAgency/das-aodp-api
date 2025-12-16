@@ -15,13 +15,16 @@ namespace SFA.DAS.AODP.Data.Search
         private readonly IDirectoryFactory _directoryFactory;
 
         public QualificationsIndexBuilder(
-            IApplicationDbContext coursesDataContext,
+            IApplicationDbContext applicationDbContext,
             IDirectoryFactory directoryFactory)
         {
-            _applicationDbContext = coursesDataContext;
+            _applicationDbContext = applicationDbContext;
             _directoryFactory = directoryFactory;
         }
 
+        // This method builds the Lucene index for qualifications
+        // We need to get the 16k qualifications from the database
+        // and index them using different analyzers for phrase, term, and n-gram searches
         public void Build()
         {
             var standardAnalyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
@@ -45,16 +48,19 @@ namespace SFA.DAS.AODP.Data.Search
             var config = new IndexWriterConfig(LuceneVersion.LUCENE_48, perFieldAnalyzerWrapper);
             var directory = _directoryFactory.GetDirectory();
 
+            // Clear existing index and build a new one
             using (var writer = new IndexWriter(directory, config))
             {
                 writer.DeleteAll();
                 writer.Commit();
 
+                // Index each qualification from the database
                 foreach (var qualification in _applicationDbContext.Qualification)
                 {
                     var doc = new Document();
                     var searchable = new SearchableQualification(qualification);
 
+                    // Add all indexable fields to the document
                     foreach (var indexableField in searchable.GetFields())
                     {
                         doc.Add(indexableField);

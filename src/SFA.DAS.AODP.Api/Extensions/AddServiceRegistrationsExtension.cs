@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using SFA.DAS.AODP.Data.Extensions;
+using SFA.DAS.AODP.Data.Search;
 using SFA.DAS.AODP.Models.Settings;
 using System.Diagnostics.CodeAnalysis;
 
@@ -14,6 +15,8 @@ public static class AddServiceRegistrationsExtension
 
         var formBuilderSettings = configuration.GetRequiredSection("FormBuilderSettings").Get<FormBuilderSettings>();
         if (formBuilderSettings != null) services.AddSingleton(formBuilderSettings);
+
+        services.AddScoped<IIndexBuilder, QualificationsIndexBuilder>();
 
         services.ConfigureDatabase(configuration);
         return services;

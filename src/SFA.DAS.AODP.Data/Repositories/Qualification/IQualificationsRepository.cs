@@ -15,4 +15,6 @@ public interface IQualificationsRepository
     Task<IEnumerable<ChangedQualificationExport>> GetChangedQualificationsExport();
 
     Task<Entities.Qualification.Qualification> GetByIdAsync(string qualificationReference);
+    //Task<IEnumerable<QualificationSearchResultDto>> GetByQans(IEnumerable<string> qualificationQans);
+
 }

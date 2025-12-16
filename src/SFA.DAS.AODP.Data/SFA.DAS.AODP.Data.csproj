@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Search\DirectoryFactory.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Lucene.Net" Version="4.8.0-beta00017" />
     <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00017" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
@@ -35,10 +31,6 @@
 
   <ItemGroup>
     <Folder Include="Entities\Jobs\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Search\DirectoryFactory.cs" />
   </ItemGroup>
 
 </Project>

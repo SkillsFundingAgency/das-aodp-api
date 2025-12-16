@@ -17,6 +17,7 @@ namespace SFA.DAS.AODP.Data.Search
             var tokenizer = new StandardTokenizer(MatchLuceneVersion, reader);
             TokenStream tokenStream = new StandardFilter(MatchLuceneVersion, tokenizer);
             tokenStream = new LowerCaseFilter(MatchLuceneVersion, tokenStream);
+            tokenStream = new StopFilter(MatchLuceneVersion, tokenStream, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
             tokenStream = new EdgeNGramTokenFilter(MatchLuceneVersion, tokenStream, MinGramSize, MaxGramSize);
 
             return new TokenStreamComponents(tokenizer, tokenStream);

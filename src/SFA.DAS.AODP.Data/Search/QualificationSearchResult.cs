@@ -9,11 +9,11 @@ namespace SFA.DAS.AODP.Data.Search
         public QualificationSearchResult(Document document,
             float score)
         {
-            QualificationUId = document.GetField(nameof(QualificationUId)).GetStringValue();
+            Id = document.GetField(nameof(Id)).GetStringValue();
             Score = score;
         }
 
-        public string QualificationUId { get; set; }
+        public string Id { get; set; }
         public float Score { get; set; }
     }
 
