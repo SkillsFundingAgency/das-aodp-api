@@ -4,6 +4,8 @@ using Lucene.Net.Analysis.Miscellaneous;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
+using Lucene.Net.Search;
+using Lucene.Net.Store;
 using Lucene.Net.Util;
 using SFA.DAS.AODP.Data.Context;
 
@@ -23,7 +25,7 @@ namespace SFA.DAS.AODP.Data.Search
         }
 
         // This method builds the Lucene index for qualifications
-        // We need to get the 16k qualifications from the database
+        // We need to get all the qualifications from the database
         // and index them using different analyzers for phrase, term, and n-gram searches
         public void Build()
         {
@@ -67,8 +69,9 @@ namespace SFA.DAS.AODP.Data.Search
                     }
 
                     writer.AddDocument(doc);
-                    writer.Commit();
+                    //writer.Commit();
                 }
+                writer.Commit();
             }
         }
     }

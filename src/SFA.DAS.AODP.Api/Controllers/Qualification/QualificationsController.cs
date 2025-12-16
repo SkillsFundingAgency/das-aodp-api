@@ -9,6 +9,7 @@ using SFA.DAS.AODP.Application.Commands.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Application.Commands;
 using System.Linq;
+using SFA.DAS.AODP.Data.Search;
 
 namespace SFA.DAS.AODP.Api.Controllers.Qualification;
 [ApiController]
@@ -17,11 +18,13 @@ public class QualificationsController : BaseController
 {
     private readonly IMediator _mediator;
     private readonly ILogger<QualificationsController> _logger;
+    private readonly IQualificationsSearchService _qualificationsSearchService;
 
-    public QualificationsController(IMediator mediator, ILogger<QualificationsController> logger) : base(mediator, logger)
+    public QualificationsController(IMediator mediator, ILogger<QualificationsController> logger, IQualificationsSearchService qualificationsSearchService) : base(mediator, logger)
     {
         _mediator = mediator;
         _logger = logger;
+        _qualificationsSearchService = qualificationsSearchService;
     }
 
     [HttpGet("/api/qualifications/{qualificationReference}/QualificationVersions")]
@@ -270,6 +273,21 @@ public class QualificationsController : BaseController
 
         return Ok(result);
     }
+
+    [HttpGet("GetMatchingQualifications")]
+    public async Task<IActionResult> GetMatchingQualifications([FromQuery] string searchTerm)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            _logger.LogWarning("Search term is empty");
+            return BadRequest(new { message = "Search term cannot be empty" });
+        }
+        var results = await _qualificationsSearchService.SearchQualificationsAsync(searchTerm.Trim());
+        return Ok(results);
+    }
+
+
+
     private async Task<IActionResult> HandleChangedQualificationCSVExport()
     {
         var result = await _mediator.Send(new GetChangedQualificationsCsvExportQuery());
