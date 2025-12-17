@@ -18,13 +18,11 @@ public class QualificationsController : BaseController
 {
     private readonly IMediator _mediator;
     private readonly ILogger<QualificationsController> _logger;
-    private readonly IQualificationsSearchService _qualificationsSearchService;
 
-    public QualificationsController(IMediator mediator, ILogger<QualificationsController> logger, IQualificationsSearchService qualificationsSearchService) : base(mediator, logger)
+    public QualificationsController(IMediator mediator, ILogger<QualificationsController> logger) : base(mediator, logger)
     {
         _mediator = mediator;
         _logger = logger;
-        _qualificationsSearchService = qualificationsSearchService;
     }
 
     [HttpGet("/api/qualifications/{qualificationReference}/QualificationVersions")]
@@ -277,13 +275,13 @@ public class QualificationsController : BaseController
     [HttpGet("GetMatchingQualifications")]
     public async Task<IActionResult> GetMatchingQualifications([FromQuery] string searchTerm)
     {
-        if (string.IsNullOrWhiteSpace(searchTerm))
+        var result = await _mediator.Send(new GetMatchingQualificationsQuery() { SearchTerm = searchTerm });
+        if (result == null || !result.Success || result.Value == null)
         {
-            _logger.LogWarning("Search term is empty");
-            return BadRequest(new { message = "Search term cannot be empty" });
+            _logger.LogWarning(result?.ErrorMessage);
+            return NotFound(new { message = result?.ErrorMessage });
         }
-        var results = await _qualificationsSearchService.SearchQualificationsByKeywordAsync(searchTerm.Trim());
-        return Ok(results);
+        return Ok(result);
     }
 
 

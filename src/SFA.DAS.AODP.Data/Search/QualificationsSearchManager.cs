@@ -3,7 +3,6 @@ using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Analysis.TokenAttributes;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
-using Lucene.Net.Util;
 
 namespace SFA.DAS.AODP.Data.Search
 {

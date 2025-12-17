@@ -1,12 +1,11 @@
 ﻿using SFA.DAS.AODP.Data.Entities.Qualification;
-using SFA.DAS.AODP.Data.Repositories.Qualification;
 
 namespace SFA.DAS.AODP.Data.Search;
 public class QualificationsSearchService : IQualificationsSearchService
 {
     private readonly ISearchManager _searchManager;
 
-    public QualificationsSearchService(ISearchManager searchManager, IQualificationDetailsRepository qualificationDetailsRepository)
+    public QualificationsSearchService(ISearchManager searchManager)
     {
         _searchManager = searchManager;
     }

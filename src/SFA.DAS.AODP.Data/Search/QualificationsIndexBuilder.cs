@@ -1,11 +1,8 @@
-﻿using J2N.Collections.Generic;
-using Lucene.Net.Analysis;
+﻿using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Miscellaneous;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
-using Lucene.Net.Search;
-using Lucene.Net.Store;
 using Lucene.Net.Util;
 using SFA.DAS.AODP.Data.Context;
 
