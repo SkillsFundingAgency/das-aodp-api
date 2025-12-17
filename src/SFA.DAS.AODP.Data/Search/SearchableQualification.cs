@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Lucene.Net.Documents;
+﻿using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 
@@ -44,10 +43,8 @@ namespace SFA.DAS.AODP.Data.Search
                 new StringField(nameof(Qan), Qan, Field.Store.YES),
                 // phrase
                 new TextField(QualificationNamePhrase, QualificationName ?? "", Field.Store.NO) {Boost = 1000f},
-                new TextField(QanPhrase, Qan ?? "", Field.Store.NO) {Boost = 500f},
                 // term
                 new TextField(QualificationNameTerm, QualificationName ?? "", Field.Store.NO) {Boost = 40f},
-                new TextField(QanTerm, Qan ?? "", Field.Store.NO) {Boost = 20f},
                 // ngram
                 new TextField(QualificationNameNGram, QualificationName ?? "", Field.Store.NO) {Boost = 10f}
             };

@@ -9,22 +9,21 @@ public class QualificationsSearchService : IQualificationsSearchService
     public QualificationsSearchService(ISearchManager searchManager, IQualificationDetailsRepository qualificationDetailsRepository)
     {
         _searchManager = searchManager;
-
     }
 
-    public async Task<IEnumerable<QualificationSearchResult>> SearchQualificationsByKeywordAsync(string keyword, int take = 25, CancellationToken ct = default)
+    public async Task<IEnumerable<Qualification>> SearchQualificationsByKeywordAsync(string keyword, int take = 25, CancellationToken ct = default)
     {
         var queryResult = _searchManager.Query(keyword);
         var results = queryResult.Qualifications
-            .Select(q => new QualificationSearchResult
+            .Select(q => new Qualification
             {
-                Id = q.Id,
+                Id = Guid.Parse(q.Id),
                 QualificationName = q.QualificationName,
                 Qan = q.Qan
             })
             .Take(take)
             .ToList();
-        return await Task.FromResult((IReadOnlyList<QualificationSearchResult>)results);
+        return await Task.FromResult((IReadOnlyList<Qualification>)results);
     }
 
 }
