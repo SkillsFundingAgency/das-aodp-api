@@ -1,4 +1,6 @@
-﻿using SFA.DAS.AODP.Data.Entities.Qualification;
+﻿using Azure;
+using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Exceptions;
 
 namespace SFA.DAS.AODP.Data.Search;
 public class QualificationsSearchService : IQualificationsSearchService
@@ -10,19 +12,43 @@ public class QualificationsSearchService : IQualificationsSearchService
         _searchManager = searchManager;
     }
 
-    public async Task<IEnumerable<Qualification>> SearchQualificationsByKeywordAsync(string keyword, int take = 25, CancellationToken ct = default)
+    public IEnumerable<Qualification> SearchQualificationsByKeywordAsync(string searchTerm, int take = 25, CancellationToken ct = default)
     {
-        var queryResult = _searchManager.Query(keyword);
+
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            throw new ArgumentException("Search Term cannot be empty.", nameof(searchTerm));
+
+
+        ct.ThrowIfCancellationRequested();
+
+        var queryResult = _searchManager.Query(searchTerm);
+
         var results = queryResult.Qualifications
-            .Select(q => new Qualification
+            .Select(q =>
             {
-                Id = Guid.Parse(q.Id),
-                QualificationName = q.QualificationName,
-                Qan = q.Qan
+                // TryParse avoids exceptions on bad GUIDs
+                if (!Guid.TryParse(q.Id, out var id))
+                    return null;
+
+                return new Qualification
+                {
+                    Id = id,
+                    QualificationName = q.QualificationName,
+                    Qan = q.Qan
+                };
             })
+            .Where(x => x != null)
             .Take(take)
-            .ToList();
-        return await Task.FromResult((IReadOnlyList<Qualification>)results);
+            .ToList()!;
+
+
+        if (results.Count == 0)
+        {
+            throw new RecordWithNameNotFoundException($"No qualifications were found matching search term: {searchTerm}");
+        }
+
+        return results;
+
     }
 
 }

@@ -16,25 +16,37 @@ namespace SFA.DAS.AODP.Application.Queries.Qualification
         }
         public async Task<BaseMediatrResponse<GetMatchingQualificationsQueryResponse>> Handle(GetMatchingQualificationsQuery request, CancellationToken cancellationToken)
         {
+
             var response = new BaseMediatrResponse<GetMatchingQualificationsQueryResponse>();
-
-            var qualifications = (await _qualificationsSearchService.SearchQualificationsByKeywordAsync(request.SearchTerm));
-
-            var result = new GetMatchingQualificationsQueryResponse
+            try
             {
-                Qualifications = qualifications.Select(q => new GetMatchingQualificationsQueryItem
+                var qualifications = _qualificationsSearchService.SearchQualificationsByKeywordAsync(request.SearchTerm);
+
+                response .Value = new GetMatchingQualificationsQueryResponse
                 {
-                    Id = q.Id,
-                    Qan = q.Qan,
-                    QualificationName = q.QualificationName
-                }).ToList()
-            };
-
-            return new BaseMediatrResponse<GetMatchingQualificationsQueryResponse>
+                    Qualifications = qualifications.Select(q => new GetMatchingQualificationsQueryItem
+                    {
+                        Id = q.Id,
+                        Qan = q.Qan,
+                        QualificationName = q.QualificationName
+                    }).ToList()
+                };
+                response.Success = true;
+            }
+            catch (RecordWithNameNotFoundException ex)
             {
-                Success = true,
-                Value = result
-            };
+                response.Success = false;
+                response.ErrorMessage = $"No qualifications were found matching search term: {request.SearchTerm}";
+                response.ErrorCode = "NO_MATCHES";
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.ErrorMessage = ex.Message;
+                response.InnerException = ex;
+            }
+
+            return response;
         }
     }
 }

@@ -290,7 +290,7 @@ public class QualificationsController : BaseController
         if (result == null || !result.Success || result.Value == null)
         {
             _logger.LogWarning(result?.ErrorMessage);
-            return NotFound(new { message = result?.ErrorMessage });
+            return NotFound(result);
         }
         return Ok(result);
     }
