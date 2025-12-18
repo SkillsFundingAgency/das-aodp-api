@@ -282,6 +282,7 @@ public class QualificationsController : BaseController
 
         return Ok(result);
     }
+
     private async Task<IActionResult> HandleChangedQualificationCSVExport()
     {
         var result = await _mediator.Send(new GetChangedQualificationsCsvExportQuery());

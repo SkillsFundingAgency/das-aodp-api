@@ -3,6 +3,7 @@ using SFA.DAS.AODP.Api.Extensions;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Application.Swashbuckle;
+using SFA.DAS.AODP.Data.Search;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +46,11 @@ if (!string.IsNullOrEmpty(connectionString))
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var indexBuilder = scope.ServiceProvider.GetRequiredService<IIndexBuilder>();
+    indexBuilder.Build();
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();

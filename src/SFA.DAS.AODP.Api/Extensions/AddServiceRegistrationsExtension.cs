@@ -1,5 +1,6 @@
 ﻿using SFA.DAS.AODP.Application.Services;
 using SFA.DAS.AODP.Data.Extensions;
+using SFA.DAS.AODP.Data.Search;
 using SFA.DAS.AODP.Infrastructure.Extensions;
 using SFA.DAS.AODP.Models.Settings;
 using System.Diagnostics.CodeAnalysis;
@@ -18,6 +19,11 @@ public static class AddServiceRegistrationsExtension
 
         var blobStorageSettings = configuration.GetRequiredSection("OutputFileBlobStorageSettings").Get<OutputFileBlobStorageSettings>();
         if (blobStorageSettings != null) services.AddSingleton(blobStorageSettings);
+
+        services.AddScoped<IQualificationsSearchService, QualificationsSearchService>();
+        services.AddSingleton<IDirectoryFactory>(new DirectoryFactory());
+        services.AddScoped<IIndexBuilder, QualificationsIndexBuilder>();
+        services.AddScoped<ISearchManager, QualificationsSearchManager>();
 
         services.ConfigureDatabase(configuration);
 
