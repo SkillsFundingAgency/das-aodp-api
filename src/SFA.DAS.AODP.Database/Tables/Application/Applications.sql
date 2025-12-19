@@ -15,6 +15,8 @@ CREATE TABLE [dbo].[Applications](
     [AwardingOrganisationName] NVARCHAR(400) NULL,
     [AwardingOrganisationUkprn] NVARCHAR(100) NULL,
     [NewMessage] BIT NULL,
+    [WithdrawnAt] DATETIME NULL, 
+    [WithdrawnBy] NVARCHAR(400) NULL, 
     CONSTRAINT [PK_Applications] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC

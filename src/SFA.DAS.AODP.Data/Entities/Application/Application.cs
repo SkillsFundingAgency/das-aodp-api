@@ -25,10 +25,12 @@ namespace SFA.DAS.AODP.Data.Entities.Application
         public string? AwardingOrganisationName { get; set; }
         public string? AwardingOrganisationUkprn { get; set; }
 
-
         public virtual List<ApplicationPage> Pages { get; set; }
         public virtual ApplicationReview ApplicationReview { get; set; }
         public virtual FormVersion FormVersion { get; set; }
+
+        public string? WithdrawnBy { get; set; }
+        public DateTime? WithdrawnAt { get; set; }
 
     }
 }

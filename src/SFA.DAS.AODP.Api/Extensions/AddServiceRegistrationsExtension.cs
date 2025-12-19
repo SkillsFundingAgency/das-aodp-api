@@ -1,6 +1,10 @@
-﻿using SFA.DAS.AODP.Application.Services;
+﻿using RestEase;
+using SFA.DAS.AODP.Application.Services;
 using SFA.DAS.AODP.Data.Extensions;
+using SFA.DAS.AODP.Infrastructure.Clients.Ofqual;
 using SFA.DAS.AODP.Infrastructure.Extensions;
+using SFA.DAS.AODP.Infrastructure.Services;
+using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
 using SFA.DAS.AODP.Models.Settings;
 using System.Diagnostics.CodeAnalysis;
 
@@ -19,11 +23,26 @@ public static class AddServiceRegistrationsExtension
         var blobStorageSettings = configuration.GetRequiredSection("OutputFileBlobStorageSettings").Get<OutputFileBlobStorageSettings>();
         if (blobStorageSettings != null) services.AddSingleton(blobStorageSettings);
 
+        var qualificationsApiSettings = configuration.GetRequiredSection("QualificationsApiSettings").Get<QualificationsApiSettings>();
+        if (qualificationsApiSettings != null) services.AddSingleton(qualificationsApiSettings);
+
         services.ConfigureDatabase(configuration);
 
         services.AddBlobStorage(configuration);
 
         services.AddScoped<INotificationDefinitionFactory, NotificationDefinitionFactory>();
+
+        services.AddScoped<IOfqualRegisterApi>(provider =>
+        {
+            var cfg = provider.GetRequiredService<QualificationsApiSettings>();
+
+            var api = RestClient.For<IOfqualRegisterApi>(cfg.BaseUrl);
+            api.SubscriptionKey = cfg.ApiKey;
+
+            return api;
+        });
+        services.AddScoped<IQanValidationService, QanValidationService>();
+        services.AddScoped<IQualificationsApi, QualificationsApi>();
 
         return services;
     }
