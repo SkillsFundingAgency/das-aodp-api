@@ -1,9 +1,8 @@
 ﻿using MediatR;
-using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
-
+namespace SFA.DAS.AODP.Application.Commands.Application.Application;
 public class EditApplicationCommandHandler : IRequestHandler<EditApplicationCommand, BaseMediatrResponse<EditApplicationCommandResponse>>
 {
     private readonly IApplicationRepository _applicationRepository;
@@ -29,7 +28,12 @@ public class EditApplicationCommandHandler : IRequestHandler<EditApplicationComm
                 request.QualificationNumber?.Trim(),
                 StringComparison.OrdinalIgnoreCase);
 
-            if (qanChanged && !string.IsNullOrWhiteSpace(request.QualificationNumber))
+            var titleChanged = !string.Equals(
+                application.Name?.Trim(),
+                request.Title?.Trim(),
+                StringComparison.OrdinalIgnoreCase);
+
+            if ((qanChanged || titleChanged) && !string.IsNullOrWhiteSpace(request.QualificationNumber))
             {
                 var validation = await _qanValidationService.ValidateAsync(
                     request.QualificationNumber,

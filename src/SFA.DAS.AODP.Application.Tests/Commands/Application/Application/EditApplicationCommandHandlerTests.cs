@@ -1,4 +1,5 @@
 ﻿using Moq;
+using SFA.DAS.AODP.Application.Commands.Application.Application;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
@@ -33,13 +34,13 @@ public class EditApplicationCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_QanNotChanged_DoesNotCallValidation_AndUpdatesApplication()
+    public async Task Handle_QanNotChanged_AndTitleNotChanged_DoesNotCallValidation_AndUpdatesApplication()
     {
         var application = new Data.Entities.Application.Application
         {
             Id = ApplicationId,
             Submitted = false,
-            Name = OldName,
+            Name = Title, // same as request.Title
             QualificationNumber = OriginalQan,
             Owner = OldOwner
         };
@@ -282,7 +283,7 @@ public class EditApplicationCommandHandlerTests
         {
             Id = ApplicationId,
             Submitted = false,
-            Name = OldName,
+            Name = Title,                    // ✅ match request.Title so titleChanged == false
             QualificationNumber = OriginalQan,
             Owner = OldOwner
         };
@@ -311,11 +312,66 @@ public class EditApplicationCommandHandlerTests
             Assert.NotNull(result.InnerException);
             Assert.Equal(ExceptionMessage, result.ErrorMessage);
 
-            _applicationRepository.Verify(r =>
-                r.GetByIdAsync(ApplicationId), Times.Once);
+            _applicationRepository.Verify(r => r.GetByIdAsync(ApplicationId), Times.Once);
+            _applicationRepository.Verify(r => r.UpdateAsync(It.IsAny<Data.Entities.Application.Application>()), Times.Once);
 
-            _applicationRepository.Verify(r =>
-                r.UpdateAsync(It.IsAny<Data.Entities.Application.Application>()), Times.Once);
+            _qanValidationService.Verify(v =>
+                v.ValidateAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()),
+                Times.Never);
         });
     }
+
+    [Fact]
+    public async Task Handle_TitleChanged_QanUnchanged_CallsValidation_AndUpdatesApplicationWhenValid()
+    {
+        var application = new Data.Entities.Application.Application
+        {
+            Id = ApplicationId,
+            Submitted = false,
+            Name = OldName,
+            QualificationNumber = OriginalQan,
+            AwardingOrganisationName = OrganisationName,
+            Owner = OldOwner
+        };
+
+        var request = new EditApplicationCommand
+        {
+            ApplicationId = ApplicationId,
+            QualificationNumber = OriginalQan,
+            Title = Title, // changed
+            Owner = Owner
+        };
+
+        _applicationRepository
+            .Setup(r => r.GetByIdAsync(ApplicationId))
+            .ReturnsAsync(application);
+
+        _qanValidationService
+            .Setup(v => v.ValidateAsync(OriginalQan, Title, OrganisationName, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new QanValidationResult { IsValid = true });
+
+        _applicationRepository
+            .Setup(r => r.UpdateAsync(It.Is<Data.Entities.Application.Application>(a =>
+                a.Id == ApplicationId &&
+                a.Name == Title &&
+                a.QualificationNumber == OriginalQan &&
+                a.Owner == Owner)))
+            .Returns(Task.CompletedTask);
+
+        var result = await _handler.Handle(request, default);
+
+        Assert.Multiple(() =>
+        {
+            Assert.True(result.Success);
+
+            _qanValidationService.Verify(v =>
+                v.ValidateAsync(OriginalQan, Title, OrganisationName, It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _applicationRepository.Verify(r =>
+                r.UpdateAsync(It.IsAny<Data.Entities.Application.Application>()),
+                Times.Once);
+        });
+    }
+
 }
