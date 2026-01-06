@@ -189,5 +189,142 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Message
                     Times.Never);
             });
         }
+
+        [Fact]
+        public async Task Handle_UnlockApplication_WhenWithdrawn_ResetsToDraft_AndClearsSubmittedAndWithdrawnFields()
+        {
+            // Arrange
+            var now = DateTime.UtcNow;
+
+            var userType = UserType.Qfau.ToString();
+
+            var application = new Data.Entities.Application.Application
+            {
+                Id = ApplicationId,
+                Status = ApplicationStatus.Withdrawn.ToString(),
+                UpdatedAt = now.AddMinutes(-10),
+                Submitted = true,
+                SubmittedAt = now.AddDays(-2),
+                WithdrawnAt = now.AddDays(-1),
+                WithdrawnBy = "someone@test.com",
+                NewMessage = false
+            };
+
+            _applicationRepository
+                .Setup(r => r.GetByIdAsync(ApplicationId))
+                .ReturnsAsync(application);
+
+            _messageRepository
+                .Setup(r => r.CreateAsync(It.IsAny<Data.Entities.Application.Message>()))
+                .ReturnsAsync(MessageId);
+
+            _reviewRepository
+                .Setup(r => r.GetByApplicationIdAsync(ApplicationId))
+                .ReturnsAsync((ApplicationReview?)null);
+
+            _feedbackRepository
+                .Setup(r => r.UpdateAsync(It.IsAny<List<ApplicationReviewFeedback>>()))
+                .Returns(Task.CompletedTask);
+
+            _notificationDefinitionFactory
+                .Setup(f => f.BuildForMessage(ApplicationId, MessageType.UnlockApplication))
+                .ReturnsAsync(new List<NotificationDefinition>());
+
+            var request = new CreateApplicationMessageCommand
+            {
+                ApplicationId = ApplicationId,
+                UserType = userType,
+                MessageType = nameof(MessageType.UnlockApplication),
+                MessageText = "Unlock please",
+                SentByName = "Test User",
+                SentByEmail = "test.user@test.com"
+            };
+
+            // Act
+            var result = await _handler.Handle(request, default);
+
+            // Assert
+            Assert.True(result.Success);
+
+            _applicationRepository.Verify(
+                r => r.UpdateAsync(It.Is<Data.Entities.Application.Application>(a =>
+                    a.Id == ApplicationId &&
+                    a.Status == ApplicationStatus.Draft.ToString() &&
+                    a.Submitted == false &&
+                    a.SubmittedAt == null &&
+                    a.WithdrawnAt == null &&
+                    a.WithdrawnBy == null &&
+                    a.UpdatedAt > now)),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task Handle_UnlockApplication_WhenNotWithdrawn_ResetsToDraft_AndClearsSubmittedFields_WithdrawnFieldsRemainNull()
+        {
+            // Arrange
+            var now = DateTime.UtcNow;
+
+            var userType = UserType.Qfau.ToString();
+
+            var application = new Data.Entities.Application.Application
+            {
+                Id = ApplicationId,
+                Status = ApplicationStatus.InReview.ToString(),
+                UpdatedAt = now.AddMinutes(-10),
+                Submitted = true,
+                SubmittedAt = now.AddDays(-2),
+                WithdrawnAt = null,
+                WithdrawnBy = null,
+                NewMessage = false
+            };
+
+            _applicationRepository
+                .Setup(r => r.GetByIdAsync(ApplicationId))
+                .ReturnsAsync(application);
+
+            _messageRepository
+                .Setup(r => r.CreateAsync(It.IsAny<Data.Entities.Application.Message>()))
+                .ReturnsAsync(MessageId);
+
+            _reviewRepository
+                .Setup(r => r.GetByApplicationIdAsync(ApplicationId))
+                .ReturnsAsync((ApplicationReview?)null);
+
+            _feedbackRepository
+                .Setup(r => r.UpdateAsync(It.IsAny<List<ApplicationReviewFeedback>>()))
+                .Returns(Task.CompletedTask);
+
+            _notificationDefinitionFactory
+                .Setup(f => f.BuildForMessage(ApplicationId, MessageType.UnlockApplication))
+                .ReturnsAsync(new List<NotificationDefinition>());
+
+            var request = new CreateApplicationMessageCommand
+            {
+                ApplicationId = ApplicationId,
+                UserType = userType,
+                MessageType = nameof(MessageType.UnlockApplication),
+                MessageText = "Unlock please",
+                SentByName = "Test User",
+                SentByEmail = "test.user@test.com"
+            };
+
+            // Act
+            var result = await _handler.Handle(request, default);
+
+            // Assert
+            Assert.True(result.Success);
+
+            _applicationRepository.Verify(
+                r => r.UpdateAsync(It.Is<Data.Entities.Application.Application>(a =>
+                    a.Id == ApplicationId &&
+                    a.Status == ApplicationStatus.Draft.ToString() &&
+                    a.Submitted == false &&
+                    a.SubmittedAt == null &&
+                    a.WithdrawnAt == null &&
+                    a.WithdrawnBy == null &&
+                    a.UpdatedAt > now)),
+                Times.Once);
+        }
+
     }
 }

@@ -140,6 +140,8 @@ public class CreateApplicationMessageCommandHandler : IRequestHandler<CreateAppl
             application.Status = ApplicationStatus.Draft.ToString();
             application.Submitted = false;
             application.SubmittedAt = null;
+            application.WithdrawnAt = null;
+            application.WithdrawnBy = null;
         }
         else if (messageType == MessageType.PutApplicationOnHold)
         {
