@@ -57,12 +57,18 @@ namespace SFA.DAS.AODP.Application.Services
                         RecipientKind = NotificationRecipientKind.QfauMailbox,
                     });
                     break;
-
                 case MessageType.OfqualFeedbackSubmitted:
                 case MessageType.SkillsEnglandFeedbackSubmitted:
                     notifications.Add(new NotificationDefinition
                     {
                         TemplateName = EmailTemplateNames.QFASTSubmittedApplicationChangedNotification,
+                        RecipientKind = NotificationRecipientKind.QfauMailbox,
+                    });
+                    break;
+                case MessageType.ApplicationWithdrawn:
+                    notifications.Add(new NotificationDefinition
+                    {
+                        TemplateName = EmailTemplateNames.QFASTApplicationWithdrawnNotification,
                         RecipientKind = NotificationRecipientKind.QfauMailbox,
                     });
                     break;

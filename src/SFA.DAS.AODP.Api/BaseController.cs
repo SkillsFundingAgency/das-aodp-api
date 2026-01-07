@@ -1,7 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Commands.Application;
 using SFA.DAS.AODP.Application.Exceptions;
+using SFA.DAS.AODP.Data.Exceptions;
 
 namespace SFA.DAS.AODP.Api;
 
@@ -25,7 +27,6 @@ public class BaseController : Controller
             return Ok(response.Value);
         }
 
-
         if (response.InnerException is LockedRecordException)
         {
             _logger.LogError(response.InnerException, $"The record is locked.");
@@ -42,6 +43,12 @@ public class BaseController : Controller
         {
             _logger.LogWarning($"The record was not found.");
             return NotFound();
+        }
+
+        if (response.InnerException is RecordLockedException)
+        {
+            _logger.LogWarning(response.InnerException, "A record lock occurred while handling request {RequestType}", request.GetType().Name);
+            return Conflict(new { message = "The record is locked and cannot be modified." });
         }
 
         _logger.LogError(message: $"Error thrown handling request. {response.ErrorMessage}", exception: response.InnerException);

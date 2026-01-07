@@ -53,6 +53,7 @@ jobs:
               SqlConnectionStringAdAuth: $(SqlConnectionStringAdAuth)
               SharedRedisConnectionString: $(SharedRedisConnectionString)
               OutputFileBlobStorageConnectionString: $(OutputFileBlobStorageConnectionString)
+              QualificationsAPISubscriptionKey: $(QualificationsAPISubscriptionKey)
         - template: azure-pipelines-templates/deploy/step/sql-dacpac-deploy.yml@das-platform-building-blocks
           parameters:
             AzureSubscription: ${{ parameters.ServiceConnection }}
