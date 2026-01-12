@@ -52,6 +52,8 @@ namespace SFA.DAS.AODP.Data.Context
         public DbSet<NewQualificationExport> NewQualificationExport { get; set; }
         public DbSet<ChangedQualificationExport> ChangedQualificationExport { get; set; }
 
+        public DbSet<QualificationOutputFile> QualificationExport { get; set; }
+
         public virtual DbSet<Job> Jobs { get; set; }
         public virtual DbSet<JobConfiguration> JobConfigurations { get; set; }
         public virtual DbSet<JobRun> JobRuns { get; set; }
@@ -69,6 +71,8 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<QualificationFundingFeedbacks> QualificationFundingFeedbacks { get; set; }
         public virtual DbSet<QualificationFundings> QualificationFundings { get; set; }
         public virtual DbSet<Survey> Surveys { get; set; }
+        public virtual DbSet<QualificationOutputFileLog> QualificationOutputFileLog { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<QualificationNewReviewRequired>().ToView("v_QualificationNewReviewRequired", "regulated").HasNoKey();
@@ -80,6 +84,8 @@ namespace SFA.DAS.AODP.Data.Context
             modelBuilder.Entity<ChangedQualificationExport>().ToView("v_ChangedQualificationsExport", "regulated").HasNoKey();
             modelBuilder.Entity<ChangedQualificationExport>().Property(q => q.QANText).HasColumnName("QAN Text");
             modelBuilder.Entity<ChangedQualificationExport>().Property(q => q.DateOfDownload).HasColumnName("Date of download");
+
+            modelBuilder.Entity<QualificationOutputFile>().ToView("view_Output_OutputFile").HasNoKey();
 
             modelBuilder.Entity<Message>().Property(m => m.Type).HasConversion<string>();
             modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")

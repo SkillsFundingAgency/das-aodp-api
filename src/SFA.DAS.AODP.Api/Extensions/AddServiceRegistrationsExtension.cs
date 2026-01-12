@@ -1,5 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿using SFA.DAS.AODP.Application.Services;
 using SFA.DAS.AODP.Data.Extensions;
+using SFA.DAS.AODP.Infrastructure.Extensions;
 using SFA.DAS.AODP.Models.Settings;
 using System.Diagnostics.CodeAnalysis;
 
@@ -15,7 +16,15 @@ public static class AddServiceRegistrationsExtension
         var formBuilderSettings = configuration.GetRequiredSection("FormBuilderSettings").Get<FormBuilderSettings>();
         if (formBuilderSettings != null) services.AddSingleton(formBuilderSettings);
 
+        var blobStorageSettings = configuration.GetRequiredSection("OutputFileBlobStorageSettings").Get<OutputFileBlobStorageSettings>();
+        if (blobStorageSettings != null) services.AddSingleton(blobStorageSettings);
+
         services.ConfigureDatabase(configuration);
+
+        services.AddBlobStorage(configuration);
+
+        services.AddScoped<INotificationDefinitionFactory, NotificationDefinitionFactory>();
+
         return services;
     }
 }

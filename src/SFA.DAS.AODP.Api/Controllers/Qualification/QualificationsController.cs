@@ -1,14 +1,10 @@
-﻿using AutoFixture;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.Qualifications;
-using SFA.DAS.AODP.Application.Queries.Application.Review;
 using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Application.Commands.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
-using SFA.DAS.AODP.Application.Commands;
-using System.Linq;
 
 namespace SFA.DAS.AODP.Api.Controllers.Qualification;
 [ApiController]
@@ -223,6 +219,22 @@ public class QualificationsController : BaseController
             return BadRequest(new { message = "Qualification reference cannot be empty" });
         }
         return await SendRequestAsync(new GetDiscussionHistoriesForQualificationQuery { QualificationReference = qualificationReference });
+    }
+
+    [HttpPost("outputfile")]
+    [ProducesResponseType(typeof(BaseMediatrResponse<GetQualificationOutputFileResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetQualificationOutputFile([FromBody] GetQualificationOutputFileQuery request)
+    {
+        var result = await _mediator.Send(request);
+        return Ok(result);
+    }
+
+    [HttpGet("outputfile/logs")]
+    [ProducesResponseType(typeof(BaseMediatrResponse<GetQualificationOutputFileLogResponse>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetQualificationOutputFileLogs ()
+    {
+        var response = await _mediator.Send(new GetQualificationOutputFileLogQuery());
+        return Ok(response);
     }
 
     [HttpGet("export")]
