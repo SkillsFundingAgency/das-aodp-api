@@ -282,6 +282,18 @@ public class QualificationsController : BaseController
 
         return Ok(result);
     }
+
+    [HttpGet("GetMatchingQualifications")]
+    public async Task<IActionResult> GetMatchingQualifications([FromQuery] string searchTerm)
+    {
+        var result = await _mediator.Send(new GetMatchingQualificationsQuery() { SearchTerm = searchTerm });
+        if (result == null || !result.Success || result.Value == null)
+        {
+            _logger.LogWarning(result?.ErrorMessage);
+            return NotFound(result);
+        }
+        return Ok(result);
+    }
     private async Task<IActionResult> HandleChangedQualificationCSVExport()
     {
         var result = await _mediator.Send(new GetChangedQualificationsCsvExportQuery());
