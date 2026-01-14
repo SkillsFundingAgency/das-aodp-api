@@ -38,29 +38,6 @@
            ,1
            ,'Initial'
            ,null)
-                    
-        INSERT INTO [dbo].[JobConfigurations]
-           ([Id]
-           ,[Name]
-           ,[Value]
-           ,[JobId])
-        VALUES
-           ('00000000-0000-0000-0001-000000000005'
-           ,'ImportPldns'
-           ,'true'
-           ,'00000000-0000-0000-0000-000000000003')
-
-        INSERT INTO [dbo].[JobConfigurations]
-           ([Id]
-           ,[Name]
-           ,[Value]
-           ,[JobId])
-        VALUES
-           ('00000000-0000-0000-0001-000000000006'
-           ,'DefundingList'
-           ,'true'
-           ,'00000000-0000-0000-0000-000000000004')
-
 
         -- Record the script as run
         INSERT INTO [dbo].[MigrationScripts]
