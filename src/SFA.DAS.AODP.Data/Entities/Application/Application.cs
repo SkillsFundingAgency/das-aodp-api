@@ -31,6 +31,7 @@ namespace SFA.DAS.AODP.Data.Entities.Application
 
         public string? WithdrawnBy { get; set; }
         public DateTime? WithdrawnAt { get; set; }
-
+        public string? Reviewer1 { get; set; }
+        public string? Reviewer2 { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.Application;
+using SFA.DAS.AODP.Application.Commands.Application.Review;
 using SFA.DAS.AODP.Application.Queries.Application.Application;
 
 namespace SFA.DAS.AODP.Api.Controllers.Application;
@@ -220,5 +221,14 @@ public class ApplicationsController : BaseController
     {
         withdrawApplicationCommand.ApplicationId = applicationId;
         return await SendRequestAsync(withdrawApplicationCommand);
+    }
+
+    [HttpPut("/api/applications/{applicationId}/reviewer")]
+    [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> SaveReviewer(SaveReviewerCommand command, Guid applicationId)
+    {
+        command.ApplicationId = applicationId;
+        return await SendRequestAsync(command);
     }
 }

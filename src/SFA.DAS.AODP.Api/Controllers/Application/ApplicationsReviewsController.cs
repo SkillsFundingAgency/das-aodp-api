@@ -116,7 +116,6 @@ public class ApplicationsReviewsController : BaseController
         return await SendRequestAsync(command);
     }
 
-
     [HttpPut("/api/application-reviews/{applicationReviewId}/owner")]
     [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
