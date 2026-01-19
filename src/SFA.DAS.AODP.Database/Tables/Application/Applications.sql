@@ -17,6 +17,8 @@ CREATE TABLE [dbo].[Applications](
     [NewMessage] BIT NULL,
     [WithdrawnAt] DATETIME NULL, 
     [WithdrawnBy] NVARCHAR(400) NULL, 
+    [Reviewer1] NVARCHAR(400) NULL, 
+    [Reviewer2] NVARCHAR(400) NULL, 
     CONSTRAINT [PK_Applications] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC

@@ -19,7 +19,8 @@
         public List<Funding> FundedOffers { get; set; } = new();
         public List<Feedback> Feedbacks { get; set; } = new();
         public string ApplicationStatus { get; set; }
-
+        public string? Reviewer1 { get; set; }
+        public string? Reviewer2 { get; set; }
         public class Feedback
         {
             public string? Owner { get; set; }
@@ -54,6 +55,8 @@
                 SharedWithSkillsEngland = review.SharedWithSkillsEngland,
                 ApplicationReviewId = review.Id,
                 FormTitle = review.Application.FormVersion.Title,
+                Reviewer1 = review.Application.Reviewer1,
+                Reviewer2 = review.Application.Reviewer2,
                 ApplicationStatus = review.Application.Status
             };
 
