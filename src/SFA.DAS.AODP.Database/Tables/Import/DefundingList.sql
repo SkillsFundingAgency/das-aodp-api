@@ -13,3 +13,7 @@
     [ImportDate] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
 );
 GO
+
+CREATE NONCLUSTERED INDEX IX_DefundingLists_Qan
+ON [DefundingLists]([Qan]);
+GO
