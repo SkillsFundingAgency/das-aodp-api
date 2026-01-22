@@ -72,6 +72,7 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<QualificationFundings> QualificationFundings { get; set; }
         public virtual DbSet<Survey> Surveys { get; set; }
         public virtual DbSet<QualificationOutputFileLog> QualificationOutputFileLog { get; set; }
+        public DbSet<QualificationFundingStatus> QualificationFundingStatus { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -97,6 +98,9 @@ namespace SFA.DAS.AODP.Data.Context
 
             modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
                 .HasKey(v => v.QualificationReference);
+
+            modelBuilder.Entity<QualificationFundingStatus>().ToView("v_QualificationFundingStatus", "regulated")
+                .HasNoKey();
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 

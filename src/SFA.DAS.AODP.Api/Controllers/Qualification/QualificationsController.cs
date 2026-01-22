@@ -284,15 +284,21 @@ public class QualificationsController : BaseController
     }
 
     [HttpGet("GetMatchingQualifications")]
-    public async Task<IActionResult> GetMatchingQualifications([FromQuery] string searchTerm)
+    [ProducesResponseType(typeof(BaseMediatrResponse<GetMatchingQualificationsQueryResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetMatchingQualifications(
+        [FromQuery] string searchTerm,
+        [FromQuery] int? skip,
+        [FromQuery] int? take)
     {
-        var result = await _mediator.Send(new GetMatchingQualificationsQuery() { SearchTerm = searchTerm });
-        if (result == null || !result.Success || result.Value == null)
+        return await SendRequestAsync(new GetMatchingQualificationsQuery()
         {
-            _logger.LogWarning(result?.ErrorMessage);
-            return NotFound(result);
-        }
-        return Ok(result);
+            SearchTerm = searchTerm,
+            Skip = skip ?? 0,
+            Take = take ?? 25
+        });
     }
     private async Task<IActionResult> HandleChangedQualificationCSVExport()
     {

@@ -1,12 +1,9 @@
 ﻿using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Miscellaneous;
 using Lucene.Net.Analysis.Standard;
-using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Util;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SFA.DAS.AODP.Data.Context;
-using System.Reflection.Metadata;
 
 namespace SFA.DAS.AODP.Data.Search
 {
@@ -56,7 +53,10 @@ namespace SFA.DAS.AODP.Data.Search
                 writer.Commit();
 
                 // Index each qualification from the database
-                foreach (var qualification in _applicationDbContext.Qualification)
+                foreach (var qualification in _applicationDbContext.QualificationFundingStatus
+                    .OrderBy(q => q.FundingStatus)
+                    .ThenBy(q => q.AwardingOrganisationName)
+                    .ThenBy(q => q.QualificationName))
                 {
                     var doc = new Lucene.Net.Documents.Document();
                     var searchable = new SearchableQualification(qualification);
@@ -68,7 +68,6 @@ namespace SFA.DAS.AODP.Data.Search
                     }
 
                     writer.AddDocument(doc);
-                    //writer.Commit();
                 }
                 writer.Commit();
             }

@@ -61,6 +61,7 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<Survey> Surveys { get; set; }
         DbSet<QualificationOutputFileLog> QualificationOutputFileLog { get; set; }
 
+        DbSet<QualificationFundingStatus> QualificationFundingStatus { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task<IDbContextTransaction> StartTransactionAsync();
     }

@@ -20,6 +20,7 @@ public static class AddServiceRegistrationsExtension
         var blobStorageSettings = configuration.GetRequiredSection("OutputFileBlobStorageSettings").Get<OutputFileBlobStorageSettings>();
         if (blobStorageSettings != null) services.AddSingleton(blobStorageSettings);
 
+        services.Configure<FuzzySearchSettings>(configuration.GetSection("FuzzySearchSettings"));
         services.AddScoped<IQualificationsSearchService, QualificationsSearchService>();
         services.AddSingleton<IDirectoryFactory>(new DirectoryFactory());
         services.AddScoped<IIndexBuilder, QualificationsIndexBuilder>();

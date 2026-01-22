@@ -12,7 +12,7 @@ public class QualificationsSearchService : IQualificationsSearchService
         _searchManager = searchManager;
     }
 
-    public IEnumerable<Qualification> SearchQualificationsByKeywordAsync(string searchTerm, int take = 25, CancellationToken ct = default)
+    public IEnumerable<SearchedQualification> SearchQualificationsByKeywordAsync(string searchTerm, CancellationToken ct = default)
     {
 
         if (string.IsNullOrWhiteSpace(searchTerm))
@@ -30,17 +30,16 @@ public class QualificationsSearchService : IQualificationsSearchService
                 if (!Guid.TryParse(q.Id, out var id))
                     return null;
 
-                return new Qualification
+                return new SearchedQualification
                 {
                     Id = id,
                     QualificationName = q.QualificationName,
-                    Qan = q.Qan
+                    Qan = q.Qan,
+                    Status = q.Status
                 };
             })
             .Where(x => x != null)
-            .Take(take)
             .ToList()!;
-
 
         if (results.Count == 0)
         {
