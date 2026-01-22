@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.OpenApi.Models;
 using SFA.DAS.AODP.Api.Extensions;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
@@ -58,3 +59,9 @@ app
 app.MapControllers();
 
 app.Run();
+
+// Bit of a workaround for now, as we use top level statements for the Program.cs and the compiler automatically generates a Program class under the hood, we need a way to assign them [ExcludeFromCodeCoverage] attribute so having a partial class solves this
+[ExcludeFromCodeCoverage]
+public partial class Program
+{
+}
