@@ -72,7 +72,7 @@ namespace SFA.DAS.AODP.Data.Search
                         i++;
                         if (i < 10)
                         {
-                            _logger.LogWarning("Indexing qualification: {QualificationId} - {QualificationName} - {Qan} - {Status} ", qualification.QualificationId, qualification.QualificationName, qualification.Qan, qualification.FundingStatus);
+                            _logger.LogWarning("Indexing qualification: {QualificationId} - {QualificationName} - {Qan} - {Status} ", qualification.QualificationId, qualification.QualificationName, qualification.Qan, qualification.FundedStatus);
                         }
                         var doc = new Lucene.Net.Documents.Document();
                         var searchable = new SearchableQualification(qualification);
