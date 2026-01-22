@@ -6,18 +6,18 @@ namespace SFA.DAS.AODP.Data.Search
 {
     public class SearchableQualification
     {
-        public SearchableQualification(Qualification Qualification)
+        public SearchableQualification(QualificationFundingStatus Qualification)
         {
-            Id = Qualification.Id;
+            Id = Qualification.QualificationId;
             Qan = Qualification?.Qan;
             QualificationName = Qualification.QualificationName;
-            //Status = Qualification.FundedStatus;
+            Status = Qualification.FundedStatus;
         }
 
         public Guid Id { get; }
         public string Qan { get; }
         public string QualificationName { get; }
-        //public string Status { get; }
+        public string Status { get; }
 
 
         private const string PhraseSuffix = "Phrase";
@@ -43,7 +43,7 @@ namespace SFA.DAS.AODP.Data.Search
                 new StringField(nameof(Id), Id.ToString(), Field.Store.YES),
                 new StringField(nameof(QualificationName), QualificationName, Field.Store.YES),
                 new StringField(nameof(Qan), Qan, Field.Store.YES),
-                //new StringField(nameof(Status), Status, Field.Store.YES),
+                new StringField(nameof(Status), Status, Field.Store.YES),
                 // phrase
                 new TextField(QualificationNamePhrase, QualificationName ?? "", Field.Store.NO) {Boost = 1000f},
                 // term
