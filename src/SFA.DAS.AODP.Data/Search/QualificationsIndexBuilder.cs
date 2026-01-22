@@ -29,59 +29,68 @@ namespace SFA.DAS.AODP.Data.Search
         // and index them using different analyzers for phrase, term, and n-gram searches
         public void Build()
         {
-            var standardAnalyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
-            var pipeAnalyzer = new PipeAnalyzer();
-            var ngramAnalyzer = new EdgeNGramAnalyzer();
-            var fieldAnalyzers = new J2N.Collections.Generic.Dictionary<string, Analyzer>
+            try
             {
-                //phrase
-                {SearchableQualification.QualificationNamePhrase, pipeAnalyzer},
-                //{SearchableQualification.QanPhrase, pipeAnalyzer},
-
-                //term
-                {SearchableQualification.QualificationNameTerm, standardAnalyzer},
-                //{SearchableQualification.QanTerm, standardAnalyzer},
-
-                //ngram
-                {SearchableQualification.QualificationNameNGram, ngramAnalyzer}
-            };
-            var perFieldAnalyzerWrapper = new PerFieldAnalyzerWrapper(standardAnalyzer, fieldAnalyzers);
-
-            var config = new IndexWriterConfig(LuceneVersion.LUCENE_48, perFieldAnalyzerWrapper);
-            var directory = _directoryFactory.GetDirectory();
-
-            // Clear existing index and build a new one
-            using (var writer = new IndexWriter(directory, config))
-            {
-                writer.DeleteAll();
-                writer.Commit();
-
-                // Index each qualification from the database
-                var qualifications = _applicationDbContext.QualificationFundingStatus
-                    .OrderBy(q => q.FundingStatus)
-                    .ThenBy(q => q.AwardingOrganisationName)
-                    .ThenBy(q => q.QualificationName);
-                _logger.LogInformation("Indexing {Count} qualifications", qualifications.Count());
-                int i = 0;
-                foreach (var qualification in qualifications)
+                var standardAnalyzer = new StandardAnalyzer(LuceneVersion.LUCENE_48);
+                var pipeAnalyzer = new PipeAnalyzer();
+                var ngramAnalyzer = new EdgeNGramAnalyzer();
+                var fieldAnalyzers = new J2N.Collections.Generic.Dictionary<string, Analyzer>
                 {
-                    i++;
-                    if (i < 10)
-                    {
-                        _logger.LogDebug("Indexing qualification: {QualificationId} - {QualificationName} - {Qan} - {Status}", qualification.QualificationId, qualification.QualificationName, qualification.Qan, qualification.FundingStatus);
-                    }
-                    var doc = new Lucene.Net.Documents.Document();
-                    var searchable = new SearchableQualification(qualification);
+                    //phrase
+                    {SearchableQualification.QualificationNamePhrase, pipeAnalyzer},
+                    //{SearchableQualification.QanPhrase, pipeAnalyzer},
 
-                    // Add all indexable fields to the document
-                    foreach (var indexableField in searchable.GetFields())
-                    {
-                        doc.Add(indexableField);
-                    }
+                    //term
+                    {SearchableQualification.QualificationNameTerm, standardAnalyzer},
+                    //{SearchableQualification.QanTerm, standardAnalyzer},
 
-                    writer.AddDocument(doc);
+                    //ngram
+                    {SearchableQualification.QualificationNameNGram, ngramAnalyzer}
+                };
+                var perFieldAnalyzerWrapper = new PerFieldAnalyzerWrapper(standardAnalyzer, fieldAnalyzers);
+
+                var config = new IndexWriterConfig(LuceneVersion.LUCENE_48, perFieldAnalyzerWrapper);
+                var directory = _directoryFactory.GetDirectory();
+
+                // Clear existing index and build a new one
+                using (var writer = new IndexWriter(directory, config))
+                {
+                    writer.DeleteAll();
+                    writer.Commit();
+
+                    _logger.LogInformation("Starting Lucene index");
+                    // Index each qualification from the database
+                    var qualifications = _applicationDbContext.QualificationFundingStatus
+                        .OrderBy(q => q.FundingStatus)
+                        .ThenBy(q => q.AwardingOrganisationName)
+                        .ThenBy(q => q.QualificationName);
+
+                    _logger.LogInformation("Indexing {Count} qualifications", qualifications.Count());
+                    int i = 0;
+                    foreach (var qualification in qualifications)
+                    {
+                        i++;
+                        if (i < 10)
+                        {
+                            _logger.LogDebug("Indexing qualification: {QualificationId} - {QualificationName} - {Qan} - {Status}", qualification.QualificationId, qualification.QualificationName, qualification.Qan, qualification.FundingStatus);
+                        }
+                        var doc = new Lucene.Net.Documents.Document();
+                        var searchable = new SearchableQualification(qualification);
+
+                        // Add all indexable fields to the document
+                        foreach (var indexableField in searchable.GetFields())
+                        {
+                            doc.Add(indexableField);
+                        }
+
+                        writer.AddDocument(doc);
+                    }
+                    writer.Commit();
                 }
-                writer.Commit();
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Error building qualifications index");
             }
         }
     }
