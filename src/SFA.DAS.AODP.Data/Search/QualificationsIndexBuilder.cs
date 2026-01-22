@@ -3,6 +3,7 @@ using Lucene.Net.Analysis.Miscellaneous;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Index;
 using Lucene.Net.Util;
+using Microsoft.Extensions.Logging;
 using SFA.DAS.AODP.Data.Context;
 
 namespace SFA.DAS.AODP.Data.Search
@@ -11,13 +12,16 @@ namespace SFA.DAS.AODP.Data.Search
     {
         private readonly IApplicationDbContext _applicationDbContext;
         private readonly IDirectoryFactory _directoryFactory;
+        private readonly ILogger<QualificationsIndexBuilder> _logger;
 
         public QualificationsIndexBuilder(
             IApplicationDbContext applicationDbContext,
-            IDirectoryFactory directoryFactory)
+            IDirectoryFactory directoryFactory,
+            ILogger<QualificationsIndexBuilder> logger)
         {
             _applicationDbContext = applicationDbContext;
             _directoryFactory = directoryFactory;
+            _logger = logger;
         }
 
         // This method builds the Lucene index for qualifications
@@ -53,11 +57,19 @@ namespace SFA.DAS.AODP.Data.Search
                 writer.Commit();
 
                 // Index each qualification from the database
-                foreach (var qualification in _applicationDbContext.QualificationFundingStatus
+                var qualifications = _applicationDbContext.QualificationFundingStatus
                     .OrderBy(q => q.FundingStatus)
                     .ThenBy(q => q.AwardingOrganisationName)
-                    .ThenBy(q => q.QualificationName))
+                    .ThenBy(q => q.QualificationName);
+                _logger.LogInformation("Indexing {Count} qualifications", qualifications.Count());
+                int i = 0;
+                foreach (var qualification in qualifications)
                 {
+                    i++;
+                    if (i < 10)
+                    {
+                        _logger.LogDebug("Indexing qualification: {QualificationId} - {QualificationName} - {Qan} - {Status}", qualification.QualificationId, qualification.QualificationName, qualification.Qan, qualification.FundingStatus);
+                    }
                     var doc = new Lucene.Net.Documents.Document();
                     var searchable = new SearchableQualification(qualification);
 

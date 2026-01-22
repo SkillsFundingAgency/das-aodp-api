@@ -1,8 +1,10 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Logging;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Data.Search;
+using System.Runtime.CompilerServices;
 using data = SFA.DAS.AODP.Data.Entities.Qualification;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualification;
@@ -11,11 +13,13 @@ public class GetMatchingQualificationsQueryHandler : IRequestHandler<GetMatching
 {
     private readonly IQualificationsSearchService _qualificationsSearchService;
     private readonly IQualificationsRepository _qualificationsRepository;
+    private readonly ILogger<GetMatchingQualificationsQueryHandler> _logger;
 
-    public GetMatchingQualificationsQueryHandler(IQualificationsSearchService qualificationsSearchService, IQualificationsRepository qualificationsRepository)
+    public GetMatchingQualificationsQueryHandler(IQualificationsSearchService qualificationsSearchService, IQualificationsRepository qualificationsRepository, ILogger<GetMatchingQualificationsQueryHandler> logger)
     {
         _qualificationsSearchService = qualificationsSearchService;
         _qualificationsRepository = qualificationsRepository;
+        _logger = logger;
     }
     public async Task<BaseMediatrResponse<GetMatchingQualificationsQueryResponse>> Handle(GetMatchingQualificationsQuery request, CancellationToken cancellationToken)
     {
@@ -83,6 +87,7 @@ public class GetMatchingQualificationsQueryHandler : IRequestHandler<GetMatching
         }
         catch (RecordWithNameNotFoundException ex)
         {
+            _logger.LogError(ex, "Error occurred while searching for qualifications with term: {SearchTerm}", request.SearchTerm);
             response.Success = false;
             response.ErrorMessage = $"No qualifications were found matching search term: {request.SearchTerm}";
             response.ErrorCode = "NO_MATCHES";
@@ -96,6 +101,7 @@ public class GetMatchingQualificationsQueryHandler : IRequestHandler<GetMatching
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error occurred while searching for qualifications with term: {SearchTerm}", request.SearchTerm);
             response.Success = false;
             response.ErrorMessage = ex.Message;
             response.InnerException = ex;

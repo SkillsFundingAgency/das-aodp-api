@@ -1,4 +1,6 @@
-﻿using Moq;
+﻿using Castle.Core.Logging;
+using Microsoft.Extensions.Logging;
+using Moq;
 using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
@@ -11,13 +13,15 @@ public class GetMatchingQualificationsQueryHandlerTests
 {
     private readonly Mock<IQualificationsSearchService> _mockSearchService;
     private readonly Mock<IQualificationsRepository> _mockRepository;
+    private readonly Mock<ILogger<GetMatchingQualificationsQueryHandler>> _mockLogger ;
     private readonly GetMatchingQualificationsQueryHandler _handler;
 
     public GetMatchingQualificationsQueryHandlerTests()
     {
         _mockSearchService = new Mock<IQualificationsSearchService>(MockBehavior.Strict);
         _mockRepository = new Mock<IQualificationsRepository>(MockBehavior.Strict);
-        _handler = new GetMatchingQualificationsQueryHandler(_mockSearchService.Object, _mockRepository.Object);
+        _mockLogger = new Mock<ILogger<GetMatchingQualificationsQueryHandler>>();
+        _handler = new GetMatchingQualificationsQueryHandler(_mockSearchService.Object, _mockRepository.Object, _mockLogger.Object);
     }
 
     [Fact]
