@@ -12,13 +12,13 @@ namespace SFA.DAS.AODP.Models.Qualifications
             Id = document.GetField(nameof(Id)).GetStringValue();
             QualificationName = document.GetField(nameof(QualificationName)).GetStringValue();
             Qan = document.GetField(nameof(Qan)).GetStringValue();
-            Status = document.GetField(nameof(Status)).GetStringValue();
+            //Status = document.GetField(nameof(Status)).GetStringValue();
         }
 
         public string Id { get; set; }
         public string QualificationName { get; set; }
         public string Qan { get; set; }
-        public string Status { get; set; }
+        //public string Status { get; set; }
     }
 
 }

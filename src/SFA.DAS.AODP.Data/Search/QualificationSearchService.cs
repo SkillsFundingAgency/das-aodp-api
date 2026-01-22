@@ -34,8 +34,8 @@ public class QualificationsSearchService : IQualificationsSearchService
                 {
                     Id = id,
                     QualificationName = q.QualificationName,
-                    Qan = q.Qan,
-                    Status = q.Status
+                    Qan = q.Qan //,
+                    //Status = q.Status
                 };
             })
             .Where(x => x != null)

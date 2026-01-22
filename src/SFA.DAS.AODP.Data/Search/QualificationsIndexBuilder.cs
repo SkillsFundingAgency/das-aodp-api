@@ -60,10 +60,11 @@ namespace SFA.DAS.AODP.Data.Search
 
                     _logger.LogInformation("Starting Lucene index");
                     // Index each qualification from the database
-                    var qualifications = _applicationDbContext.QualificationFundingStatus
-                        .OrderBy(q => q.FundingStatus)
-                        .ThenBy(q => q.AwardingOrganisationName)
-                        .ThenBy(q => q.QualificationName);
+                    var qualifications = _applicationDbContext.Qualification;
+                        //.QualificationFundingStatus
+                        //.OrderBy(q => q.FundingStatus)
+                        //.ThenBy(q => q.AwardingOrganisationName)
+                        //.ThenBy(q => q.QualificationName);
 
                     _logger.LogInformation("Indexing {Count} qualifications", qualifications.Count());
                     int i = 0;
@@ -72,7 +73,7 @@ namespace SFA.DAS.AODP.Data.Search
                         i++;
                         if (i < 10)
                         {
-                            _logger.LogDebug("Indexing qualification: {QualificationId} - {QualificationName} - {Qan} - {Status}", qualification.QualificationId, qualification.QualificationName, qualification.Qan, qualification.FundingStatus);
+                            _logger.LogDebug("Indexing qualification: {QualificationId} - {QualificationName} - {Qan} ", qualification.Id, qualification.QualificationName, qualification.Qan);
                         }
                         var doc = new Lucene.Net.Documents.Document();
                         var searchable = new SearchableQualification(qualification);
