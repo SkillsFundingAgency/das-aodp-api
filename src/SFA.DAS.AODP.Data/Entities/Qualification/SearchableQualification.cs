@@ -17,7 +17,7 @@ namespace SFA.DAS.AODP.Data.Search
         public Guid Id { get; }
         public string Qan { get; }
         public string QualificationName { get; }
-        public string Status { get; }
+        public Guid? Status { get; }
 
 
         private const string PhraseSuffix = "Phrase";
@@ -40,14 +40,12 @@ namespace SFA.DAS.AODP.Data.Search
         {
             var storedQualificationName = QualificationName ?? string.Empty;
             var storedQan = Qan ?? string.Empty;
-            var storedStatus = Status ?? string.Empty;
-
             return new Field[]
             {
                 new StringField(nameof(Id), Id.ToString(), Field.Store.YES),
                 new StringField(nameof(QualificationName), storedQualificationName, Field.Store.YES),
                 new StringField(nameof(Qan), storedQan, Field.Store.YES),
-                new StringField(nameof(Status), storedStatus, Field.Store.YES),
+                new StringField(nameof(Status), Status?.ToString(), Field.Store.YES),
                 // phrase
                 new TextField(QualificationNamePhrase, QualificationName ?? "", Field.Store.NO) {Boost = 1000f},
                 // term

@@ -26,6 +26,7 @@ WITH LatestQualificationVersions AS (
         qv.EighteenPlus,
         qv.OperationalStartDate,
         qv.OperationalEndDate,
+        qv.ProcessStatusId AS FundedStatus,
         CAST(qv.EligibleForFunding AS BIT)              AS EligibleForFunding,
         CAST(COALESCE(qv.OfferedInEngland, 0) AS BIT)   AS OfferedInEnglandFlag,
         qv.AwardingOrganisationId,
@@ -53,6 +54,7 @@ Classified AS (
         lv.OperationalStartDate,
         lv.OperationalEndDate,
         lv.EligibleForFunding,
+        lv.FundedStatus,
         CASE WHEN lv.OfferedInEnglandFlag = 1
              THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS FundedInEngland,
         fq.Id                      AS FundedQualificationSnapshotId,
@@ -60,7 +62,6 @@ Classified AS (
         fq.QualificationType       AS FundedQualificationType,
         fq.SubCategory,
         fq.SectorSubjectArea,
-        fq.Status                  AS FundedStatus,
         fq.DateOfOfqualDataSnapshot,
         ao.NameOfqual              AS AwardingOrganisationName,
         CASE

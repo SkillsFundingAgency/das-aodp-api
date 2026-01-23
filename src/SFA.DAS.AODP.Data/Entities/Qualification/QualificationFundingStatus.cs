@@ -32,7 +32,7 @@ public class QualificationFundingStatus
     public string? FundedQualificationType { get; set; }
     public string? SubCategory { get; set; }
     public string? SectorSubjectArea { get; set; }
-    public string? FundedStatus { get; set; }
+    public Guid? FundedStatus { get; set; }
     public DateTime? DateOfOfqualDataSnapshot { get; set; }
 
     public string? AwardingOrganisationName { get; set; }

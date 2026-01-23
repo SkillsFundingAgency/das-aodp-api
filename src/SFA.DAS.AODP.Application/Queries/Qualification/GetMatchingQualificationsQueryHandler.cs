@@ -57,7 +57,7 @@ public class GetMatchingQualificationsQueryHandler : IRequestHandler<GetMatching
                         Id = qualification.Id,
                         Qan = qualification.Qan,
                         QualificationName = qualification.QualificationName,
-                        Status = qualification.Qualifications.FirstOrDefault()?.Status
+                        Status = qualification.QualificationVersions.OrderByDescending(qv => qv.Version).FirstOrDefault()?.ProcessStatusId ?? Guid.Empty
                     } };
                 }
             }
