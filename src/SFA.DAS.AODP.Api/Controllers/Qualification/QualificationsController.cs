@@ -297,7 +297,7 @@ public class QualificationsController : BaseController
         {
             SearchTerm = searchTerm,
             Skip = skip ?? 0,
-            Take = take ?? 25
+            Take = take ?? 10
         });
     }
     private async Task<IActionResult> HandleChangedQualificationCSVExport()

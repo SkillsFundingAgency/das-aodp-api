@@ -53,19 +53,6 @@ namespace SFA.DAS.AODP.Data.Search
                 // ngram
                 new TextField(QualificationNameNGram, QualificationName ?? "", Field.Store.NO) {Boost = 10f}
             };
-            //return new Field[]
-            //{
-            //    new StringField(nameof(Id), Id.ToString(), Field.Store.YES),
-            //    new StringField(nameof(QualificationName), QualificationName, Field.Store.YES),
-            //    new StringField(nameof(Qan), Qan, Field.Store.YES),
-            //    new StringField(nameof(Status), Status, Field.Store.YES),
-            //    // phrase
-            //    new TextField(QualificationNamePhrase, QualificationName ?? "", Field.Store.NO) {Boost = 1000f},
-            //    // term
-            //    new TextField(QualificationNameTerm, QualificationName ?? "", Field.Store.NO) {Boost = 40f},
-            //    // ngram
-            //    new TextField(QualificationNameNGram, QualificationName ?? "", Field.Store.NO) {Boost = 10f}
-            //};
         }
     }
 }

@@ -4,8 +4,7 @@ using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Data.Search;
-using System.Runtime.CompilerServices;
-using data = SFA.DAS.AODP.Data.Entities.Qualification;
+using System.Text.RegularExpressions;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualification;
 
@@ -14,6 +13,7 @@ public class GetMatchingQualificationsQueryHandler : IRequestHandler<GetMatching
     private readonly IQualificationsSearchService _qualificationsSearchService;
     private readonly IQualificationsRepository _qualificationsRepository;
     private readonly ILogger<GetMatchingQualificationsQueryHandler> _logger;
+    private static readonly TimeSpan OperationTimeout = TimeSpan.FromSeconds(5);
 
     public GetMatchingQualificationsQueryHandler(IQualificationsSearchService qualificationsSearchService, IQualificationsRepository qualificationsRepository, ILogger<GetMatchingQualificationsQueryHandler> logger)
     {
@@ -21,6 +21,7 @@ public class GetMatchingQualificationsQueryHandler : IRequestHandler<GetMatching
         _qualificationsRepository = qualificationsRepository;
         _logger = logger;
     }
+
     public async Task<BaseMediatrResponse<GetMatchingQualificationsQueryResponse>> Handle(GetMatchingQualificationsQuery request, CancellationToken cancellationToken)
     {
         var response = new BaseMediatrResponse<GetMatchingQualificationsQueryResponse>();
@@ -30,27 +31,28 @@ public class GetMatchingQualificationsQueryHandler : IRequestHandler<GetMatching
 
             var trimmed = request.SearchTerm!.Trim();
 
-            // Detect qualification reference: either exactly 8 digits or digits/digits/digits
-            var isQualificationReference = System.Text.RegularExpressions.Regex.IsMatch(trimmed, @"^(?:\d{8}|\d+\/\d+\/\d+)$");
+            var isQualificationReference = Regex.IsMatch(trimmed, @"^(?:[A-Za-z0-9]{8}|\d+\/\d+\/[A-Za-z0-9]+)$");
 
             if (isQualificationReference)
             {
-                // Normalize: remove non-digit characters (removes '/' etc.)
-                var normalizedDigits = System.Text.RegularExpressions.Regex.Replace(trimmed, @"\D", "");
+                // Normalize: remove any non-alphanumeric characters (removes '/' etc.)
+                var normalized = Regex.Replace(trimmed, @"[^A-Za-z0-9]", "");
 
-                // Ensure an 8-digit numeric string:
-                if (normalizedDigits.Length < 8)
+                // Ensure an 8-character alphanumeric string:
+                if (normalized.Length < 8)
                 {
-                    // Pad left with zeros if too short
-                    normalizedDigits = normalizedDigits.PadLeft(8, '0');
+                    // Pad left with zeros if too short (keeps numeric padding behavior for short refs)
+                    normalized = normalized.PadLeft(8, '0');
                 }
-                else if (normalizedDigits.Length > 8)
+                else if (normalized.Length > 8)
                 {
-                    // If longer than 8, take the right-most 8 digits
-                    normalizedDigits = normalizedDigits.Substring(normalizedDigits.Length - 8);
+                    // If longer than 8, take the right-most 8 characters
+                    normalized = normalized.Substring(normalized.Length - 8);
                 }
 
-                var qualification = await _qualificationsRepository.GetByIdAsync(normalizedDigits);
+                //var qualification = await _qualificationsRepository.GetByIdAsync(normalized);
+                var getByIdTask = _qualificationsRepository.GetByIdAsync(normalized);
+                var qualification = await getByIdTask.WaitAsync(OperationTimeout, cancellationToken).ConfigureAwait(false);
                 if (qualification != null)
                 {
                     qualifications = new List<SearchedQualification> { new SearchedQualification {

@@ -38,11 +38,9 @@ namespace SFA.DAS.AODP.Data.Search
                 {
                     //phrase
                     {SearchableQualification.QualificationNamePhrase, pipeAnalyzer},
-                    //{SearchableQualification.QanPhrase, pipeAnalyzer},
 
                     //term
                     {SearchableQualification.QualificationNameTerm, standardAnalyzer},
-                    //{SearchableQualification.QanTerm, standardAnalyzer},
 
                     //ngram
                     {SearchableQualification.QualificationNameNGram, ngramAnalyzer}
@@ -59,6 +57,7 @@ namespace SFA.DAS.AODP.Data.Search
                     writer.Commit();
 
                     _logger.LogWarning("Starting Lucene index");
+
                     // Index each qualification from the database
                     var qualifications = _applicationDbContext.QualificationFundingStatus
                                             .OrderBy(q => q.FundingStatus)
