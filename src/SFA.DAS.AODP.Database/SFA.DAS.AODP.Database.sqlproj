@@ -166,6 +166,7 @@
     <Build Include="Views\Output\v_Output_CombinedStatuses.sql" />
     <Build Include="Views\Output\view_Output_OutputFile.sql" />
     <Build Include="Tables\QualificationOutputFileLog.sql" />
+    <Build Include="Views\v_QualificationFundingStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />

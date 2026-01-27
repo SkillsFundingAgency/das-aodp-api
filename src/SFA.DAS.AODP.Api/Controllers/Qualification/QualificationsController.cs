@@ -282,6 +282,24 @@ public class QualificationsController : BaseController
 
         return Ok(result);
     }
+
+    [HttpGet("GetMatchingQualifications")]
+    [ProducesResponseType(typeof(BaseMediatrResponse<GetMatchingQualificationsQueryResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetMatchingQualifications(
+        [FromQuery] string searchTerm,
+        [FromQuery] int? skip,
+        [FromQuery] int? take)
+    {
+        return await SendRequestAsync(new GetMatchingQualificationsQuery()
+        {
+            SearchTerm = searchTerm,
+            Skip = skip ?? 0,
+            Take = take ?? 10
+        });
+    }
     private async Task<IActionResult> HandleChangedQualificationCSVExport()
     {
         var result = await _mediator.Send(new GetChangedQualificationsCsvExportQuery());
