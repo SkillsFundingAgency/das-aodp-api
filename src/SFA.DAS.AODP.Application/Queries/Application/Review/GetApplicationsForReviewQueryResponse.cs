@@ -19,8 +19,10 @@ namespace SFA.DAS.AODP.Application.Queries.Application.Review
             public string? Owner { get; set; }
             public string Status { get; set; }
             public bool NewMessage { get; set; }
-        }
 
+            public string? Reviewer1 { get; set; }
+            public string? Reviewer2 { get; set; }
+        }
         public static GetApplicationsForReviewQueryResponse Map(List<ApplicationReviewFeedback> reviews, int totalRecords)
         {
             GetApplicationsForReviewQueryResponse response = new()
@@ -41,14 +43,13 @@ namespace SFA.DAS.AODP.Application.Queries.Application.Review
                     NewMessage = review.NewMessage,
                     Owner = review.Owner,
                     AwardingOrganisation = review.ApplicationReview.Application.AwardingOrganisationName,
-                    ApplicationReviewId = review.ApplicationReviewId
+                    ApplicationReviewId = review.ApplicationReviewId,
+                    Reviewer1 = review.ApplicationReview.Application.Reviewer1,
+                    Reviewer2 = review.ApplicationReview.Application.Reviewer2,
                 };
-
-
 
                 response.Applications.Add(application);
             }
-
 
             return response;
         }

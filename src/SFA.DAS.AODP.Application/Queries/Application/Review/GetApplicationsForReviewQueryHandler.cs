@@ -25,7 +25,9 @@ namespace SFA.DAS.AODP.Application.Queries.Application.Review
                     includeApplicationWithNewMessages: request.ApplicationsWithNewMessages,
                     applicationStatuses: request.ApplicationStatuses,
                     applicationSearch: request.ApplicationSearch,
-                    awardingOrganisationSearch: request.AwardingOrganisationSearch
+                    awardingOrganisationSearch: request.AwardingOrganisationSearch,
+                    reviewerSearch: request.ReviewerSearch,
+                    unassignedOnly:request.UnassignedOnly
                 );
 
                 response.Value = GetApplicationsForReviewQueryResponse.Map(applicationReviewsWithCount.Item1, applicationReviewsWithCount.Item2);
