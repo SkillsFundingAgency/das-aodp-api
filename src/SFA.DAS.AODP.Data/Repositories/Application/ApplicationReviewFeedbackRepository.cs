@@ -23,7 +23,9 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             bool includeApplicationWithNewMessages,
             List<string>? applicationStatuses = null,
             string? applicationSearch = null,
-            string? awardingOrganisationSearch = null
+            string? awardingOrganisationSearch = null,
+            string? reviewerSearch = null,
+            bool unassignedOnly = false
         )
         {
             var query = _context
@@ -74,6 +76,19 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
                 query = query.Where(q => applicationStatuses.Contains(q.Status));
             }
 
+            if (unassignedOnly)
+            {
+                query = query.Where(q =>
+                    string.IsNullOrEmpty(q.ApplicationReview.Application.Reviewer1) &&
+                    string.IsNullOrEmpty(q.ApplicationReview.Application.Reviewer2));
+            }
+            else if (!string.IsNullOrWhiteSpace(reviewerSearch))
+            {
+                var term = reviewerSearch.Trim();
+                query = query.Where(q =>
+                    q.ApplicationReview.Application.Reviewer1 == term ||
+                    q.ApplicationReview.Application.Reviewer2 == term);
+            }
 
             return (await query.OrderByDescending(o => o.ApplicationReview.Application.UpdatedAt).Skip(offset).Take(limit).ToListAsync(), await query.CountAsync());
 

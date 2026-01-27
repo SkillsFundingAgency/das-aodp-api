@@ -5,9 +5,6 @@ using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Models.Application;
 using SFA.DAS.AODP.Application.Queries.Application.Review;
 using SFA.DAS.AODP.Data.Entities.Application;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using SFA.DAS.AODP.Data.Entities.Qualification;
-using SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
 {
@@ -34,6 +31,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
                 AwardingOrganisationSearch = _fixture.Create<string>(),
                 ApplicationSearch = _fixture.Create<string>(),
                 ApplicationStatuses = _fixture.CreateMany<string>().ToList(),
+                UnassignedOnly = false,
+                ReviewerSearch = _fixture.Create<string>(), 
                 Limit = 1,
                 Offset = 1
             };
@@ -57,7 +56,9 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
                             ReferenceId = 1,
                             UpdatedAt = DateTime.UtcNow,
                             QualificationNumber = "1",
-                            AwardingOrganisationName = "SkillsEngland"
+                            AwardingOrganisationName = "SkillsEngland",
+                            Reviewer1 = "Bob Smith",
+                            Reviewer2 = "Sam Jones"
 
                         }
                     }
@@ -71,7 +72,9 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
                 query.ApplicationsWithNewMessages,
                 query.ApplicationStatuses,
                 query.ApplicationSearch,
-                query.AwardingOrganisationSearch))
+                query.AwardingOrganisationSearch,
+                query.ReviewerSearch,
+                query.UnassignedOnly))
                            .ReturnsAsync(response);
 
             // Act
@@ -84,6 +87,10 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
 
             Assert.Single(result.Value.Applications);
             Assert.Equal(response.Item1.First().ApplicationReview.Application.Id, result.Value.Applications.First().Id);
+
+            var returned = result.Value.Applications.First();
+            Assert.Equal("Bob Smith", returned.Reviewer1);
+            Assert.Equal("Sam Jones", returned.Reviewer2);
         }
 
         [Fact]
@@ -98,6 +105,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
                 AwardingOrganisationSearch = _fixture.Create<string>(),
                 ApplicationSearch = _fixture.Create<string>(),
                 ApplicationStatuses = _fixture.CreateMany<string>().ToList(),
+                UnassignedOnly = false,
+                ReviewerSearch = _fixture.Create<string>(),
                 Limit = 1,
                 Offset = 1
             };
@@ -121,7 +130,9 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
                             ReferenceId = 1,
                             UpdatedAt = DateTime.UtcNow,
                             QualificationNumber = "1",
-                            AwardingOrganisationName = "SkillsEngland"
+                            AwardingOrganisationName = "SkillsEngland",
+                            Reviewer1 = "Alice Smith",
+                            Reviewer2 = "Sam Jones"
 
                         }
                     }
@@ -137,7 +148,9 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
                 query.ApplicationsWithNewMessages,
                 query.ApplicationStatuses,
                 query.ApplicationSearch,
-                query.AwardingOrganisationSearch))
+                query.AwardingOrganisationSearch,
+                query.ReviewerSearch,
+                query.UnassignedOnly))
                            .ThrowsAsync(ex);
 
             // Act
@@ -147,5 +160,36 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
             Assert.False(result.Success);
             Assert.Equal(ex.Message, result.ErrorMessage);
         }
+
+        [Fact]
+        public async Task Then_UnassignedOnly_Is_Passed_To_Repository()
+        {
+            var query = new GetApplicationsForReviewQuery
+            {
+                ReviewUser = UserType.Qfau.ToString(),
+                UnassignedOnly = true,
+                ReviewerSearch = "Bob",
+                Limit = 10,
+                Offset = 0
+            };
+
+            _repositoryMock
+                .Setup(r => r.GetApplicationReviews(
+                    UserType.Qfau,
+                    query.Offset.Value,
+                    query.Limit.Value,
+                    query.ApplicationsWithNewMessages,
+                    query.ApplicationStatuses,
+                    query.ApplicationSearch,
+                    query.AwardingOrganisationSearch,
+                    query.ReviewerSearch,
+                    query.UnassignedOnly))
+                .ReturnsAsync((new List<ApplicationReviewFeedback>(), 0));
+
+            await _handler.Handle(query, CancellationToken.None);
+
+            _repositoryMock.VerifyAll();
+        }
+
     }
 }

@@ -52,6 +52,12 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                         throw new ArgumentOutOfRangeException(nameof(request.ReviewerFieldName), request.ReviewerFieldName, "Unknown reviewer field");
                 }
 
+                if (newReviewer == previousReviewer)
+                {
+                    response.Success = true;
+                    return response;
+                }
+
                 if (!string.IsNullOrWhiteSpace(newReviewer) &&
                     !string.IsNullOrWhiteSpace(otherReviewer) &&
                     string.Equals(newReviewer, otherReviewer, StringComparison.OrdinalIgnoreCase))
