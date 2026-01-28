@@ -11,5 +11,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
         Task<List<View_SectionSummaryForApplication>> GetSectionSummaryByApplicationIdAsync(Guid applicationId);
         Task UpdateAsync(Entities.Application.Application application);
         Task<Guid> GetFormVersionIdForApplicationAsync(Guid applicationId);
+        Task<Entities.Application.Application> GetWithReviewFeedbacksByIdAsync(Guid applicationId);
     }
 }
