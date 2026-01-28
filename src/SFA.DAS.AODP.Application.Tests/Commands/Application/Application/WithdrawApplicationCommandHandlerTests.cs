@@ -5,6 +5,7 @@ using SFA.DAS.AODP.Application.Commands.Application.Message;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Models.Application;
+using System.Linq;
 
 namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Application;
 
