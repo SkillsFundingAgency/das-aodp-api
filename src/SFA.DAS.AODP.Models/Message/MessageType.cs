@@ -26,6 +26,7 @@ public enum MessageType
     ApplicationUnsharedWithSkillsEngland,
 
     ApplicationSubmitted,
+    ApplicationWithdrawn,
 
     OfqualFeedbackSubmitted,
     SkillsEnglandFeedbackSubmitted,
@@ -303,7 +304,7 @@ public static class MessageTypeConfigurationRules
                         AvailableTo = [UserType.Qfau]
                  }
             },
-              {
+            {
                 MessageType.AoInformedOfDecision,
                  new MessageTypeConfiguration
                  {
@@ -313,6 +314,18 @@ public static class MessageTypeConfigurationRules
                         SharedWithSkillsEngland = true,
                         SharedWithAwardingOrganisation = true,
                         AvailableTo = [UserType.Qfau]
+                 }
+            },
+            {
+                MessageType.ApplicationWithdrawn,
+                 new MessageTypeConfiguration
+                 {
+                        MessageHeader = "Application Withdrawn",
+                        SharedWithDfe = true,
+                        SharedWithOfqual = true,
+                        SharedWithSkillsEngland = true,
+                        SharedWithAwardingOrganisation = true,
+                        AvailableTo = [UserType.AwardingOrganisation]
                  }
             },
         };
