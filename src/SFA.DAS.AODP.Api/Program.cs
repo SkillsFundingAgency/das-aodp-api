@@ -51,24 +51,20 @@ public static class Program
             builder.Services.AddApplicationInsightsTelemetry();
         }
 
-using (var scope = app.Services.CreateScope())
-{
-    var indexBuilder = scope.ServiceProvider.GetRequiredService<IIndexBuilder>();
-    indexBuilder.Build();
-}
-
         var app = builder.Build();
 
+        using (var scope = app.Services.CreateScope())
+        {
+            var indexBuilder = scope.ServiceProvider.GetRequiredService<IIndexBuilder>();
+            indexBuilder.Build();
+        }
 
         app.UseSwagger();
         app.UseSwaggerUI();
-
-
         app
             .UseHealthChecks("/ping")
             .UseHttpsRedirection()
             .UseAuthorization();
-
         app.MapControllers();
 
         app.Run();
