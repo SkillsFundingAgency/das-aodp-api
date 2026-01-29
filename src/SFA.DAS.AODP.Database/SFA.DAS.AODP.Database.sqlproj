@@ -72,6 +72,7 @@
     <Folder Include="Tables\Feedback" />
     <Folder Include="Views\Support" />
     <Folder Include="Views\Output" />
+    <Folder Include="Tables\Import" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Schemas\FundedSchema.sql" />
@@ -166,6 +167,13 @@
     <Build Include="Views\Output\v_Output_CombinedStatuses.sql" />
     <Build Include="Views\Output\view_Output_OutputFile.sql" />
     <Build Include="Tables\QualificationOutputFileLog.sql" />
+    <Build Include="Tables\Import\DefundingList.sql" />
+    <Build Include="Stored Procedures\proc_DeleteDuplicateDefundingLists.sql" />
+    <Build Include="Tables\Import\PLDNS.sql" />
+    <Build Include="Stored Procedures\proc_DeleteDuplicatePLDNS.sql" />
+    <None Include="MigrationScripts\MVS2_AWARD_901_Jobs_Data_Seed.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Build Include="Views\v_QualificationFundingStatus.sql" />
   </ItemGroup>
   <ItemGroup>
