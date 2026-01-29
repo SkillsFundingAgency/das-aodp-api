@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.AODP.Application.Commands.Application.Message;
 using SFA.DAS.AODP.Application.Commands.Application.Review;
@@ -11,6 +12,7 @@ public class SaveReviewerCommandHandlerTests
 {
     private readonly Mock<IApplicationRepository> _repository = new();
     private readonly Mock<IMediator> _mediator = new();
+    private readonly Mock<ILogger<SaveReviewerCommandHandler>> _logger = new();
     private readonly SaveReviewerCommandHandler _handler;
 
     private static readonly Guid ApplicationId = Guid.NewGuid();
@@ -30,7 +32,7 @@ public class SaveReviewerCommandHandlerTests
 
     public SaveReviewerCommandHandlerTests()
     {
-        _handler = new SaveReviewerCommandHandler(_repository.Object, _mediator.Object);
+        _handler = new SaveReviewerCommandHandler(_repository.Object, _mediator.Object, _logger.Object);
 
         _mediator
             .Setup(m => m.Send(It.IsAny<CreateApplicationMessageCommand>(), It.IsAny<CancellationToken>()))
@@ -239,7 +241,7 @@ public class SaveReviewerCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_MessageCommandFails_ReturnsErrorResponse()
+    public async Task Handle_MessageCommandFails_LogsError_ButReturnsSuccess()
     {
         var application = new Data.Entities.Application.Application
         {
@@ -272,12 +274,21 @@ public class SaveReviewerCommandHandlerTests
 
         Assert.Multiple(() =>
         {
-            Assert.False(response.Success);
-            Assert.NotNull(response.InnerException);
-            Assert.Equal(MessageSendFailed, response.InnerException!.Message);
+            Assert.True(response.Success);
+            Assert.Null(response.InnerException);
 
             _repository.Verify(r => r.UpdateAsync(It.IsAny<Data.Entities.Application.Application>()), Times.Once);
+            _mediator.Verify(m => m.Send(It.IsAny<CreateApplicationMessageCommand>(), It.IsAny<CancellationToken>()), Times.Once);
         });
+
+        _logger.Verify(
+            x => x.Log(
+                LogLevel.Error,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, _) => v.ToString()!.Contains(MessageSendFailed)),
+                It.IsAny<Exception?>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
     }
 
     [Fact]

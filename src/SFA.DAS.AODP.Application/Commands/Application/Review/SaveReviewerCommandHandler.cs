@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Logging;
 using SFA.DAS.AODP.Application.Commands.Application.Message;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Models.Application;
@@ -9,11 +10,13 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
     {
         private readonly IApplicationRepository _repository;
         private readonly IMediator _mediator;
+        private readonly ILogger<SaveReviewerCommandHandler> _logger;
 
-        public SaveReviewerCommandHandler(IApplicationRepository repository, IMediator mediator)
+        public SaveReviewerCommandHandler(IApplicationRepository repository, IMediator mediator, ILogger<SaveReviewerCommandHandler> logger)
         {
             _repository = repository;
             _mediator = mediator;
+            _logger = logger;
         }
 
         public async Task<BaseMediatrResponse<SaveReviewerCommandResponse>> Handle(SaveReviewerCommand request, CancellationToken cancellationToken)
@@ -49,7 +52,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                         break;
 
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(request.ReviewerFieldName), request.ReviewerFieldName, "Unknown reviewer field");
+                        throw new ArgumentOutOfRangeException(nameof(request), request.ReviewerFieldName, "Unknown reviewer field");
                 }
 
                 if (!string.IsNullOrWhiteSpace(newReviewer) &&
@@ -73,8 +76,14 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                     MessageType = MessageType.QfauOwnerUpdated.ToString()
                 };
 
-                var msgResult = await _mediator.Send(msgCommand);
-                if (!msgResult.Success) throw new Exception(msgResult.ErrorMessage, msgResult.InnerException);
+                var msgResult = await _mediator.Send(msgCommand, cancellationToken);
+                if (!msgResult.Success)
+                {
+                    _logger.LogError(msgResult.InnerException,
+                        "Reviewer updated message failed for Application Id {ApplicationId}. Error {Error}.",
+                        request.ApplicationId,
+                        msgResult.ErrorMessage);
+                } 
 
                 response.Success = true;
             }
