@@ -31,12 +31,12 @@ public class GetMatchingQualificationsQueryHandler : IRequestHandler<GetMatching
 
             var trimmed = request.SearchTerm!.Trim();
 
-            var isQualificationReference = Regex.IsMatch(trimmed, @"^(?:[A-Za-z0-9]{8}|\d+\/\d+\/[A-Za-z0-9]+)$");
+            var isQualificationReference = Regex.IsMatch(trimmed, @"^(?:[A-Za-z0-9]{8}|\d+\/\d+\/[A-Za-z0-9]+)$", RegexOptions.IgnoreCase, TimeSpan.FromSeconds(5));
 
             if (isQualificationReference)
             {
                 // Normalize: remove any non-alphanumeric characters (removes '/' etc.)
-                var normalized = Regex.Replace(trimmed, @"[^A-Za-z0-9]", "");
+                var normalized = Regex.Replace(trimmed, @"[^A-Za-z0-9]", "", RegexOptions.IgnoreCase, TimeSpan.FromSeconds(5));
 
                 // Ensure an 8-character alphanumeric string:
                 if (normalized.Length < 8)
