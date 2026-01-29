@@ -65,8 +65,11 @@ public class GetMatchingQualificationsQueryHandler : IRequestHandler<GetMatching
             }
             else
             {
-                // Use Take from request for pagination; Search service supports 'take' and cancellation token.
-                qualifications = _qualificationsSearchService.SearchQualificationsByKeywordAsync(trimmed, cancellationToken);
+                // Ensure the search operation is bounded by a timeout: create a linked CTS with OperationTimeout.
+                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                linkedCts.CancelAfter(OperationTimeout);
+
+                qualifications = _qualificationsSearchService.SearchQualificationsByKeywordAsync(trimmed, linkedCts.Token);
             }
 
             response.Value = new GetMatchingQualificationsQueryResponse
@@ -93,6 +96,20 @@ public class GetMatchingQualificationsQueryHandler : IRequestHandler<GetMatching
             response.Success = false;
             response.ErrorMessage = $"No qualifications were found matching search term: {request.SearchTerm}";
             response.ErrorCode = "NO_MATCHES";
+            response.Value = new GetMatchingQualificationsQueryResponse
+            {
+                TotalRecords = 0,
+                Skip = request.Skip,
+                Take = request.Take,
+                Qualifications = new List<GetMatchingQualificationsQueryItem>()
+            };
+        }
+        catch (OperationCanceledException)
+        {
+            // This exception is expected when the operation times out.
+            _logger.LogWarning("Search operation timed out after {Timeout} seconds for term: {SearchTerm}", OperationTimeout.TotalSeconds, request.SearchTerm);
+            response.Success = false;
+            response.ErrorMessage = $"The search operation timed out. Please try again later.";
             response.Value = new GetMatchingQualificationsQueryResponse
             {
                 TotalRecords = 0,
