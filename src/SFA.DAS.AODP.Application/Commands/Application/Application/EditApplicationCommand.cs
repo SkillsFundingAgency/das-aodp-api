@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.Application.Application;
+namespace SFA.DAS.AODP.Application.Commands.Application.Application;
 
 public class EditApplicationCommand : IRequest<BaseMediatrResponse<EditApplicationCommandResponse>>
 {
