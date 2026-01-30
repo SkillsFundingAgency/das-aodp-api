@@ -4,10 +4,8 @@ using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Infrastructure;
 using SFA.DAS.AODP.Models.Settings;
 using System.Globalization;
-using System.IO.Compression;
 using System.Text;
 namespace SFA.DAS.AODP.Application.Queries.Qualifications;
-
 
 public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualificationOutputFileQuery, BaseMediatrResponse<GetQualificationOutputFileResponse>>
 {
