@@ -1,9 +1,11 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Data.Search;
+using SFA.DAS.AODP.Models.Settings;
 using System.Text.RegularExpressions;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualification;
@@ -14,12 +16,18 @@ public class GetMatchingQualificationsQueryHandler : IRequestHandler<GetMatching
     private readonly IQualificationsRepository _qualificationsRepository;
     private readonly ILogger<GetMatchingQualificationsQueryHandler> _logger;
     private static readonly TimeSpan OperationTimeout = TimeSpan.FromSeconds(5);
+    private readonly bool _fuzzySearchEnabled;
 
-    public GetMatchingQualificationsQueryHandler(IQualificationsSearchService qualificationsSearchService, IQualificationsRepository qualificationsRepository, ILogger<GetMatchingQualificationsQueryHandler> logger)
+    public GetMatchingQualificationsQueryHandler(
+                    IQualificationsSearchService qualificationsSearchService, 
+                    IQualificationsRepository qualificationsRepository,
+                    IOptions<FuzzySearchSettings> fuzzySearchOptions,
+                    ILogger<GetMatchingQualificationsQueryHandler> logger)
     {
         _qualificationsSearchService = qualificationsSearchService;
         _qualificationsRepository = qualificationsRepository;
         _logger = logger;
+        _fuzzySearchEnabled = fuzzySearchOptions.Value.Enabled;
     }
 
     public async Task<BaseMediatrResponse<GetMatchingQualificationsQueryResponse>> Handle(GetMatchingQualificationsQuery request, CancellationToken cancellationToken)
@@ -31,7 +39,11 @@ public class GetMatchingQualificationsQueryHandler : IRequestHandler<GetMatching
 
             var trimmed = request.SearchTerm!.Trim();
 
-            var isQualificationReference = Regex.IsMatch(trimmed, @"^(?:[A-Za-z0-9]{8}|\d+\/\d+\/[A-Za-z0-9]+)$", RegexOptions.IgnoreCase, TimeSpan.FromSeconds(5));
+            var isQualificationReference = Regex.IsMatch(
+                trimmed,
+                @"^(?=(?:.*\d){5,})(?:[A-Za-z0-9]{8}|\d+\/\d+\/[A-Za-z0-9]+)$",
+                RegexOptions.IgnoreCase,
+                TimeSpan.FromSeconds(5));
 
             if (isQualificationReference)
             {
@@ -50,7 +62,6 @@ public class GetMatchingQualificationsQueryHandler : IRequestHandler<GetMatching
                     normalized = normalized.Substring(normalized.Length - 8);
                 }
 
-                //var qualification = await _qualificationsRepository.GetByIdAsync(normalized);
                 var getByIdTask = _qualificationsRepository.GetByIdAsync(normalized);
                 var qualification = await getByIdTask.WaitAsync(OperationTimeout, cancellationToken).ConfigureAwait(false);
                 if (qualification != null)
@@ -62,6 +73,15 @@ public class GetMatchingQualificationsQueryHandler : IRequestHandler<GetMatching
                         Status = qualification.QualificationVersions.OrderByDescending(qv => qv.Version).FirstOrDefault()?.ProcessStatusId ?? Guid.Empty
                     } };
                 }
+            }
+            else if (!_fuzzySearchEnabled)
+            {
+                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                linkedCts.CancelAfter(OperationTimeout);
+
+                var getByNameTask = _qualificationsRepository.GetSearchedQualificationByNameAsync(trimmed);
+                var searched = await getByNameTask.WaitAsync(OperationTimeout, linkedCts.Token).ConfigureAwait(false);
+                qualifications = searched ?? Enumerable.Empty<SearchedQualification>();
             }
             else
             {

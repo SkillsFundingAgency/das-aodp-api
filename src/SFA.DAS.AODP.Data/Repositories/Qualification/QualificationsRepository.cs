@@ -81,4 +81,24 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
                     .FirstOrDefaultAsync();
 
     }
+
+    public async Task<List<SearchedQualification>> GetSearchedQualificationByNameAsync(string searchTerm)
+    {
+        var pattern = $"%{searchTerm.Trim()}%";
+
+        return await _context.QualificationFundingStatus
+            .AsNoTracking()
+            .Where(q => EF.Functions.Like((q.QualificationName ?? string.Empty), pattern))
+            .OrderBy(q => q.FundingStatus)
+            .ThenBy(q => q.AwardingOrganisationName)
+            .ThenBy(q => q.QualificationName)
+            .Select(q => new SearchedQualification
+            {
+                Id = q.QualificationId,
+                QualificationName = q.QualificationName,
+                Qan = q.Qan!,
+                Status = q.FundedStatus
+            })
+            .ToListAsync();
+    }
 }

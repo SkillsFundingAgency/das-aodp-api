@@ -1,5 +1,4 @@
 ﻿using SFA.DAS.AODP.Data.Entities.Qualification;
-using System;
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification;
 
@@ -15,4 +14,6 @@ public interface IQualificationsRepository
     Task<IEnumerable<ChangedQualificationExport>> GetChangedQualificationsExport();
 
     Task<Entities.Qualification.Qualification> GetByIdAsync(string qualificationReference);
+
+    Task<List<SearchedQualification>> GetSearchedQualificationByNameAsync(string name);
 }

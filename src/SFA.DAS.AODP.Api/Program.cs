@@ -1,10 +1,10 @@
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.OpenApi.Models;
 using SFA.DAS.AODP.Api.Extensions;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Application.Swashbuckle;
 using SFA.DAS.AODP.Data.Search;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Api;
 
@@ -53,10 +53,15 @@ public static class Program
 
         var app = builder.Build();
 
-        using (var scope = app.Services.CreateScope())
+        var fuzzySearchEnabled = configuration.GetSection("FuzzySearchSettings").GetValue<bool>("Enabled");
+
+        if (fuzzySearchEnabled)
         {
-            var indexBuilder = scope.ServiceProvider.GetRequiredService<IIndexBuilder>();
-            indexBuilder.Build();
+            using (var scope = app.Services.CreateScope())
+            {
+                var indexBuilder = scope.ServiceProvider.GetRequiredService<IIndexBuilder>();
+                indexBuilder.Build();
+            }
         }
 
         app.UseSwagger();
