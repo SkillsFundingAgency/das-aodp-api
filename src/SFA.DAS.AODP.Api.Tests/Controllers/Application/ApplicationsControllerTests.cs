@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.Application;
+using SFA.DAS.AODP.Application.Queries.Application.Application;
 
 namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
 {
@@ -528,6 +529,64 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
             });
         }
 
+        [Fact]
+        public async Task GetApplicationByQanAsync_ReturnsOkResult()
+        {
+            // Arrange
+            var qan = _fixture.Create<string>();
+            var response = _fixture.Create<GetApplicationsByQanQueryResponse>();
+            var wrapper = new BaseMediatrResponse<GetApplicationsByQanQueryResponse>
+            {
+                Value = response,
+                Success = true
+            };
 
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<GetApplicationsByQanQuery>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(wrapper);
+
+            // Act
+            var result = await _controller.GetApplicationByQanAsync(qan);
+
+            // Assert
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<GetApplicationsByQanQuery>(q => q.Qan == qan),
+                    It.IsAny<CancellationToken>()),
+                Times.Once());
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var model = Assert.IsAssignableFrom<GetApplicationsByQanQueryResponse>(okResult.Value);
+            Assert.Equal(response, model);
+        }
+
+        [Fact]
+        public async Task GetApplicationByQanAsync_WhenMediatorFails_ReturnsInternalServerError()
+        {
+            // Arrange
+            var qan = _fixture.Create<string>();
+            var wrapper = new BaseMediatrResponse<GetApplicationsByQanQueryResponse>
+            {
+                Success = false,
+                ErrorMessage = "Mediator failure"
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<GetApplicationsByQanQuery>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(wrapper);
+
+            // Act
+            var result = await _controller.GetApplicationByQanAsync(qan);
+
+            // Assert
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<GetApplicationsByQanQuery>(q => q.Qan == qan),
+                    It.IsAny<CancellationToken>()),
+                Times.Once());
+
+            var statusResult = Assert.IsType<StatusCodeResult>(result);
+            Assert.Equal(StatusCodes.Status500InternalServerError, statusResult.StatusCode);
+        }
     }
 }

@@ -12,5 +12,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
         Task UpdateAsync(Entities.Application.Application application);
         Task<Guid> GetFormVersionIdForApplicationAsync(Guid applicationId);
         Task<Entities.Application.Application> GetWithReviewFeedbacksByIdAsync(Guid applicationId);
+        Task<List<Data.Entities.Application.Application>> GetByQan(string qan);
     }
 }

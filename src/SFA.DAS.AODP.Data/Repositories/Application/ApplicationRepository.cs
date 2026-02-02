@@ -74,5 +74,13 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
 
             return res is null ? throw new RecordNotFoundException(applicationId) : res;
         }
+
+        public async Task<List<Data.Entities.Application.Application>> GetByQan(string qan)
+        {
+            return await _context.Applications
+                .Where(v => v.QualificationNumber == qan)
+                .ToListAsync();
+
+        }
     }
 }
