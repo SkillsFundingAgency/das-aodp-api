@@ -2,6 +2,7 @@
 using AutoFixture.AutoMoq;
 using AutoFixture.Kernel;
 using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -27,7 +28,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
 
         #region Test data
         private GetQualificationOutputFileQuery _getOutputFileRequest = new()
-        { 
+        {
             CurrentUsername = "Alaam Adams",
             PublicationDate = DateTime.UtcNow.AddDays(1)
         };
@@ -150,7 +151,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
 
 
 
-        [Fact]        
+        [Fact]
         public async Task GetNewQualifications_ReturnsStatusCode_WhenQueryFails()
         {
             // Arrange
@@ -164,7 +165,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             var result = await _controller.GetQualifications(processStatusFilter: null, status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
-            var notFoundResult = Assert.IsType<StatusCodeResult>(result);                   
+            var notFoundResult = Assert.IsType<StatusCodeResult>(result);
         }
 
         [Fact]
@@ -218,7 +219,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             var result = await _controller.GetQualifications(processStatusFilter: null, status: "new", skip: 0, take: 10, name: "", organisation: "", qan: "");
 
             // Assert
-            var notFoundResult = Assert.IsType<OkObjectResult>(result);            
+            var notFoundResult = Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
@@ -271,7 +272,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             var badRequestValue = badRequestResult.Value?.GetType().GetProperty("message")?.GetValue(badRequestResult.Value, null);
             Assert.Equal("Qualification reference cannot be empty", badRequestValue);
         }
-        
+
         [Fact]
         public async Task GetQualificationDetailWithVersions_ReturnsBadRequest_WhenQualificationReferenceIsEmpty()
         {
@@ -289,9 +290,9 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
         {
             // Arrange
             var queryResponse = _fixture.Create<BaseMediatrResponse<GetQualificationDetailsQueryResponse>>();
-//            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
-//.ForEach(b => _fixture.Behaviors.Remove(b));
-//            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            //            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+            //.ForEach(b => _fixture.Behaviors.Remove(b));
+            //            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             queryResponse.Success = false;
             queryResponse.ErrorMessage = "No details found for qualification reference: Ref123";
             queryResponse.InnerException = new NotFoundWithNameException("Ref123");
@@ -505,7 +506,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
 
             // assert
             Assert.Multiple(() =>
-            { 
+            {
                 var ok = Assert.IsType<OkObjectResult>(result);
                 var body = Assert.IsType<BaseMediatrResponse<GetQualificationOutputFileResponse>>(ok.Value);
                 Assert.True(body.Success);
@@ -578,7 +579,8 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
 
             await _controller.GetQualificationOutputFile(_getOutputFileRequest);
 
-            Assert.Multiple(() => { 
+            Assert.Multiple(() =>
+            {
                 Assert.NotNull(captured);
                 Assert.Equal(_getOutputFileRequest.CurrentUsername, captured!.CurrentUsername);
             });
@@ -593,9 +595,9 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                 Success = true,
                 Value = new GetQualificationOutputFileLogResponse
                 {
-                    OutputFileLogs = new List<QualificationOutputFileLog> 
-                    { 
-                        new() { DownloadDate = DateTime.Now.AddDays(-3), PublicationDate= _getOutputFileRequest.PublicationDate,  UserDisplayName = _getOutputFileRequest.CurrentUsername, FileName = "a.csv" } 
+                    OutputFileLogs = new List<QualificationOutputFileLog>
+                    {
+                        new() { DownloadDate = DateTime.Now.AddDays(-3), PublicationDate= _getOutputFileRequest.PublicationDate,  UserDisplayName = _getOutputFileRequest.CurrentUsername, FileName = "a.csv" }
                     }
                 }
             };
@@ -606,8 +608,8 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             var result = await _controller.GetQualificationOutputFileLogs();
 
             // assert
-            Assert.Multiple(()=>
-            { 
+            Assert.Multiple(() =>
+            {
                 var ok = Assert.IsType<OkObjectResult>(result);
                 var body = Assert.IsType<BaseMediatrResponse<GetQualificationOutputFileLogResponse>>(ok.Value);
                 Assert.True(body.Success);
@@ -639,6 +641,75 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
                 Assert.Equal("Failed to fetch logs.", body.ErrorMessage);
             });
         }
+
+
+
+        [Theory]
+        [InlineData("Plumbing", 2)]
+        [InlineData("plumbing", 2)]
+        [InlineData("Plumb", 2)]
+        [InlineData("Plum", 2)]
+        public async Task GetMatchingQualifications_ReturnsOk_WithQualifications_ThatContainSearchTerm(string searchTerm, int expectedCount)
+        {
+            // arrange
+            _mediatorMock
+                .Setup(x => x.Send(It.IsAny<GetMatchingQualificationsQuery>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new BaseMediatrResponse<GetMatchingQualificationsQueryResponse>
+                {
+                    Success = true,
+                    Value = new GetMatchingQualificationsQueryResponse
+                    {
+                        Qualifications = new List<GetMatchingQualificationsQueryItem>
+                        {
+                    new() { Id = Guid.NewGuid(), QualificationName = "EAL Level 2 Certificate in Plumbing and Heating" },
+                    new() { Id = Guid.NewGuid(), QualificationName = "City & Guilds Level 1 Certificate in Plumbing" }
+                        }
+                    }
+                });
+
+            // act
+            var result = await _controller.GetMatchingQualifications(searchTerm, 0, 0);
+
+            // assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+
+            if (okResult.Value is BaseMediatrResponse<GetMatchingQualificationsQueryResponse> wrapper)
+            {
+                Assert.True(wrapper.Success);
+                Assert.NotNull(wrapper.Value);
+                Assert.Equal(expectedCount, wrapper.Value!.Qualifications.Count);
+            }
+            else
+            {
+                var model = Assert.IsAssignableFrom<GetMatchingQualificationsQueryResponse>(okResult.Value);
+                Assert.Equal(expectedCount, model.Qualifications.Count);
+            }
+
+        }
+
+        [Theory]
+        [InlineData("Pkummbning", 0)]
+        [InlineData("qlummbimg", 0)]
+        [InlineData("pkumbing", 0)]
+        public async Task GetMatchingQualifications_ReturnsFailure_WithEmptyQualifications_ForBadSearch(string searchTerm, int expectedCount)
+        {
+            // arrange
+            _mediatorMock
+                .Setup(x => x.Send(It.IsAny<GetMatchingQualificationsQuery>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new BaseMediatrResponse<GetMatchingQualificationsQueryResponse>
+                {
+                    Success = false,
+                    ErrorMessage = $"No qualifications were found matching search term: {searchTerm}"
+                });
+
+            // act
+            var result = await _controller.GetMatchingQualifications(searchTerm, 0, 0);
+
+            // assert — controller returns a StatusCodeResult for failures
+            var statusResult = Assert.IsType<StatusCodeResult>(result);
+        }
+
+
     }
 }
 
