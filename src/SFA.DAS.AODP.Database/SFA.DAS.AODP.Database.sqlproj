@@ -174,6 +174,7 @@
     <None Include="MigrationScripts\MVS2_AWARD_901_Jobs_Data_Seed.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Build Include="Views\v_QualificationFundingStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />

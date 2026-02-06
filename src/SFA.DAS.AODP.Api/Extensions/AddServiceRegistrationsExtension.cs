@@ -2,6 +2,7 @@
 using SFA.DAS.AODP.Application.Services;
 using SFA.DAS.AODP.Data.Extensions;
 using SFA.DAS.AODP.Infrastructure.Clients.Ofqual;
+using SFA.DAS.AODP.Data.Search;
 using SFA.DAS.AODP.Infrastructure.Extensions;
 using SFA.DAS.AODP.Infrastructure.Services;
 using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
@@ -22,6 +23,12 @@ public static class AddServiceRegistrationsExtension
 
         var blobStorageSettings = configuration.GetRequiredSection("OutputFileBlobStorageSettings").Get<OutputFileBlobStorageSettings>();
         if (blobStorageSettings != null) services.AddSingleton(blobStorageSettings);
+
+        services.Configure<FuzzySearchSettings>(configuration.GetSection("FuzzySearchSettings"));
+        services.AddScoped<IQualificationsSearchService, QualificationsSearchService>();
+        services.AddSingleton<IDirectoryFactory>(new DirectoryFactory());
+        services.AddScoped<IIndexBuilder, QualificationsIndexBuilder>();
+        services.AddScoped<ISearchManager, QualificationsSearchManager>();
 
         var qualificationsApiSettings = configuration.GetRequiredSection("QualificationsApiSettings").Get<QualificationsApiSettings>();
         if (qualificationsApiSettings != null) services.AddSingleton(qualificationsApiSettings);
