@@ -59,9 +59,8 @@ namespace SFA.DAS.AODP.Data.Search
                     _logger.LogWarning("Starting Lucene index");
 
                     // Index each qualification from the database
-                    var noActionRequired = new Guid("00000000-0000-0000-0000-000000000002");
                     var qualifications = _applicationDbContext.QualificationFundingStatus
-                                            .OrderBy(q => q.FundedStatus == noActionRequired ? 0 : 1)
+                                            .OrderBy(q => q.FundedStatus)
                                             .ThenBy(q => q.AwardingOrganisationName)
                                             .ThenBy(q => q.QualificationName);
 
