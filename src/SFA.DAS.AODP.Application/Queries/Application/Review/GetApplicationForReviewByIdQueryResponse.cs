@@ -18,6 +18,7 @@
 
         public List<Funding> FundedOffers { get; set; } = new();
         public List<Feedback> Feedbacks { get; set; } = new();
+        public string ApplicationStatus { get; set; }
 
         public class Feedback
         {
@@ -53,6 +54,7 @@
                 SharedWithSkillsEngland = review.SharedWithSkillsEngland,
                 ApplicationReviewId = review.Id,
                 FormTitle = review.Application.FormVersion.Title,
+                ApplicationStatus = review.Application.Status
             };
 
             foreach (var feedback in review.ApplicationReviewFeedbacks ?? [])
