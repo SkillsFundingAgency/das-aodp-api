@@ -1,13 +1,11 @@
-﻿using AutoFixture.AutoMoq;
-using AutoFixture;
+﻿using AutoFixture;
+using AutoFixture.AutoMoq;
+using Azure;
 using Moq;
-using SFA.DAS.AODP.Data.Repositories.Application;
-using SFA.DAS.AODP.Models.Application;
 using SFA.DAS.AODP.Application.Queries.Application.Review;
 using SFA.DAS.AODP.Data.Entities.Application;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using SFA.DAS.AODP.Data.Entities.Qualification;
-using SFA.DAS.AODP.Application.Queries.FormBuilder.Sections;
+using SFA.DAS.AODP.Data.Repositories.Application;
+using SFA.DAS.AODP.Models.Application;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
 {
@@ -34,6 +32,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
                 AwardingOrganisationSearch = _fixture.Create<string>(),
                 ApplicationSearch = _fixture.Create<string>(),
                 ApplicationStatuses = _fixture.CreateMany<string>().ToList(),
+                UnassignedOnly = false,
+                ReviewerSearch = _fixture.Create<string>(), 
                 Limit = 1,
                 Offset = 1
             };
@@ -57,22 +57,29 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
                             ReferenceId = 1,
                             UpdatedAt = DateTime.UtcNow,
                             QualificationNumber = "1",
-                            AwardingOrganisationName = "SkillsEngland"
+                            AwardingOrganisationName = "SkillsEngland",
+                            Reviewer1 = "Bob Smith",
+                            Reviewer2 = "Sam Jones"
 
                         }
                     }
                 }
             }, 1);
 
-            _repositoryMock.Setup(x => x.GetApplicationReviews(
-                UserType.Qfau, 
-                query.Offset.Value,
-                query.Limit.Value,
-                query.ApplicationsWithNewMessages,
-                query.ApplicationStatuses,
-                query.ApplicationSearch,
-                query.AwardingOrganisationSearch))
-                           .ReturnsAsync(response);
+            _repositoryMock
+                .Setup(x => x.GetApplicationReviews(It.Is<ApplicationReviewSearchCriteria>(c =>
+                    c.ReviewType == UserType.Qfau &&
+                    c.Offset == query.Offset!.Value &&
+                    c.Limit == query.Limit!.Value &&
+                    c.IncludeApplicationWithNewMessages == query.ApplicationsWithNewMessages &&
+                    c.UnassignedOnly == query.UnassignedOnly &&
+                    c.ApplicationSearch == query.ApplicationSearch &&
+                    c.AwardingOrganisationSearch == query.AwardingOrganisationSearch &&
+                    c.ReviewerSearch == query.ReviewerSearch &&
+                    c.ApplicationStatuses != null &&
+                    c.ApplicationStatuses.SequenceEqual(query.ApplicationStatuses)
+                )))
+                .ReturnsAsync(response);
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -84,12 +91,15 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
 
             Assert.Single(result.Value.Applications);
             Assert.Equal(response.Item1.First().ApplicationReview.Application.Id, result.Value.Applications.First().Id);
+
+            var returned = result.Value.Applications.First();
+            Assert.Equal("Bob Smith", returned.Reviewer1);
+            Assert.Equal("Sam Jones", returned.Reviewer2);
         }
 
         [Fact]
         public async Task Then_The_Api_Is_Called_With_The_Request_And_Exception_Is_Handled()
         {
-            // Arrange
             // Arrange
             var query = new GetApplicationsForReviewQuery()
             {
@@ -98,6 +108,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
                 AwardingOrganisationSearch = _fixture.Create<string>(),
                 ApplicationSearch = _fixture.Create<string>(),
                 ApplicationStatuses = _fixture.CreateMany<string>().ToList(),
+                UnassignedOnly = false,
+                ReviewerSearch = _fixture.Create<string>(),
                 Limit = 1,
                 Offset = 1
             };
@@ -121,7 +133,9 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
                             ReferenceId = 1,
                             UpdatedAt = DateTime.UtcNow,
                             QualificationNumber = "1",
-                            AwardingOrganisationName = "SkillsEngland"
+                            AwardingOrganisationName = "SkillsEngland",
+                            Reviewer1 = "Alice Smith",
+                            Reviewer2 = "Sam Jones"
 
                         }
                     }
@@ -130,15 +144,20 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
 
             Exception ex = new Exception();
 
-            _repositoryMock.Setup(x => x.GetApplicationReviews(
-                UserType.Qfau,
-                query.Offset.Value,
-                query.Limit.Value,
-                query.ApplicationsWithNewMessages,
-                query.ApplicationStatuses,
-                query.ApplicationSearch,
-                query.AwardingOrganisationSearch))
-                           .ThrowsAsync(ex);
+            _repositoryMock
+                .Setup(x => x.GetApplicationReviews(It.Is<ApplicationReviewSearchCriteria>(c =>
+                    c.ReviewType == UserType.Qfau &&
+                    c.Offset == query.Offset!.Value &&
+                    c.Limit == query.Limit!.Value &&
+                    c.IncludeApplicationWithNewMessages == query.ApplicationsWithNewMessages &&
+                    c.UnassignedOnly == query.UnassignedOnly &&
+                    c.ApplicationSearch == query.ApplicationSearch &&
+                    c.AwardingOrganisationSearch == query.AwardingOrganisationSearch &&
+                    c.ReviewerSearch == query.ReviewerSearch &&
+                    c.ApplicationStatuses != null &&
+                    c.ApplicationStatuses.SequenceEqual(query.ApplicationStatuses)
+                )))
+                .ThrowsAsync(ex);
 
             // Act
             var result = await _handler.Handle(query, CancellationToken.None);
@@ -147,5 +166,51 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Application.Review
             Assert.False(result.Success);
             Assert.Equal(ex.Message, result.ErrorMessage);
         }
+
+        [Fact]
+        public async Task Then_UnassignedOnly_Is_Passed_To_Repository()
+        {
+            var query = new GetApplicationsForReviewQuery
+            {
+                ReviewUser = UserType.Qfau.ToString(),
+                UnassignedOnly = true,
+                ReviewerSearch = "Bob",
+                Limit = 10,
+                Offset = 0
+            };
+
+            var criteria = new ApplicationReviewSearchCriteria
+            {
+                ReviewType = UserType.Qfau,
+                Offset = query.Offset.Value,
+                Limit = query.Limit.Value,
+                ApplicationSearch = query.ApplicationSearch,
+                ApplicationStatuses = query.ApplicationStatuses,
+                AwardingOrganisationSearch = query.AwardingOrganisationSearch,
+                ReviewerSearch = query.ReviewerSearch,
+                UnassignedOnly = query.UnassignedOnly,
+                IncludeApplicationWithNewMessages = query.ApplicationsWithNewMessages,
+            };
+
+            _repositoryMock
+                .Setup(x => x.GetApplicationReviews(It.Is<ApplicationReviewSearchCriteria>(c =>
+                    c.ReviewType == UserType.Qfau &&
+                    c.Offset == query.Offset!.Value &&
+                    c.Limit == query.Limit!.Value &&
+                    c.IncludeApplicationWithNewMessages == query.ApplicationsWithNewMessages &&
+                    c.UnassignedOnly == query.UnassignedOnly &&
+                    c.ApplicationSearch == query.ApplicationSearch &&
+                    c.AwardingOrganisationSearch == query.AwardingOrganisationSearch &&
+                    c.ReviewerSearch == query.ReviewerSearch &&
+                    c.ApplicationStatuses != null &&
+                    c.ApplicationStatuses.SequenceEqual(query.ApplicationStatuses)
+                )))
+                .ReturnsAsync((new List<ApplicationReviewFeedback>(), 0));
+
+            await _handler.Handle(query, CancellationToken.None);
+
+            _repositoryMock.VerifyAll();
+        }
+
     }
 }

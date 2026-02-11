@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Moq.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
+using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Models.Application;
 using System;
 
@@ -37,9 +38,15 @@ public class WhenGettingApplicationReviews
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            IncludeApplicationWithNewMessages = false,
+            Limit = 1
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.Qfau, 0, 1, false);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.NotEmpty(result.Item1);
@@ -79,9 +86,15 @@ public class WhenGettingApplicationReviews
         };
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            IncludeApplicationWithNewMessages = false,
+            Offset = 1
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.Qfau, 1, 10, false);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.Single(result.Item1);
@@ -120,9 +133,15 @@ public class WhenGettingApplicationReviews
         };
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            IncludeApplicationWithNewMessages = false,
+            Limit = 1
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.Qfau, 0, 1, false);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.Single(result.Item1);
@@ -185,9 +204,15 @@ public class WhenGettingApplicationReviews
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2, feedback_3]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            IncludeApplicationWithNewMessages = false,
+            ApplicationSearch = "123"
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.Qfau, 0, 10, false, applicationSearch: "123");
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.True(result.Item1.Count == 3);
@@ -236,9 +261,15 @@ public class WhenGettingApplicationReviews
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            IncludeApplicationWithNewMessages = false,
+            AwardingOrganisationSearch = "123"
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.Qfau, 0, 10, false, awardingOrganisationSearch: "123");
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.True(result.Item1.Count == 2);
@@ -283,9 +314,14 @@ public class WhenGettingApplicationReviews
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Ofqual,
+            IncludeApplicationWithNewMessages = false,
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.Ofqual, 0, 10, false);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.True(result.Item1.Count == 1);
@@ -329,9 +365,14 @@ public class WhenGettingApplicationReviews
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.SkillsEngland,
+            IncludeApplicationWithNewMessages = false,
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.SkillsEngland, 0, 10, false);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.True(result.Item1.Count == 1);
@@ -376,9 +417,15 @@ public class WhenGettingApplicationReviews
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.SkillsEngland,
+            ApplicationStatuses = ["test"],
+            IncludeApplicationWithNewMessages = false
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.SkillsEngland, 0, 10, false, applicationStatuses: ["test"]);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.True(result.Item1.Count == 1);
@@ -422,9 +469,14 @@ public class WhenGettingApplicationReviews
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria 
+        { 
+            ReviewType = UserType.SkillsEngland ,
+            IncludeApplicationWithNewMessages = true
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.SkillsEngland, 0, 10, true);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.True(result.Item1.Count == 1);
@@ -468,9 +520,15 @@ public class WhenGettingApplicationReviews
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            IncludeApplicationWithNewMessages = true,
+            ApplicationStatuses = ["test"]
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.Qfau, 0, 10, true, applicationStatuses: ["test"]);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.True(result.Item1.Count == 2);
@@ -479,6 +537,275 @@ public class WhenGettingApplicationReviews
 
         Assert.Equal(2, result.Item2);
     }
+
+    [Fact]
+    public async Task With_UnassignedOnly_Then_Gets_Only_Unassigned_Applications_With_Count()
+    {
+        // Arrange
+        var unassigned1 = new Entities.Application.ApplicationReviewFeedback
+        {
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    Id = Guid.NewGuid(),
+                    UpdatedAt = DateTime.UtcNow,
+                    Reviewer1 = null,
+                    Reviewer2 = null
+                }
+            },
+            Type = UserType.Qfau.ToString()
+        };
+
+        var unassigned2 = new Entities.Application.ApplicationReviewFeedback
+        {
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    Id = Guid.NewGuid(),
+                    UpdatedAt = DateTime.UtcNow.AddMinutes(-1),
+                    Reviewer1 = "",
+                    Reviewer2 = ""
+                }
+            },
+            Type = UserType.Qfau.ToString()
+        };
+
+        var assigned1 = new Entities.Application.ApplicationReviewFeedback
+        {
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    Id = Guid.NewGuid(),
+                    UpdatedAt = DateTime.UtcNow.AddMinutes(-2),
+                    Reviewer1 = "Bob",
+                    Reviewer2 = null
+                }
+            },
+            Type = UserType.Qfau.ToString()
+        };
+
+        var assigned2 = new Entities.Application.ApplicationReviewFeedback
+        {
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    Id = Guid.NewGuid(),
+                    UpdatedAt = DateTime.UtcNow.AddMinutes(-3),
+                    Reviewer1 = null,
+                    Reviewer2 = "Bob"
+                }
+            },
+            Type = UserType.Qfau.ToString()
+        };
+
+        _context.SetupGet(c => c.ApplicationReviewFeedbacks)
+            .ReturnsDbSet([unassigned1, unassigned2, assigned1, assigned2]);
+
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            IncludeApplicationWithNewMessages = false,
+            UnassignedOnly = true
+        };
+
+        // Act
+        var result = await _sut.GetApplicationReviews(criteria);
+
+        // Assert
+        Assert.Equal(2, result.Item1.Count);
+        Assert.Contains(unassigned1, result.Item1);
+        Assert.Contains(unassigned2, result.Item1);
+        Assert.DoesNotContain(assigned1, result.Item1);
+        Assert.DoesNotContain(assigned2, result.Item1);
+        Assert.Equal(2, result.Item2);
+    }
+
+    [Fact]
+    public async Task With_ReviewerSearch_Then_Gets_Only_Matching_Reviewer_Applications_With_Count()
+    {
+        // Arrange
+        var match1 = new Entities.Application.ApplicationReviewFeedback
+        {
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    Id = Guid.NewGuid(),
+                    UpdatedAt = DateTime.UtcNow,
+                    Reviewer1 = "Bob",
+                    Reviewer2 = ""
+                }
+            },
+            Type = UserType.Qfau.ToString()
+        };
+
+        var match2 = new Entities.Application.ApplicationReviewFeedback
+        {
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    Id = Guid.NewGuid(),
+                    UpdatedAt = DateTime.UtcNow.AddMinutes(-1),
+                    Reviewer1 = "",
+                    Reviewer2 = "Bob"
+                }
+            },
+            Type = UserType.Qfau.ToString()
+        };
+
+        var nonMatch = new Entities.Application.ApplicationReviewFeedback
+        {
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    Id = Guid.NewGuid(),
+                    UpdatedAt = DateTime.UtcNow.AddMinutes(-2),
+                    Reviewer1 = "Alice",
+                    Reviewer2 = "Charlie"
+                }
+            },
+            Type = UserType.Qfau.ToString()
+        };
+
+        _context.SetupGet(c => c.ApplicationReviewFeedbacks)
+            .ReturnsDbSet([match1, match2, nonMatch]);
+
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            ReviewerSearch = "Bob",
+            UnassignedOnly = false,
+            IncludeApplicationWithNewMessages = false
+        };
+
+        // Act
+        var result = await _sut.GetApplicationReviews(criteria);
+
+        // Assert
+        Assert.Equal(2, result.Item1.Count);
+        Assert.Contains(match1, result.Item1);
+        Assert.Contains(match2, result.Item1);
+        Assert.DoesNotContain(nonMatch, result.Item1);
+        Assert.Equal(2, result.Item2);
+    }
+
+    [Fact]
+    public async Task With_ReviewerSearch_Then_Trims_Input()
+    {
+        // Arrange
+        var match = new Entities.Application.ApplicationReviewFeedback
+        {
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    Id = Guid.NewGuid(),
+                    UpdatedAt = DateTime.UtcNow,
+                    Reviewer1 = "Bob",
+                    Reviewer2 = null
+                }
+            },
+            Type = UserType.Qfau.ToString()
+        };
+
+        var nonMatch = new Entities.Application.ApplicationReviewFeedback
+        {
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    Id = Guid.NewGuid(),
+                    UpdatedAt = DateTime.UtcNow.AddMinutes(-1),
+                    Reviewer1 = "Alice",
+                    Reviewer2 = null
+                }
+            },
+            Type = UserType.Qfau.ToString()
+        };
+
+        _context.SetupGet(c => c.ApplicationReviewFeedbacks)
+            .ReturnsDbSet([match, nonMatch]);
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            IncludeApplicationWithNewMessages = false,
+            UnassignedOnly = false,
+            ReviewerSearch = "Bob"
+        };
+
+        // Act
+        var result = await _sut.GetApplicationReviews(criteria);
+
+        // Assert
+        Assert.Single(result.Item1);
+        Assert.Equal(match, result.Item1.First());
+        Assert.Equal(1, result.Item2);
+    }
+
+    [Fact]
+    public async Task With_UnassignedOnly_True_And_ReviewerSearch_Set_Then_UnassignedOnly_Takes_Precedence()
+    {
+        // Arrange
+        var unassigned = new Entities.Application.ApplicationReviewFeedback
+        {
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    Id = Guid.NewGuid(),
+                    UpdatedAt = DateTime.UtcNow,
+                    Reviewer1 = null,
+                    Reviewer2 = null
+                }
+            },
+            Type = UserType.Qfau.ToString()
+        };
+
+        var bob = new Entities.Application.ApplicationReviewFeedback
+        {
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    Id = Guid.NewGuid(),
+                    UpdatedAt = DateTime.UtcNow.AddMinutes(-1),
+                    Reviewer1 = "Bob",
+                    Reviewer2 = null
+                }
+            },
+            Type = UserType.Qfau.ToString()
+        };
+
+        _context.SetupGet(c => c.ApplicationReviewFeedbacks)
+            .ReturnsDbSet([unassigned, bob]);
+
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            IncludeApplicationWithNewMessages = false,
+            ReviewerSearch = "Bob",
+            UnassignedOnly = true
+        };
+
+        // Act
+        var result = await _sut.GetApplicationReviews(criteria);
+
+        // Assert
+        Assert.Single(result.Item1);
+        Assert.Equal(unassigned, result.Item1.First());
+        Assert.Equal(1, result.Item2);
+    }
+
+
+
+
+
 }
 
 

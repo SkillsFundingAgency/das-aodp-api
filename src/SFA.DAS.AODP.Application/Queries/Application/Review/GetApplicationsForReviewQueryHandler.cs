@@ -18,14 +18,21 @@ namespace SFA.DAS.AODP.Application.Queries.Application.Review
             {
                 if (!Enum.TryParse(request.ReviewUser, out UserType userType)) throw new Exception("Invalid user type provided");
 
+                var criteria = new ApplicationReviewSearchCriteria
+                {
+                    ReviewType = userType,
+                    Offset = request.Offset ?? 0,
+                    Limit = request.Limit ?? 10,
+                    IncludeApplicationWithNewMessages = request.ApplicationsWithNewMessages,
+                    ApplicationStatuses = request.ApplicationStatuses,
+                    ApplicationSearch = request.ApplicationSearch,
+                    AwardingOrganisationSearch = request.AwardingOrganisationSearch,
+                    ReviewerSearch = request.ReviewerSearch,
+                    UnassignedOnly = request.UnassignedOnly
+                };
+
                 var applicationReviewsWithCount = await _applicationReviewRepository.GetApplicationReviews(
-                    reviewType: userType,
-                    offset: request.Offset ?? 0,
-                    limit: request.Limit ?? 10,
-                    includeApplicationWithNewMessages: request.ApplicationsWithNewMessages,
-                    applicationStatuses: request.ApplicationStatuses,
-                    applicationSearch: request.ApplicationSearch,
-                    awardingOrganisationSearch: request.AwardingOrganisationSearch
+                    criteria
                 );
 
                 response.Value = GetApplicationsForReviewQueryResponse.Map(applicationReviewsWithCount.Item1, applicationReviewsWithCount.Item2);
