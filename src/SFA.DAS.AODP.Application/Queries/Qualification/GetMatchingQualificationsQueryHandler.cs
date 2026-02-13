@@ -92,12 +92,20 @@ public class GetMatchingQualificationsQueryHandler : IRequestHandler<GetMatching
                 qualifications = _qualificationsSearchService.SearchQualificationsByKeywordAsync(trimmed, linkedCts.Token);
             }
 
+            // Put "No Action Required" items first.
+            var noActionGuid = new Guid("00000000-0000-0000-0000-000000000002");
+
+            var orderedQualifications = qualifications
+                .OrderBy(q => q.Status != noActionGuid)
+                .ThenBy(q => q.QualificationName)
+                .ThenBy(q => q.Qan);
+
             response.Value = new GetMatchingQualificationsQueryResponse
             {
                 TotalRecords = qualifications.Count(),
                 Skip = request.Skip,
                 Take = request.Take,
-                Qualifications = qualifications.Select(q => new GetMatchingQualificationsQueryItem
+                Qualifications = orderedQualifications.Select(q => new GetMatchingQualificationsQueryItem
                 {
                     Id = q.Id,
                     Qan = q.Qan,

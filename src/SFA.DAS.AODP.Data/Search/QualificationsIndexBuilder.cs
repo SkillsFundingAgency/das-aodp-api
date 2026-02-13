@@ -60,7 +60,7 @@ namespace SFA.DAS.AODP.Data.Search
 
                     // Index each qualification from the database
                     var qualifications = _applicationDbContext.QualificationFundingStatus
-                                            .OrderBy(q => q.FundingStatus)
+                                            .OrderBy(q => q.FundedStatus)
                                             .ThenBy(q => q.AwardingOrganisationName)
                                             .ThenBy(q => q.QualificationName);
 
