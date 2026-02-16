@@ -551,24 +551,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<SaveReviewerCommand>(), default))
                 .ReturnsAsync(wrapper);
-        [Fact]
-        public async Task GetApplicationByQanAsync_ReturnsOkResult()
-        {
-            // Arrange
-            var qan = _fixture.Create<string>();
-            var response = _fixture.Create<GetApplicationsByQanQueryResponse>();
-            var wrapper = new BaseMediatrResponse<GetApplicationsByQanQueryResponse>
-            {
-                Value = response,
-                Success = true
-            };
-
-            _mediatorMock
-                .Setup(m => m.Send(It.IsAny<GetApplicationsByQanQuery>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(wrapper);
-
-            // Act
-            var result = await _controller.GetApplicationByQanAsync(qan);
+        
 
             // Act
             var result = await _controller.SaveReviewer(request, applicationId);
@@ -615,6 +598,25 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
             var statusResult = Assert.IsType<StatusCodeResult>(result);
             Assert.Equal(StatusCodes.Status500InternalServerError, statusResult.StatusCode);
         }
+
+        [Fact]
+        public async Task GetApplicationByQanAsync_ReturnsOkResult()
+        {
+            // Arrange
+            var qan = _fixture.Create<string>();
+            var response = _fixture.Create<GetApplicationsByQanQueryResponse>();
+            var wrapper = new BaseMediatrResponse<GetApplicationsByQanQueryResponse>
+            {
+                Value = response,
+                Success = true
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<GetApplicationsByQanQuery>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(wrapper);
+
+            // Act
+            var result = await _controller.GetApplicationByQanAsync(qan);
             // Assert
             _mediatorMock.Verify(m =>
                 m.Send(
