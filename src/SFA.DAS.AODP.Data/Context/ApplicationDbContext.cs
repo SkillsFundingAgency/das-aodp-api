@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Configuration;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.Feedback;
@@ -8,6 +7,7 @@ using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Entities.Import;
 using SFA.DAS.AODP.Data.Entities.Jobs;
 using SFA.DAS.AODP.Data.Entities.Offer;
+using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.EntityConfiguration;
 
@@ -78,6 +78,8 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<DefundingList> DefundingLists { get; set; }
         public virtual DbSet<Pldns> Pldns { get; set; }
 
+        public virtual DbSet<RegulatedQaaQualification> RegulatedQaaQualifications { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<QualificationNewReviewRequired>().ToView("v_QualificationNewReviewRequired", "regulated").HasNoKey();
@@ -105,6 +107,12 @@ namespace SFA.DAS.AODP.Data.Context
 
             modelBuilder.Entity<QualificationFundingStatus>().ToView("v_QualificationFundingStatus", "regulated")
                 .HasNoKey();
+
+            modelBuilder.Entity<RegulatedQaaQualification>()
+                .Property(q => q.SectorSubjectArea)
+                .HasConversion(
+                    ssaTier => ssaTier.Name, 
+                    ssaName => SectorSubjectArea.FromName(ssaName));
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 
