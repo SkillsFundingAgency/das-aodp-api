@@ -3,6 +3,7 @@ using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Models.Application;
+using System.Linq;
 
 namespace SFA.DAS.AODP.Data.Repositories.Application
 {
@@ -17,65 +18,72 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
 
         public async Task<(List<ApplicationReviewFeedback>, int)> GetApplicationReviews
         (
-            UserType reviewType,
-            int offset,
-            int limit,
-            bool includeApplicationWithNewMessages,
-            List<string>? applicationStatuses = null,
-            string? applicationSearch = null,
-            string? awardingOrganisationSearch = null
+            ApplicationReviewSearchCriteria criteria
         )
         {
             var query = _context
                 .ApplicationReviewFeedbacks
                 .Include(a => a.ApplicationReview)
                 .ThenInclude(a => a.Application)
-                .Where(a => a.Type == reviewType.ToString());
+                .Where(a => a.Type == criteria.ReviewType.ToString());
 
-            if (!string.IsNullOrWhiteSpace(applicationSearch))
+            if (!string.IsNullOrWhiteSpace(criteria.ApplicationSearch))
             {
                 query = query.Where(q =>
-                    q.ApplicationReview.Application.ReferenceId.ToString().Contains(applicationSearch.TrimStart('0'))
-                    || q.ApplicationReview.Application.Name.Contains(applicationSearch)
-                    || q.ApplicationReview.Application.QualificationNumber.Contains(applicationSearch)
+                    q.ApplicationReview.Application.ReferenceId.ToString().Contains(criteria.ApplicationSearch.TrimStart('0'))
+                    || q.ApplicationReview.Application.Name.Contains(criteria.ApplicationSearch)
+                    || q.ApplicationReview.Application.QualificationNumber.Contains(criteria.ApplicationSearch)
 
                  );
             }
 
-            if (!string.IsNullOrWhiteSpace(awardingOrganisationSearch))
+            if (!string.IsNullOrWhiteSpace(criteria.AwardingOrganisationSearch))
             {
                 query = query.Where(q =>
-                    q.ApplicationReview.Application.AwardingOrganisationName.Contains(awardingOrganisationSearch)
-                    || q.ApplicationReview.Application.AwardingOrganisationUkprn.Contains(awardingOrganisationSearch)
+                    q.ApplicationReview.Application.AwardingOrganisationName.Contains(criteria.AwardingOrganisationSearch)
+                    || q.ApplicationReview.Application.AwardingOrganisationUkprn.Contains(criteria.AwardingOrganisationSearch)
                  );
             }
 
 
-            if (reviewType == UserType.Ofqual)
+            if (criteria.ReviewType == UserType.Ofqual)
             {
                 query = query.Where(a => a.ApplicationReview.SharedWithOfqual);
             }
-            else if (reviewType == UserType.SkillsEngland)
+            else if (criteria.ReviewType == UserType.SkillsEngland)
             {
                 query = query.Where(a => a.ApplicationReview.SharedWithSkillsEngland);
 
             }
 
-            if (includeApplicationWithNewMessages && applicationStatuses?.Any() == true)
+            if (criteria.IncludeApplicationWithNewMessages && criteria.ApplicationStatuses ?.Any() == true)
             {
-                query = query.Where(a => a.NewMessage || applicationStatuses.Contains(a.Status));
+                query = query.Where(a => a.NewMessage || criteria.ApplicationStatuses.Contains(a.Status));
             }
-            else if (includeApplicationWithNewMessages)
+            else if (criteria.IncludeApplicationWithNewMessages)
             {
                 query = query.Where(q => q.NewMessage);
             }
-            else if (applicationStatuses?.Any() == true)
+            else if (criteria.ApplicationStatuses?.Any() == true)
             {
-                query = query.Where(q => applicationStatuses.Contains(q.Status));
+                query = query.Where(q => criteria.ApplicationStatuses.Contains(q.Status));
             }
 
+            if (criteria.UnassignedOnly)
+            {
+                query = query.Where(q =>
+                    string.IsNullOrEmpty(q.ApplicationReview.Application.Reviewer1) &&
+                    string.IsNullOrEmpty(q.ApplicationReview.Application.Reviewer2));
+            }
+            else if (!string.IsNullOrWhiteSpace(criteria.ReviewerSearch))
+            {
+                var term = criteria.ReviewerSearch.Trim();
+                query = query.Where(q =>
+                    q.ApplicationReview.Application.Reviewer1 == term ||
+                    q.ApplicationReview.Application.Reviewer2 == term);
+            }
 
-            return (await query.OrderByDescending(o => o.ApplicationReview.Application.UpdatedAt).Skip(offset).Take(limit).ToListAsync(), await query.CountAsync());
+            return (await query.OrderByDescending(o => o.ApplicationReview.Application.UpdatedAt).Skip(criteria.Offset).Take(criteria.Limit).ToListAsync(), await query.CountAsync());
 
         }
 

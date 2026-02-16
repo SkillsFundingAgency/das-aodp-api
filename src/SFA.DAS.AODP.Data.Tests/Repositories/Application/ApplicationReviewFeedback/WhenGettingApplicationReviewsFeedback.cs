@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Moq;
 using Moq.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
+using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Models.Application;
 using System;
 
@@ -37,9 +38,15 @@ public class WhenGettingApplicationReviewsFeedback
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            IncludeApplicationWithNewMessages = false,
+            Limit = 1
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.Qfau, 0, 1, false);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.NotEmpty(result.Item1);
@@ -79,9 +86,15 @@ public class WhenGettingApplicationReviewsFeedback
         };
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            IncludeApplicationWithNewMessages = false,
+            Offset = 1
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.Qfau, 1, 10, false);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.Single(result.Item1);
@@ -120,9 +133,15 @@ public class WhenGettingApplicationReviewsFeedback
         };
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            IncludeApplicationWithNewMessages = false,
+            Limit = 1
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.Qfau, 0, 1, false);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.Single(result.Item1);
@@ -185,9 +204,15 @@ public class WhenGettingApplicationReviewsFeedback
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2, feedback_3]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            IncludeApplicationWithNewMessages = false,
+            ApplicationSearch = "123"
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.Qfau, 0, 10, false, applicationSearch: "123");
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.True(result.Item1.Count == 3);
@@ -236,9 +261,15 @@ public class WhenGettingApplicationReviewsFeedback
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            IncludeApplicationWithNewMessages = false,
+            AwardingOrganisationSearch = "123"
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.Qfau, 0, 10, false, awardingOrganisationSearch: "123");
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.True(result.Item1.Count == 2);
@@ -283,9 +314,14 @@ public class WhenGettingApplicationReviewsFeedback
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Ofqual,
+            IncludeApplicationWithNewMessages = false,
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.Ofqual, 0, 10, false);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.True(result.Item1.Count == 1);
@@ -329,9 +365,14 @@ public class WhenGettingApplicationReviewsFeedback
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.SkillsEngland,
+            IncludeApplicationWithNewMessages = false,
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.SkillsEngland, 0, 10, false);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.True(result.Item1.Count == 1);
@@ -376,9 +417,15 @@ public class WhenGettingApplicationReviewsFeedback
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.SkillsEngland,
+            IncludeApplicationWithNewMessages = false,
+            ApplicationStatuses = ["test"]
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.SkillsEngland, 0, 10, false, applicationStatuses: ["test"]);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.True(result.Item1.Count == 1);
@@ -422,9 +469,14 @@ public class WhenGettingApplicationReviewsFeedback
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.SkillsEngland,
+            IncludeApplicationWithNewMessages = true,
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.SkillsEngland, 0, 10, true);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.True(result.Item1.Count == 1);
@@ -468,9 +520,15 @@ public class WhenGettingApplicationReviewsFeedback
 
         _context.SetupGet(c => c.ApplicationReviewFeedbacks).ReturnsDbSet([feedback_1, feedback_2]);
 
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau,
+            IncludeApplicationWithNewMessages = true,
+            ApplicationStatuses = ["test"]
+        };
 
         // Act
-        var result = await _sut.GetApplicationReviews(UserType.Qfau, 0, 10, true, applicationStatuses: ["test"]);
+        var result = await _sut.GetApplicationReviews(criteria);
 
         // Assert
         Assert.True(result.Item1.Count == 2);

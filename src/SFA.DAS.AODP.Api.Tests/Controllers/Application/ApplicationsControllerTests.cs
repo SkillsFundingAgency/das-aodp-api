@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.Application;
+using SFA.DAS.AODP.Application.Commands.Application.Review;
 using SFA.DAS.AODP.Application.Queries.Application.Application;
 
 namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
@@ -530,6 +531,27 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
         }
 
         [Fact]
+        public async Task SaveReviewer_ReturnsOkResult()
+        {
+            // Arrange
+            var applicationId = Guid.NewGuid();
+
+            var request = _fixture.Build<SaveReviewerCommand>()
+                .With(x => x.ApplicationId, Guid.NewGuid()) 
+                .Create();
+
+            var response = _fixture.Create<SaveReviewerCommandResponse>();
+
+            var wrapper = new BaseMediatrResponse<SaveReviewerCommandResponse>
+            {
+                Value = response,
+                Success = true
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<SaveReviewerCommand>(), default))
+                .ReturnsAsync(wrapper);
+        [Fact]
         public async Task GetApplicationByQanAsync_ReturnsOkResult()
         {
             // Arrange
@@ -548,6 +570,51 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
             // Act
             var result = await _controller.GetApplicationByQanAsync(qan);
 
+            // Act
+            var result = await _controller.SaveReviewer(request, applicationId);
+
+            // Assert
+            _mediatorMock.Verify(m => m.Send(
+                It.Is<SaveReviewerCommand>(c => c.ApplicationId == applicationId),
+                default), Times.Once);
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(StatusCodes.Status200OK, okResult.StatusCode);
+            var model = Assert.IsAssignableFrom<SaveReviewerCommandResponse>(okResult.Value);
+            Assert.Equal(response, model);
+        }
+
+        [Fact]
+        public async Task SaveReviewer_WhenMediatorFails_ReturnsInternalServerError()
+        {
+            // Arrange
+            var applicationId = Guid.NewGuid();
+
+            var request = _fixture.Build<SaveReviewerCommand>()
+                .With(x => x.ApplicationId, Guid.NewGuid())
+                .Create();
+
+            var wrapper = new BaseMediatrResponse<SaveReviewerCommandResponse>
+            {
+                Success = false,
+                ErrorMessage = "Some error"
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<SaveReviewerCommand>(), default))
+                .ReturnsAsync(wrapper);
+
+            // Act
+            var result = await _controller.SaveReviewer(request, applicationId);
+
+            // Assert
+            _mediatorMock.Verify(m => m.Send(
+                It.Is<SaveReviewerCommand>(c => c.ApplicationId == applicationId),
+                default), Times.Once);
+
+            var statusResult = Assert.IsType<StatusCodeResult>(result);
+            Assert.Equal(StatusCodes.Status500InternalServerError, statusResult.StatusCode);
+        }
             // Assert
             _mediatorMock.Verify(m =>
                 m.Send(
