@@ -18,7 +18,7 @@ public class GetApplicationsByQanQueryHandler : IRequestHandler<GetApplicationsB
         try
         {
             var result = await _applicationRepository.GetByQan(request.Qan);
-            response.Value = result;
+            response.Value = GetApplicationsByQanQueryResponse.FromEntities(result);
             response.Success = true;
         }
         catch (Exception ex)
