@@ -14,6 +14,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
         {
             _repository = repository;
             _mediator = mediator;
+
         }
 
         public async Task<BaseMediatrResponse<SaveReviewerCommandResponse>> Handle(SaveReviewerCommand request, CancellationToken cancellationToken)
@@ -56,6 +57,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                 {
                     response.Success = true;
                     return response;
+
                 }
 
                 if (!string.IsNullOrWhiteSpace(newReviewer) &&
@@ -81,6 +83,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
 
                 var msgResult = await _mediator.Send(msgCommand);
                 if (!msgResult.Success) throw new Exception(msgResult.ErrorMessage, msgResult.InnerException);
+
 
                 response.Success = true;
             }
