@@ -78,6 +78,8 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
         public async Task<List<Data.Entities.Application.Application>> GetByQan(string qan)
         {
             return await _context.Applications
+                .Include(a => a.ApplicationReview)
+                .ThenInclude(r => r.ApplicationReviewFeedbacks)
                 .Where(v => v.QualificationNumber == qan)
                 .ToListAsync();
 

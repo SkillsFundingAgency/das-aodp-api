@@ -16,6 +16,7 @@ public class GetApplicationsByQanQueryResponse
         public DateTime? SubmittedDate { get; set; }
         public string? Status { get; set; }
         public int ReferenceId { get; set; }
+        public Guid? ApplicationReviewId { get; set; }
     }
 
     public static GetApplicationsByQanQueryResponse FromEntities(IEnumerable<SFA.DAS.AODP.Data.Entities.Application.Application>? applications)
@@ -34,7 +35,8 @@ public class GetApplicationsByQanQueryResponse
                 CreatedDate = app.CreatedAt,
                 SubmittedDate = app.SubmittedAt,
                 Status = app.Status,
-                ReferenceId = app.ReferenceId
+                ReferenceId = app.ReferenceId,
+                ApplicationReviewId = app.ApplicationReview.Id
             }).ToList()
         };
     }
