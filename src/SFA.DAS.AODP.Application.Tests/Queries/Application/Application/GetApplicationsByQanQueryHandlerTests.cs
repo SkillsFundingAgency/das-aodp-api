@@ -20,19 +20,33 @@ public class GetApplicationsByQanQueryHandlerTests
     {
         // Arrange
         var qan = "QAN123";
+        var applicationId1 = Guid.NewGuid();
+        var applicationId2 = Guid.NewGuid();
+        var applicationReviewId1 = Guid.NewGuid();
+        var applicationReviewId2 = Guid.NewGuid();
         var app1 = new SFA.DAS.AODP.Data.Entities.Application.Application
         {
-            Id = Guid.NewGuid(),
+            Id = applicationId1,
             Name = "App1",
             CreatedAt = DateTime.UtcNow.AddDays(-2),
-            SubmittedAt = DateTime.UtcNow.AddDays(-1)
+            SubmittedAt = DateTime.UtcNow.AddDays(-1),
+            ApplicationReview = new Data.Entities.Application.ApplicationReview
+            { 
+                Id = applicationReviewId1,
+                ApplicationId = applicationId1,
+            }
         };
         var app2 = new SFA.DAS.AODP.Data.Entities.Application.Application
         {
-            Id = Guid.NewGuid(),
+            Id = applicationId2,
             Name = "App2",
             CreatedAt = DateTime.UtcNow.AddDays(-5),
-            SubmittedAt = null
+            SubmittedAt = null,
+            ApplicationReview = new Data.Entities.Application.ApplicationReview
+            {
+                Id = applicationReviewId2,
+                ApplicationId = applicationId2,
+            }
         };
 
         var list = new List<SFA.DAS.AODP.Data.Entities.Application.Application> { app1, app2 };
@@ -50,8 +64,8 @@ public class GetApplicationsByQanQueryHandlerTests
         Assert.NotNull(result.Value);
         Assert.Equal(2, result.Value.Applications.Count);
 
-        Assert.Contains(result.Value.Applications, a => a.Id == app1.Id && a.Name == app1.Name && a.CreatedDate == app1.CreatedAt && a.SubmittedDate == app1.SubmittedAt);
-        Assert.Contains(result.Value.Applications, a => a.Id == app2.Id && a.Name == app2.Name && a.CreatedDate == app2.CreatedAt && a.SubmittedDate == app2.SubmittedAt);
+        Assert.Contains(result.Value.Applications, a => a.Id == app1.Id && a.Name == app1.Name && a.CreatedDate == app1.CreatedAt && a.SubmittedDate == app1.SubmittedAt && a.ApplicationReviewId == app1.ApplicationReview.Id);
+        Assert.Contains(result.Value.Applications, a => a.Id == app2.Id && a.Name == app2.Name && a.CreatedDate == app2.CreatedAt && a.SubmittedDate == app2.SubmittedAt && a.ApplicationReviewId == app2.ApplicationReview.Id);
     }
 
     [Fact]
