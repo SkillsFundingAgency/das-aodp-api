@@ -33,7 +33,10 @@ public static class Program
 
         builder.Services.AddControllers(options =>
         {
-            options.Filters.Add(new AuthorizeFilter());
+            if (!builder.Environment.IsDevelopment())
+            {
+                options.Filters.Add(new AuthorizeFilter());
+            }
         });
 
         builder.Services
@@ -44,30 +47,33 @@ public static class Program
                 c.CustomSchemaIds(type => schemaHelper.GetSchemaId(type));
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "AODP Inner API", Version = "v1" });
 
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                if (!builder.Environment.IsDevelopment())
                 {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "Paste a JWT here (without the 'Bearer ' prefix)."
-                });
-
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
+                    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                     {
-                        new OpenApiSecurityScheme
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.Http,
+                        Scheme = "bearer",
+                        BearerFormat = "JWT",
+                        In = ParameterLocation.Header,
+                        Description = "Paste a JWT here (without the 'Bearer ' prefix)."
+                    });
+
+                    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    {
                         {
-                            Reference = new OpenApiReference
+                            new OpenApiSecurityScheme
                             {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        Array.Empty<string>()
-                    }
-                });
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
+                                }
+                            },
+                            Array.Empty<string>()
+                        }
+                    });
+                }
             });
 
         var connectionString = configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
