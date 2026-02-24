@@ -3,9 +3,11 @@
 namespace SFA.DAS.AODP.Data.Entities.QaaQualification;
 
 [Table("QaaQualification", Schema = "regulated")]
-public class RegulatedQaaQualification
+public partial class RegulatedQaaQualification
 {
     public Guid Id { get; private set; }
+
+    public DateTime DateOfDataSnapshot { get; private set; }
 
     public string AimCode { get; private set; }
 

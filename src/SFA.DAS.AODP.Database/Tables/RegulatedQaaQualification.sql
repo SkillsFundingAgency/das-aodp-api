@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [regulated].[QaaQualification] (
     [Id] uniqueidentifier NOT NULL,
+    [DateOfDataSnapshot] datetime2 NOT NULL,
     [AimCode] varchar(10) NOT NULL,
     [QualificationTitle] varchar(250),
     [AwardingBody] varchar(250) NOT NULL,
