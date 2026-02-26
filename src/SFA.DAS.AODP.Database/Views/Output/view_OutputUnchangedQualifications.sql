@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[view_OutputUnchangedQualifications] AS
+﻿﻿CREATE VIEW [dbo].[view_OutputUnchangedQualifications] AS
 
 /*##################################################################################################
 	-Name:				Output Unchanged Qualifications
@@ -116,19 +116,24 @@ CombinedPivotData AS (
 PivotOfferNotes AS
 (
     SELECT
-        qo.QualificationId,
-        MAX(CASE WHEN qo.Name = 'Age1416' THEN qo.Notes END)                  AS Age1416_Notes,
-        MAX(CASE WHEN qo.Name = 'Age1619' THEN qo.Notes END)                  AS Age1619_Notes,
-        MAX(CASE WHEN qo.Name = 'AdvancedLearnerLoans' THEN qo.Notes END)     AS AdvancedLearnerLoans_Notes,
-        MAX(CASE WHEN qo.Name = 'DigitalEntitlement' THEN qo.Notes END)       AS DigitalEntitlement_Notes,
-        MAX(CASE WHEN qo.Name = 'L3FreeCoursesForJobs' THEN qo.Notes END)     AS L3FreeCoursesForJobs_Notes,
-        MAX(CASE WHEN qo.Name = 'LegalEntitlementEnglishandMaths' THEN qo.Notes END) AS LegalEntitlementEnglishandMaths_Notes,
-        MAX(CASE WHEN qo.Name = 'LegalEntitlementL2L3' THEN qo.Notes END)     AS LegalEntitlementL2L3_Notes,
-        MAX(CASE WHEN qo.Name = 'LifelongLearningEntitlement' THEN qo.Notes END) AS LifelongLearningEntitlement_Notes,
-        MAX(CASE WHEN qo.Name = 'LocalFlexibilities' THEN qo.Notes END)       AS LocalFlexibilities_Notes
-    FROM funded.QualificationOffers qo
-    GROUP BY qo.QualificationId
+        qf.QualificationVersionId,
+        MAX(CASE WHEN fo.Name = 'Age1416' THEN qf.Comments END)                  AS Age1416_Notes,
+        MAX(CASE WHEN fo.Name = 'Age1619' THEN qf.Comments END)                  AS Age1619_Notes,
+        MAX(CASE WHEN fo.Name = 'AdvancedLearnerLoans' THEN qf.Comments END)     AS AdvancedLearnerLoans_Notes,
+        MAX(CASE WHEN fo.Name = 'DigitalEntitlement' THEN qf.Comments END)       AS DigitalEntitlement_Notes,
+        MAX(CASE WHEN fo.Name = 'L3FreeCoursesForJobs' THEN qf.Comments END)     AS L3FreeCoursesForJobs_Notes,
+        MAX(CASE WHEN fo.Name = 'LegalEntitlementEnglishandMaths' THEN qf.Comments END) AS LegalEntitlementEnglishandMaths_Notes,
+        MAX(CASE WHEN fo.Name = 'LegalEntitlementL2L3' THEN qf.Comments END)     AS LegalEntitlementL2L3_Notes,
+        MAX(CASE WHEN fo.Name = 'LifelongLearningEntitlement' THEN qf.Comments END) AS LifelongLearningEntitlement_Notes,
+        MAX(CASE WHEN fo.Name = 'LocalFlexibilities' THEN qf.Comments END)       AS LocalFlexibilities_Notes
+    FROM funded.QualificationFundings qf
+    INNER JOIN dbo.FundingOffers fo
+        ON fo.Id = qf.FundingOfferId
+    INNER JOIN LatestQualifications LQ
+        ON qf.QualificationVersionId = LQ.Id
+    GROUP BY qf.QualificationVersionId
 )
+
 SELECT
 	'Unchanged' AS Status,
     latestversion.InsertedTimeStamp AS DateOfOfqualDataSnapshot,
@@ -180,6 +185,6 @@ FROM LatestQualifications latestversion
 INNER JOIN dbo.Qualification qual ON qual.Id = latestversion.QualificationId
 INNER JOIN dbo.AwardingOrganisation ao ON ao.Id = latestversion.AwardingOrganisationId
 LEFT JOIN CombinedPivotData pivotdata ON pivotdata.QualificationVersionId = latestversion.Id
-LEFT JOIN PivotOfferNotes AS onp ON onp.QualificationId = latestversion.QualificationId
+LEFT JOIN PivotOfferNotes AS onp ON onp.QualificationVersionId = latestversion.Id
 LEFT JOIN funded.Qualifications fq ON fq.Id = latestversion.QualificationId;
 GO
