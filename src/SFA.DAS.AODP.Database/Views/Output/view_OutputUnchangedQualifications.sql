@@ -1,10 +1,10 @@
-﻿﻿CREATE VIEW [dbo].[view_OutputUnchangedQualifications] AS
+﻿CREATE VIEW [dbo].[view_OutputUnchangedQualifications] AS
 
 /*##################################################################################################
 	-Name:				Output Unchanged Qualifications
 	-Description:		All unchanged qualifications
 	                    The must have a lifecycle stage of 'Completed'
-						The latest qualification version must be used
+					The latest qualification version must be used
 	-Date of Creation:	10/04/2025
 	-Created By:		Robert Rybnikar
 ####################################################################################################*/

@@ -1,4 +1,4 @@
-﻿﻿CREATE VIEW [dbo].[view_OutputUnapprovedQualifications] AS
+﻿CREATE VIEW [dbo].[view_OutputUnapprovedQualifications] AS
 
 /*##################################################################################################
 	-Name:				Output Unchanged Qualifications

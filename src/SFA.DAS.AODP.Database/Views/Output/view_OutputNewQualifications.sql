@@ -1,10 +1,10 @@
 ﻿CREATE VIEW [dbo].[view_OutputNewQualifications] AS
 
 /*##################################################################################################
-	-Name:				Output New Qualifications
+	-Name:			Output New Qualifications
 	-Description:		All new qualifications that have been funded during the current review cycle
 	                    The must have a lifecycle stage of 'New' and a Process Status of 'Approved'
-						The latest qualification version must be used
+				The latest qualification version must be used
 	-Date of Creation:	10/04/2025
 	-Created By:		Robert Rybnikar
 ####################################################################################################*/
