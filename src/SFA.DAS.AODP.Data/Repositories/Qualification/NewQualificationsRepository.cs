@@ -61,6 +61,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             var records = executed
                       .Select(q => new NewQualification
                       {
+                          QualificationId = q.QualificationId,
                           Title = q.QualificationTitle,
                           Reference = q.QualificationReference,
                           AwardingOrganisation = q.AwardingOrganisation,

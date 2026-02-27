@@ -208,6 +208,15 @@ public class QualificationsController : BaseController
         return await SendRequestAsync(qualificationStatus);
     }
 
+    [HttpPut("bulk-status")]
+    [ProducesResponseType(typeof(BaseMediatrResponse<BulkUpdateQualificationStatusResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> BulkStatusUpdate([FromBody] BulkUpdateQualificationStatusCommand bulkUpdateCommand)
+    {
+        return await SendRequestAsync(bulkUpdateCommand);
+    }
+
     [HttpGet("{qualificationReference}/qualificationdiscussionhistories")]
     [ProducesResponseType(typeof(BaseMediatrResponse<GetDiscussionHistoriesForQualificationQueryResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
