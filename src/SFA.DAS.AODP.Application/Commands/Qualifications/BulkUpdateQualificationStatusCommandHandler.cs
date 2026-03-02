@@ -39,9 +39,9 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                     .Distinct()
                     .ToList();
 
-                var errors = new List<BulkQualificationErrorDTO>();
+                var errors = new List<BulkQualificationErrorDto>();
 
-                errors.AddRange(result.MissingIds.Select(id => new BulkQualificationErrorDTO
+                errors.AddRange(result.MissingIds.Select(id => new BulkQualificationErrorDto
                 {
                     QualificationId = id,
                     Qan = string.Empty,
@@ -49,7 +49,7 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                     ErrorType = BulkQualificationErrorType.Missing
                 }));
 
-                errors.AddRange(result.StatusUpdateFailed.Select(f => new BulkQualificationErrorDTO
+                errors.AddRange(result.StatusUpdateFailed.Select(f => new BulkQualificationErrorDto
                 {
                     QualificationId = f.QualificationId,
                     Qan = f.Qan,
@@ -57,13 +57,15 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                     ErrorType = BulkQualificationErrorType.StatusUpdateFailed
                 }));
 
-                errors.AddRange(result.HistoryFailed.Select(f => new BulkQualificationErrorDTO
+                errors.AddRange(result.HistoryFailed.Select(f => new BulkQualificationErrorDto
                 {
                     QualificationId = f.QualificationId,
                     Qan = f.Qan,
                     Title = HistoryFailedTitle,
                     ErrorType = BulkQualificationErrorType.HistoryFailed
                 }));
+
+                if (result.Status is null) { throw new InvalidOperationException("Repository returned null status unexpectedly."); }
 
                 response.Value = new BulkUpdateQualificationStatusResponse
                 {

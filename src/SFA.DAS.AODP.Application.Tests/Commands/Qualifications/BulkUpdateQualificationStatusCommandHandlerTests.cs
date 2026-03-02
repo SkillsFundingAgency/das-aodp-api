@@ -72,7 +72,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
                 .Setup(r => r.BulkUpdateQualificationStatusWithHistoryAsync(
                     It.IsAny<IReadOnlyCollection<Guid>>(),
                     It.IsAny<Guid>(),
-                    It.IsAny<string?>(),
+                    It.IsAny<string>(),
                     It.IsAny<string?>(),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(repoResult);
@@ -139,7 +139,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
                 .Setup(r => r.BulkUpdateQualificationStatusWithHistoryAsync(
                     It.IsAny<IReadOnlyCollection<Guid>>(),
                     It.IsAny<Guid>(),
-                    It.IsAny<string?>(),
+                    It.IsAny<string>(),
                     It.IsAny<string?>(),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(repoResult);
@@ -163,7 +163,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
                 .Setup(r => r.BulkUpdateQualificationStatusWithHistoryAsync(
                     It.IsAny<IReadOnlyCollection<Guid>>(),
                     It.IsAny<Guid>(),
-                    It.IsAny<string?>(),
+                    It.IsAny<string>(),
                     It.IsAny<string?>(),
                     It.IsAny<CancellationToken>()))
                 .ThrowsAsync(new NoForeignKeyException(fkId));
@@ -188,7 +188,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
                 .Setup(r => r.BulkUpdateQualificationStatusWithHistoryAsync(
                     It.IsAny<IReadOnlyCollection<Guid>>(),
                     It.IsAny<Guid>(),
-                    It.IsAny<string?>(),
+                    It.IsAny<string>(),
                     It.IsAny<string?>(),
                     It.IsAny<CancellationToken>()))
                 .ThrowsAsync(exception);

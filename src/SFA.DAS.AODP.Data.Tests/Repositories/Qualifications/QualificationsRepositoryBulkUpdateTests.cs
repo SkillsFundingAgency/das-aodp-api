@@ -49,6 +49,8 @@ namespace SFA.DAS.AODP.Data.Tests
         {
             _dbContext.Dispose();
             _connection.Dispose();
+
+            GC.SuppressFinalize(this);
         }
 
         private void SeedReferenceData()
