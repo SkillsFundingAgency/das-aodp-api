@@ -175,6 +175,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Build Include="Views\v_QualificationFundingStatus.sql" />
+    <Build Include="Tables\RegulatedQaaQualification.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
@@ -192,5 +193,7 @@
     <None Include="MigrationScripts\MVS1_Qual_Ref_Data.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="SFA.DAS.AODP.Database.publish.xml" />
+    <None Include="MigrationScripts\MVS2_AWARD_904_JobsDataSeed.sql" />
   </ItemGroup>
 </Project>
