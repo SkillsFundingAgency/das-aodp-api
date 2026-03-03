@@ -10,13 +10,10 @@
     PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 
-
 GO
 CREATE NONCLUSTERED INDEX [IX_RolloverWorkflowRun_YearSelectionMethod]
     ON [dbo].[RolloverWorkflowRun]([AcademicYear] ASC, [SelectionMethod] ASC);
 
-
 GO
 CREATE NONCLUSTERED INDEX [IX_RolloverWorkflowRun_YearCreatedAt]
     ON [dbo].[RolloverWorkflowRun]([AcademicYear] ASC, [CreatedAt] ASC);
-

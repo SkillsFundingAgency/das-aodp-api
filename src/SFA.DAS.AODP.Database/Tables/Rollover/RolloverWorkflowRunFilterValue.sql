@@ -8,13 +8,10 @@
     FOREIGN KEY ([RolloverWorkflowRunFilterId]) REFERENCES [dbo].[RolloverWorkflowRunFilter] ([Id])
 );
 
-
 GO
 CREATE NONCLUSTERED INDEX [IX_WorkflowRunFilterValue_Filter_Guid]
     ON [dbo].[RolloverWorkflowRunFilterValue]([RolloverWorkflowRunFilterId] ASC, [ValueGuid] ASC);
 
-
 GO
 CREATE NONCLUSTERED INDEX [IX_WorkflowRunFilterValue_Filter_Text]
     ON [dbo].[RolloverWorkflowRunFilterValue]([RolloverWorkflowRunFilterId] ASC, [ValueText] ASC);
-

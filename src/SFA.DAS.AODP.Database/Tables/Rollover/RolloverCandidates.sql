@@ -18,23 +18,18 @@
     FOREIGN KEY ([RolloverDecisionRunId]) REFERENCES [dbo].[RolloverDecisionRun] ([Id])
 );
 
-
 GO
 CREATE NONCLUSTERED INDEX [IX_RolloverCandidates_DecisionRunId]
     ON [dbo].[RolloverCandidates]([RolloverDecisionRunId] ASC);
-
 
 GO
 CREATE NONCLUSTERED INDEX [IX_RolloverCandidates_ByCandidateKey]
     ON [dbo].[RolloverCandidates]([QualificationVersionId] ASC, [FundingOfferId] ASC, [AcademicYear] ASC);
 
-
 GO
 CREATE NONCLUSTERED INDEX [IX_RolloverCandidates_Totals]
     ON [dbo].[RolloverCandidates]([AcademicYear] ASC, [RolloverStatus] ASC, [IsActive] ASC);
 
-
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [UX_RolloverCandidates_QualOfferYearRound]
     ON [dbo].[RolloverCandidates]([QualificationVersionId] ASC, [FundingOfferId] ASC, [AcademicYear] ASC, [RolloverRound] ASC);
-
