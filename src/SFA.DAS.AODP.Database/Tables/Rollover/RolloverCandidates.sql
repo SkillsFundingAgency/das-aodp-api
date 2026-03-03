@@ -19,6 +19,11 @@
 );
 
 GO
+ALTER TABLE dbo.RolloverCandidates
+    ADD CONSTRAINT UQ_RolloverCandidates_QualOfferYearRound
+        UNIQUE (QualificationVersionId, FundingOfferId, AcademicYear, RolloverRound);
+
+GO
 CREATE NONCLUSTERED INDEX [IX_RolloverCandidates_DecisionRunId]
     ON [dbo].[RolloverCandidates]([RolloverDecisionRunId] ASC);
 
