@@ -10,6 +10,7 @@ using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
+using SFA.DAS.AODP.Data.Entities.Rollover.ModelBuilder;
 using SFA.DAS.AODP.Data.EntityConfiguration;
 
 namespace SFA.DAS.AODP.Data.Context

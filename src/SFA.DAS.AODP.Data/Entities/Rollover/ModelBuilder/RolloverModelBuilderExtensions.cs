@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-using SFA.DAS.AODP.Data.Entities.Rollover;
+
+namespace SFA.DAS.AODP.Data.Entities.Rollover.ModelBuilder;
 
 /// <summary>
 /// Provides extension methods for configuring the rollover-related entities in the Entity Framework Core model builder.
@@ -13,7 +14,7 @@ public static class RolloverModelBuilderExtensions
     /// </summary>
     /// <param name="modelBuilder">The model builder to configure.</param>
     /// <returns>The updated model builder.</returns>
-    public static ModelBuilder AddRollover(this ModelBuilder modelBuilder)
+    public static Microsoft.EntityFrameworkCore.ModelBuilder AddRollover(this Microsoft.EntityFrameworkCore.ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<RolloverCandidates>(b =>
         {
