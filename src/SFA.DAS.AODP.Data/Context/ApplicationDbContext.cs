@@ -9,6 +9,7 @@ using SFA.DAS.AODP.Data.Entities.Jobs;
 using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.EntityConfiguration;
 
 namespace SFA.DAS.AODP.Data.Context
@@ -80,6 +81,14 @@ namespace SFA.DAS.AODP.Data.Context
 
         public virtual DbSet<RegulatedQaaQualification> RegulatedQaaQualifications { get; set; }
 
+        public DbSet<RolloverCandidates> RolloverCandidates => Set<RolloverCandidates>();
+        public DbSet<RolloverWorkflowRun> RolloverWorkflowRuns => Set<RolloverWorkflowRun>();
+        public DbSet<RolloverWorkflowRunFundingOffer> RolloverWorkflowRunFundingOffers => Set<RolloverWorkflowRunFundingOffer>();
+        public DbSet<RolloverWorkflowRunFilter> RolloverWorkflowRunFilters => Set<RolloverWorkflowRunFilter>();
+        public DbSet<RolloverWorkflowRunFilterValue> RolloverWorkflowRunFilterValues => Set<RolloverWorkflowRunFilterValue>();
+        public DbSet<RolloverWorkflowCandidate> RolloverWorkflowCandidates => Set<RolloverWorkflowCandidate>();
+        public DbSet<RolloverDecisionRun> RolloverDecisionRuns => Set<RolloverDecisionRun>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<QualificationNewReviewRequired>().ToView("v_QualificationNewReviewRequired", "regulated").HasNoKey();
@@ -114,6 +123,8 @@ namespace SFA.DAS.AODP.Data.Context
                     ssaTier => ssaTier.Name, 
                     ssaName => SectorSubjectArea.FromName(ssaName));
 
+            modelBuilder.AddRollover();
+
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 
             base.OnModelCreating(modelBuilder);
@@ -131,4 +142,3 @@ namespace SFA.DAS.AODP.Data.Context
 
     }
 }
-

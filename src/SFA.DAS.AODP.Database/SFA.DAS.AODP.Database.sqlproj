@@ -73,6 +73,7 @@
     <Folder Include="Views\Support" />
     <Folder Include="Views\Output" />
     <Folder Include="Tables\Import" />
+    <Folder Include="Tables\Rollover" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Schemas\FundedSchema.sql" />
@@ -176,6 +177,13 @@
     </None>
     <Build Include="Views\v_QualificationFundingStatus.sql" />
     <Build Include="Tables\RegulatedQaaQualification.sql" />
+    <Build Include="Tables\Rollover\RolloverCandidates.sql" />
+    <Build Include="Tables\Rollover\RolloverDecisionRun.sql" />
+    <Build Include="Tables\Rollover\RolloverWorkflowCandidate.sql" />
+    <Build Include="Tables\Rollover\RolloverWorkflowRun.sql" />
+    <Build Include="Tables\Rollover\RolloverWorkflowRunFilter.sql" />
+    <Build Include="Tables\Rollover\RolloverWorkflowRunFilterValue.sql" />
+    <Build Include="Tables\Rollover\RolloverWorkflowRunFundingOffer.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
@@ -195,5 +203,6 @@
     </None>
     <None Include="SFA.DAS.AODP.Database.publish.xml" />
     <None Include="MigrationScripts\MVS2_AWARD_904_JobsDataSeed.sql" />
+    <None Include="dab-options.json" />
   </ItemGroup>
 </Project>
