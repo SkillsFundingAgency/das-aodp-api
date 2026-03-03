@@ -31,6 +31,7 @@ public class RolloverWorkflowRunTests
         Assert.Empty(result.FundingOffers);
         Assert.Empty(result.Candidates);
         Assert.Empty(result.Filters);
+        Assert.Equal(Guid.Empty, result.Id);
     }
 
     [Fact]

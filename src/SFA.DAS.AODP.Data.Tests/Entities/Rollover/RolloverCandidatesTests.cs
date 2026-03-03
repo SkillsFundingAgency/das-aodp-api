@@ -28,6 +28,9 @@ public class RolloverCandidatesTests
         Assert.Null(result.ReviewedAt);
         Assert.Null(result.ReviewedByUsername);
         Assert.Null(result.RolloverDecisionRunId);
+        Assert.Null(result.QualificationVersion);
+        Assert.Null(result.DecisionRun);
+        Assert.Equal(Guid.Empty, result.Id);
 
         // As this is the first entry the created and updated at should be the same.
         Assert.Equal(createdAt, result.UpdatedAt);

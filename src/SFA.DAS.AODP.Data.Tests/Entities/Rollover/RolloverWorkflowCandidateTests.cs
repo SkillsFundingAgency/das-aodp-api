@@ -42,6 +42,9 @@ public class RolloverWorkflowCandidateTests
         Assert.False(result.IncludedInFinalUpload);
         Assert.False(result.PassP1);
         Assert.Null(result.P1FailureReason);
+        Assert.Null(result.WorkflowRun);
+        Assert.Null(result.RolloverCandidates);
+        Assert.Equal(Guid.Empty, result.Id);
     }
 
     [Fact]

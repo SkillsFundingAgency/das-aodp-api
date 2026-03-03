@@ -19,5 +19,6 @@ public class RolloverWorkflowRunFilterTests
         Assert.Equal(createdAt, result.CreatedAt);
         Assert.Empty(result.Values);
         Assert.Null(result.WorkflowRun);
+        Assert.Equal(Guid.Empty, result.Id);
     }
 }
