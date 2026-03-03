@@ -233,6 +233,14 @@ public class ApplicationsController : BaseController
         return await SendRequestAsync(command);
     }
 
+    [HttpPut("/api/applications/bulk-reviewer")]
+    [ProducesResponseType(typeof(BulkSaveReviewerCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> BulkUpdateReviewer(BulkSaveReviewerCommand command)
+    {
+        return await SendRequestAsync(command);
+    }
+
     [HttpGet("/api/applications/qualifications/{qan}")]
     [ProducesResponseType(typeof(GetApplicationsByQanQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
