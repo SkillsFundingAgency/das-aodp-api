@@ -84,13 +84,13 @@ namespace SFA.DAS.AODP.Data.Context
 
         public virtual DbSet<RegulatedQaaQualification> RegulatedQaaQualifications { get; set; }
 
-        public DbSet<RolloverCandidates> RolloverCandidates => Set<RolloverCandidates>();
-        public DbSet<RolloverWorkflowRun> RolloverWorkflowRuns => Set<RolloverWorkflowRun>();
-        public DbSet<RolloverWorkflowRunFundingOffer> RolloverWorkflowRunFundingOffers => Set<RolloverWorkflowRunFundingOffer>();
-        public DbSet<RolloverWorkflowRunFilter> RolloverWorkflowRunFilters => Set<RolloverWorkflowRunFilter>();
-        public DbSet<RolloverWorkflowRunFilterValue> RolloverWorkflowRunFilterValues => Set<RolloverWorkflowRunFilterValue>();
-        public DbSet<RolloverWorkflowCandidate> RolloverWorkflowCandidates => Set<RolloverWorkflowCandidate>();
-        public DbSet<RolloverDecisionRun> RolloverDecisionRuns => Set<RolloverDecisionRun>();
+        public virtual DbSet<RolloverCandidates> RolloverCandidates { get; set; }
+        public virtual DbSet<RolloverWorkflowRun> RolloverWorkflowRuns { get; set; }
+        public virtual DbSet<RolloverWorkflowRunFundingOffer> RolloverWorkflowRunFundingOffers { get; set; }
+        public virtual DbSet<RolloverWorkflowRunFilter> RolloverWorkflowRunFilters { get; set; }
+        public virtual DbSet<RolloverWorkflowRunFilterValue> RolloverWorkflowRunFilterValues { get; set; }
+        public virtual DbSet<RolloverWorkflowCandidate> RolloverWorkflowCandidates { get; set; }
+        public virtual DbSet<RolloverDecisionRun> RolloverDecisionRuns { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
