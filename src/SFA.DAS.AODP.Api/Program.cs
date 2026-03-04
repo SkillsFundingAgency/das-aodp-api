@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.OpenApi.Models;
 using SFA.DAS.AODP.Api.Extensions;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Application.Swashbuckle;
 using SFA.DAS.AODP.Data.Search;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.OpenApi;
 
 namespace SFA.DAS.AODP.Api;
 
@@ -59,19 +59,14 @@ public static class Program
                         Description = "Paste a JWT here (without the 'Bearer ' prefix)."
                     });
 
-                    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    c.AddSecurityRequirement(document =>
                     {
+                        var requirement = new OpenApiSecurityRequirement
                         {
-                            new OpenApiSecurityScheme
-                            {
-                                Reference = new OpenApiReference
-                                {
-                                    Type = ReferenceType.SecurityScheme,
-                                    Id = "Bearer"
-                                }
-                            },
-                            Array.Empty<string>()
-                        }
+                            [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+                        };
+
+                        return requirement;
                     });
                 }
             });
