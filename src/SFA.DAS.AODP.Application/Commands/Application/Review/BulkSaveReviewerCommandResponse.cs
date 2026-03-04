@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace SFA.DAS.AODP.Application.Commands.Application.Review
 {
@@ -19,9 +20,6 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
         public Guid ApplicationId { get; init; }
         public int ReferenceNumber { get; init; } = default!;
         public string? Qan { get; set; }
-
-        //Might need this
-        //public string? QualificationTitle { get; set; }
         public BulkReviewerErrorType ErrorType { get; init; }
     }
 
@@ -29,6 +27,6 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
     {
         Missing = 1,                 // Application not found
         Conflict = 2,                // Reviewer1 == Reviewer2
-        MessageFailed = 3            // Update succeeded but message logging failed
+        MessageFailed = 3            // Reviewer update succeeded but message failed
     }
 }

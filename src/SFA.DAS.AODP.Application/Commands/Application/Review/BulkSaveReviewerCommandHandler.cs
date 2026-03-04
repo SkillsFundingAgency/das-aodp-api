@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application.Commands.Application.Message;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Models.Application;
 
@@ -35,28 +36,34 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
 
                 foreach (var id in request.ApplicationIds)
                 {
-                    var application = await _repository.GetByIdAsync(id);
+                    Data.Entities.Application.Application? application = null;
 
-                    if (application == null)
+                    try 
                     {
-                        errors.Add(new BulkReviewerErrorDto
-                        {
-                            ApplicationId = id,
-                            ErrorType = BulkReviewerErrorType.Missing
-                        });
-                        continue;
+                        application = await _repository.GetByIdAsync(id);
+                    }
+                    catch (RecordNotFoundException) 
+                    { 
+                        errors.Add(new BulkReviewerErrorDto 
+                        { 
+                            ApplicationId = id, 
+                            ErrorType = BulkReviewerErrorType.Missing 
+                        }); 
+                    
+                        continue; 
                     }
 
                     var oldReviewer1 = application.Reviewer1;
                     var oldReviewer2 = application.Reviewer2;
 
-                    var newReviewer1 = request.Reviewer1 ?? oldReviewer1;
-                    var newReviewer2 = request.Reviewer2 ?? oldReviewer2;
+                    var newReviewer1 = request.Reviewer1Set ? request.Reviewer1 : oldReviewer1;
+                    var newReviewer2 = request.Reviewer2Set ? request.Reviewer2 : oldReviewer2;
 
-                    if (oldReviewer1 == newReviewer1 && oldReviewer2 == newReviewer2)
-                    {
+                    bool reviewer1Changed = request.Reviewer1Set && oldReviewer1 != newReviewer1;
+                    bool reviewer2Changed = request.Reviewer2Set && oldReviewer2 != newReviewer2;
+
+                    if (!reviewer1Changed && !reviewer2Changed)
                         continue;
-                    }
 
                     if (ReviewerAssignmentRules.WouldCauseConflict(newReviewer1, newReviewer2))
                     {
@@ -110,7 +117,6 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                             Qan = application.QualificationNumber,
                             ErrorType = BulkReviewerErrorType.MessageFailed
                         });
-                        continue;
                     }
 
                     updatedCount++;
