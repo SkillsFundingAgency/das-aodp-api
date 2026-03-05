@@ -11,7 +11,7 @@
     [NewFundingEndDate]      DATETIME2 (7)    NULL,
     [ReviewedAt]             DATETIME2 (7)    NULL,
     [ReviewedByUsername]     NVARCHAR (255)   NULL,
-    [IsActive]               INT              NOT NULL,
+    [IsActive]               BIT              NOT NULL,
     [CreatedAt]              DATETIME2 (7)    NOT NULL,
     [UpdatedAt]              DATETIME2 (7)    NOT NULL,
     PRIMARY KEY CLUSTERED ([Id] ASC),
