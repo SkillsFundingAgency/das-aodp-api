@@ -21,7 +21,7 @@ public static class RolloverModelBuilderExtensions
             b.Property(x => x.RolloverStatus)
                 .HasConversion<string>();
 
-            b.HasOne(x => x.DecisionRun)
+            b.HasOne(x => x.RolloverDecisionRun)
                 .WithMany()
                 .HasForeignKey(x => x.RolloverDecisionRunId)
                 .OnDelete(DeleteBehavior.SetNull);
@@ -50,7 +50,7 @@ public static class RolloverModelBuilderExtensions
             b.Property(x => x.FilterKey)
                 .HasConversion<string>();
 
-            b.HasOne(x => x.WorkflowRun)
+            b.HasOne(x => x.RolloverWorkflowRun)
                 .WithMany(r => r.Filters)
                 .HasForeignKey(x => x.RolloverWorkflowRunId)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -60,7 +60,7 @@ public static class RolloverModelBuilderExtensions
 
         modelBuilder.Entity<RolloverWorkflowRunFilterValue>(b =>
         {
-            b.HasOne(x => x.Filter)
+            b.HasOne(x => x.RolloverWorkflowRunFilter)
                 .WithMany(f => f.Values)
                 .HasForeignKey(x => x.RolloverWorkflowRunFilterId)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -68,7 +68,7 @@ public static class RolloverModelBuilderExtensions
 
         modelBuilder.Entity<RolloverWorkflowCandidate>(b =>
         {
-            b.HasOne(x => x.WorkflowRun)
+            b.HasOne(x => x.RolloverWorkflowRun)
                 .WithMany(r => r.Candidates)
                 .HasForeignKey(x => x.RolloverWorkflowRunId)
                 .OnDelete(DeleteBehavior.Cascade);

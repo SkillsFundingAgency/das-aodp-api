@@ -15,7 +15,9 @@
     [CreatedAt]              DATETIME2 (7)    NOT NULL,
     [UpdatedAt]              DATETIME2 (7)    NOT NULL,
     PRIMARY KEY CLUSTERED ([Id] ASC),
-    FOREIGN KEY ([RolloverDecisionRunId]) REFERENCES [dbo].[RolloverDecisionRun] ([Id])
+    FOREIGN KEY ([RolloverDecisionRunId]) REFERENCES [dbo].[RolloverDecisionRun] ([Id]),
+    FOREIGN KEY ([QualificationVersionId]) REFERENCES [regulated].[QualificationVersions] ([Id]),
+    FOREIGN KEY ([FundingOfferId]) REFERENCES [dbo].[FundingOffers] ([Id]),
 );
 
 GO
