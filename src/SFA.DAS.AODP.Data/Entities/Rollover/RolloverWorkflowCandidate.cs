@@ -15,7 +15,7 @@ public class RolloverWorkflowCandidate
     
     public string AcademicYear { get; private set; } = null!;
     
-    public Guid RolloverCandidateRecordId { get; private set; }
+    public Guid RolloverCandidateId { get; private set; }
 
     public bool PassP1 { get; private set; }
 
@@ -55,7 +55,7 @@ public class RolloverWorkflowCandidate
         return new RolloverWorkflowCandidate
         {
             RolloverWorkflowRunId = workflowRunId,
-            RolloverCandidateRecordId = rolloverCandidateRecordId,
+            RolloverCandidateId = rolloverCandidateRecordId,
             QualificationVersionId = qualificationVersionId,
             FundingOfferId = fundingOfferId,
             AcademicYear = academicYear,
