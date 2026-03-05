@@ -84,4 +84,20 @@ public class RolloverRepository : IRolloverRepository
         }
         
     }
+
+    public async Task<IEnumerable<RolloverCandidate>> GetRolloverCandidatesAsync()
+    {
+        return  await _context.RolloverCandidates
+        .AsNoTracking()
+        .Select(rc => new RolloverCandidate
+        {
+            Qan = rc.QualificationVersion.Qualification.Qan,
+            Title = rc.QualificationVersion.Qualification.QualificationName ?? string.Empty,
+            AwardingOrganisation = rc.QualificationVersion.Organisation.NameOfqual ?? string.Empty,
+            FundingOffer = rc.FundingOffer.Name,
+            FundingApprovalEndDate = rc.NewFundingEndDate,
+            IsActive = rc.IsActive
+        })
+        .ToListAsync();
+    }
 }

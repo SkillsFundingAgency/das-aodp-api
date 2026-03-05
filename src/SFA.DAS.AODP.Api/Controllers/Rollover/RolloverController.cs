@@ -25,4 +25,13 @@ public class RolloverController : BaseController
         var query = new GetRolloverWorkflowCandidatesQuery(skip, take);
         return await SendRequestAsync(query);
     }
+
+    [HttpGet("rollovercandidates")]
+    [ProducesResponseType(typeof(GetRolloverCandidatesQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetRolloverCandidates()
+    {
+        var query = new GetRolloverCandidatesQuery();
+        return await SendRequestAsync(query);
+    }
 }
