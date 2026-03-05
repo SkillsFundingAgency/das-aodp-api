@@ -103,18 +103,41 @@ public partial class RegulatedQaaQualification
         // 
         // If the Last Day for Registration is before the current Funding Approval End Date on the website date then the Funding Approval End Date should be the same as before (i.e. no change to Funding Approval End Date)
 
-
-        if (LastDateForRegistration > publicationDate)
+        var publicationDateOnly = DateOnly.FromDateTime(publicationDate);
+    
+        if (LastDateForRegistration > publicationDateOnly)
         {
+            var dates = new List<DateOnly>
+            {
+                LastDateForRegistration,
+                GetAcademicYear()
+            };
 
+            LastFundingApprovalEndDate = dates.Min();
+            return this;
         }
 
-        if (LastDateForRegistration < publicationDate)
+        if (LastDateForRegistration < publicationDateOnly)
         {
-            if (LastDateForRegistration < LastFundingApprovalEndDate)
+            if (LastDateForRegistration > LastFundingApprovalEndDate || 
+                LastFundingApprovalEndDate is null)
             {
-
+                LastFundingApprovalEndDate = LastDateForRegistration;
             }
         }
+
+        return this;
+    }
+
+    private static DateOnly GetAcademicYear()
+    {
+        var today = DateTime.Today;
+
+        if (today > new DateTime(today.Year, 7, 31))
+        {
+            return new DateOnly(today.Year + 1, 7, 31);
+        }
+
+        return DateOnly.FromDateTime(today);
     }
 }
