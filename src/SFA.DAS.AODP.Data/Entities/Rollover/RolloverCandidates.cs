@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.Rollover.Enums;
 
@@ -39,7 +40,9 @@ public class RolloverCandidates
 
     public virtual QualificationVersions QualificationVersion { get; set; } = null!;
 
-    public virtual RolloverDecisionRun DecisionRun { get; private set; } = null!;
+    public virtual RolloverDecisionRun RolloverDecisionRun { get; private set; } = null!;
+
+    public virtual FundingOffer FundingOffer { get; set; } = null!;
 
     public static RolloverCandidates CreateInitialRound(
         Guid qualificationVersionId,

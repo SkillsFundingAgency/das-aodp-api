@@ -29,7 +29,7 @@ public class RolloverCandidatesTests
         Assert.Null(result.ReviewedByUsername);
         Assert.Null(result.RolloverDecisionRunId);
         Assert.Null(result.QualificationVersion);
-        Assert.Null(result.DecisionRun);
+        Assert.Null(result.RolloverDecisionRun);
         Assert.Equal(Guid.Empty, result.Id);
 
         // As this is the first entry the created and updated at should be the same.

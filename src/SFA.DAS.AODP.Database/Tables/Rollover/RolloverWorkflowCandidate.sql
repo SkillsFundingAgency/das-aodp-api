@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[RolloverWorkflowCandidate] (
     [Id]                     UNIQUEIDENTIFIER NOT NULL,
     [RolloverWorkflowRunId]  UNIQUEIDENTIFIER NOT NULL,
+    [RolloverCandidatesId]   UNIQUEIDENTIFIER NOT NULL,
     [QualificationVersionId] UNIQUEIDENTIFIER NOT NULL,
     [FundingOfferId]         UNIQUEIDENTIFIER NOT NULL,
     [AcademicYear]           NVARCHAR (255)   NOT NULL,
@@ -14,7 +15,8 @@
     [CreatedAt]              DATETIME2 (7)    NOT NULL,
     [UpdatedAt]              DATETIME2 (7)    NOT NULL,
     PRIMARY KEY CLUSTERED ([Id] ASC),
-    FOREIGN KEY ([RolloverWorkflowRunId]) REFERENCES [dbo].[RolloverWorkflowRun] ([Id])
+    FOREIGN KEY ([RolloverWorkflowRunId]) REFERENCES [dbo].[RolloverWorkflowRun] ([Id]),
+    FOREIGN KEY ([RolloverCandidatesId]) REFERENCES [dbo].[RolloverCandidates] ([Id])
 );
 
 GO
