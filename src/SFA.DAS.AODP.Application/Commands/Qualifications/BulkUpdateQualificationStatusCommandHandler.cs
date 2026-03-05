@@ -11,6 +11,14 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
         private const string MissingTitle = "Qualification not found";
         private const string StatusUpdateFailedTitle = "Failed to update status";
         private const string HistoryFailedTitle = "Status updated but failed to add history";
+        private const string InvalidBulkUpdateStatus = "Status '{0}' cannot be applied via bulk update.";
+
+        private static readonly HashSet<string> AllowedBulkStatuses = new()
+        {
+            Data.Enum.ProcessStatus.OnHold,
+            Data.Enum.ProcessStatus.NoActionRequired,
+            Data.Enum.ProcessStatus.DecisionRequired
+        };
 
         private readonly IQualificationsRepository _qualificationsRepository;
 
@@ -27,6 +35,15 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
 
             try
             {
+
+                var status = await _qualificationsRepository.GetProcessStatusOrThrow(request.ProcessStatusId);
+                if (!AllowedBulkStatuses.Contains(status.Name))
+                {
+                    response.Success = false;
+                    response.ErrorMessage = string.Format(InvalidBulkUpdateStatus, status.Name);
+                    return response;
+                }
+
                 var result = await _qualificationsRepository.BulkUpdateQualificationStatusWithHistoryAsync(
                     qualificationIds: request.QualificationIds,
                     processStatusId: request.ProcessStatusId,

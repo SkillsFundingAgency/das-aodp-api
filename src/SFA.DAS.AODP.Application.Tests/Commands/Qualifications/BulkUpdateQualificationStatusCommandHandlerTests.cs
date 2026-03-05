@@ -19,6 +19,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         private const string MissingTitle = "Qualification not found";
         private const string StatusUpdateFailedTitle = "Failed to update status";
         private const string HistoryFailedTitle = "Status updated but failed to add history";
+        private const string InvalidBulkUpdateStatus = "Status '{0}' cannot be applied via bulk update.";
 
         public BulkUpdateQualificationStatusCommandHandlerTests()
         {
@@ -29,6 +30,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 
             _qualificationsRepositoryMock = _fixture.Freeze<Mock<IQualificationsRepository>>();
             _handler = new BulkUpdateQualificationStatusCommandHandler(_qualificationsRepositoryMock.Object);
+
+            SetupStatus(true);
         }
 
         [Fact]
@@ -198,6 +201,76 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             Assert.False(result.Success);
             Assert.Equal(exception.Message, result.ErrorMessage);
             Assert.Equal(exception, result.InnerException);
+        }
+
+        [Fact]
+        public async Task Handle_WhenStatusIsNotAllowed_ReturnsError_AndDoesNotCallBulkUpdate()
+        {
+            // Arrange
+            var command = _fixture.Create<BulkUpdateQualificationStatusCommand>();
+
+            SetupStatus(false);
+
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            Assert.False(result.Success);
+            Assert.Equal(string.Format(InvalidBulkUpdateStatus, Data.Enum.ProcessStatus.Approved), result.ErrorMessage);
+
+            if (result.Value is not null)
+            {
+                Assert.Equal(0, result.Value.UpdatedCount);
+                Assert.Equal(0, result.Value.RequestedCount);
+                Assert.Equal(0, result.Value.ErrorCount);
+                Assert.Empty(result.Value.Errors);
+            }
+
+            _qualificationsRepositoryMock.Verify(r => r.BulkUpdateQualificationStatusWithHistoryAsync(
+                    It.IsAny<IReadOnlyCollection<Guid>>(),
+                    It.IsAny<Guid>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string?>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Never);
+        }
+
+        [Fact]
+        public async Task Handle_WhenStatusIsNotAllowed_DoesNotCareAboutQualificationIds_DoesNotCallBulkUpdate()
+        {
+            // Arrange
+            var command = _fixture.Create<BulkUpdateQualificationStatusCommand>();
+            command.QualificationIds.Add(Guid.Empty); 
+            command.QualificationIds.Add(command.QualificationIds[0]); 
+
+            SetupStatus(false); 
+
+            // Act
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            Assert.False(result.Success);
+            Assert.Contains("cannot be applied via bulk update", result.ErrorMessage ?? string.Empty);
+
+            _qualificationsRepositoryMock.Verify(r => r.BulkUpdateQualificationStatusWithHistoryAsync(
+                    It.IsAny<IReadOnlyCollection<Guid>>(),
+                    It.IsAny<Guid>(),
+                    It.IsAny<string>(),
+                    It.IsAny<string?>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Never);
+        }
+
+
+        private void SetupStatus(bool statusUpdateAllowed)
+        {
+            _qualificationsRepositoryMock
+                .Setup(r => r.GetProcessStatusOrThrow(It.IsAny<Guid>()))
+                .ReturnsAsync(new ProcessStatus
+                {
+                    Id = Guid.NewGuid(),
+                    Name = statusUpdateAllowed ? Data.Enum.ProcessStatus.DecisionRequired : Data.Enum.ProcessStatus.Approved
+                });
         }
     }
 }
