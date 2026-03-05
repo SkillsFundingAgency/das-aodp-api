@@ -19,5 +19,5 @@ public class RolloverWorkflowRunFilterValue
 
     public string? DisplayText { get; private set; }
 
-    public virtual RolloverWorkflowRunFilter Filter { get; private set; } = null!;
+    public virtual RolloverWorkflowRunFilter RolloverWorkflowRunFilter { get; private set; } = null!;
 }

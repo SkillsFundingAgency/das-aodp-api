@@ -14,7 +14,7 @@ public class RolloverWorkflowRunFilter
     
     public DateTime CreatedAt { get; private set; }
 
-    public virtual RolloverWorkflowRun WorkflowRun { get; private set; } = null!;
+    public virtual RolloverWorkflowRun RolloverWorkflowRun { get; private set; } = null!;
 
     public virtual IReadOnlyCollection<RolloverWorkflowRunFilterValue> Values => _values;
     private readonly List<RolloverWorkflowRunFilterValue> _values = new();

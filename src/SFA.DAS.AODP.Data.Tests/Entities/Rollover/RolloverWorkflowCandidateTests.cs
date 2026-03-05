@@ -28,7 +28,7 @@ public class RolloverWorkflowCandidateTests
         
         // Assert
         Assert.Equal(workflowRunId, result.RolloverWorkflowRunId);
-        Assert.Equal(rolloverCandidateRecordId, result.RolloverCandidateId);
+        Assert.Equal(rolloverCandidateRecordId, result.RolloverCandidatesId);
         Assert.Equal(qualificationVersionId, result.QualificationVersionId);
         Assert.Equal(fundingOfferId, result.FundingOfferId);
         Assert.Equal(academicYear, result.AcademicYear);
@@ -42,7 +42,7 @@ public class RolloverWorkflowCandidateTests
         Assert.False(result.IncludedInFinalUpload);
         Assert.False(result.PassP1);
         Assert.Null(result.P1FailureReason);
-        Assert.Null(result.WorkflowRun);
+        Assert.Null(result.RolloverWorkflowRun);
         Assert.Null(result.RolloverCandidates);
         Assert.Equal(Guid.Empty, result.Id);
     }
