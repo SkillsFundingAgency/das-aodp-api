@@ -42,46 +42,37 @@ public class RolloverRepository : IRolloverRepository
         }
 
         var skipChecked = skip ?? 0;
-        var takeChecked = take ?? 50;
+        var takeChecked = (take ?? 0) == 0 ? 50 : take!.Value;
 
-        try
+        var data = await query
+                        .OrderByDescending(r => r.CreatedAt)
+                        .Skip(skipChecked)
+                        .Take(takeChecked)
+                        .Select(e => new RolloverModel
+                        {
+                            Id = e.Id,
+                            RolloverWorkflowRunId = e.RolloverWorkflowRunId,
+                            QualificationVersionId = e.QualificationVersionId,
+                            FundingOfferId = e.FundingOfferId,
+                            AcademicYear = e.AcademicYear,
+                            RolloverCandidatesId = e.RolloverCandidatesId,
+                            PassP1 = e.PassP1,
+                            P1FailureReason = e.P1FailureReason,
+                            IncludedInP1Export = e.IncludedInP1Export,
+                            IncludedInFinalUpload = e.IncludedInFinalUpload,
+                            CurrentFundingEndDate = e.CurrentFundingEndDate,
+                            ProposedFundingEndDate = e.ProposedFundingEndDate,
+                            CreatedAt = e.CreatedAt,
+                            UpdatedAt = e.UpdatedAt
+                        })
+                        .ToListAsync();
+
+        return new RolloverWorkflowCandidatesResult
         {
-            var data = await query
-                            .OrderByDescending(r => r.CreatedAt)
-                            .Skip(skipChecked)
-                            .Take(takeChecked)
-                            .Select(e => new RolloverModel
-                            {
-                                Id = e.Id,
-                                RolloverWorkflowRunId = e.RolloverWorkflowRunId,
-                                QualificationVersionId = e.QualificationVersionId,
-                                FundingOfferId = e.FundingOfferId,
-                                AcademicYear = e.AcademicYear,
-                                //RolloverCandidateId = e.RolloverCandidateId,
-                                PassP1 = e.PassP1,
-                                P1FailureReason = e.P1FailureReason,
-                                IncludedInP1Export = e.IncludedInP1Export,
-                                IncludedInFinalUpload = e.IncludedInFinalUpload,
-                                CurrentFundingEndDate = e.CurrentFundingEndDate,
-                                ProposedFundingEndDate = e.ProposedFundingEndDate,
-                                CreatedAt = e.CreatedAt,
-                                UpdatedAt = e.UpdatedAt
-                            })
-                            .ToListAsync();
-
-            return new RolloverWorkflowCandidatesResult
-            {
-                Data = data,
-                Skip = skip,
-                Take = take,
-                TotalRecords = totalRecords
-            };
-        }
-        catch (Exception)
-        {
-
-            throw;
-        }
-        
+            Data = data,
+            Skip = skip,
+            Take = take,
+            TotalRecords = totalRecords
+        };
     }
 }
