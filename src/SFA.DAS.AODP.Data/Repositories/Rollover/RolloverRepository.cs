@@ -91,6 +91,9 @@ public class RolloverRepository : IRolloverRepository
         .AsNoTracking()
         .Select(rc => new RolloverCandidate
         {
+            Id = rc.Id,
+            QualificationVersionId = rc.QualificationVersionId,
+            FundingOfferId = rc.FundingOfferId,
             Qan = rc.QualificationVersion.Qualification.Qan,
             Title = rc.QualificationVersion.Qualification.QualificationName ?? string.Empty,
             AwardingOrganisation = rc.QualificationVersion.Organisation.NameOfqual ?? string.Empty,
