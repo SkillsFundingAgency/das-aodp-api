@@ -7,7 +7,7 @@ public class RolloverWorkflowCandidate
     public Guid QualificationVersionId { get; set; }
     public Guid FundingOfferId { get; set; }
     public string AcademicYear { get; set; } = null!;
-    public Guid RolloverCandidateId { get; set; }
+    public Guid RolloverCandidatesId { get; set; }
     public bool PassP1 { get; set; }
     public string? P1FailureReason { get; set; }
     public bool IncludedInP1Export { get; set; }
