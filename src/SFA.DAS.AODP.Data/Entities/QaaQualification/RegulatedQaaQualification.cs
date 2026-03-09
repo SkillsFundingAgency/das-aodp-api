@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Internal;
 
 namespace SFA.DAS.AODP.Data.Entities.QaaQualification;
 
@@ -60,7 +61,7 @@ public partial class RegulatedQaaQualification
     /// <summary>
     /// What date is the last date that funding can be approved for, this is set as part of the output file generation.
     /// </summary>
-    public DateOnly? LastFundingApprovalEndDate { get; private set; }
+    public DateOnly? LastFundingApprovalEndDate { get; set; }
 
     /// <summary>
     /// A value object representation for the sector subject area.
@@ -95,7 +96,7 @@ public partial class RegulatedQaaQualification
         };
     }
 
-    public RegulatedQaaQualification SetFundingApprovalEndDate(DateTime publicationDate)
+    public RegulatedQaaQualification SetFundingApprovalEndDate(DateTime publicationDate, IAcademicYearProvider academicYearProvider)
     {
         //If the Last Day for Registration is after the next website publication date then the Funding Approval End Date should be between the Last Day for Registration and the End of the Academic Year
         // 
@@ -110,16 +111,14 @@ public partial class RegulatedQaaQualification
             var dates = new List<DateOnly>
             {
                 LastDateForRegistration,
-                GetAcademicYear()
+                academicYearProvider.GetCurrentAcademicYearEndDate()
             };
 
             LastFundingApprovalEndDate = dates.Min();
-            return this;
         }
-
-        if (LastDateForRegistration < publicationDateOnly)
+        else if (LastDateForRegistration < publicationDateOnly)
         {
-            if (LastDateForRegistration > LastFundingApprovalEndDate || 
+            if (LastDateForRegistration > LastFundingApprovalEndDate ||
                 LastFundingApprovalEndDate is null)
             {
                 LastFundingApprovalEndDate = LastDateForRegistration;
@@ -128,16 +127,24 @@ public partial class RegulatedQaaQualification
 
         return this;
     }
+}
 
-    private static DateOnly GetAcademicYear()
+public class AcademicYearProvider(ISystemClock clock) : IAcademicYearProvider
+{
+    public DateOnly GetCurrentAcademicYearEndDate()
     {
-        var today = DateTime.Today;
+        var today = clock.UtcNow.Date;
 
         if (today > new DateTime(today.Year, 7, 31))
         {
             return new DateOnly(today.Year + 1, 7, 31);
         }
 
-        return DateOnly.FromDateTime(today);
+        return new DateOnly(today.Year, 7, 31);
     }
+}
+
+public interface IAcademicYearProvider
+{
+    DateOnly GetCurrentAcademicYearEndDate();
 }

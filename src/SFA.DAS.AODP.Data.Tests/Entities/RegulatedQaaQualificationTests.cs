@@ -1,4 +1,5 @@
-﻿using SFA.DAS.AODP.Data.Entities.QaaQualification;
+﻿using Moq;
+using SFA.DAS.AODP.Data.Entities.QaaQualification;
 
 namespace SFA.DAS.AODP.Data.UnitTests.Entities;
 
@@ -105,9 +106,11 @@ public class RegulatedQaaQualificationTests
     }
 
     [Fact]
-    public void METHOD()
+    public void SetFundingApprovalEndDate_LastDateForRegistrationAfterPublicationDate_LastDateEarlierThanAcademicYearEnd_ShouldUseLastDateForRegistration()
     {
         // Arrange
+        var mockAcademicYearProvider = new Mock<IAcademicYearProvider>();
+        var academicYearEndDate = new DateOnly(2026, 07, 31);
         var snapshot1 = new DateTime(2024, 02, 15);
         var publicationDate = new DateTime(2026, 03, 10);
         var lastDateForRegistration = new DateOnly(2026, 03, 30);
@@ -115,10 +118,85 @@ public class RegulatedQaaQualificationTests
             snapshot1, TestAimCode, TestQualificationTitle, TestAwardingBody,
             _testStartDate, lastDateForRegistration, _testSectorSubjectArea);
 
+        // Expectations
+        mockAcademicYearProvider.Setup(o => o.GetCurrentAcademicYearEndDate()).Returns(academicYearEndDate);
+
         // Act
-        qualification1.SetFundingApprovalEndDate(publicationDate);
+        qualification1.SetFundingApprovalEndDate(publicationDate, mockAcademicYearProvider.Object);
 
         // Assert
-        Assert.Equal( qualification1.LastFundingApprovalEndDate);
+        Assert.Equal(lastDateForRegistration, qualification1.LastFundingApprovalEndDate);
+    }
+
+    [Fact]
+    public void SetFundingApprovalEndDate_LastDateForRegistrationAfterPublicationDate_LastDateLaterThanAcademicYearEnd_ShouldUseAcademicYearEnd()
+    {
+        // Arrange
+        var mockAcademicYearProvider = new Mock<IAcademicYearProvider>();
+        var academicYearEndDate = new DateOnly(2026, 07, 31);
+        var snapshot1 = new DateTime(2024, 02, 15);
+        var publicationDate = new DateTime(2026, 03, 10);
+        var lastDateForRegistration = new DateOnly(2026, 08, 1);
+        var qualification1 = RegulatedQaaQualification.Create(
+            snapshot1, TestAimCode, TestQualificationTitle, TestAwardingBody,
+            _testStartDate, lastDateForRegistration, _testSectorSubjectArea);
+        qualification1.LastFundingApprovalEndDate = new DateOnly(2026, 03, 20);
+
+        // Expectations
+        mockAcademicYearProvider.Setup(o => o.GetCurrentAcademicYearEndDate()).Returns(academicYearEndDate);
+
+        // Act
+        qualification1.SetFundingApprovalEndDate(publicationDate, mockAcademicYearProvider.Object);
+
+        // Assert
+        Assert.Equal(academicYearEndDate, qualification1.LastFundingApprovalEndDate);
+    }
+
+    [Fact]
+    public void SetFundingApprovalEndDate_LastDateForRegistrationBeforePublicationDate_LastDateAfterCurrentApproval_UseLastDate()
+    {
+        // Arrange
+        var mockAcademicYearProvider = new Mock<IAcademicYearProvider>();
+        var academicYearEndDate = new DateOnly(2026, 07, 31);
+        var snapshot1 = new DateTime(2024, 02, 15);
+        var publicationDate = new DateTime(2026, 04, 30);
+        var lastDateForRegistration = new DateOnly(2026, 03, 30);
+        var qualification1 = RegulatedQaaQualification.Create(
+            snapshot1, TestAimCode, TestQualificationTitle, TestAwardingBody,
+            _testStartDate, lastDateForRegistration, _testSectorSubjectArea);
+        qualification1.LastFundingApprovalEndDate = new DateOnly(2026, 03, 20);
+
+        // Expectations
+        mockAcademicYearProvider.Setup(o => o.GetCurrentAcademicYearEndDate()).Returns(academicYearEndDate);
+
+        // Act
+        qualification1.SetFundingApprovalEndDate(publicationDate, mockAcademicYearProvider.Object);
+
+        // Assert
+        Assert.Equal(lastDateForRegistration, qualification1.LastFundingApprovalEndDate);
+    }
+
+    [Fact]
+    public void SetFundingApprovalEndDate_LastDateForRegistrationBeforePublicationDate_LastDateBeforeCurrentApproval_UseExistingValue()
+    {
+        // Arrange
+        var mockAcademicYearProvider = new Mock<IAcademicYearProvider>();
+        var academicYearEndDate = new DateOnly(2026, 07, 31);
+        var snapshot1 = new DateTime(2024, 02, 15);
+        var publicationDate = new DateTime(2026, 04, 30);
+        var lastDateForRegistration = new DateOnly(2026, 03, 30);
+        var qualification1 = RegulatedQaaQualification.Create(
+            snapshot1, TestAimCode, TestQualificationTitle, TestAwardingBody,
+            _testStartDate, lastDateForRegistration, _testSectorSubjectArea);
+        qualification1.LastFundingApprovalEndDate = new DateOnly(2026, 04, 20);
+
+        // Expectations
+        mockAcademicYearProvider.Setup(o => o.GetCurrentAcademicYearEndDate()).Returns(academicYearEndDate);
+
+        // Act
+        qualification1.SetFundingApprovalEndDate(publicationDate, mockAcademicYearProvider.Object);
+
+        // Assert
+        Assert.Equal(new DateOnly(2026, 04, 20), qualification1.LastFundingApprovalEndDate);
     }
 }
