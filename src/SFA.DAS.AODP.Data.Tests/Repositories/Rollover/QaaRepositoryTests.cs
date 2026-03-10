@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
-using SFA.DAS.AODP.Data.Repositories.Rollover;
+using SFA.DAS.AODP.Data.Repositories.QaaQualification;
 
 namespace SFA.DAS.AODP.Data.UnitTests.Repositories.Rollover;
 
@@ -9,6 +9,7 @@ public class QaaRepositoryTests
 {
     private readonly ApplicationDbContext _dbContext = new(new DbContextOptionsBuilder<ApplicationDbContext>()
         .UseInMemoryDatabase(Guid.NewGuid().ToString())
+        //.UseSqlServer("Data Source=localhost;Integrated Security=True;Persist Security Info=False;Encrypt=True;TrustServerCertificate=True;Command Timeout=0;Initial Catalog=SFA.DAS.AODP.Database")
         .Options);
 
     [Fact]
@@ -56,5 +57,18 @@ public class QaaRepositoryTests
 
         // Assert
         Assert.Empty(result);
+    }
+
+    [Fact]
+    public void SaveChanges_ShouldReturnCompletedTask()
+    {
+        // Arrange
+        var sut = new QaaQualificationRepository(_dbContext);
+
+        // Act
+        var result = sut.SaveChangesAsync(CancellationToken.None);
+
+        // Assert
+        Assert.Equal(Task.CompletedTask, result);
     }
 }

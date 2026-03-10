@@ -8,8 +8,8 @@ using SFA.DAS.AODP.Infrastructure;
 using SFA.DAS.AODP.Models.Settings;
 using System.Text;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
-using SFA.DAS.AODP.Data.Repositories.Rollover;
 using SFA.DAS.AODP.Data.Providers;
+using SFA.DAS.AODP.Data.Repositories.QaaQualification;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 {

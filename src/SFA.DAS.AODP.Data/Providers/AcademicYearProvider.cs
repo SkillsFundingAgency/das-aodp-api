@@ -1,12 +1,10 @@
-﻿using Microsoft.Extensions.Internal;
-
-namespace SFA.DAS.AODP.Data.Providers;
+﻿namespace SFA.DAS.AODP.Data.Providers;
 
 /// <summary>
 /// Implementation for <see cref="IAcademicYearProvider"/>.
 /// </summary>
 /// <param name="clock">Abstraction over the system clock.</param>
-public class AcademicYearProvider(ISystemClock clock) : IAcademicYearProvider
+public class AcademicYearProvider(ISystemClockProvider clock) : IAcademicYearProvider
 {
     /// <inheritdoc/>.
     public DateOnly GetCurrentAcademicYearEndDate()

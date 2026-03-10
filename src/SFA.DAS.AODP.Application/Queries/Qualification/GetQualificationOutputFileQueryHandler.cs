@@ -5,8 +5,8 @@ using SFA.DAS.AODP.Infrastructure;
 using SFA.DAS.AODP.Models.Settings;
 using System.Globalization;
 using System.Text;
-using SFA.DAS.AODP.Data.Repositories.Rollover;
 using SFA.DAS.AODP.Data.Providers;
+using SFA.DAS.AODP.Data.Repositories.QaaQualification;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualifications;
 
@@ -48,6 +48,8 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
                 {
                     qaaQualification.SetFundingApprovalEndDate(request.PublicationDate, _academicYearProvider);
                 }
+
+                await _qaaQualificationRepository.SaveChangesAsync(cancellationToken);
             }
 
             var qualifications = await _outputFileRepository.GetQualificationOutputFile();

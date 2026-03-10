@@ -1,8 +1,7 @@
-﻿using Microsoft.Extensions.Internal;
-using Moq;
+﻿using Moq;
 using SFA.DAS.AODP.Data.Providers;
 
-namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification;
+namespace SFA.DAS.AODP.Data.UnitTests.Providers;
 
 public class AcademicYearProviderTests
 {
@@ -10,11 +9,11 @@ public class AcademicYearProviderTests
     public void GetCurrentAcademicYearEndDate_CurrentDateIsBeforeThirtyFirstJuly_ReturnCurrentYearsAcademicEndDate()
     {
         // Arrange
-        var mockSystemClock = new Mock<ISystemClock>();
+        var mockSystemClock = new Mock<ISystemClockProvider>();
         var sut = new AcademicYearProvider(mockSystemClock.Object);
 
         // Expectations
-        mockSystemClock.Setup(o => o.UtcNow).Returns(new DateTimeOffset(new DateTime(2025, 07, 1)));
+        mockSystemClock.Setup(o => o.UtcNow).Returns(new DateTime(2025, 07, 1));
 
         // Act
         var result = sut.GetCurrentAcademicYearEndDate();
@@ -27,11 +26,11 @@ public class AcademicYearProviderTests
     public void GetCurrentAcademicYearEndDate_CurrentDateIsAfterThirtyFirstJuly_ReturnNextYearsAcademicEndDate()
     {
         // Arrange
-        var mockSystemClock = new Mock<ISystemClock>();
+        var mockSystemClock = new Mock<ISystemClockProvider>();
         var sut = new AcademicYearProvider(mockSystemClock.Object);
 
         // Expectations
-        mockSystemClock.Setup(o => o.UtcNow).Returns(new DateTimeOffset(new DateTime(2025, 08, 1)));
+        mockSystemClock.Setup(o => o.UtcNow).Returns(new DateTime(2025, 08, 1));
 
         // Act
         var result = sut.GetCurrentAcademicYearEndDate();

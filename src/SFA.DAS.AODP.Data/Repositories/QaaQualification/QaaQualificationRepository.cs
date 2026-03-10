@@ -2,7 +2,7 @@
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
 
-namespace SFA.DAS.AODP.Data.Repositories.Rollover;
+namespace SFA.DAS.AODP.Data.Repositories.QaaQualification;
 
 /// <summary>
 /// Implementation for <see cref="IQaaQualificationRepository"/>.
@@ -15,4 +15,8 @@ public class QaaQualificationRepository(ApplicationDbContext context) : IQaaQual
     /// <inheritdoc/>.
     public async Task<IEnumerable<RegulatedQaaQualification>> GetAllAsync(CancellationToken cancellationToken) 
         => await _context.RegulatedQaaQualifications.ToListAsync(cancellationToken);
+
+    /// <inheritdoc/>.
+    public async Task SaveChangesAsync(CancellationToken cancellationToken) 
+        => await _context.SaveChangesAsync(cancellationToken);
 }
