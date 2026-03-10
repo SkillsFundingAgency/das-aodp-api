@@ -5,6 +5,9 @@ using SFA.DAS.AODP.Infrastructure;
 using SFA.DAS.AODP.Models.Settings;
 using System.Globalization;
 using System.Text;
+using SFA.DAS.AODP.Data.Providers;
+using SFA.DAS.AODP.Data.Repositories.QaaQualification;
+
 namespace SFA.DAS.AODP.Application.Queries.Qualifications;
 
 public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualificationOutputFileQuery, BaseMediatrResponse<GetQualificationOutputFileResponse>>
@@ -13,15 +16,19 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
     private readonly IQualificationOutputFileLogRepository _outputFileLogRepository;
     private readonly IBlobStorageService _blobStorageService;
     private readonly OutputFileBlobStorageSettings _storageSettings;
+    private readonly IQaaQualificationRepository _qaaQualificationRepository;
+    private readonly IAcademicYearProvider _academicYearProvider;
 
     public const string NoQualificationsFound = "No qualifications found for the output file.";
     public const string UnexpectedErrorGeneratingFile = "An unexpected error occurred while generating the output file.";
-    public GetQualificationOutputFileQueryHandler(IQualificationOutputFileRepository outputFileRepository, IQualificationOutputFileLogRepository outputFileLogRepository, IBlobStorageService blobStorageService, OutputFileBlobStorageSettings blobStorageSettings )
+    public GetQualificationOutputFileQueryHandler(IQualificationOutputFileRepository outputFileRepository, IQualificationOutputFileLogRepository outputFileLogRepository, IBlobStorageService blobStorageService, OutputFileBlobStorageSettings blobStorageSettings, IQaaQualificationRepository qaaQualificationRepository, IAcademicYearProvider academicYearProvider)
     {
         _outputFileRepository = outputFileRepository;
         _outputFileLogRepository = outputFileLogRepository;
         _blobStorageService = blobStorageService;
         _storageSettings = blobStorageSettings;
+        _qaaQualificationRepository = qaaQualificationRepository;
+        _academicYearProvider = academicYearProvider;
     }
 
     public async Task<BaseMediatrResponse<GetQualificationOutputFileResponse>> Handle(
@@ -32,6 +39,19 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
 
         try
         {
+            var qaaQualifications = await _qaaQualificationRepository.GetAllAsync(cancellationToken);
+
+            var regulatedQaaQualifications = qaaQualifications.ToList();
+            if (regulatedQaaQualifications.Count > 0)
+            {
+                foreach (var qaaQualification in regulatedQaaQualifications)
+                {
+                    qaaQualification.SetFundingApprovalEndDate(request.PublicationDate, _academicYearProvider);
+                }
+
+                await _qaaQualificationRepository.SaveChangesAsync(cancellationToken);
+            }
+
             var qualifications = await _outputFileRepository.GetQualificationOutputFile();
 
             if (qualifications is null)

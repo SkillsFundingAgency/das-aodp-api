@@ -8,6 +8,8 @@ using SFA.DAS.AODP.Infrastructure.Services;
 using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
 using SFA.DAS.AODP.Models.Settings;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Internal;
+using SFA.DAS.AODP.Data.Providers;
 
 namespace SFA.DAS.AODP.Api.Extensions;
 
@@ -50,6 +52,9 @@ public static class AddServiceRegistrationsExtension
         });
         services.AddScoped<IQanValidationService, QanValidationService>();
         services.AddScoped<IQualificationsApi, QualificationsApi>();
+
+        services.AddScoped<ISystemClockProvider, SystemClockProvider>();
+        services.AddScoped<IAcademicYearProvider, AcademicYearProvider>();
 
         return services;
     }

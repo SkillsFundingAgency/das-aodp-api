@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.Feedback;
@@ -113,6 +114,33 @@ namespace SFA.DAS.AODP.Data.Context
                 .HasConversion(
                     ssaTier => ssaTier.Name, 
                     ssaName => SectorSubjectArea.FromName(ssaName));
+
+            var dateOnlyConverter = new ValueConverter<DateOnly, DateTime>(
+                dateOnly => dateOnly.ToDateTime(TimeOnly.MinValue),
+                dateTime => DateOnly.FromDateTime(dateTime));
+
+            var nullableDateOnlyConverter = new ValueConverter<DateOnly?, DateTime?>(
+                dateOnly => dateOnly.HasValue
+                    ? dateOnly.Value.ToDateTime(TimeOnly.MinValue)
+                    : null,
+                dateTime => dateTime.HasValue
+                    ? DateOnly.FromDateTime(dateTime.Value)
+                    : null);
+
+            modelBuilder.Entity<RegulatedQaaQualification>()
+                .Property(q => q.StartDate)
+                .HasConversion(dateOnlyConverter)
+                .HasColumnType("datetime2");
+
+            modelBuilder.Entity<RegulatedQaaQualification>()
+                .Property(q => q.LastDateForRegistration)
+                .HasConversion(dateOnlyConverter)
+                .HasColumnType("datetime2");
+
+            modelBuilder.Entity<RegulatedQaaQualification>()
+                .Property(q => q.LastFundingApprovalEndDate)
+                .HasConversion(nullableDateOnlyConverter)
+                .HasColumnType("datetime2");
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 
