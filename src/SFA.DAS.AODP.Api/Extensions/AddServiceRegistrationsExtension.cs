@@ -8,7 +8,7 @@ using SFA.DAS.AODP.Infrastructure.Services;
 using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
 using SFA.DAS.AODP.Models.Settings;
 using System.Diagnostics.CodeAnalysis;
-using SFA.DAS.AODP.Data.Entities.QaaQualification;
+using SFA.DAS.AODP.Data.Providers;
 
 namespace SFA.DAS.AODP.Api.Extensions;
 

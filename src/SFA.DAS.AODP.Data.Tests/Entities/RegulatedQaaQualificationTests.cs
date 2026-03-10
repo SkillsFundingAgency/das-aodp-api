@@ -1,5 +1,6 @@
 ﻿using Moq;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
+using SFA.DAS.AODP.Data.Providers;
 
 namespace SFA.DAS.AODP.Data.UnitTests.Entities;
 

@@ -1,10 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SFA.DAS.AODP.Data.Providers;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Extensions.Internal;
 
 namespace SFA.DAS.AODP.Data.Entities.QaaQualification;
 
-[ExcludeFromCodeCoverage]
 [Table("QaaQualification", Schema = "regulated")]
 public partial class RegulatedQaaQualification
 {
@@ -127,24 +126,4 @@ public partial class RegulatedQaaQualification
 
         return this;
     }
-}
-
-public class AcademicYearProvider(ISystemClock clock) : IAcademicYearProvider
-{
-    public DateOnly GetCurrentAcademicYearEndDate()
-    {
-        var today = clock.UtcNow.Date;
-
-        if (today > new DateTime(today.Year, 7, 31))
-        {
-            return new DateOnly(today.Year + 1, 7, 31);
-        }
-
-        return new DateOnly(today.Year, 7, 31);
-    }
-}
-
-public interface IAcademicYearProvider
-{
-    DateOnly GetCurrentAcademicYearEndDate();
 }

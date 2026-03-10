@@ -19,6 +19,6 @@ SELECT
 	, LastDateForRegistration
 	, LastFundingApprovalEndDate
 	, SectorSubjectArea
-FROM dbo.RegulatedQaaQualification
+FROM regulated.QaaQualification
 
 GO
