@@ -34,19 +34,19 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                 var errors = new List<BulkReviewerErrorDto>();
                 var updatedCount = 0;
 
-                foreach (var id in request.ApplicationIds)
+                foreach (var applicationReviewId in request.ApplicationReviewIds)
                 {
                     Data.Entities.Application.Application? application = null;
 
                     try 
                     {
-                        application = await _repository.GetByIdAsync(id);
+                        application = await _repository.GetByReviewIdAsync(applicationReviewId);
                     }
                     catch (RecordNotFoundException) 
                     { 
                         errors.Add(new BulkReviewerErrorDto 
                         { 
-                            ApplicationId = id, 
+                            ApplicationId = applicationReviewId, 
                             ErrorType = BulkReviewerErrorType.Missing 
                         }); 
                     
@@ -67,13 +67,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
 
                     if (ReviewerAssignmentRules.WouldCauseConflict(newReviewer1, newReviewer2))
                     {
-                        errors.Add(new BulkReviewerErrorDto
-                        {
-                            ApplicationId = application.Id,
-                            ReferenceNumber = application.ReferenceId,
-                            Qan = application.QualificationNumber,
-                            ErrorType = BulkReviewerErrorType.Conflict
-                        });
+                        errors.Add(CreateError(application, BulkReviewerErrorType.Conflict));
                         continue;
                     }
 
@@ -98,7 +92,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
 
                     var msgCommand = new CreateApplicationMessageCommand
                     {
-                        ApplicationId = id,
+                        ApplicationId = application.Id,
                         MessageText = messageText,
                         SentByEmail = request.SentByEmail,
                         SentByName = request.SentByName,
@@ -110,13 +104,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
 
                     if (!msgResult.Success)
                     {
-                        errors.Add(new BulkReviewerErrorDto
-                        {
-                            ApplicationId = application.Id,
-                            ReferenceNumber = application.ReferenceId,
-                            Qan = application.QualificationNumber,
-                            ErrorType = BulkReviewerErrorType.MessageFailed
-                        });
+                        errors.Add(CreateError(application, BulkReviewerErrorType.MessageFailed));
                     }
 
                     updatedCount++;
@@ -126,7 +114,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
 
                 result.Value = new BulkSaveReviewerCommandResponse
                 {
-                    RequestedCount = request.ApplicationIds.Count,
+                    RequestedCount = request.ApplicationReviewIds.Count,
                     UpdatedCount = updatedCount,
                     ErrorCount = errorCount,
                     Errors = errors
@@ -142,6 +130,19 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
             }
 
             return result;
+        }
+
+        private BulkReviewerErrorDto CreateError(Data.Entities.Application.Application application, BulkReviewerErrorType errorType)
+        {
+            return new BulkReviewerErrorDto
+            {
+                ApplicationId = application.Id,
+                ReferenceNumber = application.ReferenceId,
+                Qan = application.QualificationNumber,
+                Title = application.Name,
+                AwardingOrganisation = application.AwardingOrganisationName,
+                ErrorType = errorType
+            };
         }
     }
 }

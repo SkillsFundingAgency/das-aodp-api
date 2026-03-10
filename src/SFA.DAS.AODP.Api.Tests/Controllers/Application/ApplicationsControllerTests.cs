@@ -682,7 +682,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
             _mediatorMock.Verify(m =>
                 m.Send(
                     It.Is<BulkSaveReviewerCommand>(c =>
-                        c.ApplicationIds.SequenceEqual(request.ApplicationIds) &&
+                        c.ApplicationReviewIds.SequenceEqual(request.ApplicationReviewIds) &&
                         c.Reviewer1 == request.Reviewer1 &&
                         c.Reviewer2 == request.Reviewer2 &&
                         c.SentByEmail == request.SentByEmail &&
@@ -721,7 +721,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
             _mediatorMock.Verify(m =>
                 m.Send(
                     It.Is<BulkSaveReviewerCommand>(c =>
-                        c.ApplicationIds.SequenceEqual(request.ApplicationIds)
+                        c.ApplicationReviewIds.SequenceEqual(request.ApplicationReviewIds)
                     ),
                     default),
                 Times.Once);

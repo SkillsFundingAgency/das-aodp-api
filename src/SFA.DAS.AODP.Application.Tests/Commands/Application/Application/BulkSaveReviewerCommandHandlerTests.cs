@@ -34,7 +34,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review
             var command = new BulkSaveReviewerCommand
             {
                 UserType = "INVALID",
-                ApplicationIds = new List<Guid> { Guid.NewGuid() },
+                ApplicationReviewIds = new List<Guid> { Guid.NewGuid() },
                 SentByEmail = SentByEmail,
                 SentByName = SentByName
             };
@@ -56,7 +56,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review
             var command = new BulkSaveReviewerCommand
             {
                 UserType = UserType.Qfau.ToString(),
-                ApplicationIds = new List<Guid> { id },
+                ApplicationReviewIds = new List<Guid> { id },
                 SentByEmail = SentByEmail,
                 SentByName = SentByName
             };
@@ -90,7 +90,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review
                 UserType = UserType.Qfau.ToString(),
                 Reviewer1Set = false,
                 Reviewer2Set = false,
-                ApplicationIds = new List<Guid> { id },
+                ApplicationReviewIds = new List<Guid> { id },
                 SentByEmail = SentByEmail,
                 SentByName = SentByName
             };
@@ -126,7 +126,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review
                 Reviewer1Set = true,
                 Reviewer1 = ReviewerNew1,
                 Reviewer2Set = false,
-                ApplicationIds = new List<Guid> { id },
+                ApplicationReviewIds = new List<Guid> { id },
                 SentByName = SentByName,
                 SentByEmail = SentByEmail
             };
@@ -165,7 +165,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review
                 Reviewer1Set = true,
                 Reviewer1 = null,
                 Reviewer2Set = false,
-                ApplicationIds = new List<Guid> { id },
+                ApplicationReviewIds = new List<Guid> { id },
                 SentByName = SentByName,
                 SentByEmail = SentByEmail
             };
@@ -204,7 +204,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review
                 Reviewer1Set = false,
                 Reviewer2Set = true,
                 Reviewer2 = ReviewerNew2,
-                ApplicationIds = new List<Guid> { id },
+                ApplicationReviewIds = new List<Guid> { id },
                 SentByName = SentByName,
                 SentByEmail = SentByEmail
             };
@@ -244,7 +244,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review
                 Reviewer1Set = false,
                 Reviewer2Set = true,
                 Reviewer2 = null,
-                ApplicationIds = new List<Guid> { id },
+                ApplicationReviewIds = new List<Guid> { id },
                 SentByName = SentByName,
                 SentByEmail = SentByEmail
             };
@@ -284,7 +284,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review
                 Reviewer1 = ReviewerNew1,
                 Reviewer2Set = true,
                 Reviewer2 = ReviewerNew2,
-                ApplicationIds = new List<Guid> { id },
+                ApplicationReviewIds = new List<Guid> { id },
                 SentByName = SentByName,
                 SentByEmail = SentByEmail
             };
@@ -324,7 +324,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review
                 Reviewer1 = null,
                 Reviewer2Set = true,
                 Reviewer2 = null,
-                ApplicationIds = new List<Guid> { id },
+                ApplicationReviewIds = new List<Guid> { id },
                 SentByName = SentByName,
                 SentByEmail = SentByEmail
             };
@@ -364,7 +364,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review
                 Reviewer1 = ReviewerNew1,
                 Reviewer2Set = true,
                 Reviewer2 = ReviewerNew1, // conflict
-                ApplicationIds = new List<Guid> { id },
+                ApplicationReviewIds = new List<Guid> { id },
                 SentByEmail = SentByEmail,
                 SentByName = SentByName
             };
@@ -395,7 +395,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review
                 Reviewer1Set = true,
                 Reviewer1 = ReviewerNew1,
                 Reviewer2Set = false,
-                ApplicationIds = new List<Guid> { id },
+                ApplicationReviewIds = new List<Guid> { id },
                 SentByName = SentByName,
                 SentByEmail = SentByEmail
             };
@@ -436,7 +436,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review
                 Reviewer1Set = true,
                 Reviewer1 = ReviewerNew1,
                 Reviewer2Set = false,
-                ApplicationIds = new List<Guid> { id1, id2 },
+                ApplicationReviewIds = new List<Guid> { id1, id2 },
                 SentByName = SentByName,
                 SentByEmail = SentByEmail
             };
@@ -464,7 +464,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review
                 UserType = UserType.Qfau.ToString(),
                 Reviewer1Set = true,
                 Reviewer1 = ReviewerNew1,
-                ApplicationIds = new List<Guid> { id },
+                ApplicationReviewIds = new List<Guid> { id },
                 SentByEmail = SentByEmail,
                 SentByName = SentByName
             };
