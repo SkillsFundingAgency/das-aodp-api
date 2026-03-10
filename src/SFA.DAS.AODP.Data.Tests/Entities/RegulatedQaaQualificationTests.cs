@@ -39,6 +39,7 @@ public class RegulatedQaaQualificationTests
         Assert.Equal("Access to HE", qualification.Type);
         Assert.Equal("Approved", qualification.Status);
         Assert.Null(qualification.LastFundingApprovalEndDate);
+        Assert.Equal(Guid.Empty, qualification.Id);
     }
 
     [Fact]
@@ -199,5 +200,29 @@ public class RegulatedQaaQualificationTests
 
         // Assert
         Assert.Equal(new DateOnly(2026, 04, 20), qualification1.LastFundingApprovalEndDate);
+    }
+
+    [Fact]
+    public void SetFundingApprovalEndDate_LastDateForRegistrationBeforePublicationDate_CurrentApprovalNull_UseLastDate()
+    {
+        // Arrange
+        var mockAcademicYearProvider = new Mock<IAcademicYearProvider>();
+        var academicYearEndDate = new DateOnly(2026, 07, 31);
+        var snapshot1 = new DateTime(2024, 02, 15);
+        var publicationDate = new DateTime(2026, 04, 30);
+        var lastDateForRegistration = new DateOnly(2026, 03, 30);
+        var qualification1 = RegulatedQaaQualification.Create(
+            snapshot1, TestAimCode, TestQualificationTitle, TestAwardingBody,
+            _testStartDate, lastDateForRegistration, _testSectorSubjectArea);
+        qualification1.LastFundingApprovalEndDate = null;
+
+        // Expectations
+        mockAcademicYearProvider.Setup(o => o.GetCurrentAcademicYearEndDate()).Returns(academicYearEndDate);
+
+        // Act
+        qualification1.SetFundingApprovalEndDate(publicationDate, mockAcademicYearProvider.Object);
+
+        // Assert
+        Assert.Equal(new DateOnly(2026, 03, 30), qualification1.LastFundingApprovalEndDate);
     }
 }
