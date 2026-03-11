@@ -26,97 +26,31 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
 
             try
             {
-                if (!Enum.TryParse(request.UserType, true, out UserType userType))
-                {
-                    throw new ArgumentException($"Invalid User Type: {request.UserType}");
-                }
+                var userType = ParseUserType(request.UserType);
 
                 var errors = new List<BulkReviewerErrorDto>();
                 var updatedCount = 0;
 
                 foreach (var applicationReviewId in request.ApplicationReviewIds)
                 {
-                    Data.Entities.Application.Application? application = null;
+                    var updated = await ProcessApplicationAsync(
+                        applicationReviewId,
+                        request,
+                        userType,
+                        errors,
+                        cancellationToken);
 
-                    try 
+                    if (updated)
                     {
-                        application = await _repository.GetByReviewIdAsync(applicationReviewId);
+                        updatedCount++;
                     }
-                    catch (RecordNotFoundException) 
-                    { 
-                        errors.Add(new BulkReviewerErrorDto 
-                        { 
-                            ApplicationId = applicationReviewId, 
-                            ErrorType = BulkReviewerErrorType.Missing 
-                        }); 
-                    
-                        continue; 
-                    }
-
-                    var oldReviewer1 = application.Reviewer1;
-                    var oldReviewer2 = application.Reviewer2;
-
-                    var newReviewer1 = request.Reviewer1Set ? request.Reviewer1 : oldReviewer1;
-                    var newReviewer2 = request.Reviewer2Set ? request.Reviewer2 : oldReviewer2;
-
-                    bool reviewer1Changed = request.Reviewer1Set && oldReviewer1 != newReviewer1;
-                    bool reviewer2Changed = request.Reviewer2Set && oldReviewer2 != newReviewer2;
-
-                    if (!reviewer1Changed && !reviewer2Changed)
-                        continue;
-
-                    if (ReviewerAssignmentRules.WouldCauseConflict(newReviewer1, newReviewer2))
-                    {
-                        errors.Add(CreateError(application, BulkReviewerErrorType.Conflict));
-                        continue;
-                    }
-
-                    application.Reviewer1 = newReviewer1;
-                    application.Reviewer2 = newReviewer2;
-
-                    await _repository.UpdateAsync(application);
-
-                    var changes = new List<string>();
-
-                    if (oldReviewer1 != newReviewer1)
-                    {
-                        changes.Add($"Previous Reviewer1: {oldReviewer1}\nNew Reviewer1: {newReviewer1}");
-                    }
-
-                    if (oldReviewer2 != newReviewer2)
-                    {
-                        changes.Add($"Previous Reviewer2: {oldReviewer2}\nNew Reviewer2: {newReviewer2}");
-                    }
-
-                    var messageText = string.Join("\n", changes);
-
-                    var msgCommand = new CreateApplicationMessageCommand
-                    {
-                        ApplicationId = application.Id,
-                        MessageText = messageText,
-                        SentByEmail = request.SentByEmail,
-                        SentByName = request.SentByName,
-                        UserType = userType.ToString(),
-                        MessageType = MessageType.QfauOwnerUpdated.ToString()
-                    };
-
-                    var msgResult = await _mediator.Send(msgCommand);
-
-                    if (!msgResult.Success)
-                    {
-                        errors.Add(CreateError(application, BulkReviewerErrorType.MessageFailed));
-                    }
-
-                    updatedCount++;
                 }
-
-                var errorCount = errors.Count;
 
                 result.Value = new BulkSaveReviewerCommandResponse
                 {
                     RequestedCount = request.ApplicationReviewIds.Count,
                     UpdatedCount = updatedCount,
-                    ErrorCount = errorCount,
+                    ErrorCount = errors.Count,
                     Errors = errors
                 };
 
@@ -132,7 +66,99 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
             return result;
         }
 
-        private BulkReviewerErrorDto CreateError(Data.Entities.Application.Application application, BulkReviewerErrorType errorType)
+        private static UserType ParseUserType(string userType)
+        {
+            if (!Enum.TryParse(userType, true, out UserType parsedUserType))
+            {
+                throw new ArgumentException($"Invalid User Type: {userType}");
+            }
+
+            return parsedUserType;
+        }
+
+        private async Task<bool> ProcessApplicationAsync(
+            Guid applicationReviewId,
+            BulkSaveReviewerCommand request,
+            UserType userType,
+            List<BulkReviewerErrorDto> errors,
+            CancellationToken cancellationToken)
+        {
+            Data.Entities.Application.Application? application = null;
+
+            try
+            {
+                application = await _repository.GetByReviewIdAsync(applicationReviewId);
+            }
+            catch (RecordNotFoundException)
+            {
+                errors.Add(new BulkReviewerErrorDto
+                {
+                    ApplicationId = applicationReviewId,
+                    Title = "Application not found",
+                    ErrorType = BulkReviewerErrorType.Missing
+                });
+
+                return false;
+            }
+
+            var oldReviewer1 = application.Reviewer1;
+            var oldReviewer2 = application.Reviewer2;
+
+            var newReviewer1 = request.Reviewer1Set ? request.Reviewer1 : oldReviewer1;
+            var newReviewer2 = request.Reviewer2Set ? request.Reviewer2 : oldReviewer2;
+
+            bool reviewer1Changed = request.Reviewer1Set && oldReviewer1 != newReviewer1;
+            bool reviewer2Changed = request.Reviewer2Set && oldReviewer2 != newReviewer2;
+
+            if (!reviewer1Changed && !reviewer2Changed)
+            {
+                return false;
+            }
+
+            if (ReviewerAssignmentRules.WouldCauseConflict(newReviewer1, newReviewer2))
+            {
+                errors.Add(CreateError(application, BulkReviewerErrorType.Conflict));
+                return false;
+            }
+
+            application.Reviewer1 = newReviewer1;
+            application.Reviewer2 = newReviewer2;
+
+            await _repository.UpdateAsync(application);
+
+            var changes = new List<string>();
+
+            if (oldReviewer1 != newReviewer1)
+            {
+                changes.Add($"Previous Reviewer1: {oldReviewer1}\nNew Reviewer1: {newReviewer1}");
+            }
+
+            if (oldReviewer2 != newReviewer2)
+            {
+                changes.Add($"Previous Reviewer2: {oldReviewer2}\nNew Reviewer2: {newReviewer2}");
+            }
+
+            var msgCommand = new CreateApplicationMessageCommand
+            {
+                ApplicationId = application.Id,
+                MessageText = string.Join("\n", changes),
+                SentByEmail = request.SentByEmail,
+                SentByName = request.SentByName,
+                UserType = userType.ToString(),
+                MessageType = MessageType.QfauOwnerUpdated.ToString()
+            };
+
+            var msgResult = await _mediator.Send(msgCommand, cancellationToken);
+
+            if (!msgResult.Success)
+            {
+                errors.Add(CreateError(application, BulkReviewerErrorType.MessageFailed));
+            }
+
+            return true;
+        }
+
+        private static BulkReviewerErrorDto CreateError(Data.Entities.Application.Application application, BulkReviewerErrorType errorType)
         {
             return new BulkReviewerErrorDto
             {
