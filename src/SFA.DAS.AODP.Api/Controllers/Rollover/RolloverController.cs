@@ -8,13 +8,9 @@ namespace SFA.DAS.AODP.Api.Controllers.Rollover;
 [Route("api/rollover")]
 public class RolloverController : BaseController
 {
-    private readonly IMediator _mediator;
-    private readonly ILogger<RolloverController> _logger;
 
     public RolloverController(IMediator mediator, ILogger<RolloverController> logger) : base(mediator, logger)
     {
-        _mediator = mediator;
-        _logger = logger;
     }
 
     [HttpGet("workflowcandidates")]
