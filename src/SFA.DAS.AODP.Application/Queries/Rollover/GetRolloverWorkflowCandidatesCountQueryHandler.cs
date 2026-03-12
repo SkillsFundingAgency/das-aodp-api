@@ -19,19 +19,12 @@ public class GetRolloverWorkflowCandidatesCountQueryHandler : IRequestHandler<Ge
         {
             var result = await _repository.GetRolloverWorkflowCandidatesCountAsync(cancellationToken);
 
-            if (result != null)
+            response.Value = new GetRolloverWorkflowCandidatesCountQueryResponse
             {
-                response.Value = new GetRolloverWorkflowCandidatesCountQueryResponse
-                {
-                    TotalRecords = result.TotalRecords
-                };
-                response.Success = true;
-            }
-            else
-            {
-                response.Success = false;
-                response.ErrorMessage = "No rollover workflow candidates found.";
-            }
+                TotalRecords = result.TotalRecords
+            };
+            response.Success = true;
+          
         }
         catch (Exception ex)
         {

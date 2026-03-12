@@ -41,24 +41,6 @@ public class GetRolloverWorkflowCandidatesCountQueryHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ReturnsFailure_WhenRepositoryReturnsNull()
-    {
-        // Arrange
-        var query = new GetRolloverWorkflowCandidatesCountQuery();
-
-        _repositoryMock.Setup(r => r.GetRolloverWorkflowCandidatesCountAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync((RolloverWorkflowCandidatesCountResult?)null!);
-
-        // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        _repositoryMock.Verify(r => r.GetRolloverWorkflowCandidatesCountAsync(It.IsAny<CancellationToken>()), Times.Once);
-        Assert.False(result.Success);
-        Assert.Equal("No rollover workflow candidates found.", result.ErrorMessage);
-    }
-
-    [Fact]
     public async Task Handle_ReturnsFailure_WhenRepositoryThrows()
     {
         // Arrange
