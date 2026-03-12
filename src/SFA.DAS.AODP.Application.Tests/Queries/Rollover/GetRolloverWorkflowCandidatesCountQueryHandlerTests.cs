@@ -7,59 +7,53 @@ using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover;
 
-public class GetRolloverWorkflowCandidatesQueryHandlerTests
+public class GetRolloverWorkflowCandidatesCountQueryHandlerTests
 {
     private readonly IFixture _fixture;
     private readonly Mock<IRolloverRepository> _repositoryMock;
-    private readonly GetRolloverWorkflowCandidatesQueryHandler _handler;
+    private readonly GetRolloverWorkflowCandidatesCountQueryHandler _handler;
 
-    public GetRolloverWorkflowCandidatesQueryHandlerTests()
+    public GetRolloverWorkflowCandidatesCountQueryHandlerTests()
     {
         _fixture = new Fixture().Customize(new AutoMoqCustomization());
         _repositoryMock = _fixture.Freeze<Mock<IRolloverRepository>>();
-        _handler = _fixture.Create<GetRolloverWorkflowCandidatesQueryHandler>();
+        _handler = _fixture.Create<GetRolloverWorkflowCandidatesCountQueryHandler>();
     }
 
     [Fact]
     public async Task Handle_ReturnsData_WhenRepositoryReturnsData()
     {
         // Arrange
-        var query = new GetRolloverWorkflowCandidatesQuery(0, 10);
-        var repoResult = new RolloverWorkflowCandidatesResult
-        {
-            Data = _fixture.CreateMany<RolloverWorkflowCandidate>(2).ToList(),
-            Skip = 0,
-            Take = 10,
-            TotalRecords = 2
-        };
+        var query = new GetRolloverWorkflowCandidatesCountQuery();
+        var repoResult = new RolloverWorkflowCandidatesCountResult(2);
 
-        _repositoryMock.Setup(r => r.GetAllRolloverWorkflowCandidatesAsync(query.Skip, query.Take))
+        _repositoryMock.Setup(r => r.GetRolloverWorkflowCandidatesCountAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(repoResult);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
         // Assert
-        _repositoryMock.Verify(r => r.GetAllRolloverWorkflowCandidatesAsync(query.Skip, query.Take), Times.Once);
+        _repositoryMock.Verify(r => r.GetRolloverWorkflowCandidatesCountAsync(It.IsAny<CancellationToken>()), Times.Once);
         Assert.True(result.Success);
         Assert.NotNull(result.Value);
-        Assert.Equal(2, result.Value.Data.Count);
+        Assert.Equal(2, result.Value.TotalRecords);
     }
 
     [Fact]
     public async Task Handle_ReturnsFailure_WhenRepositoryReturnsNull()
     {
         // Arrange
-        var query = new GetRolloverWorkflowCandidatesQuery(0, 10);
+        var query = new GetRolloverWorkflowCandidatesCountQuery();
 
-        _repositoryMock.Setup(r => r.GetAllRolloverWorkflowCandidatesAsync(query.Skip, query.Take))
-            .ReturnsAsync((RolloverWorkflowCandidatesResult?)null!);
+        _repositoryMock.Setup(r => r.GetRolloverWorkflowCandidatesCountAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync((RolloverWorkflowCandidatesCountResult?)null!);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
         // Assert
-        _repositoryMock.Verify(r => r.GetAllRolloverWorkflowCandidatesAsync(query.Skip, query.Take), Times.Once);
+        _repositoryMock.Verify(r => r.GetRolloverWorkflowCandidatesCountAsync(It.IsAny<CancellationToken>()), Times.Once);
         Assert.False(result.Success);
         Assert.Equal("No rollover workflow candidates found.", result.ErrorMessage);
     }
@@ -68,16 +62,16 @@ public class GetRolloverWorkflowCandidatesQueryHandlerTests
     public async Task Handle_ReturnsFailure_WhenRepositoryThrows()
     {
         // Arrange
-        var query = new GetRolloverWorkflowCandidatesQuery(0, 10);
+        var query = new GetRolloverWorkflowCandidatesCountQuery();
         var exceptionMessage = "boom";
-        _repositoryMock.Setup(r => r.GetAllRolloverWorkflowCandidatesAsync(query.Skip, query.Take))
+        _repositoryMock.Setup(r => r.GetRolloverWorkflowCandidatesCountAsync(It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception(exceptionMessage));
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
         // Assert
-        _repositoryMock.Verify(r => r.GetAllRolloverWorkflowCandidatesAsync(query.Skip, query.Take), Times.Once);
+        _repositoryMock.Verify(r => r.GetRolloverWorkflowCandidatesCountAsync(It.IsAny<CancellationToken>()), Times.Once);
         Assert.False(result.Success);
         Assert.Equal(exceptionMessage, result.ErrorMessage);
     }

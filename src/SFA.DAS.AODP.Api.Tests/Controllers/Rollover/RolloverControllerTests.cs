@@ -28,42 +28,45 @@ public class RolloverControllerTests
     public async Task GetRolloverWorkflowCandidates_ReturnsOk_WhenMediatorReturnsSuccess()
     {
         // Arrange
-        var response = _fixture.Create<BaseMediatrResponse<GetRolloverWorkflowCandidatesQueryResponse>>();
+        var response = _fixture.Create<BaseMediatrResponse<GetRolloverWorkflowCandidatesCountQueryResponse>>();
         response.Success = true;
-        response.Value = new GetRolloverWorkflowCandidatesQueryResponse
+        response.Value = new GetRolloverWorkflowCandidatesCountQueryResponse
         {
-            Data = _fixture.CreateMany<SFA.DAS.AODP.Models.Rollover.RolloverWorkflowCandidate>(2).ToList(),
-            Skip = 0,
-            Take = 10,
             TotalRecords = 2
         };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetRolloverWorkflowCandidatesQuery>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetRolloverWorkflowCandidatesCountQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(response);
 
         // Act
-        var result = await _controller.GetRolloverWorkflowCandidates(0, 10);
+        var result = await _controller.GetRolloverWorkflowCandidatesCount(default);
 
         // Assert
         var ok = Assert.IsType<OkObjectResult>(result);
-        var value = Assert.IsType<GetRolloverWorkflowCandidatesQueryResponse>(ok.Value);
-        Assert.Equal(2, value.Data.Count);
+        var value = Assert.IsType <BaseMediatrResponse<GetRolloverWorkflowCandidatesCountQueryResponse>>(ok.Value);
+        Assert.Equal(2, value.Value.TotalRecords);
     }
 
     [Fact]
     public async Task GetRolloverWorkflowCandidates_ReturnsStatusCode_WhenMediatorReturnsFailure()
     {
         // Arrange
-        var response = _fixture.Create<BaseMediatrResponse<GetRolloverWorkflowCandidatesQueryResponse>>();
-        response.Success = false;
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetRolloverWorkflowCandidatesQuery>(), It.IsAny<CancellationToken>()))
+        var response = new BaseMediatrResponse<GetRolloverWorkflowCandidatesCountQueryResponse>
+        {
+            Success = false,
+            ErrorMessage = "Failed to get the count"
+        };
+
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetRolloverWorkflowCandidatesCountQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(response);
 
         // Act
-        var result = await _controller.GetRolloverWorkflowCandidates(0, 10);
+        var result = await _controller.GetRolloverWorkflowCandidatesCount(default);
 
         // Assert
-        var status = Assert.IsType<StatusCodeResult>(result);
-        Assert.Equal(500, status.StatusCode);
+        var status = Assert.IsType<OkObjectResult>(result);
+        var value = Assert.IsType<BaseMediatrResponse<GetRolloverWorkflowCandidatesCountQueryResponse>>(status.Value);
+        Assert.False(value.Success);
+        Assert.Equal("Failed to get the count", value.ErrorMessage);
     }
 }

@@ -8,17 +8,22 @@ namespace SFA.DAS.AODP.Api.Controllers.Rollover;
 [Route("api/rollover")]
 public class RolloverController : BaseController
 {
+    private readonly IMediator _mediator;
+    private readonly ILogger<RolloverController> _logger;
 
     public RolloverController(IMediator mediator, ILogger<RolloverController> logger) : base(mediator, logger)
     {
+        _mediator = mediator;
+        _logger = logger;
     }
 
-    [HttpGet("workflowcandidates")]
-    [ProducesResponseType(typeof(GetRolloverWorkflowCandidatesQueryResponse), StatusCodes.Status200OK)]
+    [HttpGet("workflowcandidatescount")]
+    [ProducesResponseType(typeof(GetRolloverWorkflowCandidatesCountQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetRolloverWorkflowCandidates([FromQuery] int? skip, [FromQuery] int? take)
+    public async Task<IActionResult> GetRolloverWorkflowCandidatesCount(CancellationToken cancellationToken)
     {
-        var query = new GetRolloverWorkflowCandidatesQuery(skip, take);
-        return await SendRequestAsync(query);
+        var query = new GetRolloverWorkflowCandidatesCountQuery();
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
     }
 }
