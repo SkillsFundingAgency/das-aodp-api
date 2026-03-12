@@ -21,7 +21,7 @@ public class GetRolloverWorkflowCandidatesCountQueryHandler : IRequestHandler<Ge
 
             response.Value = new GetRolloverWorkflowCandidatesCountQueryResponse
             {
-                TotalRecords = result.TotalRecords
+                TotalRecords = result
             };
             response.Success = true;
           

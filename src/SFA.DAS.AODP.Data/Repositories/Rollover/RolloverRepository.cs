@@ -14,13 +14,13 @@ public class RolloverRepository : IRolloverRepository
         _context = context;
     }
 
-    public async Task<RolloverWorkflowCandidatesCountResult> GetRolloverWorkflowCandidatesCountAsync(CancellationToken cancellationToken)
+    public async Task<int> GetRolloverWorkflowCandidatesCountAsync(CancellationToken cancellationToken)
     {
         var dbSet = _context.RolloverWorkflowCandidates;
 
         var totalRecords = await dbSet.AsNoTracking().CountAsync(cancellationToken);
 
-        return new RolloverWorkflowCandidatesCountResult(totalRecords);
+        return totalRecords;
     }
 
     public async Task<IEnumerable<RolloverWorkflowCandidate>> GetAllRolloverWorkflowCandidatesAsync(CancellationToken cancellationToken)

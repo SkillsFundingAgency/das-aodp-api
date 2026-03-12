@@ -31,7 +31,7 @@ public class RolloverRepositoryTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(0, result.TotalRecords);
+        Assert.Equal(0, result);
     }
 
     [Fact]
@@ -62,7 +62,7 @@ public class RolloverRepositoryTests
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(3, result.TotalRecords);
+            Assert.Equal(3, result);
 
         }
     }

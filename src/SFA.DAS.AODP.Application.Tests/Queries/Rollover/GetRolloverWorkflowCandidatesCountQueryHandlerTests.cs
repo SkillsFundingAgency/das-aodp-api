@@ -25,7 +25,7 @@ public class GetRolloverWorkflowCandidatesCountQueryHandlerTests
     {
         // Arrange
         var query = new GetRolloverWorkflowCandidatesCountQuery();
-        var repoResult = new RolloverWorkflowCandidatesCountResult(2);
+        var repoResult = 2;
 
         _repositoryMock.Setup(r => r.GetRolloverWorkflowCandidatesCountAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(repoResult);
