@@ -1,7 +1,6 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoMoq;
 using Microsoft.EntityFrameworkCore;
-using Moq;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
 
@@ -17,26 +16,6 @@ public class RolloverRepositoryTests
     }
 
     [Fact]
-    public async Task GetAllRolloverWorkflowCandidatesAsync_ReturnsEmptyResult_When_DbSetIsNull()
-    {
-        // Arrange
-        var contextMock = _fixture.Freeze<Mock<IApplicationDbContext>>();
-        contextMock.Setup(c => c.RolloverWorkflowCandidates).Returns((DbSet<Data.Entities.Rollover.RolloverWorkflowCandidate>?)null);
-
-        var sut = new RolloverRepository(contextMock.Object);
-
-        // Act
-        var result = await sut.GetAllRolloverWorkflowCandidatesAsync(0, 10);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Empty(result.Data);
-        Assert.Equal(0, result.TotalRecords);
-        Assert.Equal(0, result.Skip);
-        Assert.Equal(10, result.Take);
-    }
-
-    [Fact]
     public async Task GetAllRolloverWorkflowCandidatesAsync_ReturnsEmptyResult_When_NoRecords()
     {
         // Arrange
@@ -48,14 +27,11 @@ public class RolloverRepositoryTests
         var sut = new RolloverRepository(db);
 
         // Act
-        var result = await sut.GetAllRolloverWorkflowCandidatesAsync(0, 10);
+        var result = await sut.GetRolloverWorkflowCandidatesCountAsync(default);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Empty(result.Data);
-        Assert.Equal(0, result.TotalRecords);
-        Assert.Equal(0, result.Skip);
-        Assert.Equal(10, result.Take);
+        Assert.Equal(0, result);
     }
 
     [Fact]
@@ -82,51 +58,66 @@ public class RolloverRepositoryTests
             var sut = new RolloverRepository(db);
 
             // Act 
-            var result = await sut.GetAllRolloverWorkflowCandidatesAsync(1, 1);
+            var result = await sut.GetRolloverWorkflowCandidatesCountAsync(default);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(3, result.TotalRecords);
-            Assert.Equal(1, result.Skip);
-            Assert.Equal(1, result.Take);
-            Assert.Single(result.Data);
+            Assert.Equal(3, result);
 
-            var returned = result.Data.Single();
-            Assert.Equal(e2.Id, returned.Id);
-            Assert.Equal(e2.QualificationVersionId, returned.QualificationVersionId);
-            Assert.Equal(e2.FundingOfferId, returned.FundingOfferId);
-            Assert.Equal(e2.AcademicYear, returned.AcademicYear);
         }
     }
 
     [Fact]
-    public async Task GetAllRolloverWorkflowCandidatesAsync_Throws_When_AsyncEnumerationFails()
+    public async Task GetAllRolloverWorkflowCandidatesAsync_ReturnsEmpty_When_NoRecords()
     {
         // Arrange
-        var contextMock = _fixture.Freeze<Mock<IApplicationDbContext>>();
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase("Rollover_NoRecords_" + Guid.NewGuid())
+            .Options;
+
+        await using var db = new ApplicationDbContext(options);
+        var sut = new RolloverRepository(db);
+
+        // Act
+        var result = (await sut.GetAllRolloverWorkflowCandidatesAsync(CancellationToken.None)).ToList();
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task GetAllRolloverWorkflowCandidatesAsync_ReturnsAllRecords()
+    {
+        // Arrange
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase("Rollover_AllRecords_" + Guid.NewGuid())
+            .Options;
 
         var now = DateTime.UtcNow;
-        var entity = Data.Entities.Rollover.RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", now, null, now);
-        var list = new List<Data.Entities.Rollover.RolloverWorkflowCandidate> { entity };
-        var queryable = list.AsQueryable();
+        var e1 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", now.AddDays(-3), null, now.AddDays(-3));
+        var e2 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", now.AddDays(-2), null, now.AddDays(-2));
+        var e3 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", now.AddDays(-1), null, now.AddDays(-1));
 
-        var dbSetMock = new Mock<DbSet<Data.Entities.Rollover.RolloverWorkflowCandidate>>();
+        await using (var db = new ApplicationDbContext(options))
+        {
+            await db.RolloverWorkflowCandidates.AddRangeAsync(new[] { e1, e2, e3 });
+            await db.SaveChangesAsync();
+        }
 
-        dbSetMock.As<IQueryable<Data.Entities.Rollover.RolloverWorkflowCandidate>>().Setup(m => m.Provider).Returns(queryable.Provider);
-        dbSetMock.As<IQueryable<Data.Entities.Rollover.RolloverWorkflowCandidate>>().Setup(m => m.Expression).Returns(queryable.Expression);
-        dbSetMock.As<IQueryable<Data.Entities.Rollover.RolloverWorkflowCandidate>>().Setup(m => m.ElementType).Returns(queryable.ElementType);
-        dbSetMock.As<IQueryable<Data.Entities.Rollover.RolloverWorkflowCandidate>>().Setup(m => m.GetEnumerator()).Returns(() => queryable.GetEnumerator());
+        await using (var db = new ApplicationDbContext(options))
+        {
+            var sut = new RolloverRepository(db);
 
-        dbSetMock.As<IAsyncEnumerable<Data.Entities.Rollover.RolloverWorkflowCandidate>>()
-                 .Setup(d => d.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
-                 .Throws(new Exception("Async enumeration failure"));
+            // Act
+            var result = (await sut.GetAllRolloverWorkflowCandidatesAsync(default)).ToList();
 
-        contextMock.Setup(c => c.RolloverWorkflowCandidates).Returns(dbSetMock.Object);
-
-        var sut = new RolloverRepository(contextMock.Object);
-
-        // Act & Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => sut.GetAllRolloverWorkflowCandidatesAsync(0, 10));
-        Assert.Contains("IAsyncQueryProvider", ex.Message, StringComparison.OrdinalIgnoreCase);
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(3, result.Count);
+            Assert.Contains(result, r => r.CreatedAt == e1.CreatedAt);
+            Assert.Contains(result, r => r.CreatedAt == e2.CreatedAt);
+            Assert.Contains(result, r => r.CreatedAt == e3.CreatedAt);
+        }
     }
 }

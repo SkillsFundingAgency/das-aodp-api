@@ -1,6 +1,9 @@
-﻿namespace SFA.DAS.AODP.Models.Rollover;
+﻿using System.Diagnostics.CodeAnalysis;
 
-public class RolloverWorkflowCandidate
+namespace SFA.DAS.AODP.Models.Rollover;
+
+[ExcludeFromCodeCoverage]
+public class RolloverWorkflowCandidateDto
 {
     public Guid Id { get; set; }
     public Guid RolloverWorkflowRunId { get; set; }
