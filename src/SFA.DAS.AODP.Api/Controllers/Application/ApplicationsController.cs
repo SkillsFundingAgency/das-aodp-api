@@ -236,7 +236,7 @@ public class ApplicationsController : BaseController
     [HttpPut("/api/applications/bulk-reviewer")]
     [ProducesResponseType(typeof(BulkSaveReviewerCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> BulkUpdateReviewer(BulkSaveReviewerCommand command)
+    public async Task<IActionResult> BulkUpdateReviewer([FromBody]BulkSaveReviewerCommand command)
     {
         return await SendRequestAsync(command);
     }
