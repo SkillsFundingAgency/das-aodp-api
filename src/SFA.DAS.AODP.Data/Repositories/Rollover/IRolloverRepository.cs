@@ -9,4 +9,6 @@ public interface IRolloverRepository
     Task<int> GetRolloverWorkflowCandidatesCountAsync(CancellationToken cancellationToken);
     Task<IEnumerable<RolloverWorkflowCandidate>> GetAllRolloverWorkflowCandidatesAsync(CancellationToken cancellationToken);
     Task<IEnumerable<RolloverCandidate>> GetRolloverCandidatesAsync();
+    Task<RolloverWorkflowRun> CreateRolloverWorkflowRunAsync(RolloverWorkflowRun request, CancellationToken cancellationToken = default);
+    Task AddWorkflowCandidatesAsync(Guid workflowRunId, string academicYear, IReadOnlyCollection<Guid> rolloverCandidateIds, CancellationToken cancellationToken = default);
 }

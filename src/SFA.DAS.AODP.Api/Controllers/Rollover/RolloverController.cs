@@ -1,5 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using SFA.DAS.AODP.Application.Commands.Qualification;
+using SFA.DAS.AODP.Application.Commands.Rollover;
 using SFA.DAS.AODP.Application.Queries.Rollover;
 
 namespace SFA.DAS.AODP.Api.Controllers.Rollover;
@@ -35,5 +37,13 @@ public class RolloverController : BaseController
     {
         var query = new GetRolloverCandidatesQuery();
         return await SendRequestAsync(query);
+    }
+
+    [HttpPost("rolloverworkflowruns")]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> CreateRolloverWorkflowRun([FromBody] CreateRolloverWorkflowRunCommand createRolloverWorkflowRunCommand)
+    {
+        return await SendRequestAsync(createRolloverWorkflowRunCommand);
     }
 }
