@@ -162,8 +162,6 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
             });
             if (updateOfferDetails.Success == false) throw new Exception(updateOfferDetails.ErrorMessage, updateOfferDetails.InnerException);
 
-            await _qualificationsRepository.UpdateQualificationStatus(qualVersion.Qualification.Qan, review.Status == ApplicationStatus.Approved.ToString() ? ApprovedProcessStatusId : RejectedProcessStatusId, qualVersion.Version);
-
             var applicationOfferIds = review.ApplicationReview.ApplicationReviewFundings?.Select(a => a.FundingOfferId) ?? [];
             List<QualificationFundings> removedOffers = qualificationfundedOffers.Where(q => !applicationOfferIds.Contains(q.FundingOfferId)).ToList();
 

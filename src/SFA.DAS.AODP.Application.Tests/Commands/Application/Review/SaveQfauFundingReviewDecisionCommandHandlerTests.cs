@@ -133,7 +133,6 @@ public class SaveQfauFundingReviewDecisionCommandHandlerTests
         _mediator.Verify(mediator => mediator.Send(It.IsAny<SaveQualificationsFundingOffersCommand>(), default), Times.Once());
         _mediator.Verify(mediator => mediator.Send(It.IsAny<SaveQualificationsFundingOffersDetailsCommand>(), default), Times.Once());
 
-        _qualificationsRepository.Verify(q => q.UpdateQualificationStatus(qan, It.Is<Guid>(g => g == Guid.Parse("00000000-0000-0000-0000-000000000004")), qualVersion.Version.Value));
         _qualificationDiscussionHistoryRepository.Verify(q => q.CreateAsync(It.IsAny<QualificationDiscussionHistory>()), Times.Once);
     }
 
