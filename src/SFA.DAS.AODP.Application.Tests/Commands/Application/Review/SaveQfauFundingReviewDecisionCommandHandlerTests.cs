@@ -20,14 +20,13 @@ public class SaveQfauFundingReviewDecisionCommandHandlerTests
     private readonly Mock<IQualificationDetailsRepository> _qualificationDetailsRepository = new();
     private readonly Mock<IQualificationFundingsRepository> _qualificationFundingsrepository = new();
     private readonly Mock<IQualificationDiscussionHistoryRepository> _qualificationDiscussionHistoryRepository = new();
-    private readonly Mock<IQualificationsRepository> _qualificationsRepository = new();
 
     private readonly SaveQfauFundingReviewDecisionCommandHandler _handler;
 
     public SaveQfauFundingReviewDecisionCommandHandlerTests()
     {
         _handler = new(_reviewRepository.Object, _mediator.Object, _qualificationDetailsRepository.Object, _qualificationDiscussionHistoryRepository.Object,
-            _qualificationFundingsrepository.Object, _qualificationsRepository.Object);
+            _qualificationFundingsrepository.Object);
     }
 
     [Fact]
