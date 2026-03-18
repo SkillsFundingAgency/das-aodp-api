@@ -28,7 +28,7 @@ jobs:
         Write-Host "First bytes:"
         $bytes = [System.IO.File]::ReadAllBytes($file)[0..20]
         $bytes
-    pwsh: true
+      pwsh: true
 
   - template: azure-pipelines-templates/build/step/gitversion.yml@das-platform-building-blocks
 
