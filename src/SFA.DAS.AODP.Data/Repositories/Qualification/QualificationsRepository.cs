@@ -44,27 +44,12 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
             .FirstOrDefaultAsync();
     }
 
-    public async Task<ProcessStatus> UpdateQualificationStatus(string qualificationReference, Guid processStatusId, int? version)
-    {
-        var query = _context.QualificationVersions.Include(v => v.LifecycleStage)
-            .Include(v => v.Qualification)
-            .OrderByDescending(v => v.Version);
-        var qual = version is not null ?
-            await query.FirstOrDefaultAsync(v => v.Qualification.Qan == qualificationReference && v.Version == version) :
-            await query.FirstOrDefaultAsync(v => v.Qualification.Qan == qualificationReference);
-        if (qual is null)
-        {
-            throw new RecordWithNameNotFoundException(qualificationReference);
-        }
-        var processStatus = await _context.ProcessStatus.FirstOrDefaultAsync(v => v.Id == processStatusId);
-        if (processStatus is null)
-        {
-            throw new NoForeignKeyException(processStatusId);
-        }
-        qual.ProcessStatusId = processStatusId;
-        await _context.SaveChangesAsync();
-        return processStatus;
-    }
+    public async Task<QualificationVersions?> GetQualificationVersionByQanAsync(string qualificationReference, CancellationToken cancellationToken) 
+        => await _context.QualificationVersions
+            .Include(o => o.ProcessStatus)
+            .Include(o => o.LifecycleStage)
+            .Include(o => o.Qualification)
+            .FirstOrDefaultAsync(x => x.Qualification.Qan == qualificationReference, cancellationToken: cancellationToken);
 
     public async Task<List<ProcessStatus>> GetProcessingStatuses() => await _context.ProcessStatus.ToListAsync();
     public async Task<IEnumerable<ChangedQualificationExport>> GetChangedQualificationsExport()
