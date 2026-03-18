@@ -27,16 +27,14 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                     throw new InvalidOperationException("At least one rollover candidate must be provided.");
                 }
 
-                var repoRequest = RolloverWorkflowRun.Create(request.AcademicYear, request.SelectionMethod, request.FundingEndDateEligibilityThreshold,
+                var repoRequest = RolloverWorkflowRun.Create(request.AcademicYear, Data.Entities.Rollover.Enums.SelectionMethod.FileUpload, request.FundingEndDateEligibilityThreshold,
                     request.OperationalEndDateEligibilityThreshold, request.MaximumApprovalFundingEndDate, request.CreatedByUserName, DateTime.Now);
 
-                var workflowRun = await _rolloverRepository.CreateRolloverWorkflowRunAsync(repoRequest, cancellationToken);
-
-                await _rolloverRepository.AddWorkflowCandidatesAsync(workflowRun.Id, workflowRun.AcademicYear, request.RolloverCandidateIds, cancellationToken);
+                var workflowRunId = await _rolloverRepository.CreateRolloverWorkflowRunAsync(repoRequest, request.RolloverCandidateIds, cancellationToken);
 
                 response.Value = new CreateRolloverWorkflowRunCommandResponse
                 {
-                    RolloverWorkflowRunId = workflowRun.Id
+                    RolloverWorkflowRunId = workflowRunId
                 };
 
                 response.Success = true;

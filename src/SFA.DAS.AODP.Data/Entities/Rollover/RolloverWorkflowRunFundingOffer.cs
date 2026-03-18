@@ -14,4 +14,16 @@ public class RolloverWorkflowRunFundingOffer
     public Guid FundingOfferId { get; private set; }
 
     public virtual RolloverWorkflowRun WorkflowRun { get; private set; } = null!;
+
+    public static RolloverWorkflowRunFundingOffer Create(
+        Guid rolloverWorkflowRunId,
+        Guid fundingOfferId)
+    {
+        return new RolloverWorkflowRunFundingOffer
+        {
+            Id = Guid.NewGuid(),
+            RolloverWorkflowRunId = rolloverWorkflowRunId,
+            FundingOfferId = fundingOfferId
+        };
+    }
 }

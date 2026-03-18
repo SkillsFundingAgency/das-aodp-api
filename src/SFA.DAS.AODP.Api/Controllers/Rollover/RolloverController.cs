@@ -42,7 +42,7 @@ public class RolloverController : BaseController
     [HttpPost("rolloverworkflowruns")]
     [ProducesResponseType(typeof(BaseMediatrResponse<CreateRolloverWorkflowRunCommandResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateRolloverWorkflowRun([FromBody] CreateRolloverWorkflowRunCommand createRolloverWorkflowRunCommand)
+    public async Task<IActionResult> CreateRolloverWorkflowRun(CreateRolloverWorkflowRunCommand createRolloverWorkflowRunCommand)
     {
         return await SendRequestAsync(createRolloverWorkflowRunCommand);
     }

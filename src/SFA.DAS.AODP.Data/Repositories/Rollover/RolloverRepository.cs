@@ -39,6 +39,7 @@ public class RolloverRepository : IRolloverRepository
     {
         return await _context.RolloverCandidates
             .AsNoTracking()
+            .Where(x => x.IsActive)
             .Select(rc => new RolloverCandidate
             {
                 Id = rc.Id,
@@ -50,19 +51,73 @@ public class RolloverRepository : IRolloverRepository
                 QualificationNumber = rc.QualificationVersion != null && rc.QualificationVersion.Qualification != null
                     ? rc.QualificationVersion.Qualification.Qan
                     : null,
-                IsActive = rc.IsActive,
                 AcademicYear = rc.AcademicYear
             })
             .ToListAsync();
     }
 
-    public async Task<RolloverWorkflowRun> CreateRolloverWorkflowRunAsync(RolloverWorkflowRun workflowRun, CancellationToken cancellationToken = default)
+    public async Task<Guid> CreateRolloverWorkflowRunAsync(RolloverWorkflowRun workflowRun, IReadOnlyCollection<Guid> rolloverCandidateIds, CancellationToken cancellationToken = default)
     {
-        if (workflowRun == null) throw new ArgumentNullException(nameof(workflowRun));
+        using var transaction = await _context.StartTransactionAsync();
 
-        _context.RolloverWorkflowRuns.Add(workflowRun);
-        await _context.SaveChangesAsync(cancellationToken);
-        return workflowRun;
+        try
+        {
+            if (workflowRun == null) throw new ArgumentNullException(nameof(workflowRun));
+
+            if (rolloverCandidateIds == null || rolloverCandidateIds.Count == 0)
+                throw new ArgumentException("At least one rollover candidate ID must be provided.", nameof(rolloverCandidateIds));
+
+            var now = DateTime.UtcNow;
+
+            _context.RolloverWorkflowRuns.Add(workflowRun);
+
+            var candidates = await _context.RolloverCandidates
+            .Where(rc =>
+                rolloverCandidateIds.Contains(rc.Id) &&
+                rc.AcademicYear == workflowRun.AcademicYear &&
+                rc.IsActive)
+            .ToListAsync(cancellationToken);
+
+            if (candidates.Count != rolloverCandidateIds.Count)
+            {
+                throw new InvalidOperationException("One or more rollover candidate IDs are invalid or inactive.");
+            }
+
+            var workflowCandidates = candidates
+                .Select(rc => RolloverWorkflowCandidate.Create(
+                    workflowRun.Id,
+                    rc.Id,
+                    rc.QualificationVersionId,
+                    rc.FundingOfferId,
+                    rc.AcademicYear,
+                    rc.PreviousFundingEndDate ?? now,
+                    rc.NewFundingEndDate,
+                    now))
+                .ToList();
+
+            _context.RolloverWorkflowCandidates.AddRange(workflowCandidates);
+
+            var fundingOfferIds = candidates
+                .Select(rc => rc.FundingOfferId)
+                .Distinct()
+                .ToList();
+
+            var workflowFundingOffers = fundingOfferIds
+                .Select(foId => RolloverWorkflowRunFundingOffer.Create(workflowRun.Id, foId))
+                .ToList();
+
+            _context.RolloverWorkflowRunFundingOffers.AddRange(workflowFundingOffers);
+
+            await _context.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            return workflowRun.Id;
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task AddWorkflowCandidatesAsync(Guid workflowRunId, string academicYear, IReadOnlyCollection<Guid> rolloverCandidateIds, CancellationToken cancellationToken = default)
