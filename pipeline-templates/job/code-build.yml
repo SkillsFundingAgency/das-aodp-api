@@ -18,7 +18,7 @@ jobs:
       script: |
         Write-Host "Downloading Octokit 4.0.0 nupkg..."
         $url  = 'https://api.nuget.org/v3-flatcontainer/octokit/4.0.0/octokit.4.0.0.nupkg'
-        $file = "$env:TEMP\octokit-test.nupkg"
+        $file = "$(Agent.TempDirectory)\packages\octokit-test.nupkg"
 
         Invoke-WebRequest -Uri $url -OutFile $file -UseBasicParsing
 
