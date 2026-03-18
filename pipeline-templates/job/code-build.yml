@@ -11,15 +11,6 @@ jobs:
   variables:
   - group: BUILD Management Resources
   steps:
-  - task: PowerShell@2
-    displayName: "Pull Request Commenting"
-    inputs:
-      targetType: inline
-      script: |
-        $null = Register-PackageSource -Name NuGet -Location https://api.nuget.org/v3/index.json -ProviderName NuGet
-        Install-Package -Name "Octokit" -RequiredVersion "4.0.0" -Destination "$(Agent.TempDirectory)/packages" -Source "NuGet" -Force -SkipDependencies -Verbose
-      pwsh: true
-
   - template: azure-pipelines-templates/build/step/gitversion.yml@das-platform-building-blocks
 
   - template: azure-pipelines-templates/build/step/app-build.yml@das-platform-building-blocks
