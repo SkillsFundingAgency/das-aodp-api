@@ -17,7 +17,7 @@ jobs:
       targetType: inline
       script: |
         $null = Register-PackageSource -Name NuGet -Location https://api.nuget.org/v3/index.json -ProviderName NuGet
-        $null = Install-Package -Name "Octokit" -RequiredVersion "4.0.0" -Destination "$(Agent.TempDirectory)/packages" -Source "NuGet" -Force -SkipDependencies -Verbose
+        Install-Package -Name "Octokit" -RequiredVersion "4.0.0" -Destination "$(Agent.TempDirectory)/packages" -Source "NuGet" -Force -SkipDependencies -Verbose
       pwsh: true
 
   - template: azure-pipelines-templates/build/step/gitversion.yml@das-platform-building-blocks
