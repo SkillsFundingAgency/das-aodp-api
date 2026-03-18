@@ -7,7 +7,9 @@ using ChangedQualification = Entities.Qualification.ChangedQualification;
 public interface IQualificationsRepository
 {
     Task AddQualificationDiscussionHistory(Entities.Qualification.QualificationDiscussionHistory qualificationDiscussionHistory, string qualificationReference);
-    
+
+    Task<ProcessStatus> UpdateQualificationStatus(string qualificationReference, Guid processStatusId, int? version);
+
     Task<List<ChangedQualification>> GetChangedQualificationsAsync();
 
     Task<List<ProcessStatus>> GetProcessingStatuses();
