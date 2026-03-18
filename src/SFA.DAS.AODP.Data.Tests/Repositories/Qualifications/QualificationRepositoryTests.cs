@@ -53,7 +53,6 @@ public class QualificationRepositoryTests
         var loaded = await _dbContext.QualificationVersions.Include(o => o.Qualification)
             .SingleAsync(o => o.Qualification.Qan == "qan1");
 
-        Assert.NotNull(result);
         Assert.Equal("qan1", loaded.Qualification.Qan);
     }
 
