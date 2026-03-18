@@ -51,9 +51,15 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                 {
                     var qualVersion = await _qualificationDetailsRepository.GetQualificationDetailsByIdAsync(qan);
 
-                    if (qualVersion == null || qualVersion.ProcessStatus.Name != ProcessStatus.DecisionRequired)
+                    if (qualVersion == null)
                     {
-                        throw new InvalidOperationException("The current qualification status is not valid to confirm the decision.");
+                        throw new InvalidOperationException("The application's QAN does not match any regulated qualification.");
+                    }
+
+                    if (qualVersion.ProcessStatus.Name is ProcessStatus.Rejected or ProcessStatus.NoActionRequired)
+                    {
+                        throw new InvalidOperationException(
+                            $"The current qualification status is not valid to confirm the decision. The current qualification status is: {qualVersion.ProcessStatus.Name}.");
                     }
 
                     await UpdateQualificationOffersAsync(review, qualVersion, request.SentByName);
