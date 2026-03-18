@@ -16,18 +16,8 @@ jobs:
     inputs:
       targetType: inline
       script: |
-        Write-Host "Downloading Octokit 4.0.0 nupkg..."
-        $url  = 'https://api.nuget.org/v3-flatcontainer/octokit/4.0.0/octokit.4.0.0.nupkg'
-        $file = "$(Agent.TempDirectory)/packages/octokit-test.nupkg"
-
-        Invoke-WebRequest -Uri $url -OutFile $file -UseBasicParsing
-
-        Write-Host "Download complete: $file"
-        Write-Host "File size: $((Get-Item $file).Length) bytes"
-
-        Write-Host "First bytes:"
-        $bytes = [System.IO.File]::ReadAllBytes($file)[0..20]
-        $bytes
+        $null = Register-PackageSource -Name NuGet -Location https://api.nuget.org/v3/index.json -ProviderName NuGet
+        $null = Install-Package -Name "Octokit" -RequiredVersion "4.0.0" -Destination "$(Agent.TempDirectory)/packages" -Source "NuGet" -Force -SkipDependencies -Verbose
       pwsh: true
 
   - template: azure-pipelines-templates/build/step/gitversion.yml@das-platform-building-blocks
