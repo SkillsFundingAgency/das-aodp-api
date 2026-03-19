@@ -18,7 +18,7 @@ namespace SFA.DAS.AODP.Application.Queries.Rollover
 
             try
             {
-                var result = await _repository.GetRolloverCandidatesAsync();
+                var result = await _repository.GetRolloverCandidatesAsync(cancellationToken);
 
                 if (result != null)
                 {

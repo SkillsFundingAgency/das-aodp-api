@@ -14,7 +14,9 @@ public class RolloverWorkflowCandidate
     public Guid FundingOfferId { get; private set; }
     
     public string AcademicYear { get; private set; } = null!;
-    
+
+    public int RolloverRound { get; private set; }
+
     public Guid RolloverCandidatesId { get; private set; }
 
     public bool PassP1 { get; private set; }
@@ -43,6 +45,7 @@ public class RolloverWorkflowCandidate
         Guid qualificationVersionId,
         Guid fundingOfferId,
         string academicYear,
+        int rolloverRound,
         DateTime currentFundingEndDate,
         DateTime? proposedFundingEndDate,
         DateTime createdAt)
@@ -59,6 +62,7 @@ public class RolloverWorkflowCandidate
             QualificationVersionId = qualificationVersionId,
             FundingOfferId = fundingOfferId,
             AcademicYear = academicYear,
+            RolloverRound = rolloverRound,
             CurrentFundingEndDate = currentFundingEndDate,
             ProposedFundingEndDate = proposedFundingEndDate,
             CreatedAt = createdAt,
