@@ -7,4 +7,17 @@ public interface IRolloverRepository
 {
     Task<int> GetRolloverWorkflowCandidatesCountAsync(CancellationToken cancellationToken);
     Task<IEnumerable<RolloverWorkflowCandidate>> GetAllRolloverWorkflowCandidatesAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<RolloverCandidate>> GetRolloverCandidatesAsync(CancellationToken cancellationToken);
+
+    Task<IEnumerable<RolloverCandidate>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, 
+        CancellationToken cancellationToken);
+
+    Task<Guid> CreateRolloverWorkflowRunAsync(RolloverWorkflowRun request,
+        CancellationToken cancellationToken);
+
+    Task CreateRolloverWorkflowCandidatesAsync(IEnumerable<RolloverWorkflowCandidate> request,
+        CancellationToken cancellationToken);
+
+    Task CreateRolloverWorkflowRunFundingOffersAsync(IEnumerable<RolloverWorkflowRunFundingOffer> request,
+        CancellationToken cancellationToken);
 }
