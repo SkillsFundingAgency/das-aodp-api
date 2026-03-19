@@ -35,8 +35,8 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
 
                 var now = DateTime.UtcNow;
 
-                var workflowrun = RolloverWorkflowRun.Create(request.AcademicYear, 
-                    Data.Entities.Rollover.Enums.SelectionMethod.FileUpload, 
+                var workflowrun = RolloverWorkflowRun.Create(request.AcademicYear,
+                    request.SelectionMethod, 
                     request.FundingEndDateEligibilityThreshold,
                     request.OperationalEndDateEligibilityThreshold, 
                     request.MaximumApprovalFundingEndDate, 

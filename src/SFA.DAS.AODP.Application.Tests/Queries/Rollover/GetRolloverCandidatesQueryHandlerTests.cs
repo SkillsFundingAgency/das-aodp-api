@@ -27,7 +27,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
             var candidates = _fixture.CreateMany<RolloverCandidate>(3).ToList();
 
             _repositoryMock
-                .Setup(r => r.GetRolloverCandidatesAsync())
+                .Setup(r => r.GetRolloverCandidatesAsync(default))
                 .ReturnsAsync(candidates);
 
             var query = new GetRolloverCandidatesQuery();
@@ -47,7 +47,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
         {
             // Arrange
             _repositoryMock
-                .Setup(r => r.GetRolloverCandidatesAsync())
+                .Setup(r => r.GetRolloverCandidatesAsync(default))
                 .ReturnsAsync((List<RolloverCandidate>)null!);
 
             var query = new GetRolloverCandidatesQuery();
@@ -68,7 +68,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
             var exception = new InvalidOperationException("DB exploded");
 
             _repositoryMock
-                .Setup(r => r.GetRolloverCandidatesAsync())
+                .Setup(r => r.GetRolloverCandidatesAsync(default))
                 .ThrowsAsync(exception);
 
             var query = new GetRolloverCandidatesQuery();

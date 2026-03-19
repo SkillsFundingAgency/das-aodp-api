@@ -14,7 +14,7 @@ public class RolloverWorkflowCandidateTests
         var currentFundingEndDate = new DateTime(2026, 02, 28);
         var proposedFundingEndDate = new DateTime(2026, 08, 31);
         var createdAt = new DateTime(2026, 02, 28, 12, 00, 00);
-        
+
         // Act
         var result = RolloverWorkflowCandidate.Create(
             workflowRunId,
@@ -22,10 +22,11 @@ public class RolloverWorkflowCandidateTests
             qualificationVersionId,
             fundingOfferId,
             academicYear,
+            1,
             currentFundingEndDate,
             proposedFundingEndDate,
             createdAt);
-        
+
         // Assert
         Assert.Equal(workflowRunId, result.RolloverWorkflowRunId);
         Assert.Equal(rolloverCandidateRecordId, result.RolloverCandidatesId);
@@ -60,6 +61,6 @@ public class RolloverWorkflowCandidateTests
         var createdAt = new DateTime(2026, 02, 28, 12, 00, 00);
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => RolloverWorkflowCandidate.Create(workflowRunId, rolloverCandidateRecordId, qualificationVersionId, fundingOfferId, null!, currentFundingEndDate, proposedFundingEndDate, createdAt));
+        Assert.Throws<ArgumentNullException>(() => RolloverWorkflowCandidate.Create(workflowRunId, rolloverCandidateRecordId, qualificationVersionId, fundingOfferId, null!, 1, currentFundingEndDate, proposedFundingEndDate, createdAt));
     }
 }
