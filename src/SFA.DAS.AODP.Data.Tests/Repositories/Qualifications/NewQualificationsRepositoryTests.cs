@@ -8,7 +8,7 @@ using SFA.DAS.AODP.Data.Repositories.Qualification;
 
 namespace SFA.DAS.AODP.Data.Tests
 {
-    public class QualificationsRepositoryTests
+    public class NewQualificationsRepositoryTests
     {
         private ApplicationDbContext _dbContext;
         private NewQualificationsRepository _repository;       
@@ -20,7 +20,7 @@ namespace SFA.DAS.AODP.Data.Tests
         private Guid ActionTypeNoAction = new Guid("00000000-0000-0000-0000-000000000001");
         private Guid ActionTypeDecision = new Guid("00000000-0000-0000-0000-000000000002");
 
-        public QualificationsRepositoryTests()
+        public NewQualificationsRepositoryTests()
         {
             _fixture = new Fixture();          
             var options = new DbContextOptionsBuilder<ApplicationDbContext>().UseInMemoryDatabase("ApplicationDbContext" + Guid.NewGuid()).Options;
@@ -62,8 +62,6 @@ namespace SFA.DAS.AODP.Data.Tests
         //    Assert.Equal(qualificationName1, result.Data[0].Title);
         //    Assert.Equal(qualificationName2, result.Data[1].Title);
         //}
-
-
         private async Task PopulateDbWithReferenceData()
         {
             var actionType1 = new Entities.Qualification.ActionType() { Description = "No Action Required", Id = ActionTypeNoAction };
@@ -97,7 +95,7 @@ namespace SFA.DAS.AODP.Data.Tests
             return qan1_qualification;
         }
 
-        private async Task CreateQualificationRecordSet(int organisationId, string qualificationNumber, string qualificationName)
+        private async Task CreateQualificationRecordSetAsync(int organisationId, string qualificationNumber, string qualificationName, CancellationToken cancellationToken)
         {
             var orgId = Guid.NewGuid();
             var qan1_organisation = _fixture.Build<AwardingOrganisation>()
@@ -143,11 +141,11 @@ namespace SFA.DAS.AODP.Data.Tests
             var qualificationVersions = new List<QualificationVersions>() { qan1_qualificationVersion1 };
             var qualificationVersionFieldChanges = new List<VersionFieldChange>() { qan1_qualificationVersionFieldChange1 };
 
-            await _dbContext.AddRangeAsync(organisations);
-            await _dbContext.AddRangeAsync(qualifications);
-            await _dbContext.AddRangeAsync(qualificationVersions);
-            await _dbContext.AddRangeAsync(qualificationVersionFieldChanges);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.AddRangeAsync(organisations, cancellationToken);
+            await _dbContext.AddRangeAsync(qualifications, cancellationToken);
+            await _dbContext.AddRangeAsync(qualificationVersions, cancellationToken);
+            await _dbContext.AddRangeAsync(qualificationVersionFieldChanges, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
 
