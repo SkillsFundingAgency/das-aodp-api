@@ -20,5 +20,5 @@ public interface IQualificationsRepository
 
     Task<List<SearchedQualification>> GetSearchedQualificationByNameAsync(string name);
 
-    Task<QualificationVersions?> GetQualificationVersionByQanAsync(string qualificationReference, CancellationToken cancellationToken);
+    Task<QualificationVersions?> GetQualificationVersionByQanAsync(string qualificationReference, int? version, CancellationToken cancellationToken);
 }

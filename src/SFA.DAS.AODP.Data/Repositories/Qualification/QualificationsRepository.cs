@@ -66,12 +66,14 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
         return processStatus;
     }
 
-    public async Task<QualificationVersions?> GetQualificationVersionByQanAsync(string qualificationReference, CancellationToken cancellationToken) 
+    public async Task<QualificationVersions?> GetQualificationVersionByQanAsync(string qualificationReference, int? version, CancellationToken cancellationToken) 
         => await _context.QualificationVersions
             .Include(o => o.ProcessStatus)
             .Include(o => o.LifecycleStage)
             .Include(o => o.Qualification)
-            .FirstOrDefaultAsync(x => x.Qualification.Qan == qualificationReference, cancellationToken: cancellationToken);
+            .Where(x => x.Qualification.Qan == qualificationReference)
+            .OrderByDescending(x => x.Version)
+            .FirstOrDefaultAsync(cancellationToken);
 
     public async Task<List<ProcessStatus>> GetProcessingStatuses() => await _context.ProcessStatus.ToListAsync();
     public async Task<IEnumerable<ChangedQualificationExport>> GetChangedQualificationsExport()

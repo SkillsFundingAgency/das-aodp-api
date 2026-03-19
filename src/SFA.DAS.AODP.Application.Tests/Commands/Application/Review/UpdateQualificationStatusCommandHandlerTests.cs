@@ -31,7 +31,7 @@ public class UpdateQualificationStatusCommandHandlerTests
         };
 
         // Expectations
-        _mockQualificationsRepository.Setup(o => o.GetQualificationVersionByQanAsync("QAN123", It.IsAny<CancellationToken>())).ReturnsAsync((QualificationVersions?)null);
+        _mockQualificationsRepository.Setup(o => o.GetQualificationVersionByQanAsync("QAN123", 1, It.IsAny<CancellationToken>())).ReturnsAsync((QualificationVersions?)null);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -79,7 +79,7 @@ public class UpdateQualificationStatusCommandHandlerTests
         };
 
         // Expectations
-        _mockQualificationsRepository.Setup(o => o.GetQualificationVersionByQanAsync("QAN123", It.IsAny<CancellationToken>())).ReturnsAsync(qualificationVersion);
+        _mockQualificationsRepository.Setup(o => o.GetQualificationVersionByQanAsync("QAN123", 1, It.IsAny<CancellationToken>())).ReturnsAsync(qualificationVersion);
         _mockQualificationsRepository.Setup(o => o.AddQualificationDiscussionHistory(discussionHistory, "QAN123")).Returns(Task.CompletedTask);
 
         // Act
@@ -107,7 +107,7 @@ public class UpdateQualificationStatusCommandHandlerTests
         };
 
         // Expectations
-        _mockQualificationsRepository.Setup(o => o.GetQualificationVersionByQanAsync("QAN123", It.IsAny<CancellationToken>())).ThrowsAsync(new NoForeignKeyException(Guid.NewGuid()));
+        _mockQualificationsRepository.Setup(o => o.GetQualificationVersionByQanAsync("QAN123", 1,It.IsAny<CancellationToken>())).ThrowsAsync(new NoForeignKeyException(Guid.NewGuid()));
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -129,11 +129,11 @@ public class UpdateQualificationStatusCommandHandlerTests
             QualificationReference = "QAN123",
             Notes = "Approved",
             UserDisplayName = "Test User",
-            Version = 1
+            Version = null
         };
 
         // Expectations
-        _mockQualificationsRepository.Setup(o => o.GetQualificationVersionByQanAsync("QAN123", It.IsAny<CancellationToken>())).ThrowsAsync(new Exception());
+        _mockQualificationsRepository.Setup(o => o.GetQualificationVersionByQanAsync("QAN123", null, It.IsAny<CancellationToken>())).ThrowsAsync(new Exception());
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);

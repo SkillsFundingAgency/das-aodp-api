@@ -27,7 +27,7 @@ public class UpdateQualificationStatusCommandHandler : IRequestHandler<UpdateQua
                 Notes = request.Notes,
             }; 
             
-            var qualificationVersion = await _qualificationsRepository.GetQualificationVersionByQanAsync(request.QualificationReference, cancellationToken);
+            var qualificationVersion = await _qualificationsRepository.GetQualificationVersionByQanAsync(request.QualificationReference, request.Version, cancellationToken);
 
             if (qualificationVersion is null)
             {

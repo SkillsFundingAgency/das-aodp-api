@@ -31,7 +31,7 @@ public class QualificationRepositoryTests
         await CreateQualificationRecordSetAsync(12, "qan1", "qual1", CancellationToken.None);
 
         // Act
-        var result = await _repository.GetQualificationVersionByQanAsync("qan2", CancellationToken.None);
+        var result = await _repository.GetQualificationVersionByQanAsync("qan2", 1, CancellationToken.None);
 
         // Assert
         Assert.Null(result);
@@ -47,7 +47,7 @@ public class QualificationRepositoryTests
         await CreateQualificationRecordSetAsync(12, "qan2", "qual2", CancellationToken.None);
 
         // Act
-        var result = await _repository.GetQualificationVersionByQanAsync("qan1", CancellationToken.None);
+        var result = await _repository.GetQualificationVersionByQanAsync("qan1", 1, CancellationToken.None);
 
         // Assert
         var loaded = await _dbContext.QualificationVersions.Include(o => o.Qualification)
