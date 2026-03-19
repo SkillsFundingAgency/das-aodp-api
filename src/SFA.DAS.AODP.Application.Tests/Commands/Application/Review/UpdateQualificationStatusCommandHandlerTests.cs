@@ -43,48 +43,6 @@ public class UpdateQualificationStatusCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ProcessStatusSameAsRequested_DoNothing()
-    {
-        // Arrange
-        var command = new UpdateQualificationStatusCommand
-        {
-            ProcessStatusId = ProcessStatusLookup.OnHold.Id,
-            QualificationReference = "QAN123",
-            Notes = "Approved",
-            UserDisplayName = "Test User",
-            Version = 1
-        };
-
-        var qualificationVersion = new QualificationVersions
-        {
-            LifecycleStageId = new Guid("00000000-0000-0000-0000-000000000001"),
-            ProcessStatusId = ProcessStatusLookup.OnHold.Id,
-            ProcessStatus = new ProcessStatus
-            {
-                Id = ProcessStatusLookup.OnHold.Id,
-                Name = ProcessStatusLookup.OnHold.Name
-            },
-            LifecycleStage = new LifecycleStage
-            {
-                Id = new Guid("00000000-0000-0000-0000-000000000001"),
-                Name = "New"
-            }
-        };
-
-        // Expectations
-        _mockQualificationsRepository.Setup(o => o.GetQualificationVersionByQanAsync("QAN123", It.IsAny<CancellationToken>())).ReturnsAsync(qualificationVersion);
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        Assert.True(result.Success);
-        Assert.Equal(ProcessStatusLookup.OnHold.Id, qualificationVersion.ProcessStatusId);
-        _mockQualificationsRepository.Verify(o =>
-            o.AddQualificationDiscussionHistory(It.IsAny<QualificationDiscussionHistory>(), It.IsAny<string>()), times: Times.Never);
-    }
-
-    [Fact]
     public async Task Handle_ProcessStatusDifferentAsRequested_AddDiscussionHistory_SetStatus()
     {
         // Arrange

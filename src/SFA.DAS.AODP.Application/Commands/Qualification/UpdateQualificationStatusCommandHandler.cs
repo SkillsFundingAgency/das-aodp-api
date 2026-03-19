@@ -33,16 +33,11 @@ public class UpdateQualificationStatusCommandHandler : IRequestHandler<UpdateQua
             {
                 throw new RecordWithNameNotFoundException(request.QualificationReference);
             }
+            
+            qualificationVersion.SetLifecycleStatus(ProcessStatusLookup.FromId(request.ProcessStatusId));
 
-            // If the current qualification version process status is NOT as the requested process status, then update the qualification version process status and add a discussion history record.
-            if (qualificationVersion.ProcessStatus.Id != request.ProcessStatusId)
-            {
-                qualificationVersion.SetLifecycleStatus(ProcessStatusLookup.FromId(request.ProcessStatusId));
-
-                discussionHistory.Title = $"Updated status to: {ProcessStatusLookup.FromId(request.ProcessStatusId).Name}";
-                await _qualificationsRepository.AddQualificationDiscussionHistory(discussionHistory, request.QualificationReference);
-                response.Success = true;
-            }
+            discussionHistory.Title = $"Updated status to: {ProcessStatusLookup.FromId(request.ProcessStatusId).Name}";
+            await _qualificationsRepository.AddQualificationDiscussionHistory(discussionHistory, request.QualificationReference);
 
             response.Success = true;
         }
