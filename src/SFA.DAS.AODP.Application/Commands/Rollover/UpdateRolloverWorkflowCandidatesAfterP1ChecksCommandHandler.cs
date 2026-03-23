@@ -50,31 +50,31 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandler : IRequ
             if (candidate == null)
                 continue;
 
-            var failures = new List<string>();
+            var failures = ValidateP1Checks(v);
 
-            // 1) Is the Funding Stream included in the RollOver
-            if (v.FundingStream == null)
-                failures.Add("Funding Stream out of scope for RollOver");
+            //// 1) Is the Funding Stream included in the RollOver
+            //if (v.FundingStream == null)
+            //    failures.Add("Funding Stream out of scope for RollOver");
 
-            // 2) Latest Funding Approval End Date >= Threshold Date
-            if (v.LatestFundingApprovalEndDate.HasValue && v.LatestFundingApprovalEndDate.Value < v.ThresholdDate)
-                failures.Add("Funding Approval End Date is before the Threshold");
+            //// 2) Latest Funding Approval End Date >= Threshold Date
+            //if (v.LatestFundingApprovalEndDate.HasValue && v.LatestFundingApprovalEndDate.Value < v.ThresholdDate)
+            //    failures.Add("Funding Approval End Date is before the Threshold");
 
-            // 3) Operating End Date > Threshold Date  (If Operating End Date = Null, this should Pass the check)
-            if (v.OperationalEndDate.HasValue && v.OperationalEndDate.Value <= v.ThresholdDate)
-                failures.Add("Operating End Date is before the Threshold");
+            //// 3) Operating End Date > Threshold Date  (If Operating End Date = Null, this should Pass the check)
+            //if (v.OperationalEndDate.HasValue && v.OperationalEndDate.Value <= v.ThresholdDate)
+            //    failures.Add("Operating End Date is before the Threshold");
 
-            // 4) Offered in England = TRUE
-            if (!v.OfferedInEngland)
-                failures.Add("Not Funded in England");
+            //// 4) Offered in England = TRUE
+            //if (!v.OfferedInEngland)
+            //    failures.Add("Not Funded in England");
 
-            // 6) GLH <= TQT
-            if (v.Glh > v.Tqt)
-                failures.Add("GLH > TQT");
+            //// 6) GLH <= TQT
+            //if (v.Glh > v.Tqt)
+            //    failures.Add("GLH > TQT");
 
-            // 7) Does the Qualification appear in the Defunding (Defunded) List
-            if (v.IsOnDefundingList)
-                failures.Add("Qualification is on Defunding (Defunded) List");
+            //// 7) Does the Qualification appear in the Defunding (Defunded) List
+            //if (v.IsOnDefundingList)
+            //    failures.Add("Qualification is on Defunding (Defunded) List");
 
             var passP1 = failures.Count == 0;
             candidate.SetP1Result(passP1, passP1 ? null : string.Join("; ", failures));
@@ -83,5 +83,36 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandler : IRequ
         }
 
         return candidatesToUpdate;
+    }
+
+    private static List<string> ValidateP1Checks(RolloverWorkflowCandidatesP1Checks checks)
+    {
+        var failures = new List<string>();
+
+        // 1) Is the Funding Stream included in the RollOver
+        if (checks.FundingStream == null)
+            failures.Add("Funding Stream out of scope for RollOver");
+
+        // 2) Latest Funding Approval End Date >= Threshold Date
+        if (checks.LatestFundingApprovalEndDate.HasValue && checks.LatestFundingApprovalEndDate.Value < checks.ThresholdDate)
+            failures.Add("Funding Approval End Date is before the Threshold");
+
+        // 3) Operating End Date > Threshold Date  (If Operating End Date = Null, this should Pass the check)
+        if (checks.OperationalEndDate.HasValue && checks.OperationalEndDate.Value <= checks.ThresholdDate)
+            failures.Add("Operating End Date is before the Threshold");
+
+        // 4) Offered in England = TRUE
+        if (!checks.OfferedInEngland)
+            failures.Add("Not Funded in England");
+
+        // 6) GLH <= TQT
+        if (checks.Glh > checks.Tqt)
+            failures.Add("GLH > TQT");
+
+        // 7) Does the Qualification appear in the Defunding (Defunded) List
+        if (checks.IsOnDefundingList)
+            failures.Add("Qualification is on Defunding (Defunded) List");
+
+        return failures;
     }
 }
