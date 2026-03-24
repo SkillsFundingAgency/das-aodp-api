@@ -52,6 +52,7 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
         var records = executed
                   .Select(q => new DAS.AODP.Models.Qualifications.ChangedQualification
                   {
+                      QualificationId = q.QualificationId,
                       QualificationTitle = q.QualificationTitle,
                       QualificationReference = q.QualificationReference,
                       AwardingOrganisation = q.AwardingOrganisation,
