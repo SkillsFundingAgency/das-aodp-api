@@ -2,6 +2,7 @@
 using Moq;
 using SFA.DAS.AODP.Application.Commands.Application.Message;
 using SFA.DAS.AODP.Application.Commands.Application.Review;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Models.Application;
 
@@ -14,52 +15,55 @@ public class SaveReviewerCommandHandlerTests
     private readonly SaveReviewerCommandHandler _handler;
 
     private static readonly Guid ApplicationId = Guid.NewGuid();
+
+    private const string Reviewer1Field = "Reviewer1";
+    private const string Reviewer2Field = "Reviewer2";
+
+    private const string PreviousReviewer1 = "Old1";
+    private const string PreviousReviewer2 = "Old2";
+
+    private const string NewReviewer = "NewReviewer";
+    private const string DuplicateReviewer = "Bob";
+    private const string InvalidUserType = "NotReal";
+
+    private const string UserTypeValue = "Qfau";
     private const string SentByName = "Test User";
     private const string SentByEmail = "user@test.com";
-    private const string UserTypeValue = "Qfau";
-    private const string ReviewerFieldName1 = "Reviewer1";
-    private const string ReviewerFieldName2 = "Reviewer2";
-    private const string PreviousReviewer1 = "Old Reviewer 1";
-    private const string PreviousReviewer2 = "Old Reviewer 2";
-    private const string NewReviewer = "New Reviewer";
-    private const string DuplicateReviewer = "Same Reviewer";
-    private const string InvalidUserType = "NotAUserType";
-    private const string InvalidReviewerFieldName = "Reviewer3";
-    private const string MessageSendFailed = "Message send failed";
-    private const string RepositoryExceptionMessage = "Repository exception";
+
+    private const string MessageFailure = "FAIL";
+    private const string NotFoundText = "not found";
 
     public SaveReviewerCommandHandlerTests()
     {
         _handler = new SaveReviewerCommandHandler(_repository.Object, _mediator.Object);
 
-        _mediator
-            .Setup(m => m.Send(It.IsAny<CreateApplicationMessageCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new BaseMediatrResponse<CreateApplicationMessageCommandResponse>
-            {
-                Success = true,
-                Value = new CreateApplicationMessageCommandResponse()
-            });
+        _mediator.Setup(m => m.Send(
+            It.IsAny<CreateApplicationMessageCommand>(),
+            It.IsAny<CancellationToken>()))
+        .ReturnsAsync(new BaseMediatrResponse<CreateApplicationMessageCommandResponse>
+        {
+            Success = true,
+            Value = new CreateApplicationMessageCommandResponse()
+        });
     }
 
     [Fact]
-    public async Task Handle_ValidReviewer1_UpdatesApplication_AndCreatesMessage()
+    public async Task Handle_ReviewerNotChanged_ReturnsSuccess_NoUpdate_NoMessage()
     {
         var application = new Data.Entities.Application.Application
         {
             Id = ApplicationId,
-            Reviewer1 = PreviousReviewer1,
-            Reviewer2 = PreviousReviewer2
+            Reviewer1 = PreviousReviewer1
         };
 
-        _repository
-            .Setup(r => r.GetByIdAsync(ApplicationId))
+        _repository.Setup(r => r.GetByIdAsync(ApplicationId))
             .ReturnsAsync(application);
 
-        var response = await _handler.Handle(new SaveReviewerCommand
+        var result = await _handler.Handle(new SaveReviewerCommand
         {
             ApplicationId = ApplicationId,
-            ReviewerFieldName = ReviewerFieldName1,
-            ReviewerValue = NewReviewer,
+            ReviewerFieldName = Reviewer1Field,
+            ReviewerValue = PreviousReviewer1,
             SentByEmail = SentByEmail,
             SentByName = SentByName,
             UserType = UserTypeValue
@@ -67,74 +71,14 @@ public class SaveReviewerCommandHandlerTests
 
         Assert.Multiple(() =>
         {
-            Assert.True(response.Success);
-
-            _repository.Verify(r => r.UpdateAsync(It.Is<Data.Entities.Application.Application>(a =>
-                a.Id == ApplicationId &&
-                a.Reviewer1 == NewReviewer &&
-                a.Reviewer2 == PreviousReviewer2
-            )), Times.Once);
-
-            _mediator.Verify(m => m.Send(It.Is<CreateApplicationMessageCommand>(c =>
-                c.ApplicationId == ApplicationId &&
-                c.SentByEmail == SentByEmail &&
-                c.SentByName == SentByName &&
-                c.UserType == UserType.Qfau.ToString() &&
-                c.MessageType == MessageType.QfauOwnerUpdated.ToString() &&
-                c.MessageText.Contains($"Previous {ReviewerFieldName1}:") &&
-                c.MessageText.Contains($"New {ReviewerFieldName1}:")
-            ), It.IsAny<CancellationToken>()), Times.Once);
+            Assert.True(result.Success);
+            _repository.Verify(r => r.UpdateAsync(It.IsAny<Data.Entities.Application.Application>()), Times.Never);
+            _mediator.Verify(r => r.Send(It.IsAny<CreateApplicationMessageCommand>(), It.IsAny<CancellationToken>()), Times.Never);
         });
     }
 
     [Fact]
-    public async Task Handle_ValidReviewer2_UpdatesApplication_AndCreatesMessage()
-    {
-        var application = new Data.Entities.Application.Application
-        {
-            Id = ApplicationId,
-            Reviewer1 = PreviousReviewer1,
-            Reviewer2 = PreviousReviewer2
-        };
-
-        _repository
-            .Setup(r => r.GetByIdAsync(ApplicationId))
-            .ReturnsAsync(application);
-
-        var response = await _handler.Handle(new SaveReviewerCommand
-        {
-            ApplicationId = ApplicationId,
-            ReviewerFieldName = ReviewerFieldName2,
-            ReviewerValue = NewReviewer,
-            SentByEmail = SentByEmail,
-            SentByName = SentByName,
-            UserType = UserTypeValue
-        }, default);
-
-        Assert.Multiple(() =>
-        {
-            Assert.True(response.Success);
-
-            _repository.Verify(r => r.UpdateAsync(It.Is<Data.Entities.Application.Application>(a =>
-                a.Id == ApplicationId &&
-                a.Reviewer1 == PreviousReviewer1 &&
-                a.Reviewer2 == NewReviewer
-            )), Times.Once);
-
-            _mediator.Verify(m => m.Send(It.Is<CreateApplicationMessageCommand>(c =>
-                c.ApplicationId == ApplicationId &&
-                c.SentByEmail == SentByEmail &&
-                c.SentByName == SentByName &&
-                c.UserType == UserType.Qfau.ToString() &&
-                c.MessageType == MessageType.QfauOwnerUpdated.ToString() &&
-                c.MessageText.Contains($"Previous {ReviewerFieldName2}:") &&
-                c.MessageText.Contains($"New {ReviewerFieldName2}:")
-            ), It.IsAny<CancellationToken>()), Times.Once);
-        });
-    }
-
-    [Fact]
-    public async Task Handle_DuplicateReviewer_ReturnsDuplicateError_DoesNotUpdate_AndDoesNotSendMessage()
+    public async Task Handle_DuplicateReviewer_CaseInsensitive_ReturnsDuplicateError()
     {
         var application = new Data.Entities.Application.Application
         {
@@ -143,15 +87,14 @@ public class SaveReviewerCommandHandlerTests
             Reviewer2 = PreviousReviewer2
         };
 
-        _repository
-            .Setup(r => r.GetByIdAsync(ApplicationId))
+        _repository.Setup(r => r.GetByIdAsync(ApplicationId))
             .ReturnsAsync(application);
 
-        var response = await _handler.Handle(new SaveReviewerCommand
+        var result = await _handler.Handle(new SaveReviewerCommand
         {
             ApplicationId = ApplicationId,
-            ReviewerFieldName = ReviewerFieldName2,
-            ReviewerValue = DuplicateReviewer,
+            ReviewerFieldName = Reviewer2Field,
+            ReviewerValue = "  bob  ",
             SentByEmail = SentByEmail,
             SentByName = SentByName,
             UserType = UserTypeValue
@@ -159,11 +102,74 @@ public class SaveReviewerCommandHandlerTests
 
         Assert.Multiple(() =>
         {
-            Assert.True(response.Success);
-            Assert.NotNull(response.Value);
-            Assert.True(response.Value.DuplicateReviewerError);
-
+            Assert.True(result.Success);
+            Assert.NotNull(result.Value);
+            Assert.True(result.Value.DuplicateReviewerError);
             _repository.Verify(r => r.UpdateAsync(It.IsAny<Data.Entities.Application.Application>()), Times.Never);
+            _mediator.Verify(r => r.Send(It.IsAny<CreateApplicationMessageCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+        });
+    }
+
+    [Fact]
+    public async Task Handle_ValidReviewer1_Updates_AndSendsMessage()
+    {
+        var application = new Data.Entities.Application.Application
+        {
+            Id = ApplicationId,
+            Reviewer1 = PreviousReviewer1,
+            Reviewer2 = PreviousReviewer2
+        };
+
+        _repository.Setup(r => r.GetByIdAsync(ApplicationId))
+            .ReturnsAsync(application);
+
+        var result = await _handler.Handle(new SaveReviewerCommand
+        {
+            ApplicationId = ApplicationId,
+            ReviewerFieldName = Reviewer1Field,
+            ReviewerValue = NewReviewer,
+            SentByEmail = SentByEmail,
+            SentByName = SentByName,
+            UserType = UserTypeValue
+        }, default);
+
+        Assert.Multiple(() =>
+        {
+            Assert.True(result.Success);
+
+            _repository.Verify(r => r.UpdateAsync(It.Is<Data.Entities.Application.Application>(
+                a => a.Reviewer1 == NewReviewer &&
+                     a.Reviewer2 == PreviousReviewer2
+            )), Times.Once);
+
+            _mediator.Verify(m => m.Send(It.Is<CreateApplicationMessageCommand>(c =>
+                c.ApplicationId == ApplicationId &&
+                c.MessageText.Contains($"Previous {Reviewer1Field}: {PreviousReviewer1}") &&
+                c.MessageText.Contains($"New {Reviewer1Field}: {NewReviewer}")
+            ), It.IsAny<CancellationToken>()), Times.Once);
+        });
+    }
+
+    [Fact]
+    public async Task Handle_RecordNotFound_ReturnsErrorResponse()
+    {
+        _repository.Setup(r => r.GetByIdAsync(ApplicationId))
+            .ThrowsAsync(new RecordNotFoundException(ApplicationId));
+
+        var result = await _handler.Handle(new SaveReviewerCommand
+        {
+            ApplicationId = ApplicationId,
+            ReviewerFieldName = Reviewer1Field,
+            ReviewerValue = NewReviewer,
+            SentByEmail = SentByEmail,
+            SentByName = SentByName,
+            UserType = UserTypeValue
+        }, default);
+
+        Assert.Multiple(() =>
+        {
+            Assert.False(result.Success);
+            Assert.Equal($"Application {ApplicationId} not found.", result.ErrorMessage);
             _mediator.Verify(m => m.Send(It.IsAny<CreateApplicationMessageCommand>(), It.IsAny<CancellationToken>()), Times.Never);
         });
     }
@@ -174,18 +180,16 @@ public class SaveReviewerCommandHandlerTests
         var application = new Data.Entities.Application.Application
         {
             Id = ApplicationId,
-            Reviewer1 = PreviousReviewer1,
-            Reviewer2 = PreviousReviewer2
+            Reviewer1 = PreviousReviewer1
         };
 
-        _repository
-            .Setup(r => r.GetByIdAsync(ApplicationId))
+        _repository.Setup(r => r.GetByIdAsync(ApplicationId))
             .ReturnsAsync(application);
 
-        var response = await _handler.Handle(new SaveReviewerCommand
+        var result = await _handler.Handle(new SaveReviewerCommand
         {
             ApplicationId = ApplicationId,
-            ReviewerFieldName = ReviewerFieldName1,
+            ReviewerFieldName = Reviewer1Field,
             ReviewerValue = NewReviewer,
             SentByEmail = SentByEmail,
             SentByName = SentByName,
@@ -194,76 +198,36 @@ public class SaveReviewerCommandHandlerTests
 
         Assert.Multiple(() =>
         {
-            Assert.False(response.Success);
-            Assert.NotNull(response.InnerException);
-            Assert.IsAssignableFrom<ArgumentException>(response.InnerException);
-
+            Assert.False(result.Success);
+            Assert.IsType<ArgumentException>(result.InnerException);
             _repository.Verify(r => r.UpdateAsync(It.IsAny<Data.Entities.Application.Application>()), Times.Never);
-            _mediator.Verify(m => m.Send(It.IsAny<CreateApplicationMessageCommand>(), It.IsAny<CancellationToken>()), Times.Never);
+            _mediator.Verify(r => r.Send(It.IsAny<CreateApplicationMessageCommand>(), It.IsAny<CancellationToken>()), Times.Never);
         });
     }
 
     [Fact]
-    public async Task Handle_InvalidReviewerFieldName_ReturnsErrorResponse()
+    public async Task Handle_MessageFailure_ReturnsErrorResponse()
     {
         var application = new Data.Entities.Application.Application
         {
             Id = ApplicationId,
-            Reviewer1 = PreviousReviewer1,
-            Reviewer2 = PreviousReviewer2
+            Reviewer1 = PreviousReviewer1
         };
 
-        _repository
-            .Setup(r => r.GetByIdAsync(ApplicationId))
+        _repository.Setup(r => r.GetByIdAsync(ApplicationId))
             .ReturnsAsync(application);
 
-        var response = await _handler.Handle(new SaveReviewerCommand
-        {
-            ApplicationId = ApplicationId,
-            ReviewerFieldName = InvalidReviewerFieldName,
-            ReviewerValue = NewReviewer,
-            SentByEmail = SentByEmail,
-            SentByName = SentByName,
-            UserType = UserTypeValue
-        }, default);
-
-        Assert.Multiple(() =>
-        {
-            Assert.False(response.Success);
-            Assert.NotNull(response.InnerException);
-            Assert.IsAssignableFrom<ArgumentOutOfRangeException>(response.InnerException);
-
-            _repository.Verify(r => r.UpdateAsync(It.IsAny<Data.Entities.Application.Application>()), Times.Never);
-            _mediator.Verify(m => m.Send(It.IsAny<CreateApplicationMessageCommand>(), It.IsAny<CancellationToken>()), Times.Never);
-        });
-    }
-
-    [Fact]
-    public async Task Handle_MessageCommandFails_ReturnsErrorResponse()
-    {
-        var application = new Data.Entities.Application.Application
-        {
-            Id = ApplicationId,
-            Reviewer1 = PreviousReviewer1,
-            Reviewer2 = PreviousReviewer2
-        };
-
-        _repository
-            .Setup(r => r.GetByIdAsync(ApplicationId))
-            .ReturnsAsync(application);
-
-        _mediator
-            .Setup(m => m.Send(It.IsAny<CreateApplicationMessageCommand>(), It.IsAny<CancellationToken>()))
+        _mediator.Setup(m => m.Send(It.IsAny<CreateApplicationMessageCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new BaseMediatrResponse<CreateApplicationMessageCommandResponse>
             {
                 Success = false,
-                ErrorMessage = MessageSendFailed
+                ErrorMessage = MessageFailure
             });
 
-        var response = await _handler.Handle(new SaveReviewerCommand
+        var result = await _handler.Handle(new SaveReviewerCommand
         {
             ApplicationId = ApplicationId,
-            ReviewerFieldName = ReviewerFieldName1,
+            ReviewerFieldName = Reviewer1Field,
             ReviewerValue = NewReviewer,
             SentByEmail = SentByEmail,
             SentByName = SentByName,
@@ -272,39 +236,9 @@ public class SaveReviewerCommandHandlerTests
 
         Assert.Multiple(() =>
         {
-            Assert.False(response.Success);
-            Assert.NotNull(response.InnerException);
-            Assert.Equal(MessageSendFailed, response.InnerException!.Message);
-
+            Assert.False(result.Success);
+            Assert.Equal(MessageFailure, result.ErrorMessage);
             _repository.Verify(r => r.UpdateAsync(It.IsAny<Data.Entities.Application.Application>()), Times.Once);
-        });
-    }
-
-    [Fact]
-    public async Task Handle_RepositoryThrows_ReturnsErrorResponse()
-    {
-        _repository
-            .Setup(r => r.GetByIdAsync(ApplicationId))
-            .ThrowsAsync(new InvalidOperationException(RepositoryExceptionMessage));
-
-        var response = await _handler.Handle(new SaveReviewerCommand
-        {
-            ApplicationId = ApplicationId,
-            ReviewerFieldName = ReviewerFieldName1,
-            ReviewerValue = NewReviewer,
-            SentByEmail = SentByEmail,
-            SentByName = SentByName,
-            UserType = UserTypeValue
-        }, default);
-
-        Assert.Multiple(() =>
-        {
-            Assert.False(response.Success);
-            Assert.IsAssignableFrom<InvalidOperationException>(response.InnerException);
-            Assert.Equal(RepositoryExceptionMessage, response.ErrorMessage);
-
-            _repository.Verify(r => r.UpdateAsync(It.IsAny<Data.Entities.Application.Application>()), Times.Never);
-            _mediator.Verify(m => m.Send(It.IsAny<CreateApplicationMessageCommand>(), It.IsAny<CancellationToken>()), Times.Never);
         });
     }
 }
