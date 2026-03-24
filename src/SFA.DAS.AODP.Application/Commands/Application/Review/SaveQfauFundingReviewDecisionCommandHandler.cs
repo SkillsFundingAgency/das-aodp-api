@@ -14,23 +14,19 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
     public class SaveQfauFundingReviewDecisionCommandHandler : IRequestHandler<SaveQfauFundingReviewDecisionCommand, BaseMediatrResponse<EmptyResponse>>
     {
         private Guid NoActionRequiredActionTypeId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-        private Guid ApprovedProcessStatusId = Guid.Parse("00000000-0000-0000-0000-000000000004");
-        private Guid RejectedProcessStatusId = Guid.Parse("00000000-0000-0000-0000-000000000005");
         private readonly IApplicationReviewFeedbackRepository _reviewRepository;
         private readonly IMediator _mediator;
         private readonly IQualificationDetailsRepository _qualificationDetailsRepository;
         private readonly IQualificationFundingsRepository _qualificationFundingsrepository;
         private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
-        private readonly IQualificationsRepository _qualificationsRepository;
 
-        public SaveQfauFundingReviewDecisionCommandHandler(IApplicationReviewFeedbackRepository repository, IMediator mediator, IQualificationDetailsRepository qualificationDetailsRepository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository, IQualificationFundingsRepository qualificationFundingsRepository, IQualificationsRepository qualificationsRepository)
+        public SaveQfauFundingReviewDecisionCommandHandler(IApplicationReviewFeedbackRepository repository, IMediator mediator, IQualificationDetailsRepository qualificationDetailsRepository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository, IQualificationFundingsRepository qualificationFundingsRepository)
         {
             _reviewRepository = repository;
             _mediator = mediator;
             _qualificationDetailsRepository = qualificationDetailsRepository;
             _qualificationDiscussionHistoryRepository = qualificationDiscussionHistoryRepository;
             _qualificationFundingsrepository = qualificationFundingsRepository;
-            _qualificationsRepository = qualificationsRepository;
         }
 
         public async Task<BaseMediatrResponse<EmptyResponse>> Handle(SaveQfauFundingReviewDecisionCommand request, CancellationToken cancellationToken)
@@ -161,8 +157,6 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                 }).ToList() ?? []
             });
             if (updateOfferDetails.Success == false) throw new Exception(updateOfferDetails.ErrorMessage, updateOfferDetails.InnerException);
-
-            await _qualificationsRepository.UpdateQualificationStatus(qualVersion.Qualification.Qan, review.Status == ApplicationStatus.Approved.ToString() ? ApprovedProcessStatusId : RejectedProcessStatusId, qualVersion.Version);
 
             var applicationOfferIds = review.ApplicationReview.ApplicationReviewFundings?.Select(a => a.FundingOfferId) ?? [];
             List<QualificationFundings> removedOffers = qualificationfundedOffers.Where(q => !applicationOfferIds.Contains(q.FundingOfferId)).ToList();
