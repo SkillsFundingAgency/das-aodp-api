@@ -5,7 +5,7 @@ using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Application.Swashbuckle;
 using SFA.DAS.AODP.Data.Search;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.OpenApi;
+using Microsoft.OpenApi.Models;
 
 namespace SFA.DAS.AODP.Api;
 
@@ -59,14 +59,19 @@ public static class Program
                         Description = "Paste a JWT here (without the 'Bearer ' prefix)."
                     });
 
-                    c.AddSecurityRequirement(document =>
+                    c.AddSecurityRequirement(new OpenApiSecurityRequirement
                     {
-                        var requirement = new OpenApiSecurityRequirement
                         {
-                            [new OpenApiSecuritySchemeReference("Bearer", document)] = []
-                        };
-
-                        return requirement;
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
+                                }
+                            },
+                            Array.Empty<string>()
+                        }
                     });
                 }
             });
