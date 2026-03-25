@@ -6,6 +6,7 @@ using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
+using SFA.DAS.AODP.Models.Qualifications;
 using static SFA.DAS.AODP.Data.Repositories.Qualification.IQualificationsRepository;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications

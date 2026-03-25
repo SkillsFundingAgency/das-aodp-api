@@ -1,7 +1,9 @@
-﻿using MediatR;
+﻿using System.Diagnostics.CodeAnalysis;
+using MediatR;
 
 namespace SFA.DAS.AODP.Application.Commands.Qualification;
 
+[ExcludeFromCodeCoverage]
 public class UpdateQualificationStatusCommand : IRequest<BaseMediatrResponse<EmptyResponse>>
 {
     public string QualificationReference { get; set; } = string.Empty;

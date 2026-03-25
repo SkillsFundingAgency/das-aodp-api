@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Data.Entities.Qualification;
 
+[ExcludeFromCodeCoverage]
 [Table("QualificationVersions", Schema = "regulated")]
 public partial class QualificationVersions
 {
@@ -69,4 +71,17 @@ public partial class QualificationVersions
     public virtual ProcessStatus ProcessStatus { get; set; } = null!;
     public virtual Qualification Qualification { get; set; } = null!;
     public virtual VersionFieldChange VersionFieldChanges { get; set; } = null!;
+
+    public QualificationVersions SetLifecycleStatus(ProcessStatusLookup proposedProcessStatus)
+    {
+        ProcessStatusId = proposedProcessStatus.Id;
+
+        if (proposedProcessStatus == ProcessStatusLookup.Approved ||
+            proposedProcessStatus == ProcessStatusLookup.Rejected)
+        {
+            LifecycleStageId = new Guid("00000000-0000-0000-0000-000000000003");
+        }
+
+        return this;
+    }
 }
