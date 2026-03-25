@@ -72,7 +72,7 @@ namespace SFA.DAS.AODP.Data.Tests
 
             var processStatus1 = new ProcessStatus() { Name = Enum.ProcessStatus.DecisionRequired, Id = ProcessStageDecision };
             var processStatus2 = new ProcessStatus() { Name = Enum.ProcessStatus.NoActionRequired, Id = ProcessStageNoAction };
-            var processStatus3 = new ProcessStatus() { Name = Enum.ProcessStatus.Hold, Id = Guid.NewGuid() };
+            var processStatus3 = new ProcessStatus() { Name = Enum.ProcessStatus.OnHold, Id = Guid.NewGuid() };
             var processStatus4 = new ProcessStatus() { Name = Enum.ProcessStatus.Rejected, Id = Guid.NewGuid() };
             var processStatus5 = new ProcessStatus() { Name = Enum.ProcessStatus.Approved, Id = Guid.NewGuid() };
             await _dbContext.AddRangeAsync(new List<ProcessStatus>() { processStatus1, processStatus2, processStatus3, processStatus4, processStatus5 });
