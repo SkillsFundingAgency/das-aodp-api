@@ -65,6 +65,7 @@ public partial class QualificationVersions
     public bool? NineteenPlus { get; set; }
     public string? ImportStatus { get; set; }
     public bool? EligibleForFunding { get; set; }
+    public string? EligibleForFundingChangeReason { get; set; }
     public string? Name { get; set; }
     public virtual LifecycleStage LifecycleStage { get; set; } = null!;
     public virtual AwardingOrganisation Organisation { get; set; } = null!;
