@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using MediatR;using SFA.DAS.AODP.Application;
+﻿using MediatR;using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Application.Exceptions;
 using Entities = SFA.DAS.AODP.Data.Entities;
