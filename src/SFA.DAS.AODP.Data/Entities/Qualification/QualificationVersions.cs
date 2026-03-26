@@ -34,6 +34,8 @@ public partial class QualificationVersions
     public DateTime? CertificationEndDate { get; set; }
     public DateTime? ReviewDate { get; set; }
     public bool OfferedInEngland { get; set; }
+    public bool? IntentionToSeekFundingInEngland { get; set; }
+
     public bool OfferedInNi { get; set; }
     public bool? OfferedInternationally { get; set; }
     public string? Specialism { get; set; }
@@ -65,6 +67,7 @@ public partial class QualificationVersions
     public bool? NineteenPlus { get; set; }
     public string? ImportStatus { get; set; }
     public bool? EligibleForFunding { get; set; }
+    public string? EligibleForFundingChangeReason { get; set; }
     public string? Name { get; set; }
     public virtual LifecycleStage LifecycleStage { get; set; } = null!;
     public virtual AwardingOrganisation Organisation { get; set; } = null!;
