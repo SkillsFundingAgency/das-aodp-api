@@ -75,4 +75,10 @@ public class RolloverWorkflowCandidate
         P1FailureReason = pass ? null : failureReason;
         UpdatedAt = DateTime.UtcNow;
     }
+
+    public void SetProposedFundingEndDate(DateTime? proposedFundingEndDate)
+    {
+        ProposedFundingEndDate = proposedFundingEndDate;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

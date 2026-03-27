@@ -17,6 +17,24 @@ DefLists AS (
     FROM dbo.DefundingLists dl
     INNER JOIN dbo.Qualification q
         ON q.Qan = dl.Qan
+),
+Pldns AS (
+    SELECT
+        q.Id,
+        pldns.[PLDNS14-16],
+        pldns.[PLDNS16-19],
+        pldns.LocalFlex,
+        pldns.[LegalEntitlementL2-L3],
+        pldns.LegalEntitlementEngMaths,
+        pldns.DigitalEntitlement,
+        pldns.[ESF-L3-L4],
+        pldns.Loans,
+        pldns.LifelongLearningEntitlement,
+        pldns.Level3FreeCoursesForJobs,
+        pldns.CoF
+    FROM dbo.Pldns pldns
+    INNER JOIN dbo.Qualification q
+        ON q.Qan = pldns.Qan
 )
 SELECT
     rwc.Id                     AS WorkflowCandidateId,
@@ -40,7 +58,18 @@ SELECT
     qv.OfferedInEngland,
     qv.Glh,
     qv.Tqt,
-    CASE WHEN dl.Id IS NOT NULL THEN CAST(1 AS bit) ELSE CAST(0 AS bit) END AS IsOnDefundingList
+    CASE WHEN dl.Id IS NOT NULL THEN CAST(1 AS bit) ELSE CAST(0 AS bit) END AS IsOnDefundingList,
+        pldns.[PLDNS14-16] AS Age1416,
+        pldns.[PLDNS16-19] AS Age1619,
+        pldns.LocalFlex AS LocalFlexibilities,
+        pldns.[LegalEntitlementL2-L3] AS LegalEntitlementL2L3,
+        pldns.LegalEntitlementEngMaths AS LegalEntitlementEnglishandMaths,
+        pldns.DigitalEntitlement AS DigitalEntitlement,
+        pldns.[ESF-L3-L4] AS ESFL3L4,
+        pldns.Loans AS AdvancedLearnerLoans,
+        pldns.LifelongLearningEntitlement AS LifelongLearningEntitlement,
+        pldns.Level3FreeCoursesForJobs AS L3FreeCoursesForJobs,
+        pldns.CoF
 
 FROM dbo.RolloverWorkflowCandidate rwc
 INNER JOIN dbo.RolloverWorkflowRun rwr
@@ -61,4 +90,7 @@ LEFT JOIN dbo.RolloverWorkflowRunFundingOffer rwfo
 
 LEFT JOIN DefLists dl
     ON dl.Id = qv.QualificationId
+
+LEFT JOIN Pldns pldns
+    ON pldns.Id = qv.QualificationId
 GO

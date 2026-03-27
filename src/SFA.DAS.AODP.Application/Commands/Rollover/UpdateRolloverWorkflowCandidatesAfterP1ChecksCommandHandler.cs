@@ -39,21 +39,60 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandler : IRequ
         return response;
     }
 
+    private static void CalculateProposedFundingEndDate(RolloverWorkflowCandidatesP1Checks p1Check, RolloverWorkflowCandidate rolloverWorkflowCandidate)
+    {
+
+        // Candidate is marked as To Exclude Then the Proposed Funding Approval End Date is set equal to the Current Funding Approval End Date
+        if (rolloverWorkflowCandidate.ProposedFundingEndDate.HasValue && !rolloverWorkflowCandidate.PassP1)
+        {
+            rolloverWorkflowCandidate.SetProposedFundingEndDate(rolloverWorkflowCandidate.CurrentFundingEndDate);
+            return;
+        }
+
+        var pldnsDate = p1Check.GetPldnsDate();
+
+        if (pldnsDate.HasValue 
+            && pldnsDate.Value < p1Check.OperationalEndDate 
+            && pldnsDate.Value < p1Check.LatestFundingApprovalEndDate) 
+        {
+            rolloverWorkflowCandidate.SetProposedFundingEndDate(pldnsDate);
+            return;
+        }
+
+        if (pldnsDate.HasValue 
+            && p1Check.OperationalEndDate < pldnsDate.Value
+            && p1Check.OperationalEndDate < p1Check.LatestFundingApprovalEndDate)
+        {
+            rolloverWorkflowCandidate.SetProposedFundingEndDate(p1Check.OperationalEndDate);
+            return;
+        }
+
+        var (start, end) = p1Check.GetAcademicYearDates();
+        if (pldnsDate.HasValue 
+            && start.HasValue
+            && pldnsDate.Value.Date > end
+            && p1Check.OperationalEndDate > p1Check.LatestFundingApprovalEndDate)
+        {
+            rolloverWorkflowCandidate.SetProposedFundingEndDate(p1Check.LatestFundingApprovalEndDate);
+            return;
+        }
+    }
     private static List<RolloverWorkflowCandidate> ProcessP1Checks(IEnumerable<RolloverWorkflowCandidatesP1Checks> query, IEnumerable<RolloverWorkflowCandidate> rolloverWorkflowCandidates)
     {
         var candidatesToUpdate = new List<RolloverWorkflowCandidate>();
 
-        foreach (var v in query)
+        foreach (var p1Check in query)
         {
             // Find the persisted workflow candidate to update
-            var candidate = rolloverWorkflowCandidates.FirstOrDefault(rwc => rwc.Id == v.WorkflowCandidateId);
+            var candidate = rolloverWorkflowCandidates.FirstOrDefault(rwc => rwc.Id == p1Check.WorkflowCandidateId);
             if (candidate == null)
                 continue;
 
-            var failures = ValidateP1Checks(v);
-
+            var failures = ValidateP1Checks(p1Check);
             var passP1 = failures.Count == 0;
             candidate.SetP1Result(passP1, passP1 ? null : string.Join("; ", failures));
+
+            CalculateProposedFundingEndDate(p1Check, candidate);
 
             candidatesToUpdate.Add(candidate);
         }
