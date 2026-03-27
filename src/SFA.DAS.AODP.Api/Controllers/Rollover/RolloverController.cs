@@ -39,6 +39,16 @@ public class RolloverController : BaseController
         return await SendRequestAsync(query);
     }
 
+    [HttpGet("rolloverworkflowcandidates")]
+    [ProducesResponseType(typeof(GetRolloverWorkflowCandidatesQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetRolloverWorkflowCandidates(CancellationToken cancellationToken)
+    {
+        var query = new GetRolloverWorkflowCandidatesQuery();
+        var result = await _mediator.Send(query, cancellationToken);
+        return Ok(result);
+    }
+
     [HttpPost("rolloverworkflowruns")]
     [ProducesResponseType(typeof(BaseMediatrResponse<CreateRolloverWorkflowRunCommandResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

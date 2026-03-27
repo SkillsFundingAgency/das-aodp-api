@@ -23,7 +23,7 @@ public class RolloverRepository : IRolloverRepository
         return totalRecords;
     }
 
-    public async Task<IEnumerable<RolloverWorkflowCandidate>> GetAllRolloverWorkflowCandidatesAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<Entities.Rollover.RolloverWorkflowCandidate>> GetAllRolloverWorkflowCandidatesAsync(CancellationToken cancellationToken)
     {
         var dbSet = _context.RolloverWorkflowCandidates;
 
@@ -46,7 +46,7 @@ public class RolloverRepository : IRolloverRepository
                 QualificationVersionId = rc.QualificationVersionId,
                 FundingOfferId = rc.FundingOfferId,
                 FundingOfferName = rc.FundingOffer != null ? rc.FundingOffer.Name : null,
-                QualificationNumber = rc.QualificationVersion != null && rc.QualificationVersion.Qualification != null ? 
+                QualificationNumber = rc.QualificationVersion != null && rc.QualificationVersion.Qualification != null ?
                     rc.QualificationVersion.Qualification.Qan : null,
                 AcademicYear = rc.AcademicYear
             })
@@ -79,7 +79,7 @@ public class RolloverRepository : IRolloverRepository
         return workflowRun.Id;
     }
 
-    public async Task CreateRolloverWorkflowCandidatesAsync(IEnumerable<RolloverWorkflowCandidate> workflowCandidates, CancellationToken cancellationToken)
+    public async Task CreateRolloverWorkflowCandidatesAsync(IEnumerable<Entities.Rollover.RolloverWorkflowCandidate> workflowCandidates, CancellationToken cancellationToken)
     {
         _context.RolloverWorkflowCandidates.AddRange(workflowCandidates);
         await _context.SaveChangesAsync(cancellationToken);
@@ -89,5 +89,12 @@ public class RolloverRepository : IRolloverRepository
     {
         _context.RolloverWorkflowRunFundingOffers.AddRange(workflowFundingOffers);
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<RolloverWorkflowRun> GeRolloverWorkflowRunByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await _context.RolloverWorkflowRuns
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
 }

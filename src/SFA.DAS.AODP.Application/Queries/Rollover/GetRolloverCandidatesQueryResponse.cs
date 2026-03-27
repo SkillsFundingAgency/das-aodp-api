@@ -1,5 +1,4 @@
-﻿using SFA.DAS.AODP.Data.Entities.Qualification;
-using SFA.DAS.AODP.Models.Rollover;
+﻿using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Application.Queries.Rollover
 {

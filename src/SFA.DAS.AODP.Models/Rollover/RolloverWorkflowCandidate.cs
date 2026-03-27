@@ -3,7 +3,7 @@
 namespace SFA.DAS.AODP.Models.Rollover;
 
 [ExcludeFromCodeCoverage]
-public class RolloverWorkflowCandidateDto
+public class RolloverWorkflowCandidate
 {
     public Guid Id { get; set; }
     public Guid RolloverWorkflowRunId { get; set; }

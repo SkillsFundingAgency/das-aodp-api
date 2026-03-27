@@ -70,7 +70,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
 
             _repositoryMock
                 .Setup(r => r.CreateRolloverWorkflowCandidatesAsync(
-                    It.IsAny<IEnumerable<RolloverWorkflowCandidate>>(),
+                    It.IsAny<IEnumerable<Data.Entities.Rollover.RolloverWorkflowCandidate>>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
@@ -101,7 +101,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
 
             _repositoryMock.Verify(r =>
                 r.CreateRolloverWorkflowCandidatesAsync(
-                    It.IsAny<IEnumerable<RolloverWorkflowCandidate>>(),
+                    It.IsAny<IEnumerable<Data.Entities.Rollover.RolloverWorkflowCandidate>>(),
                     It.IsAny<CancellationToken>()),
                 Times.Once);
 
@@ -183,7 +183,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
             // Must mock downstream methods even if never reached
             _repositoryMock
                 .Setup(r => r.CreateRolloverWorkflowCandidatesAsync(
-                    It.IsAny<IEnumerable<RolloverWorkflowCandidate>>(),
+                    It.IsAny<IEnumerable<Data.Entities.Rollover.RolloverWorkflowCandidate>>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
@@ -241,7 +241,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
             // Must mock downstream calls (even though never reached)
             _repositoryMock
                 .Setup(r => r.CreateRolloverWorkflowCandidatesAsync(
-                    It.IsAny<IEnumerable<RolloverWorkflowCandidate>>(),
+                    It.IsAny<IEnumerable<Data.Entities.Rollover.RolloverWorkflowCandidate>>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
@@ -301,7 +301,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
             // Downstream methods must still be mocked
             _repositoryMock
                 .Setup(r => r.CreateRolloverWorkflowCandidatesAsync(
-                    It.IsAny<IEnumerable<RolloverWorkflowCandidate>>(),
+                    It.IsAny<IEnumerable<Data.Entities.Rollover.RolloverWorkflowCandidate>>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
