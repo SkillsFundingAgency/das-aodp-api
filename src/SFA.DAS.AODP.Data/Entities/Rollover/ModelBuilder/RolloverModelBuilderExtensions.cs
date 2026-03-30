@@ -1,5 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Data.Entities.Rollover.ModelBuilder;
 
@@ -79,6 +79,10 @@ public static class RolloverModelBuilderExtensions
             b.Property(x => x.SelectionMethod)
                 .HasConversion<string>();
         });
+
+        modelBuilder.Entity<RolloverWorkflowCandidatesP1Checks>()
+            .ToView("view_RolloverWorkflowCandidatesP1Checks", "dbo")
+            .HasKey(e => e.WorkflowCandidateId);
 
         return modelBuilder;
     }

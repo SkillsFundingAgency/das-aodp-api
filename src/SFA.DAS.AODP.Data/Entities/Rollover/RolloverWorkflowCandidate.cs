@@ -68,4 +68,17 @@ public class RolloverWorkflowCandidate
             PassP1 = false
         };
     }
+
+    public void SetP1Result(bool pass, string? failureReason = null)
+    {
+        PassP1 = pass;
+        P1FailureReason = pass ? null : failureReason;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void SetProposedFundingEndDate(DateTime? proposedFundingEndDate)
+    {
+        ProposedFundingEndDate = proposedFundingEndDate;
+        UpdatedAt = DateTime.UtcNow;
+    }
 }

@@ -184,6 +184,7 @@
     <Build Include="Tables\Rollover\RolloverWorkflowRunFilter.sql" />
     <Build Include="Tables\Rollover\RolloverWorkflowRunFilterValue.sql" />
     <Build Include="Tables\Rollover\RolloverWorkflowRunFundingOffer.sql" />
+    <Build Include="Views\view_RolloverWorkflowCandidatesP1Checks.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
