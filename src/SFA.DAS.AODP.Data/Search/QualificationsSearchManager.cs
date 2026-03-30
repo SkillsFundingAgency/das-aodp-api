@@ -106,22 +106,4 @@ public class QualificationsSearchManager : ISearchManager
             Qualifications = results
         };
     }
-
-    // This method tokenizes the input query using the provided analyzer
-    private IEnumerable<string> TokenizeQuery(Analyzer analyzer, string query)
-    {
-        var result = new List<string>();
-
-        // Use the analyzer to create a token stream
-        using TokenStream tokenStream = analyzer.GetTokenStream(null, new StringReader(query));
-        tokenStream.Reset();
-        // Iterate through the tokens and collect them
-        while (tokenStream.IncrementToken())
-        {
-            // Get the term attribute and add it to the result list
-            result.Add(tokenStream.GetAttribute<ICharTermAttribute>().ToString());
-        }
-
-        return result;
-    }
 }
