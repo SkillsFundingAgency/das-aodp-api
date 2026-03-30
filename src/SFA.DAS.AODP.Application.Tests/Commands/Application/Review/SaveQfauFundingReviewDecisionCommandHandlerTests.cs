@@ -15,6 +15,12 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Application.Review;
 
 public class SaveQfauFundingReviewDecisionCommandHandlerTests
 {
+    private const string MissingQualificationMessage =
+        "The application's QAN does not match any regulated qualification.";
+
+    private static string InvalidQualificationStatusMessage(string status) =>
+        $"The current qualification status is not valid to confirm the decision. The current qualification status is: {status}.";
+
     private readonly Mock<IApplicationReviewFeedbackRepository> _reviewRepository = new();
     private readonly Mock<IMediator> _mediator = new();
     private readonly Mock<IQualificationDetailsRepository> _qualificationDetailsRepository = new();
@@ -32,7 +38,6 @@ public class SaveQfauFundingReviewDecisionCommandHandlerTests
     [Fact]
     public async Task Test_Funding_Details_Updated_For_Rejected_Applications_Without_Qan()
     {
-        // Arrange
         var funding = new Data.Entities.Application.ApplicationReviewFeedback()
         {
             ApplicationReviewId = Guid.NewGuid(),
@@ -46,16 +51,19 @@ public class SaveQfauFundingReviewDecisionCommandHandlerTests
             }
         };
 
-        _mediator.Setup(mediator => mediator.Send(It.IsAny<CreateApplicationMessageCommand>(), default)).ReturnsAsync(new BaseMediatrResponse<CreateApplicationMessageCommandResponse>() { Success = true });
-        _reviewRepository.Setup(a => a.GeyByReviewIdAndUserType(funding.ApplicationReviewId, Models.Application.UserType.Qfau)).ReturnsAsync(funding);
+        _mediator
+            .Setup(mediator => mediator.Send(It.IsAny<CreateApplicationMessageCommand>(), default))
+            .ReturnsAsync(new BaseMediatrResponse<CreateApplicationMessageCommandResponse>() { Success = true });
 
-        // Act
+        _reviewRepository
+            .Setup(a => a.GeyByReviewIdAndUserType(funding.ApplicationReviewId, Models.Application.UserType.Qfau))
+            .ReturnsAsync(funding);
+
         var response = await _handler.Handle(new()
         {
             ApplicationReviewId = funding.ApplicationReviewId,
         }, default);
 
-        // Assert
         Assert.True(response.Success);
         _reviewRepository.Verify(a => a.UpdateAsync(funding), Times.Once());
         _mediator.Verify(mediator => mediator.Send(It.IsAny<CreateApplicationMessageCommand>(), default), Times.Once());
@@ -64,7 +72,6 @@ public class SaveQfauFundingReviewDecisionCommandHandlerTests
     [Fact]
     public async Task Test_Funding_Details_Updated_For_Approved_Applications_With_Qan()
     {
-        // Arrange
         var qan = "123";
         var funding = new Data.Entities.Application.ApplicationReviewFeedback()
         {
@@ -107,23 +114,39 @@ public class SaveQfauFundingReviewDecisionCommandHandlerTests
             }
         };
 
-        _qualificationFundingsrepository.Setup(q => q.GetByIdAsync(qualVersion.Id)).ReturnsAsync(qualificationFundings);
-        _mediator.Setup(mediator => mediator.Send(It.IsAny<CreateApplicationMessageCommand>(), default)).ReturnsAsync(new BaseMediatrResponse<CreateApplicationMessageCommandResponse>() { Success = true });
-        _reviewRepository.Setup(a => a.GeyByReviewIdAndUserType(funding.ApplicationReviewId, Models.Application.UserType.Qfau)).ReturnsAsync(funding);
+        _qualificationFundingsrepository
+            .Setup(q => q.GetByIdAsync(qualVersion.Id))
+            .ReturnsAsync(qualificationFundings);
 
-        _qualificationDetailsRepository.Setup(q => q.GetQualificationDetailsByIdAsync(qan)).ReturnsAsync(qualVersion);
+        _mediator
+            .Setup(mediator => mediator.Send(It.IsAny<CreateApplicationMessageCommand>(), default))
+            .ReturnsAsync(new BaseMediatrResponse<CreateApplicationMessageCommandResponse>() { Success = true });
 
-        _mediator.Setup(mediator => mediator.Send(It.IsAny<SaveQualificationsFundingOffersOutcomeCommand>(), default)).ReturnsAsync(new BaseMediatrResponse<EmptyResponse>() { Success = true });
-        _mediator.Setup(mediator => mediator.Send(It.IsAny<SaveQualificationsFundingOffersCommand>(), default)).ReturnsAsync(new BaseMediatrResponse<EmptyResponse>() { Success = true });
-        _mediator.Setup(mediator => mediator.Send(It.IsAny<SaveQualificationsFundingOffersDetailsCommand>(), default)).ReturnsAsync(new BaseMediatrResponse<EmptyResponse>() { Success = true });
+        _reviewRepository
+            .Setup(a => a.GeyByReviewIdAndUserType(funding.ApplicationReviewId, Models.Application.UserType.Qfau))
+            .ReturnsAsync(funding);
 
-        // Act
+        _qualificationDetailsRepository
+            .Setup(q => q.GetQualificationDetailsByIdAsync(qan))
+            .ReturnsAsync(qualVersion);
+
+        _mediator
+            .Setup(mediator => mediator.Send(It.IsAny<SaveQualificationsFundingOffersOutcomeCommand>(), default))
+            .ReturnsAsync(new BaseMediatrResponse<EmptyResponse>() { Success = true });
+
+        _mediator
+            .Setup(mediator => mediator.Send(It.IsAny<SaveQualificationsFundingOffersCommand>(), default))
+            .ReturnsAsync(new BaseMediatrResponse<EmptyResponse>() { Success = true });
+
+        _mediator
+            .Setup(mediator => mediator.Send(It.IsAny<SaveQualificationsFundingOffersDetailsCommand>(), default))
+            .ReturnsAsync(new BaseMediatrResponse<EmptyResponse>() { Success = true });
+
         var response = await _handler.Handle(new()
         {
             ApplicationReviewId = funding.ApplicationReviewId,
         }, default);
 
-        // Assert
         Assert.True(response.Success);
         _reviewRepository.Verify(a => a.UpdateAsync(funding), Times.Once());
 
@@ -138,31 +161,29 @@ public class SaveQfauFundingReviewDecisionCommandHandlerTests
     [Fact]
     public async Task Test_Exception_Thrown_For_Missing_Qan_For_Approved_Application()
     {
-        // Arrange
         var funding = new Data.Entities.Application.ApplicationReviewFeedback()
         {
             ApplicationReviewId = Guid.NewGuid(),
             Status = ApplicationStatus.Approved.ToString()
         };
 
-        _reviewRepository.Setup(a => a.GeyByReviewIdAndUserType(funding.ApplicationReviewId, Models.Application.UserType.Qfau)).ReturnsAsync(funding);
+        _reviewRepository
+            .Setup(a => a.GeyByReviewIdAndUserType(funding.ApplicationReviewId, Models.Application.UserType.Qfau))
+            .ReturnsAsync(funding);
 
-        // Act
         var response = await _handler.Handle(new()
         {
             ApplicationReviewId = funding.ApplicationReviewId,
         }, default);
 
-        // Assert
         Assert.False(response.Success);
         Assert.IsAssignableFrom<InvalidOperationException>(response.InnerException);
         Assert.Contains("No QAN has been provided for the application.", response.ErrorMessage);
     }
 
     [Fact]
-    public async Task Test_Exception_Thrown_For_Invalid_Qan_For_Approved_Application()
+    public async Task Test_Exception_Thrown_For_Missing_Qualification_For_Approved_Application()
     {
-        // Arrange
         var funding = new Data.Entities.Application.ApplicationReviewFeedback()
         {
             ApplicationReviewId = Guid.NewGuid(),
@@ -176,24 +197,123 @@ public class SaveQfauFundingReviewDecisionCommandHandlerTests
             }
         };
 
-        _reviewRepository.Setup(a => a.GeyByReviewIdAndUserType(funding.ApplicationReviewId, Models.Application.UserType.Qfau)).ReturnsAsync(funding);
+        _reviewRepository
+            .Setup(a => a.GeyByReviewIdAndUserType(funding.ApplicationReviewId, Models.Application.UserType.Qfau))
+            .ReturnsAsync(funding);
 
-        // Act
+        _qualificationDetailsRepository
+            .Setup(q => q.GetQualificationDetailsByIdAsync("123"))
+            .ReturnsAsync((QualificationVersions)null!);
+
         var response = await _handler.Handle(new()
         {
             ApplicationReviewId = funding.ApplicationReviewId,
         }, default);
 
-        // Assert
         Assert.False(response.Success);
         Assert.IsAssignableFrom<InvalidOperationException>(response.InnerException);
-        Assert.Contains("The current qualification status is not valid to confirm the decision.", response.ErrorMessage);
+        Assert.Contains(MissingQualificationMessage, response.ErrorMessage);
+    }
+
+    [Fact]
+    public async Task Test_Exception_Thrown_For_Rejected_Qualification_Status_For_Approved_Application()
+    {
+        var funding = new Data.Entities.Application.ApplicationReviewFeedback()
+        {
+            ApplicationReviewId = Guid.NewGuid(),
+            Status = ApplicationStatus.Approved.ToString(),
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    QualificationNumber = "123"
+                }
+            }
+        };
+
+        var qualVersion = new QualificationVersions()
+        {
+            Id = Guid.NewGuid(),
+            Version = 1,
+            ProcessStatus = new()
+            {
+                Name = ProcessStatus.Rejected
+            },
+            Qualification = new()
+            {
+                Qan = "123"
+            }
+        };
+
+        _reviewRepository
+            .Setup(a => a.GeyByReviewIdAndUserType(funding.ApplicationReviewId, Models.Application.UserType.Qfau))
+            .ReturnsAsync(funding);
+
+        _qualificationDetailsRepository
+            .Setup(q => q.GetQualificationDetailsByIdAsync("123"))
+            .ReturnsAsync(qualVersion);
+
+        var response = await _handler.Handle(new()
+        {
+            ApplicationReviewId = funding.ApplicationReviewId,
+        }, default);
+
+        Assert.False(response.Success);
+        Assert.IsAssignableFrom<InvalidOperationException>(response.InnerException);
+        Assert.Contains(InvalidQualificationStatusMessage(ProcessStatus.Rejected), response.ErrorMessage);
+    }
+
+    [Fact]
+    public async Task Test_Exception_Thrown_For_NoActionRequired_Qualification_Status_For_Approved_Application()
+    {
+        var funding = new Data.Entities.Application.ApplicationReviewFeedback()
+        {
+            ApplicationReviewId = Guid.NewGuid(),
+            Status = ApplicationStatus.Approved.ToString(),
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    QualificationNumber = "123"
+                }
+            }
+        };
+
+        var qualVersion = new QualificationVersions()
+        {
+            Id = Guid.NewGuid(),
+            Version = 1,
+            ProcessStatus = new()
+            {
+                Name = ProcessStatus.NoActionRequired
+            },
+            Qualification = new()
+            {
+                Qan = "123"
+            }
+        };
+
+        _reviewRepository
+            .Setup(a => a.GeyByReviewIdAndUserType(funding.ApplicationReviewId, Models.Application.UserType.Qfau))
+            .ReturnsAsync(funding);
+
+        _qualificationDetailsRepository
+            .Setup(q => q.GetQualificationDetailsByIdAsync("123"))
+            .ReturnsAsync(qualVersion);
+
+        var response = await _handler.Handle(new()
+        {
+            ApplicationReviewId = funding.ApplicationReviewId,
+        }, default);
+
+        Assert.False(response.Success);
+        Assert.IsAssignableFrom<InvalidOperationException>(response.InnerException);
+        Assert.Contains(InvalidQualificationStatusMessage(ProcessStatus.NoActionRequired), response.ErrorMessage);
     }
 
     [Fact]
     public async Task Test_Exception_Thrown_For_Rejected_Application_With_Approved_Offers()
     {
-        // Arrange
         var funding = new Data.Entities.Application.ApplicationReviewFeedback()
         {
             ApplicationReviewId = Guid.NewGuid(),
@@ -207,15 +327,15 @@ public class SaveQfauFundingReviewDecisionCommandHandlerTests
             }
         };
 
-        _reviewRepository.Setup(a => a.GeyByReviewIdAndUserType(funding.ApplicationReviewId, Models.Application.UserType.Qfau)).ReturnsAsync(funding);
+        _reviewRepository
+            .Setup(a => a.GeyByReviewIdAndUserType(funding.ApplicationReviewId, Models.Application.UserType.Qfau))
+            .ReturnsAsync(funding);
 
-        // Act
         var response = await _handler.Handle(new()
         {
             ApplicationReviewId = funding.ApplicationReviewId,
         }, default);
 
-        // Assert
         Assert.False(response.Success);
         Assert.IsAssignableFrom<InvalidOperationException>(response.InnerException);
         Assert.Contains("The application has been rejected for funding but has approved offers associated.", response.ErrorMessage);
