@@ -70,8 +70,8 @@ public class RolloverWorkflowCandidatesP1Checks
             throw new ArgumentException("Academic year must be in the format 'YYYY/YY'.", nameof(AcademicYear));
         }
 
-        var startDate = new DateTime(startYear, 8, 1);
-        var endDate = new DateTime(startYear + 1, 7, 31);
+        var startDate = new DateTime(startYear, 8, 1, 0, 0, 0, DateTimeKind.Utc);
+        var endDate = new DateTime(startYear + 1, 7, 31, 0, 0, 0, DateTimeKind.Utc);
 
         return (startDate, endDate);
     }
