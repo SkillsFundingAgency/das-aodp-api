@@ -37,7 +37,7 @@ namespace SFA.DAS.AODP.Application.Queries.Rollover
                         IncludedInFinalUpload = x.IncludedInFinalUpload,
                         CurrentFundingEndDate = x.CurrentFundingEndDate,
                         ProposedFundingEndDate = x.ProposedFundingEndDate
-                    });
+                    }).ToList();
 
                     var workflowRunId = workflowCandidates
                         .Select(x => x.RolloverWorkflowRunId)
