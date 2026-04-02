@@ -15,4 +15,5 @@ public class ChangedQualification
     public string? ChangedFieldNames { get; set; }
     public string? Status { get; set; }
     public Guid? ProcessStatusId { get; set; }
+    public bool EligibleForFunding { get; set; }
 }

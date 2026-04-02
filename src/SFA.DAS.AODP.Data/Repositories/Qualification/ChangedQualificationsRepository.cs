@@ -62,7 +62,8 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
                       QualificationType = q.QualificationType, 
                       Subject = q.Subject,                      
                       AgeGroup = q.AgeGroup,
-                      Status = q.Status
+                      Status = q.Status,
+                      EligibleForFunding = q.EligibleForFunding,
                   }).ToList();
 
         return new ChangedQualificationsResult()
