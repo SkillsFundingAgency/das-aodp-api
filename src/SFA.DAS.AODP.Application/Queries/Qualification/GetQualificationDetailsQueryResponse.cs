@@ -332,7 +332,9 @@ public class GetQualificationDetailsQueryResponse
                     EighteenPlus = version.EighteenPlus,
                     NineteenPlus = version.NineteenPlus,
                     ImportStatus = version.ImportStatus,
-
+                    EligibleForFunding = version.EligibleForFunding,
+                    FundingEligibilityFailedFields = version.FundingEligibilityFailedFields,
+                    IntentionToSeekFundingInEngland = version.IntentionToSeekFundingInEngland,
                     Stage = new LifecycleStage
                     {
                         Id = version.LifecycleStage.Id,
