@@ -1,6 +1,9 @@
 ﻿
+using System.Diagnostics.CodeAnalysis;
+
 namespace SFA.DAS.AODP.Data.Entities.Qualification;
 
+[ExcludeFromCodeCoverage]
 public class ChangedQualification
 {
     public Guid QualificationId { get; set; }

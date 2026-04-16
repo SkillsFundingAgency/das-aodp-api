@@ -1,7 +1,9 @@
 ﻿using SFA.DAS.AODP.Data.Entities.Qualification;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualifications;
 
+[ExcludeFromCodeCoverage]
 public class GetQualificationDetailsQueryResponse
 {
     public Guid Id { get; set; }
