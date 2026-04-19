@@ -155,7 +155,7 @@
     <Build Include="Views\KPIs\v_MS_KPI_NQS_NQR_US_001.sql" />
     <Build Include="Stored Procedures\proc_BulkDataCorrections.sql" />
     <Build Include="Views\Output\view_OutputNewQualifications.sql" />
-    <Build Include="Views\Output\view_OutputChangedQualifications.sql" />
+    <Build Include="Views\Output\view_OutputCompletedApprovedQualifications.sql" />
     <Build Include="Views\Output\view_OutputUnchangedQualifications.sql" />
     <Build Include="Views\Output\view_OutputUnapprovedQualifications.sql" />
     <Build Include="Stored Procedures\proc_CompleteOutputProcess.sql" />
@@ -177,6 +177,7 @@
     </None>
     <Build Include="Views\v_QualificationFundingStatus.sql" />
     <Build Include="Tables\RegulatedQaaQualification.sql" />
+    <None Include="MigrationScripts\MVS1_Drop_OutputChangedQualifications_View.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
