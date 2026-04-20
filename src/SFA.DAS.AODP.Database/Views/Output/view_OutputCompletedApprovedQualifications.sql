@@ -23,7 +23,6 @@ WITH LatestQualificationGroup AS (
     FROM regulated.QualificationVersions ver
     WHERE ver.ProcessStatusId = '00000000-0000-0000-0000-000000000004' --approved
       AND ver.LifecycleStageId = '00000000-0000-0000-0000-000000000003' --completed
-      AND EligibleForFunding = 1
 ),
 LatestQualifications AS (
     SELECT *
