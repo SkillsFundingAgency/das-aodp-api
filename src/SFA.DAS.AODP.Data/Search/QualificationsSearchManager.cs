@@ -28,9 +28,6 @@ public class QualificationsSearchManager : ISearchManager
     {
         searchTerm = searchTerm.ToLowerInvariant().Trim();
 
-        // Generate ngrams from the search term
-        var ngramSearchTerms = TokenizeQuery(new EdgeNGramAnalyzer(), searchTerm);
-
         var boolQuery = new BooleanQuery();
 
         // This adds phrase queries to the bool query for exact matching
@@ -41,13 +38,6 @@ public class QualificationsSearchManager : ISearchManager
         {
             // Add term query for qualification name
             boolQuery.Add(new TermQuery(new Term(SearchableQualification.QualificationNameTerm, term)), Occur.SHOULD);
-        }
-
-        // this loop adds ngram terms to the query for partial matching (exact term queries only)
-        foreach (var term in ngramSearchTerms)
-        {
-            // Add ngram term query for qualification name (NO FUZZY on ngrams)
-            boolQuery.Add(new TermQuery(new Term(SearchableQualification.QualificationNameNGram, term)), Occur.SHOULD);
         }
 
         // Execute the search
@@ -115,23 +105,5 @@ public class QualificationsSearchManager : ISearchManager
             TotalCount = topDocs.TotalHits,
             Qualifications = results
         };
-    }
-
-    // This method tokenizes the input query using the provided analyzer
-    private IEnumerable<string> TokenizeQuery(Analyzer analyzer, string query)
-    {
-        var result = new List<string>();
-
-        // Use the analyzer to create a token stream
-        using TokenStream tokenStream = analyzer.GetTokenStream(null, new StringReader(query));
-        tokenStream.Reset();
-        // Iterate through the tokens and collect them
-        while (tokenStream.IncrementToken())
-        {
-            // Get the term attribute and add it to the result list
-            result.Add(tokenStream.GetAttribute<ICharTermAttribute>().ToString());
-        }
-
-        return result;
     }
 }
