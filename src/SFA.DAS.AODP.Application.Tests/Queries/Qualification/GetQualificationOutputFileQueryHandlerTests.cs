@@ -15,8 +15,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         private readonly IFixture _fixture;
         private readonly Mock<IQualificationOutputFileRepository> _repo;
         private readonly Mock<IQualificationOutputFileLogRepository> _logRepo;
-        private readonly Mock<IBlobStorageService> _blob;
-        private readonly OutputFileBlobStorageSettings _settings;
         private readonly GetQualificationOutputFileQueryHandler _handler;
 
         private const string ContainerName = "unit-test-container";
@@ -41,11 +39,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             _fixture = new Fixture().Customize(new AutoMoqCustomization { ConfigureMembers = true });
 
             _repo = _fixture.Freeze<Mock<IQualificationOutputFileRepository>>();
-            _blob = _fixture.Freeze<Mock<IBlobStorageService>>();
+ 
             _logRepo = _fixture.Freeze<Mock<IQualificationOutputFileLogRepository>>();
-
-            _settings = _fixture.Freeze<OutputFileBlobStorageSettings>();
-            _settings.ContainerName = ContainerName;
 
             _handler = _fixture.Create<GetQualificationOutputFileQueryHandler>();
         }
@@ -72,24 +67,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             var datePrefix = publicationDate.ToString("yyyy-MM-dd");
             var expectedFile = $"{datePrefix}{FileSuffix}";
 
-            // capture uploaded streams for later assertions
-            var uploaded = new List<(string Container, string FileName, string ContentType, MemoryStream Copy)>();
-
-            _blob.Setup(x => x.UploadFileAsync(
-                        It.IsAny<string>(),
-                        It.IsAny<string>(),
-                        It.IsAny<Stream>(),
-                        It.IsAny<string>(),
-                        It.IsAny<CancellationToken>()))
-                 .Callback<string, string, Stream, string, CancellationToken>((container, name, stream, contentType, _) =>
-                 {
-                     var ms = new MemoryStream();
-                     stream.Position = 0;
-                     stream.CopyTo(ms);
-                     ms.Position = 0;
-                     uploaded.Add((container, name, contentType, ms));
-                 })
-                 .Returns(Task.CompletedTask);
 
             // Act
             var result = await _handler.Handle(_testRequest, CancellationToken.None);
@@ -106,19 +83,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 Assert.EndsWith(FileSuffix, result.Value.FileName);
                 Assert.NotNull(result.Value.FileContent);
                 Assert.NotEmpty(result.Value.FileContent);
-            });
-
-            // Assert – blob upload (one call, correct name, container, content type)
-            _blob.Verify(x => x.UploadFileAsync(_settings.ContainerName, expectedFile,
-                                                It.IsAny<Stream>(), CsvContentType, It.IsAny<CancellationToken>()), Times.Once);
-
-            Assert.Multiple(() =>
-            {
-                Assert.Single(uploaded);
-                Assert.All(uploaded, u => Assert.Equal(ContainerName, u.Container));
-                Assert.All(uploaded, u => Assert.Equal(CsvContentType, u.ContentType));
-                Assert.Contains(uploaded, u => u.FileName == expectedFile);
-                Assert.All(uploaded, u => Assert.True(u.Copy.Length > 0));
             });
 
             // Assert – CSV content
@@ -172,7 +136,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 Assert.NotNull(result.Value);                  
             });
 
-            _blob.Verify(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
             _logRepo.Verify(x => x.CreateAsync(It.IsAny<QualificationOutputFileLog>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -198,7 +161,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 Assert.NotNull(result.Value);                   
             });
 
-            _blob.Verify(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
             _logRepo.Verify(x => x.CreateAsync(It.IsAny<QualificationOutputFileLog>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -215,7 +177,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             Assert.False(result.Success);
             Assert.Equal(ErrorCodes.UnexpectedError, result.ErrorCode);
             Assert.NotNull(result.InnerException); 
-            _blob.Verify(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+
             _logRepo.Verify(x => x.CreateAsync(It.IsAny<QualificationOutputFileLog>(), It.IsAny<CancellationToken>()), Times.Never);
         }
 
@@ -233,9 +195,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ReturnsAsync(new List<QualificationOutputFile> { edge });
 
-            _blob.Setup(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                 .Returns(Task.CompletedTask);
-
             var datePrefix = DateTime.UtcNow.ToString("yyyy-MM-dd");
             var expectedFilename = $"{datePrefix}{FileSuffix}";
 
@@ -248,14 +207,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             Assert.StartsWith(datePrefix, result.Value!.FileName);
             Assert.EndsWith("-AOdPOutputFile.csv", result.Value.FileName);
             Assert.NotEmpty(result.Value.FileContent);
-
-            _blob.Verify(x => x.UploadFileAsync(
-                _settings.ContainerName,
-                expectedFilename,
-                It.IsAny<Stream>(),
-                "text/csv",
-                It.IsAny<CancellationToken>()),
-                Times.Once);
 
             // Assert – CSV has header + one data row, and row is Archived (not Approved)
             var csv = Encoding.UTF8.GetString(result.Value.FileContent);
@@ -288,14 +239,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ReturnsAsync(new List<QualificationOutputFile> { future });
-
-            _blob.Setup(x => x.UploadFileAsync(
-                    It.IsAny<string>(),
-                    It.IsAny<string>(),
-                    It.IsAny<Stream>(),
-                    It.IsAny<string>(),
-                    It.IsAny<CancellationToken>()))
-                 .Returns(Task.CompletedTask);
 
             var datePrefix = DateTime.UtcNow.ToString("yyyy-MM-dd");
             var expectedFilename = $"{datePrefix}{FileSuffix}";
