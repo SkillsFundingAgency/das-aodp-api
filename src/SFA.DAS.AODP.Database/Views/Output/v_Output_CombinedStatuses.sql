@@ -3,7 +3,7 @@
 /*##################################################################################################
 	-Name:				Output Combined Statuses
 	-Description:		View for combining all output views:
-						- view_OutputCompletedApprovedQualifications
+						- view_OutputFundedQualifications
 						- view_OutputNewQualifications
 						- view_OutputUnapprovedQualifications
 						- view_OutputUnchangedQualifications
@@ -60,7 +60,7 @@ select Status
       ,LocalFlexibilities_FundingApprovalStartDate
       ,LocalFlexibilities_FundingApprovalEndDate 
       ,LocalFlexibilities_Notes
-from dbo.view_OutputCompletedApprovedQualifications
+from dbo.view_OutputFundedQualifications
 
 Union
 
