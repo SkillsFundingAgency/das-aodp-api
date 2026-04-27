@@ -155,7 +155,7 @@
     <Build Include="Views\KPIs\v_MS_KPI_NQS_NQR_US_001.sql" />
     <Build Include="Stored Procedures\proc_BulkDataCorrections.sql" />
     <Build Include="Views\Output\view_OutputNewQualifications.sql" />
-    <Build Include="Views\Output\view_OutputCompletedApprovedQualifications.sql" />
+    <Build Include="Views\Output\view_OutputFundedQualifications.sql" />
     <Build Include="Views\Output\view_OutputUnchangedQualifications.sql" />
     <Build Include="Views\Output\view_OutputUnapprovedQualifications.sql" />
     <Build Include="Stored Procedures\proc_CompleteOutputProcess.sql" />

@@ -3,7 +3,7 @@
 /*##################################################################################################
     -Name:              Output File
     -Description:       View for combining the following output views:
-                        - view_OutputCompletedApprovedQualifications
+                        - view_OutputFundedQualifications
                         
     -Date of Creation:  08/10/2025
     -Created By:        Karen Hanna
@@ -65,4 +65,4 @@ SELECT
     , LocalFlexibilities_FundingApprovalStartDate
     , LocalFlexibilities_FundingApprovalEndDate
     , LocalFlexibilities_Notes
-FROM dbo.view_OutputCompletedApprovedQualifications
+FROM dbo.view_OutputFundedQualifications
