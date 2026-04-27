@@ -1,6 +1,9 @@
 ﻿
+using System.Diagnostics.CodeAnalysis;
+
 namespace SFA.DAS.AODP.Data.Entities.Qualification;
 
+[ExcludeFromCodeCoverage]
 public class ChangedQualification
 {
     public Guid QualificationId { get; set; }
@@ -15,4 +18,5 @@ public class ChangedQualification
     public string? ChangedFieldNames { get; set; }
     public string? Status { get; set; }
     public Guid? ProcessStatusId { get; set; }
+    public bool EligibleForFunding { get; set; }
 }
