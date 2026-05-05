@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.Feedback;
+using SFA.DAS.AODP.Data.Entities.Files;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Entities.Import;
 using SFA.DAS.AODP.Data.Entities.Jobs;
@@ -55,11 +56,13 @@ namespace SFA.DAS.AODP.Data.Context
 
         public DbSet<QualificationOutputFile> QualificationExport { get; set; }
 
+        public DbSet<FileRecord> FileRecords { get; set; }
+
         public virtual DbSet<Job> Jobs { get; set; }
         public virtual DbSet<JobConfiguration> JobConfigurations { get; set; }
         public virtual DbSet<JobRun> JobRuns { get; set; }
 
-        public virtual DbSet<FundingOffer> FundingOffers { get; set; }
+        public virtual DbSet<FundingOffer> FundingOffers{ get; set; }
         public virtual DbSet<ActionType> ActionType { get; set; }
         public virtual DbSet<LifecycleStage> LifecycleStages { get; set; }
         public virtual DbSet<AwardingOrganisation> AwardingOrganisation { get; set; }
@@ -113,6 +116,22 @@ namespace SFA.DAS.AODP.Data.Context
                 .HasConversion(
                     ssaTier => ssaTier.Name, 
                     ssaName => SectorSubjectArea.FromName(ssaName));
+
+
+            modelBuilder.Entity<FileRecord>(entity =>
+            {
+                entity.Property(e => e.FileCategory)
+                  .HasConversion<string>()
+                  .HasMaxLength(50)
+                  .IsRequired();
+
+                entity.Property(e => e.ScanResult)
+                    .HasConversion<string>()
+                    .HasMaxLength(25)
+                    .IsRequired();
+
+            });
+
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 
