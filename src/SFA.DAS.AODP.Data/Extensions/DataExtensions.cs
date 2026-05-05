@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Data.Repositories.Feedback;
+using SFA.DAS.AODP.Data.Repositories.Files;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 using SFA.DAS.AODP.Data.Repositories.FundingOffer;
 using SFA.DAS.AODP.Data.Repositories.Jobs;
@@ -65,6 +66,8 @@ namespace SFA.DAS.AODP.Data.Extensions
 
             services.AddScoped<IQualificationOutputFileRepository, QualificationOutputFileRepository>();
             services.AddScoped<IQualificationOutputFileLogRepository, QualificationOutputFileLogRepository>();
+
+            services.AddScoped<IFileRecordRepository, FileRecordRepository>();
             return services;
         }
     }
