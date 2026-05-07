@@ -14,7 +14,16 @@ namespace SFA.DAS.Aodp.Api.AppStart
                 headers.StrictTransportSecurity = "max-age=31536000";
                 headers.XFrameOptions = "SAMEORIGIN";
                 headers.XContentTypeOptions = "nosniff";
-                headers.ContentSecurityPolicy = "default-src 'none';";
+                headers.ContentSecurityPolicy =
+                    "default-src 'self'; " +
+                    "script-src 'self' 'unsafe-inline'; " +
+                    "style-src 'self' 'unsafe-inline'; " +
+                    "img-src 'self' data:; " +
+                    "font-src 'self'; " +
+                    "connect-src 'self'; " +
+                    "object-src 'none'; " +
+                    "base-uri 'self'; " +
+                    "frame-ancestors 'none';";
 
                 headers["X-Permitted-Cross-Domain-Policies"] = "none";
 
