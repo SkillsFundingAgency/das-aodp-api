@@ -4,6 +4,8 @@ using SFA.DAS.AODP.Api;
 using SFA.DAS.AODP.Application.Commands.Files;
 using SFA.DAS.AODP.Application.Queries.Files;
 
+namespace SFA.DAS.AODP.Api.Controllers.Files;
+
 [ApiController]
 [Route("api/files")]
 public class FilesController : BaseController

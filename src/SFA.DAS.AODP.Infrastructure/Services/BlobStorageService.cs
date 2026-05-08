@@ -6,7 +6,6 @@ namespace SFA.DAS.AODP.Infrastructure;
 public class BlobStorageService : IBlobStorageService
 {
     private readonly BlobServiceClient _blobServiceClient;
-    private readonly ConcurrentDictionary<string, BlobContainerClient> _containers = new();
 
     public BlobStorageService(BlobServiceClient blobServiceClient)
     {
@@ -15,11 +14,9 @@ public class BlobStorageService : IBlobStorageService
 
     public async Task DeleteAsync(string containerName, string blobPath)
     {
-        if (string.IsNullOrWhiteSpace(containerName))
-            throw new ArgumentException(nameof(containerName));
+        ArgumentException.ThrowIfNullOrEmpty(containerName);
 
-        if (string.IsNullOrWhiteSpace(blobPath))
-            throw new ArgumentException(nameof(blobPath));
+        ArgumentException.ThrowIfNullOrEmpty(blobPath);
 
         var container =
             _blobServiceClient.GetBlobContainerClient(containerName);

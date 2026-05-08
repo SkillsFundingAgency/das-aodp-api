@@ -48,7 +48,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Files
                 .Returns(Task.CompletedTask);
 
             // Act
-            var result = await _handler.Handle(command, default);
+            var result = await _handler.Handle(command, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Multiple(() =>
@@ -78,7 +78,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Files
                 .ReturnsAsync((FileRecord?)null);
 
             // Act
-            var result = await _handler.Handle(command, default);
+            var result = await _handler.Handle(command, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Multiple(() =>
@@ -120,7 +120,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Files
                 .ThrowsAsync(new Exception("Blob delete failed"));
 
             // Act
-            var result = await _handler.Handle(command, default);
+            var result = await _handler.Handle(command, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Multiple(() =>
@@ -163,7 +163,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Files
                 .ThrowsAsync(new Exception("DB delete failed"));
 
             // Act
-            var result = await _handler.Handle(command, default);
+            var result = await _handler.Handle(command, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Multiple(() =>

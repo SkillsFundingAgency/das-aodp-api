@@ -49,10 +49,10 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Files
 
             _repository
                 .Setup(r => r.AddAsync(It.IsAny<FileRecord>()))
-                .ReturnsAsync(record);
+                .ReturnsAsync(record);  
 
             // Act
-            var result = await _handler.Handle(command, default);
+            var result = await _handler.Handle(command, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Multiple(() =>
@@ -95,7 +95,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Files
                 .ThrowsAsync(new Exception("DB error"));
 
             // Act
-            var result = await _handler.Handle(command, default);
+            var result = await _handler.Handle(command, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Multiple(() =>

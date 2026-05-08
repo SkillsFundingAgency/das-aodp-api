@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
+using SFA.DAS.AODP.Api.Controllers.Files;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.Files;
 using SFA.DAS.AODP.Application.Queries.Files;
@@ -130,7 +131,8 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Files
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var model = Assert.IsAssignableFrom<GetFileMetadataQueryResponse>(okResult.Value);
+            var model = Assert.IsType<GetFileMetadataQueryResponse>(okResult.Value, exactMatch: false);
+
         }
 
         [Fact]

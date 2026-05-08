@@ -43,7 +43,7 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Files
                 .ReturnsAsync(record);
 
             // Act
-            var result = await _handler.Handle(query, default);
+            var result = await _handler.Handle(query, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Multiple(() =>
@@ -75,7 +75,7 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Files
                 .ReturnsAsync((FileRecord?)null);
 
             // Act
-            var result = await _handler.Handle(query, default);
+            var result = await _handler.Handle(query, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Multiple(() =>
@@ -127,7 +127,7 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Files
                 .ReturnsAsync(records);
 
             // Act
-            var result = await _handler.Handle(query, default);
+            var result = await _handler.Handle(query, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Multiple(() =>
@@ -162,7 +162,7 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Files
                 .ThrowsAsync(new Exception("Database error"));
 
             // Act
-            var result = await _handler.Handle(query, default);
+            var result = await _handler.Handle(query, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Multiple(() =>
