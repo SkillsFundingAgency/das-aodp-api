@@ -62,4 +62,94 @@ public class RolloverWorkflowCandidateTests
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() => RolloverWorkflowCandidate.Create(workflowRunId, rolloverCandidateRecordId, qualificationVersionId, fundingOfferId, null!, currentFundingEndDate, proposedFundingEndDate, createdAt));
     }
+
+    [Fact]
+    public void SetP1Result_PassTrue_SetsPass_ClearsFailureReason_AndUpdatesUpdatedAt()
+    {
+        // Arrange
+        var createdAt = DateTime.UtcNow.AddMinutes(-5);
+        var candidate = RolloverWorkflowCandidate.Create(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            "2025",
+            DateTime.UtcNow,
+            null,
+            createdAt);
+
+        var before = DateTime.UtcNow;
+
+        // Act
+        candidate.SetP1Result(true);
+
+        var after = DateTime.UtcNow;
+
+        // Assert
+        Assert.True(candidate.PassP1);
+        Assert.Null(candidate.P1FailureReason);
+        Assert.InRange(candidate.UpdatedAt, before, after);
+    }
+
+    [Fact]
+    public void SetP1Result_PassFalseWithReason_SetsFail_SetsFailureReason_AndUpdatesUpdatedAt()
+    {
+        // Arrange
+        var createdAt = DateTime.UtcNow.AddMinutes(-5);
+        var candidate = RolloverWorkflowCandidate.Create(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            "2025",
+            DateTime.UtcNow,
+            null,
+            createdAt);
+
+        var reason = "Validation failed";
+        var before = DateTime.UtcNow;
+
+        // Act
+        candidate.SetP1Result(false, reason);
+
+        var after = DateTime.UtcNow;
+
+        // Assert
+        Assert.False(candidate.PassP1);
+        Assert.Equal(reason, candidate.P1FailureReason);
+        Assert.InRange(candidate.UpdatedAt, before, after);
+    }
+
+    [Fact]
+    public void SetP1Result_PassTrue_ClearsPreviouslySetFailureReason()
+    {
+        // Arrange
+        var createdAt = DateTime.UtcNow.AddMinutes(-5);
+        var candidate = RolloverWorkflowCandidate.Create(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            "2025",
+            DateTime.UtcNow,
+            null,
+            createdAt);
+
+        // Set to failed first
+        candidate.SetP1Result(false, "initial reason");
+        Assert.False(candidate.PassP1);
+        Assert.Equal("initial reason", candidate.P1FailureReason);
+
+        var before = DateTime.UtcNow;
+
+        // Act
+        candidate.SetP1Result(true);
+
+        var after = DateTime.UtcNow;
+
+        // Assert
+        Assert.True(candidate.PassP1);
+        Assert.Null(candidate.P1FailureReason);
+        Assert.InRange(candidate.UpdatedAt, before, after);
+    }
 }

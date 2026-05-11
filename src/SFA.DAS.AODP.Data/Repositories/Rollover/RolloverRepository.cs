@@ -34,4 +34,23 @@ public class RolloverRepository : IRolloverRepository
 
         return data;
     }
+
+    public async Task<IEnumerable<RolloverWorkflowCandidatesP1Checks>> GetRolloverWorkflowCandidatesP1ChecksAsync(CancellationToken cancellationToken)
+    {
+        var dbSet = _context.RolloverWorkflowCandidatesP1Checks;
+        var query = await dbSet.AsNoTracking().ToListAsync(cancellationToken);
+
+        return query;
+    }
+
+    public async Task UpdateRolloverWorkflowCandidatesAsync(IEnumerable<RolloverWorkflowCandidate> candidates, CancellationToken cancellationToken)
+    {
+        var list = candidates as IList<RolloverWorkflowCandidate> ?? candidates.ToList();
+        if (!list.Any())
+            return;
+
+        _context.RolloverWorkflowCandidates.UpdateRange(list);
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }
