@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
-using SFA.DAS.AODP.Data.Enum;
-using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification
@@ -45,6 +43,29 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                 countQuery = countQuery.Where(w => filter.ProcessStatusIds.Contains(w.ProcessStatusId ?? Guid.Empty));
             }
 
+            if (filter?.AgeGroups?.Any() == true)
+            {
+                if (filter.AgeGroups.Contains(AgeGroup.Pre16))
+                {
+                    query = query.Where(w => w.PreSixteen == true);
+                }
+
+                if (filter.AgeGroups.Contains(AgeGroup.SixteenToEighteen))
+                {
+                    query = query.Where(w => w.SixteenToEighteen == true);
+                }
+
+                if (filter.AgeGroups.Contains(AgeGroup.EighteenPlus))
+                {
+                    query = query.Where(w => w.EighteenPlus == true);
+                }
+
+                if (filter.AgeGroups.Contains(AgeGroup.NineteenPlus))
+                {
+                    query = query.Where(w => w.NineteenPlus == true);
+                }
+            }
+
             query = query.OrderBy(o => o.QualificationTitle);
             query = query.AsNoTracking();
             countQuery = countQuery.AsNoTracking();
@@ -66,7 +87,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                           Reference = q.QualificationReference,
                           AwardingOrganisation = q.AwardingOrganisation,
                           Status = "New",
-                          AgeGroup = q.AgeGroup                          
+                          AgeGroup = AgeGroupHelper.Build(q.PreSixteen, q.SixteenToEighteen, q.EighteenPlus, q.NineteenPlus),
                       }).ToList();
 
             return new NewQualificationsResult()
