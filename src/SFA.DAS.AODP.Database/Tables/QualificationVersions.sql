@@ -57,7 +57,7 @@ CREATE TABLE [regulated].[QualificationVersions](
 	[ImportStatus] [varchar](50) NULL,
 	[InsertedTimestamp] [datetime] NULL,
 	[EligibleForFunding] BIT NULL, 
-    [Name] VARCHAR(250) NULL, 
+  [Name] VARCHAR(250) NULL, 
 	[IntentionToSeekFundingInEngland] BIT NULL,
 	[FundingEligibilityFailedFields] VARCHAR(max) NULL,
     CONSTRAINT PK_QualificationVersions PRIMARY KEY CLUSTERED (Id ASC),
