@@ -66,7 +66,8 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                           Reference = q.QualificationReference,
                           AwardingOrganisation = q.AwardingOrganisation,
                           Status = "New",
-                          AgeGroup = q.AgeGroup                          
+                          AgeGroup = q.AgeGroup,
+                          EligibleForFunding = q.EligibleForFunding
                       }).ToList();
 
             return new NewQualificationsResult()

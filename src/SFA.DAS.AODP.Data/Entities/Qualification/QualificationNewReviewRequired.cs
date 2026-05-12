@@ -12,6 +12,7 @@
         public string? Subject { get; set; }
         public string? SectorSubjectArea { get; set; }
         public Guid? ProcessStatusId { get; set; }
+        public bool? EligibleForFunding { get; set; }
     }
 }
 
