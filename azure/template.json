@@ -290,7 +290,7 @@
                         "value": true
                     },
                     "storageKind": {
-                        "value": "BlobStorage"
+                        "value": "StorageV2"
                     },
                     "accessTier": {
                         "value": "Hot"
@@ -323,7 +323,7 @@
                         "value": true
                     },
                     "storageKind": {
-                        "value": "BlobStorage"
+                        "value": "StorageV2"
                     },
                     "accessTier": {
                         "value": "Hot"
