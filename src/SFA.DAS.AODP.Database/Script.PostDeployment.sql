@@ -17,3 +17,4 @@ Post-Deployment Script Template
 :r .\MigrationScripts\MVS1_AWARD_633_NewLifeCycle.sql
 :r .\MigrationScripts\MVS1_AWARD_634_OfferTypes.sql
 :r .\MigrationScripts\MVS2_AWARD_904_JobsDataSeed.sql
+:r .\MigrationScripts\MVS1_Drop_OutputChangedQualifications_View.sql
