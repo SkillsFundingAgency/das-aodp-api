@@ -642,8 +642,6 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             });
         }
 
-
-
         [Theory]
         [InlineData("Plumbing", 2)]
         [InlineData("plumbing", 2)]
@@ -709,7 +707,93 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             var statusResult = Assert.IsType<StatusCodeResult>(result);
         }
 
+        [Fact]
+        public async Task BulkStatusUpdate_ReturnsOk_WhenMediatorReturnsSuccess()
+        {
+            // Arrange
+            var command = _fixture.Create<BulkUpdateQualificationStatusCommand>();
 
+            var payload = _fixture.Create<BulkUpdateQualificationStatusResponse>();
+
+            var mediatorResponse = new BaseMediatrResponse<BulkUpdateQualificationStatusResponse>
+            {
+                Success = true,
+                Value = payload
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<BulkUpdateQualificationStatusCommand>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(mediatorResponse);
+
+            // Act
+            var result = await _controller.BulkStatusUpdate(command);
+
+            // Assert
+            var ok = Assert.IsType<OkObjectResult>(result);
+            var body = Assert.IsType<BulkUpdateQualificationStatusResponse>(ok.Value);
+
+            // If you want a meaningful assertion:
+            Assert.Equal(payload.ProcessStatusId, body.ProcessStatusId);
+
+            _mediatorMock.Verify(
+                m => m.Send(It.Is<BulkUpdateQualificationStatusCommand>(c => ReferenceEquals(c, command)), It.IsAny<CancellationToken>()),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task BulkStatusUpdate_ReturnsStatusCode_WhenMediatorReturnsFailure()
+        {
+            // Arrange
+            var command = _fixture.Create<BulkUpdateQualificationStatusCommand>();
+
+            var mediatorResponse = _fixture.Create<BaseMediatrResponse<BulkUpdateQualificationStatusResponse>>();
+            mediatorResponse.Success = false;
+            mediatorResponse.ErrorMessage = "Something went wrong";
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<BulkUpdateQualificationStatusCommand>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(mediatorResponse);
+
+            // Act
+            var result = await _controller.BulkStatusUpdate(command);
+
+            // Assert
+            Assert.IsType<StatusCodeResult>(result);
+
+            _mediatorMock.Verify(
+                m => m.Send(It.IsAny<BulkUpdateQualificationStatusCommand>(), It.IsAny<CancellationToken>()),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task BulkStatusUpdate_ForwardsCommandToMediator()
+        {
+            // Arrange
+            var command = new BulkUpdateQualificationStatusCommand
+            {
+                ProcessStatusId = Guid.NewGuid(),
+                QualificationIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() },
+                Comment = "Decision reasons go here",
+                UserDisplayName = "Tony Toaster"
+            };
+
+            BulkUpdateQualificationStatusCommand? captured = null;
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<BulkUpdateQualificationStatusCommand>(), It.IsAny<CancellationToken>()))
+                .Callback<object, CancellationToken>((req, _) => captured = (BulkUpdateQualificationStatusCommand)req)
+                .ReturnsAsync(new BaseMediatrResponse<BulkUpdateQualificationStatusResponse> { Success = true });
+
+            // Act
+            await _controller.BulkStatusUpdate(command);
+
+            // Assert
+            Assert.NotNull(captured);
+            Assert.Equal(command.ProcessStatusId, captured!.ProcessStatusId);
+            Assert.Equal(command.Comment, captured.Comment);
+            Assert.Equal(command.UserDisplayName, captured.UserDisplayName);
+            Assert.Equal(command.QualificationIds, captured.QualificationIds);
+        }
     }
 }
 
