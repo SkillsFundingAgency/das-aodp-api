@@ -17,6 +17,22 @@ public partial class RegulatedQaaQualification
     /// </summary>
     public DateTime DateOfDataSnapshot { get; private set; }
 
+    public long ChangeVersion { get; private set; }
+
+    public DateTime LastChangedAt { get; private set; }
+
+    public string ContentHash { get; private set; } = null!;
+
+    public string LatestImportComparisonOutcome { get; private set; } = null!;
+
+    public string PublicationStatus { get; private set; } = null!;
+
+    public string LastDateForRegistrationChangeType { get; private set; } = null!;
+
+    public bool IsRegistrationDateExtended { get; private set; }
+
+    public bool IsRegistrationDateBroughtForward { get; private set; }
+
     /// <summary>
     /// The unique learning AIM code for the qualification.
     /// </summary>
@@ -57,13 +73,28 @@ public partial class RegulatedQaaQualification
     /// </summary>
     public DateOnly LastDateForRegistration { get; private set; }
 
+    public bool IsDiscontinued { get; private set; }
+
+    public DateOnly? DiscontinuedDate { get; private set; }
+
     /// <summary>
     /// What date is the last date that funding can be approved for, this is set as part of the output file generation.
     /// </summary>
     public DateTime? LastFundingApprovalEndDate { get; private set; }
 
+    public DateTime? LastPublishedAt { get; private set; }
+
+    public long? LastPublishedChangeVersion { get; private set; }
+
     /// <summary>
     /// A value object representation for the sector subject area.
     /// </summary>
     public SectorSubjectArea SectorSubjectArea { get; private set; } = null!;
+
+    public void MarkAsPublished(DateTime publishedAt)
+    {
+        PublicationStatus = QaaPublicationStatus.Published;
+        LastPublishedAt = publishedAt;
+        LastPublishedChangeVersion = ChangeVersion;
+    }
 }

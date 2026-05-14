@@ -7,6 +7,7 @@ using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Entities.Import;
 using SFA.DAS.AODP.Data.Entities.Jobs;
 using SFA.DAS.AODP.Data.Entities.Offer;
+using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 
 namespace SFA.DAS.AODP.Data.Context
@@ -66,6 +67,8 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<QualificationOutputFileLog> QualificationOutputFileLog { get; set; }
 
         DbSet<QualificationFundingStatus> QualificationFundingStatus { get; set; }
+        DbSet<RegulatedQaaQualification> RegulatedQaaQualifications { get; set; }
+        DbSet<RegulatedQaaQualificationVersion> RegulatedQaaQualificationVersions { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task<IDbContextTransaction> StartTransactionAsync();
     }

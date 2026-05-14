@@ -80,6 +80,8 @@ namespace SFA.DAS.AODP.Data.Context
 
         public virtual DbSet<RegulatedQaaQualification> RegulatedQaaQualifications { get; set; }
 
+        public virtual DbSet<RegulatedQaaQualificationVersion> RegulatedQaaQualificationVersions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<QualificationNewReviewRequired>().ToView("v_QualificationNewReviewRequired", "regulated").HasNoKey();
@@ -114,6 +116,12 @@ namespace SFA.DAS.AODP.Data.Context
                     ssaTier => ssaTier.Name, 
                     ssaName => SectorSubjectArea.FromName(ssaName));
 
+            modelBuilder.Entity<RegulatedQaaQualificationVersion>()
+                .Property(q => q.SectorSubjectArea)
+                .HasConversion(
+                    ssaTier => ssaTier.Name,
+                    ssaName => SectorSubjectArea.FromName(ssaName));
+
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 
             base.OnModelCreating(modelBuilder);
@@ -131,4 +139,3 @@ namespace SFA.DAS.AODP.Data.Context
 
     }
 }
-

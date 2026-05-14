@@ -87,6 +87,9 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
 
             };
             await _outputFileLogRepository.CreateAsync(history, cancellationToken);
+            await _outputFileRepository.MarkPendingQaaQualificationsAsPublishedAsync(
+                DateTime.UtcNow,
+                cancellationToken);
 
             response.Success = true;
             response.Value = new GetQualificationOutputFileResponse
@@ -290,5 +293,4 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
         
     }
 }
-
 
