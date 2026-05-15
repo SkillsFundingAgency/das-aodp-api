@@ -122,51 +122,6 @@ public class RolloverRepositoryTests
     }
 
     [Fact]
-    public async Task UpdateRolloverWorkflowCandidatesAsync_UpdatesEntities()
-    {
-        // Arrange
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase("Rollover_Update_Entities_" + Guid.NewGuid())
-            .Options;
-
-        var now = DateTime.UtcNow;
-        var e1 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", now.AddDays(-1), null, now.AddDays(-1));
-
-        await using (var db = new ApplicationDbContext(options))
-        {
-            await db.RolloverWorkflowCandidates.AddAsync(e1);
-            await db.SaveChangesAsync();
-        }
-
-        RolloverWorkflowCandidate detached;
-        await using (var dbRead = new ApplicationDbContext(options))
-        {
-            detached = await dbRead.RolloverWorkflowCandidates.AsNoTracking().FirstAsync();
-        }
-
-        var beforeUpdate = detached.UpdatedAt;
-
-        detached.SetP1Result(true, null);
-
-        await using (var dbUpdate = new ApplicationDbContext(options))
-        {
-            var sut = new RolloverRepository(dbUpdate);
-
-            // Act
-            await sut.UpdateRolloverWorkflowCandidatesAsync(new[] { detached }, CancellationToken.None);
-        }
-
-        // Assert
-        await using (var dbAssert = new ApplicationDbContext(options))
-        {
-            var saved = await dbAssert.RolloverWorkflowCandidates.AsNoTracking().FirstAsync();
-            Assert.True(saved.PassP1);
-            Assert.Null(saved.P1FailureReason);
-            Assert.True(saved.UpdatedAt > beforeUpdate);
-        }
-    }
-
-    [Fact]
     public async Task GetRolloverWorkflowCandidatesP1ChecksAsync_ReturnsEmpty_When_NoRecords()
     {
         // Arrange

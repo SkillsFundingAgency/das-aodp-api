@@ -56,6 +56,7 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
             ThresholdDate = DateTime.UtcNow.AddDays(-10),
             OperationalEndDate = null,
             OfferedInEngland = true,
+            IntentionToSeekFundingInEngland = true,
             Glh = 10,
             Tqt = 20,
             IsOnDefundingList = false
@@ -104,6 +105,7 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
             ThresholdDate = DateTime.UtcNow.AddDays(-5),
             OperationalEndDate = DateTime.UtcNow.AddDays(-20),
             OfferedInEngland = false, 
+            IntentionToSeekFundingInEngland = false,
             Glh = 200, 
             Tqt = 10,
             IsOnDefundingList = true 
@@ -135,6 +137,7 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
         Assert.Contains("Funding Stream out of scope for RollOver", saved.P1FailureReason);
         Assert.Contains("Funding Approval End Date is before the Threshold", saved.P1FailureReason);
         Assert.Contains("Operating End Date is before the Threshold", saved.P1FailureReason);
+        Assert.Contains("Not Offered in England", saved.P1FailureReason);
         Assert.Contains("Not Funded in England", saved.P1FailureReason);
         Assert.Contains("GLH > TQT", saved.P1FailureReason);
         Assert.Contains("Qualification is on Defunding (Defunded) List", saved.P1FailureReason);
@@ -200,6 +203,7 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
             LatestFundingApprovalEndDate = new DateTime(2024, 7, 1),
             OperationalEndDate = new DateTime(2024, 6, 1),
             OfferedInEngland = true,
+            IntentionToSeekFundingInEngland = true,
             Glh = 1,
             Tqt = 2,
             IsOnDefundingList = false,
@@ -255,6 +259,7 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
             LatestFundingApprovalEndDate = latestFundingApprovalEndDate,
             OperationalEndDate = new DateTime(2021, 9, 1),
             OfferedInEngland = true,
+            IntentionToSeekFundingInEngland = true,
             Glh = 1,
             Tqt = 2,
             IsOnDefundingList = false,
@@ -343,7 +348,7 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
     {
         // Arrange
         var candidateId = Guid.NewGuid();
-        var candidate = CreateCandidate(candidateId, new DateTime(2024, 4, 30));
+        var candidate = CreateCandidate(candidateId, new DateTime(2024, 4, 30), proposedFundingEndDate:null);
 
         var p1Check = new RolloverWorkflowCandidatesP1Checks
         {
@@ -382,7 +387,7 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
 
         var updatedCandidate = Assert.Single(updatedCandidates!);
         Assert.False(updatedCandidate.PassP1);
-        Assert.Null(updatedCandidate.ProposedFundingEndDate);
+        Assert.Equal(candidate.CurrentFundingEndDate, updatedCandidate.ProposedFundingEndDate);
         Assert.Contains("Funding Stream out of scope for RollOver", updatedCandidate.P1FailureReason);
         Assert.Contains("Not Funded in England", updatedCandidate.P1FailureReason);
         Assert.Contains("GLH > TQT", updatedCandidate.P1FailureReason);
