@@ -48,21 +48,25 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                 if (filter.AgeGroups.Contains(AgeGroup.Pre16))
                 {
                     query = query.Where(w => w.PreSixteen == true);
+                    countQuery = countQuery.Where(w => w.PreSixteen == true);
                 }
 
                 if (filter.AgeGroups.Contains(AgeGroup.SixteenToEighteen))
                 {
                     query = query.Where(w => w.SixteenToEighteen == true);
+                    countQuery = countQuery.Where(w => w.SixteenToEighteen == true);
                 }
 
                 if (filter.AgeGroups.Contains(AgeGroup.EighteenPlus))
                 {
                     query = query.Where(w => w.EighteenPlus == true);
+                    countQuery = countQuery.Where(w => w.EighteenPlus == true);
                 }
 
                 if (filter.AgeGroups.Contains(AgeGroup.NineteenPlus))
                 {
                     query = query.Where(w => w.NineteenPlus == true);
+                    countQuery = countQuery.Where(w => w.NineteenPlus == true);
                 }
             }
 
@@ -74,6 +78,8 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
 
             var skipChecked = skip ?? 0;
             var takeChecked = take ?? 500;
+
+            var sql = query.ToQueryString();
 
             var executed = await query.Skip(skipChecked)
                         .Take(takeChecked)
