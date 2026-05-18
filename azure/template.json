@@ -104,6 +104,55 @@
             "metadata": {
                 "description": "Resource group containing the Function App that handles malware scan events."
             }
+        },
+        "malwareScanMaxEventsPerBatch": {
+            "type": "int",
+            "defaultValue": 1,
+            "metadata": {
+                "description": "Maximum number of events to deliver per batch to the malware scan Function."
+            }
+        },
+        "malwareScanPreferredBatchSizeInKilobytes": {
+            "type": "int",
+            "defaultValue": 64,
+            "metadata": {
+                "description": "Preferred batch size in kilobytes for malware scan event delivery."
+            }
+        },
+        "malwareScanMaxDeliveryAttempts": {
+            "type": "int",
+            "defaultValue": 30,
+            "metadata": {
+                "description": "Maximum number of delivery retry attempts for malware scan events."
+            }
+        },
+        "malwareScanEventTimeToLiveInMinutes": {
+            "type": "int",
+            "defaultValue": 1440,
+            "metadata": {
+                "description": "Time-to-live for malware scan events in minutes before they are dropped or dead-lettered."
+            }
+        },
+        "malwareScanEnableDeadLettering": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Whether to enable dead-lettering of undelivered malware scan events."
+            }
+        },
+        "malwareScanDeadLetterStorageAccountResourceId": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Resource ID of the storage account used for dead-lettering malware scan events. Required when malwareScanEnableDeadLettering is true."
+            }
+        },
+        "malwareScanDeadLetterContainerName": {
+            "type": "string",
+            "defaultValue": "malware-scan-deadletter",
+            "metadata": {
+                "description": "Name of the blob container used for dead-lettered malware scan events."
+            }
         }
     },
     "variables": {
@@ -476,6 +525,27 @@
                     },
                     "functionResourceGroup": {
                         "value": "[parameters('malwareScanFunctionResourceGroup')]"
+                    },
+                    "maxEventsPerBatch": {
+                        "value": "[parameters('malwareScanMaxEventsPerBatch')]"
+                    },
+                    "preferredBatchSizeInKilobytes": {
+                        "value": "[parameters('malwareScanPreferredBatchSizeInKilobytes')]"
+                    },
+                    "maxDeliveryAttempts": {
+                        "value": "[parameters('malwareScanMaxDeliveryAttempts')]"
+                    },
+                    "eventTimeToLiveInMinutes": {
+                        "value": "[parameters('malwareScanEventTimeToLiveInMinutes')]"
+                    },
+                    "enableDeadLettering": {
+                        "value": "[parameters('malwareScanEnableDeadLettering')]"
+                    },
+                    "deadLetterStorageAccountResourceId": {
+                        "value": "[parameters('malwareScanDeadLetterStorageAccountResourceId')]"
+                    },
+                    "deadLetterContainerName": {
+                        "value": "[parameters('malwareScanDeadLetterContainerName')]"
                     }
                 }
             },
@@ -506,6 +576,27 @@
                     },
                     "functionResourceGroup": {
                         "value": "[parameters('malwareScanFunctionResourceGroup')]"
+                    },
+                    "maxEventsPerBatch": {
+                        "value": "[parameters('malwareScanMaxEventsPerBatch')]"
+                    },
+                    "preferredBatchSizeInKilobytes": {
+                        "value": "[parameters('malwareScanPreferredBatchSizeInKilobytes')]"
+                    },
+                    "maxDeliveryAttempts": {
+                        "value": "[parameters('malwareScanMaxDeliveryAttempts')]"
+                    },
+                    "eventTimeToLiveInMinutes": {
+                        "value": "[parameters('malwareScanEventTimeToLiveInMinutes')]"
+                    },
+                    "enableDeadLettering": {
+                        "value": "[parameters('malwareScanEnableDeadLettering')]"
+                    },
+                    "deadLetterStorageAccountResourceId": {
+                        "value": "[parameters('malwareScanDeadLetterStorageAccountResourceId')]"
+                    },
+                    "deadLetterContainerName": {
+                        "value": "[parameters('malwareScanDeadLetterContainerName')]"
                     }
                 }
             },
