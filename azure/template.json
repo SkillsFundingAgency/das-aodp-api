@@ -101,8 +101,9 @@
         },
         "malwareScanFunctionResourceGroup": {
             "type": "string",
+            "defaultValue": "",
             "metadata": {
-                "description": "Resource group containing the Function App that handles malware scan events."
+                "description": "Resource group containing the Function App that handles malware scan events. Defaults to this template's resource group when not supplied."
             }
         },
         "malwareScanMaxEventsPerBatch": {
@@ -163,6 +164,9 @@
         "databaseName": "[concat(replace(variables('resourceNamePrefix'), 'api', ''), '-db')]",
         "storageAccountName": "[concat(replace(replace(variables('resourceNamePrefix'), 'api', ''), '-', ''), 'str')]",
         "storageAccount2Name": "[concat(replace(replace(variables('resourceNamePrefix'), 'api', ''), '-', ''), 'str2')]",
+        "eventGridTopicName": "[concat(variables('storageAccountName'), '-malware-egt')]",
+        "eventGridTopic2Name": "[concat(variables('storageAccount2Name'), '-malware-egt')]",
+        "effectiveMalwareScanFunctionResourceGroup": "[if(empty(parameters('malwareScanFunctionResourceGroup')), variables('resourceGroupName'), parameters('malwareScanFunctionResourceGroup'))]",
         "configNames": "SFA.DAS.AODP.Api",
         "privateLinkScopeName": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-shared-ampls'))]"
     },
@@ -366,7 +370,10 @@
                         "value": "[parameters('minimumTlsVersion')]"
                     }
                 }
-            }
+            },
+            "dependsOn": [
+                "[variables('resourceGroupName')]"
+            ]
         },
         {
             "apiVersion": "2020-06-01",
@@ -399,7 +406,10 @@
                         "value": "[parameters('minimumTlsVersion')]"
                     }
                 }
-            }
+            },
+            "dependsOn": [
+                "[variables('resourceGroupName')]"
+            ]
         },
         {
             "apiVersion": "2021-04-01",
@@ -429,6 +439,108 @@
             ]
         },
         {
+            "apiVersion": "2021-04-01",
+            "name": "[concat(variables('eventGridTopicName'), '-eventgrid-malware-', parameters('utcValue'))]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'), 'event-grid-malware-subscription.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "eventGridTopicName": {
+                        "value": "[variables('eventGridTopicName')]"
+                    },
+                    "functionAppName": {
+                        "value": "[parameters('malwareScanFunctionAppName')]"
+                    },
+                    "functionName": {
+                        "value": "[parameters('malwareScanFunctionName')]"
+                    },
+                    "functionResourceGroup": {
+                        "value": "[variables('effectiveMalwareScanFunctionResourceGroup')]"
+                    },
+                    "maxEventsPerBatch": {
+                        "value": "[parameters('malwareScanMaxEventsPerBatch')]"
+                    },
+                    "preferredBatchSizeInKilobytes": {
+                        "value": "[parameters('malwareScanPreferredBatchSizeInKilobytes')]"
+                    },
+                    "maxDeliveryAttempts": {
+                        "value": "[parameters('malwareScanMaxDeliveryAttempts')]"
+                    },
+                    "eventTimeToLiveInMinutes": {
+                        "value": "[parameters('malwareScanEventTimeToLiveInMinutes')]"
+                    },
+                    "enableDeadLettering": {
+                        "value": "[parameters('malwareScanEnableDeadLettering')]"
+                    },
+                    "deadLetterStorageAccountResourceId": {
+                        "value": "[parameters('malwareScanDeadLetterStorageAccountResourceId')]"
+                    },
+                    "deadLetterContainerName": {
+                        "value": "[parameters('malwareScanDeadLetterContainerName')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]"
+            ]
+        },
+        {
+            "apiVersion": "2021-04-01",
+            "name": "[concat(variables('eventGridTopic2Name'), '-eventgrid-malware-', parameters('utcValue'))]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'), 'event-grid-malware-subscription.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "eventGridTopicName": {
+                        "value": "[variables('eventGridTopic2Name')]"
+                    },
+                    "functionAppName": {
+                        "value": "[parameters('malwareScanFunctionAppName')]"
+                    },
+                    "functionName": {
+                        "value": "[parameters('malwareScanFunctionName')]"
+                    },
+                    "functionResourceGroup": {
+                        "value": "[variables('effectiveMalwareScanFunctionResourceGroup')]"
+                    },
+                    "maxEventsPerBatch": {
+                        "value": "[parameters('malwareScanMaxEventsPerBatch')]"
+                    },
+                    "preferredBatchSizeInKilobytes": {
+                        "value": "[parameters('malwareScanPreferredBatchSizeInKilobytes')]"
+                    },
+                    "maxDeliveryAttempts": {
+                        "value": "[parameters('malwareScanMaxDeliveryAttempts')]"
+                    },
+                    "eventTimeToLiveInMinutes": {
+                        "value": "[parameters('malwareScanEventTimeToLiveInMinutes')]"
+                    },
+                    "enableDeadLettering": {
+                        "value": "[parameters('malwareScanEnableDeadLettering')]"
+                    },
+                    "deadLetterStorageAccountResourceId": {
+                        "value": "[parameters('malwareScanDeadLetterStorageAccountResourceId')]"
+                    },
+                    "deadLetterContainerName": {
+                        "value": "[parameters('malwareScanDeadLetterContainerName')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('storageAccount2Name'), '-storage-account-', parameters('utcValue'))]"
+            ]
+        },
+        {
             "apiVersion": "2023-07-01",
             "name": "[concat(variables('storageAccountName'), '-defender-', parameters('utcValue'))]",
             "resourceGroup": "[variables('resourceGroupName')]",
@@ -454,15 +566,15 @@
                     },
                     "enableSensitiveDataDiscovery": {
                         "value": true
+                    },
+                    "scanResultsEventGridTopicResourceId": {
+                        "value": "[reference(concat(variables('eventGridTopicName'), '-eventgrid-malware-', parameters('utcValue'))).outputs.eventGridTopicResourceId.value]"
                     }
                 }
             },
             "dependsOn": [
                 "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]",
-                "[concat(variables('storageAccount2Name'), '-storage-account-', parameters('utcValue'))]",
-                "[concat(variables('appServiceName'), '-', parameters('utcValue'))]",
-                "[concat(variables('appServiceName'), '-application-insights-', parameters('utcValue'))]",
-                "[concat('role-assignment-', variables('appServiceName'), '-', parameters('utcValue'))]"
+                "[concat(variables('eventGridTopicName'), '-eventgrid-malware-', parameters('utcValue'))]"
             ]
         },
         {
@@ -491,117 +603,15 @@
                     },
                     "enableSensitiveDataDiscovery": {
                         "value": true
+                    },
+                    "scanResultsEventGridTopicResourceId": {
+                        "value": "[reference(concat(variables('eventGridTopic2Name'), '-eventgrid-malware-', parameters('utcValue'))).outputs.eventGridTopicResourceId.value]"
                     }
                 }
             },
             "dependsOn": [
-                "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]",
                 "[concat(variables('storageAccount2Name'), '-storage-account-', parameters('utcValue'))]",
-                "[concat(variables('appServiceName'), '-', parameters('utcValue'))]",
-                "[concat(variables('appServiceName'), '-application-insights-', parameters('utcValue'))]",
-                "[concat('role-assignment-', variables('appServiceName'), '-', parameters('utcValue'))]"
-            ]
-        },
-        {
-            "apiVersion": "2021-04-01",
-            "name": "[concat(variables('storageAccountName'), '-eventgrid-malware-sub-', parameters('utcValue'))]",
-            "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[variables('resourceGroupName')]",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(variables('deploymentUrlBase'), 'event-grid-malware-subscription.json')]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "storageAccountName": {
-                        "value": "[variables('storageAccountName')]"
-                    },
-                    "functionAppName": {
-                        "value": "[parameters('malwareScanFunctionAppName')]"
-                    },
-                    "functionName": {
-                        "value": "[parameters('malwareScanFunctionName')]"
-                    },
-                    "functionResourceGroup": {
-                        "value": "[parameters('malwareScanFunctionResourceGroup')]"
-                    },
-                    "maxEventsPerBatch": {
-                        "value": "[parameters('malwareScanMaxEventsPerBatch')]"
-                    },
-                    "preferredBatchSizeInKilobytes": {
-                        "value": "[parameters('malwareScanPreferredBatchSizeInKilobytes')]"
-                    },
-                    "maxDeliveryAttempts": {
-                        "value": "[parameters('malwareScanMaxDeliveryAttempts')]"
-                    },
-                    "eventTimeToLiveInMinutes": {
-                        "value": "[parameters('malwareScanEventTimeToLiveInMinutes')]"
-                    },
-                    "enableDeadLettering": {
-                        "value": "[parameters('malwareScanEnableDeadLettering')]"
-                    },
-                    "deadLetterStorageAccountResourceId": {
-                        "value": "[parameters('malwareScanDeadLetterStorageAccountResourceId')]"
-                    },
-                    "deadLetterContainerName": {
-                        "value": "[parameters('malwareScanDeadLetterContainerName')]"
-                    }
-                }
-            },
-            "dependsOn": [
-                "[concat(variables('storageAccountName'), '-defender-', parameters('utcValue'))]"
-            ]
-        },
-        {
-            "apiVersion": "2021-04-01",
-            "name": "[concat(variables('storageAccount2Name'), '-eventgrid-malware-sub-', parameters('utcValue'))]",
-            "type": "Microsoft.Resources/deployments",
-            "resourceGroup": "[variables('resourceGroupName')]",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(variables('deploymentUrlBase'), 'event-grid-malware-subscription.json')]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "storageAccountName": {
-                        "value": "[variables('storageAccount2Name')]"
-                    },
-                    "functionAppName": {
-                        "value": "[parameters('malwareScanFunctionAppName')]"
-                    },
-                    "functionName": {
-                        "value": "[parameters('malwareScanFunctionName')]"
-                    },
-                    "functionResourceGroup": {
-                        "value": "[parameters('malwareScanFunctionResourceGroup')]"
-                    },
-                    "maxEventsPerBatch": {
-                        "value": "[parameters('malwareScanMaxEventsPerBatch')]"
-                    },
-                    "preferredBatchSizeInKilobytes": {
-                        "value": "[parameters('malwareScanPreferredBatchSizeInKilobytes')]"
-                    },
-                    "maxDeliveryAttempts": {
-                        "value": "[parameters('malwareScanMaxDeliveryAttempts')]"
-                    },
-                    "eventTimeToLiveInMinutes": {
-                        "value": "[parameters('malwareScanEventTimeToLiveInMinutes')]"
-                    },
-                    "enableDeadLettering": {
-                        "value": "[parameters('malwareScanEnableDeadLettering')]"
-                    },
-                    "deadLetterStorageAccountResourceId": {
-                        "value": "[parameters('malwareScanDeadLetterStorageAccountResourceId')]"
-                    },
-                    "deadLetterContainerName": {
-                        "value": "[parameters('malwareScanDeadLetterContainerName')]"
-                    }
-                }
-            },
-            "dependsOn": [
-                "[concat(variables('storageAccount2Name'), '-defender-', parameters('utcValue'))]"
+                "[concat(variables('eventGridTopic2Name'), '-eventgrid-malware-', parameters('utcValue'))]"
             ]
         },
         {
