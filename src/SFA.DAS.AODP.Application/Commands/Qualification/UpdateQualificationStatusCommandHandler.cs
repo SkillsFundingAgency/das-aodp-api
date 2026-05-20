@@ -1,7 +1,5 @@
 ﻿using MediatR;
-using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 using SFA.DAS.AODP.Data.Exceptions;
-using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Application.Exceptions;
@@ -23,14 +21,24 @@ public class UpdateQualificationStatusCommandHandler : IRequestHandler<UpdateQua
 
         try
         {
-            var discussuionHistory = new QualificationDiscussionHistory
+            var discussionHistory = new QualificationDiscussionHistory
             {
                 UserDisplayName = request.UserDisplayName,
                 Notes = request.Notes,
             }; 
-            var status = await _qualificationsRepository.UpdateQualificationStatus(request.QualificationReference, request.ProcessStatusId, request.Version);
-            discussuionHistory.Title = $"Updated status to: {status.Name}";
-            await _qualificationsRepository.AddQualificationDiscussionHistory(discussuionHistory, request.QualificationReference);
+            
+            var qualificationVersion = await _qualificationsRepository.GetQualificationVersionByQanAsync(request.QualificationReference, request.Version, cancellationToken);
+
+            if (qualificationVersion is null)
+            {
+                throw new RecordWithNameNotFoundException(request.QualificationReference);
+            }
+            
+            qualificationVersion.SetLifecycleStatus(ProcessStatusLookup.FromId(request.ProcessStatusId));
+
+            discussionHistory.Title = $"Updated status to: {ProcessStatusLookup.FromId(request.ProcessStatusId).Name}";
+            await _qualificationsRepository.AddQualificationDiscussionHistory(discussionHistory, request.QualificationReference);
+
             response.Success = true;
         }
         catch (RecordWithNameNotFoundException ex)

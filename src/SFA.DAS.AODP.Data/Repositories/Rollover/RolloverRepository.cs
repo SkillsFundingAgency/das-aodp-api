@@ -35,6 +35,25 @@ public class RolloverRepository : IRolloverRepository
         return data;
     }
 
+    public async Task<IEnumerable<RolloverWorkflowCandidatesP1Checks>> GetRolloverWorkflowCandidatesP1ChecksAsync(CancellationToken cancellationToken)
+    {
+        var dbSet = _context.RolloverWorkflowCandidatesP1Checks;
+        var query = await dbSet.AsNoTracking().ToListAsync(cancellationToken);
+
+        return query;
+    }
+
+    public async Task UpdateRolloverWorkflowCandidatesAsync(IEnumerable<RolloverWorkflowCandidate> candidates, CancellationToken cancellationToken)
+    {
+        var list = candidates as IList<RolloverWorkflowCandidate> ?? candidates.ToList();
+        if (!list.Any())
+            return;
+
+        _context.RolloverWorkflowCandidates.UpdateRange(list);
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<IEnumerable<RolloverCandidate>> GetRolloverCandidatesAsync(CancellationToken cancellationToken)
     {
         return await _context.RolloverCandidates
@@ -46,7 +65,7 @@ public class RolloverRepository : IRolloverRepository
                 QualificationVersionId = rc.QualificationVersionId,
                 FundingOfferId = rc.FundingOfferId,
                 FundingOfferName = rc.FundingOffer != null ? rc.FundingOffer.Name : null,
-                QualificationNumber = rc.QualificationVersion != null && rc.QualificationVersion.Qualification != null ? 
+                QualificationNumber = rc.QualificationVersion != null && rc.QualificationVersion.Qualification != null ?
                     rc.QualificationVersion.Qualification.Qan : null,
                 AcademicYear = rc.AcademicYear
             })
