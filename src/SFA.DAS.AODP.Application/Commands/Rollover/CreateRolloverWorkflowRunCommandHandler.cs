@@ -10,10 +10,12 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
     : IRequestHandler<CreateRolloverWorkflowRunCommand, BaseMediatrResponse<CreateRolloverWorkflowRunCommandResponse>>
     {
         private readonly IRolloverRepository _repository;
+        private readonly IMediator _mediator;
 
-        public CreateRolloverWorkflowRunCommandHandler(IRolloverRepository rolloverRepository)
+        public CreateRolloverWorkflowRunCommandHandler(IRolloverRepository rolloverRepository, IMediator mediator)
         {
             _repository = rolloverRepository;
+            _mediator = mediator;
         }
 
         public async Task<BaseMediatrResponse<CreateRolloverWorkflowRunCommandResponse>> Handle(CreateRolloverWorkflowRunCommand request, CancellationToken cancellationToken)
