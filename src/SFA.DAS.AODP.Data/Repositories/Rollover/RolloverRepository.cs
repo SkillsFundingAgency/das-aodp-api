@@ -98,9 +98,24 @@ public class RolloverRepository : IRolloverRepository
         return workflowRun.Id;
     }
 
-    public async Task CreateRolloverWorkflowCandidatesAsync(IEnumerable<RolloverWorkflowCandidate> workflowCandidates, CancellationToken cancellationToken)
+    public async Task CreateRolloverWorkflowCandidatesAsync(
+        IEnumerable<RolloverWorkflowCandidate> workflowCandidates,
+        CancellationToken cancellationToken)
     {
-        _context.RolloverWorkflowCandidates.AddRange(workflowCandidates);
+        var incomingRolloverCandidates = workflowCandidates.ToList();
+
+        var incomingCandidateIds = incomingRolloverCandidates
+            .Select(x => x.RolloverCandidatesId)
+            .ToList();
+
+        var existingWorkflowCandidates = await _context.RolloverWorkflowCandidates
+            .Where(x => incomingCandidateIds.Contains(x.RolloverCandidatesId))
+            .ToListAsync(cancellationToken);
+
+        _context.RolloverWorkflowCandidates.RemoveRange(existingWorkflowCandidates);
+
+        _context.RolloverWorkflowCandidates.AddRange(incomingRolloverCandidates);
+
         await _context.SaveChangesAsync(cancellationToken);
     }
 
