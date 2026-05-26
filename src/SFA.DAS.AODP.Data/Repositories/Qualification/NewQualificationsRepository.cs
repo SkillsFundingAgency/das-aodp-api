@@ -37,37 +37,25 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                 countQuery = countQuery.Where(w => w.QualificationReference.Equals(filter.QAN));
             }
 
-            if (filter?.ProcessStatusIds?.Any() ?? false)
+            if (filter?.ProcessStatusIds?.Count > 0)
             {
                 query = query.Where(w => filter.ProcessStatusIds.Contains(w.ProcessStatusId ?? Guid.Empty));
                 countQuery = countQuery.Where(w => filter.ProcessStatusIds.Contains(w.ProcessStatusId ?? Guid.Empty));
             }
 
-            if (filter?.AgeGroups?.Any() == true)
+            if (filter?.AgeGroups?.Count > 0)
             {
-                if (filter.AgeGroups.Contains(AgeGroup.Pre16))
-                {
-                    query = query.Where(w => w.PreSixteen == true);
-                    countQuery = countQuery.Where(w => w.PreSixteen == true);
-                }
+                query = query.Where(w =>
+                    (filter.AgeGroups.Contains(AgeGroup.Pre16) && w.PreSixteen == true)
+                    || (filter.AgeGroups.Contains(AgeGroup.SixteenToEighteen) && w.SixteenToEighteen == true)
+                    || (filter.AgeGroups.Contains(AgeGroup.EighteenPlus) && w.EighteenPlus == true)
+                    || (filter.AgeGroups.Contains(AgeGroup.NineteenPlus) && w.NineteenPlus == true));
 
-                if (filter.AgeGroups.Contains(AgeGroup.SixteenToEighteen))
-                {
-                    query = query.Where(w => w.SixteenToEighteen == true);
-                    countQuery = countQuery.Where(w => w.SixteenToEighteen == true);
-                }
-
-                if (filter.AgeGroups.Contains(AgeGroup.EighteenPlus))
-                {
-                    query = query.Where(w => w.EighteenPlus == true);
-                    countQuery = countQuery.Where(w => w.EighteenPlus == true);
-                }
-
-                if (filter.AgeGroups.Contains(AgeGroup.NineteenPlus))
-                {
-                    query = query.Where(w => w.NineteenPlus == true);
-                    countQuery = countQuery.Where(w => w.NineteenPlus == true);
-                }
+                countQuery = countQuery.Where(w =>
+                    (filter.AgeGroups.Contains(AgeGroup.Pre16) && w.PreSixteen == true)
+                    || (filter.AgeGroups.Contains(AgeGroup.SixteenToEighteen) && w.SixteenToEighteen == true)
+                    || (filter.AgeGroups.Contains(AgeGroup.EighteenPlus) && w.EighteenPlus == true)
+                    || (filter.AgeGroups.Contains(AgeGroup.NineteenPlus) && w.NineteenPlus == true));
             }
 
             query = query.OrderBy(o => o.QualificationTitle);
