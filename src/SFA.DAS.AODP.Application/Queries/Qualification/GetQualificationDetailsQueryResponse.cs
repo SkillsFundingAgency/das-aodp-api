@@ -174,7 +174,7 @@ public class GetQualificationDetailsQueryResponse
         return new GetQualificationDetailsQueryResponse
         {
             Id = entity.Id,
-            Name = entity.Name,
+            Name = entity.Name!,
             AgeGroup = GetAgeGroup(entity),
             QualificationId = entity.QualificationId,
             VersionFieldChangesId = entity.VersionFieldChangesId,
@@ -273,7 +273,7 @@ public class GetQualificationDetailsQueryResponse
                 Versions = entity.Qualification.QualificationVersions.ToList().Select(version => new GetQualificationDetailsQueryResponse()
                 {
                     Id = version.Id,
-                    Name = version.Name,
+                    Name = version.Name!,
                     AgeGroup = GetAgeGroup(version),
                     QualificationId = version.QualificationId,
                     VersionFieldChangesId = version.VersionFieldChangesId,

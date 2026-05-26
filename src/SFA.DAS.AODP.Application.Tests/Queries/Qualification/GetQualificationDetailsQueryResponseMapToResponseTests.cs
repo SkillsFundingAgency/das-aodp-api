@@ -721,7 +721,7 @@ public class GetQualificationDetailsQueryResponseMapToResponseTests
     }
 
     // Helper method to create a valid QualificationVersions entity
-    private QualificationVersions CreateQualificationVersionEntity()
+    private static QualificationVersions CreateQualificationVersionEntity()
     {
         var qualId = Guid.NewGuid();
         return new QualificationVersions
