@@ -18,6 +18,7 @@ public class RolloverWorkflowCandidatesP1Checks
     public DateTime? OperationalStartDate { get; set; }
     public DateTime? OperationalEndDate { get; set; }
     public bool OfferedInEngland { get; set; }
+    public bool IntentionToSeekFundingInEngland { get; set; }
     public int? Glh { get; set; }
     public int? Tqt { get; set; }
     public bool IsOnDefundingList { get; set; }

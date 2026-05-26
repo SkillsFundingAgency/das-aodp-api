@@ -24,4 +24,6 @@ public interface IRolloverRepository
 
     Task CreateRolloverWorkflowRunFundingOffersAsync(IEnumerable<RolloverWorkflowRunFundingOffer> request,
         CancellationToken cancellationToken);
+
+    Task SaveChangesAsync(CancellationToken cancellationToken);
 }

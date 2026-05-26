@@ -56,6 +56,7 @@ SELECT
     qv.OperationalStartDate,
     qv.OperationalEndDate,
     qv.OfferedInEngland,
+    qv.IntentionToSeekFundingInEngland,
     qv.Glh,
     qv.Tqt,
     CASE WHEN dl.Id IS NOT NULL THEN CAST(1 AS bit) ELSE CAST(0 AS bit) END AS IsOnDefundingList,
