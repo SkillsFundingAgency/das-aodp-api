@@ -143,4 +143,14 @@ public class ApplicationsReviewsController : BaseController
         var query = new GetApplicationFormAnswersByReviewIdQuery(applicationReviewId);
         return await SendRequestAsync(query);
     }
+
+    [HttpGet("/api/application-reviews/{applicationReviewId}/export-data")]
+    [ProducesResponseType(typeof(GetApplicationExportDataQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetApplicationExportData(Guid applicationReviewId)
+    {
+        var query = new GetApplicationExportDataQuery(applicationReviewId);
+        return await SendRequestAsync(query);
+    }
 }
