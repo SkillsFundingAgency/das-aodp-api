@@ -120,7 +120,8 @@ public class RolloverWorkflowCandidateTests
             Glh = 50,
             Tqt = 10,
             IsOnDefundingList = true,
-            ThresholdDate = new DateTime(2025, 01, 01),
+            FundingEndDateThreshold = new DateTime(2025, 01, 01),
+            OperationalEndDateThreshold = new DateTime(2025, 01, 01),
             OperationalEndDate = new DateTime(2024, 01, 01),
             LatestFundingApprovalEndDate = new DateTime(2024, 01, 01)
         };
@@ -346,7 +347,8 @@ public class RolloverWorkflowCandidateTests
             Tqt = 20,
             IsOnDefundingList = false,
 
-            ThresholdDate = new DateTime(2025, 01, 01),
+            FundingEndDateThreshold = new DateTime(2025, 01, 01),
+            OperationalEndDateThreshold = new DateTime(2024, 12, 01),
 
             LatestFundingApprovalEndDate =
                 latestFundingApprovalEndDate ?? new DateTime(2026, 01, 01),
