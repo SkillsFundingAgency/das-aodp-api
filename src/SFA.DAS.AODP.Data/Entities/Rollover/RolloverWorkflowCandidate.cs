@@ -134,11 +134,11 @@ public class RolloverWorkflowCandidate
             failures.Add("Funding Stream out of scope for RollOver");
 
         // 2) Latest Funding Approval End Date >= Threshold Date
-        if (checks.LatestFundingApprovalEndDate.HasValue && checks.LatestFundingApprovalEndDate.Value < checks.ThresholdDate)
+        if (checks.LatestFundingApprovalEndDate.HasValue && checks.LatestFundingApprovalEndDate.Value < checks.FundingEndDateThreshold)
             failures.Add("Funding Approval End Date is before the Threshold");
 
         // 3) Operating End Date > Threshold Date  (If Operating End Date = Null, this should Pass the check)
-        if (checks.OperationalEndDate.HasValue && checks.OperationalEndDate.Value <= checks.ThresholdDate)
+        if (checks.OperationalEndDate.HasValue && checks.OperationalEndDate.Value <= checks.OperationalEndDateThreshold)
             failures.Add("Operating End Date is before the Threshold");
 
         // 4) Offered in England = TRUE

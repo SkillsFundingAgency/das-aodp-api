@@ -13,7 +13,9 @@ public class RolloverWorkflowCandidatesP1Checks
 
     public string? FundingStream { get; set; }
     public int? RolloverRound { get; set; }
-    public DateTime? ThresholdDate { get; set; }
+    public DateTime? FundingEndDateThreshold { get; set; }
+    public DateTime? OperationalEndDateThreshold { get; set; }
+    public DateTime? MaximumApprovalEndDate { get; set; }
     public DateTime? LatestFundingApprovalEndDate { get; set; }
     public DateTime? OperationalStartDate { get; set; }
     public DateTime? OperationalEndDate { get; set; }
