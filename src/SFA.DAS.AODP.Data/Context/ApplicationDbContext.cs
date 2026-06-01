@@ -80,7 +80,7 @@ namespace SFA.DAS.AODP.Data.Context
 
         public virtual DbSet<RegulatedQaaQualification> RegulatedQaaQualifications { get; set; }
 
-        public virtual DbSet<RegulatedQaaQualificationVersion> RegulatedQaaQualificationVersions { get; set; }
+        public virtual DbSet<RegulatedQaaQualificationHistory> RegulatedQaaQualificationHistory { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -116,7 +116,7 @@ namespace SFA.DAS.AODP.Data.Context
                     ssaTier => ssaTier.Name, 
                     ssaName => SectorSubjectArea.FromName(ssaName));
 
-            modelBuilder.Entity<RegulatedQaaQualificationVersion>()
+            modelBuilder.Entity<RegulatedQaaQualificationHistory>()
                 .Property(q => q.SectorSubjectArea)
                 .HasConversion(
                     ssaTier => ssaTier.Name,

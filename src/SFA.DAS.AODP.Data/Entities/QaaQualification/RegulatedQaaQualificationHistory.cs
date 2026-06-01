@@ -4,16 +4,14 @@ using System.Diagnostics.CodeAnalysis;
 namespace SFA.DAS.AODP.Data.Entities.QaaQualification;
 
 [ExcludeFromCodeCoverage]
-[Table("QaaQualificationVersion", Schema = "regulated")]
-public partial class RegulatedQaaQualificationVersion
+[Table("QaaQualificationHistory", Schema = "regulated")]
+public partial class RegulatedQaaQualificationHistory
 {
     public Guid Id { get; private set; }
 
     public Guid QaaQualificationId { get; private set; }
 
     public string AimCode { get; private set; } = null!;
-
-    public long ChangeVersion { get; private set; }
 
     public DateTime DateOfDataSnapshot { get; private set; }
 

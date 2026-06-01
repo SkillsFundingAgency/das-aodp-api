@@ -47,11 +47,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             _settings = _fixture.Freeze<OutputFileBlobStorageSettings>();
             _settings.ContainerName = ContainerName;
 
-            _repo.Setup(x => x.MarkPendingQaaQualificationsAsPublishedAsync(
-                    It.IsAny<DateTime>(),
-                    It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
-
             _handler = _fixture.Create<GetQualificationOutputFileQueryHandler>();
         }
 
@@ -155,9 +150,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 ),
                 It.IsAny<CancellationToken>()), Times.Once);
 
-            _repo.Verify(x => x.MarkPendingQaaQualificationsAsPublishedAsync(
-                It.IsAny<DateTime>(),
-                It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -183,9 +175,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 
             _blob.Verify(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
             _logRepo.Verify(x => x.CreateAsync(It.IsAny<QualificationOutputFileLog>(), It.IsAny<CancellationToken>()), Times.Never);
-            _repo.Verify(x => x.MarkPendingQaaQualificationsAsPublishedAsync(
-                It.IsAny<DateTime>(),
-                It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -212,9 +201,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 
             _blob.Verify(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
             _logRepo.Verify(x => x.CreateAsync(It.IsAny<QualificationOutputFileLog>(), It.IsAny<CancellationToken>()), Times.Never);
-            _repo.Verify(x => x.MarkPendingQaaQualificationsAsPublishedAsync(
-                It.IsAny<DateTime>(),
-                It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -232,9 +218,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             Assert.NotNull(result.InnerException); 
             _blob.Verify(x => x.UploadFileAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
             _logRepo.Verify(x => x.CreateAsync(It.IsAny<QualificationOutputFileLog>(), It.IsAny<CancellationToken>()), Times.Never);
-            _repo.Verify(x => x.MarkPendingQaaQualificationsAsPublishedAsync(
-                It.IsAny<DateTime>(),
-                It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]

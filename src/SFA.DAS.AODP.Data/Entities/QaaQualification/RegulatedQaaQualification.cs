@@ -17,7 +17,7 @@ public partial class RegulatedQaaQualification
     /// </summary>
     public DateTime DateOfDataSnapshot { get; private set; }
 
-    public long ChangeVersion { get; private set; }
+    public DateTime FirstSeenAt { get; private set; }
 
     public DateTime LastChangedAt { get; private set; }
 
@@ -25,13 +25,9 @@ public partial class RegulatedQaaQualification
 
     public string LatestImportComparisonOutcome { get; private set; } = null!;
 
-    public string PublicationStatus { get; private set; } = null!;
-
     public string LastDateForRegistrationChangeType { get; private set; } = null!;
 
-    public bool IsRegistrationDateExtended { get; private set; }
-
-    public bool IsRegistrationDateBroughtForward { get; private set; }
+    public Guid? LatestQaaQualificationHistoryId { get; private set; }
 
     /// <summary>
     /// The unique learning AIM code for the qualification.
@@ -82,19 +78,8 @@ public partial class RegulatedQaaQualification
     /// </summary>
     public DateTime? LastFundingApprovalEndDate { get; private set; }
 
-    public DateTime? LastPublishedAt { get; private set; }
-
-    public long? LastPublishedChangeVersion { get; private set; }
-
     /// <summary>
     /// A value object representation for the sector subject area.
     /// </summary>
     public SectorSubjectArea SectorSubjectArea { get; private set; } = null!;
-
-    public void MarkAsPublished(DateTime publishedAt)
-    {
-        PublicationStatus = QaaPublicationStatus.Published;
-        LastPublishedAt = publishedAt;
-        LastPublishedChangeVersion = ChangeVersion;
-    }
 }

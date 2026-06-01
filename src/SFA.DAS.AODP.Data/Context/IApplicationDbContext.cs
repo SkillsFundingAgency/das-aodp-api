@@ -68,7 +68,7 @@ namespace SFA.DAS.AODP.Data.Context
 
         DbSet<QualificationFundingStatus> QualificationFundingStatus { get; set; }
         DbSet<RegulatedQaaQualification> RegulatedQaaQualifications { get; set; }
-        DbSet<RegulatedQaaQualificationVersion> RegulatedQaaQualificationVersions { get; set; }
+        DbSet<RegulatedQaaQualificationHistory> RegulatedQaaQualificationHistory { get; set; }
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task<IDbContextTransaction> StartTransactionAsync();
     }
