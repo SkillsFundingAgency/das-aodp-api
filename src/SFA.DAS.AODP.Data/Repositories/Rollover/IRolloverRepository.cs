@@ -19,7 +19,7 @@ public interface IRolloverRepository
     Task<Guid> CreateRolloverWorkflowRunAsync(RolloverWorkflowRun request,
         CancellationToken cancellationToken);
 
-    Task CreateRolloverWorkflowCandidatesAsync(IEnumerable<RolloverWorkflowCandidate> request,
+    Task CreateRolloverWorkflowCandidatesAsync(IEnumerable<RolloverWorkflowCandidate> workflowCandidates,
         CancellationToken cancellationToken);
 
     Task CreateRolloverWorkflowRunFundingOffersAsync(IEnumerable<RolloverWorkflowRunFundingOffer> request,
