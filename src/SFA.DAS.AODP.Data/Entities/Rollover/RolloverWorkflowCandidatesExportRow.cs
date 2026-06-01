@@ -1,5 +1,8 @@
-﻿namespace SFA.DAS.AODP.Data.Entities.Rollover
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace SFA.DAS.AODP.Data.Entities.Rollover
 {
+    [ExcludeFromCodeCoverage]
     public class RolloverWorkflowCandidatesExportRow
     {
         public string QAN { get; set; } = string.Empty;
