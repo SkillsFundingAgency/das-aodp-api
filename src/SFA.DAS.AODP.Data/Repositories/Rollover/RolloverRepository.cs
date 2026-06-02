@@ -25,14 +25,7 @@ public class RolloverRepository : IRolloverRepository
 
     public async Task<IEnumerable<RolloverWorkflowCandidate>> GetAllRolloverWorkflowCandidatesAsync(CancellationToken cancellationToken)
     {
-        var dbSet = _context.RolloverWorkflowCandidates;
-
-        var query = dbSet.AsNoTracking();
-
-        var data = await query
-                        .ToListAsync(cancellationToken);
-
-        return data;
+        return await _context.RolloverWorkflowCandidates.ToListAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<RolloverWorkflowCandidatesP1Checks>> GetRolloverWorkflowCandidatesP1ChecksAsync(CancellationToken cancellationToken)
@@ -180,6 +173,4 @@ public class RolloverRepository : IRolloverRepository
             .OrderBy(x => x.QAN)
             .ToListAsync(cancellationToken);
     }
-
-
 }
