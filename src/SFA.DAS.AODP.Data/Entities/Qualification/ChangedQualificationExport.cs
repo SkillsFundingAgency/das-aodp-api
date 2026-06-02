@@ -42,7 +42,7 @@
         public bool? NineteenPlus { get; set; }
 
         // Funding Details (Placeholders)
-        public bool? FundedInEngland { get; set; }              // Placeholder
+        public bool? IntentionToSeekFundingInEngland { get; set; }              // Placeholder
         public bool? FundingInWales { get; set; }                // Placeholder
         public bool? FundingInNorthernIreland { get; set; }      // Placeholder
 

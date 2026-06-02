@@ -19,7 +19,7 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
             try
             {
                 var qualification = await _repository.GetVersionByIdAsync(request.QualificationReference,request.Version);
-                response.Value = qualification;
+                response.Value = GetQualificationDetailsQueryResponse.MapToResponse(qualification);
                 response.Success = true;
             }
             catch (RecordWithNameNotFoundException ex)
