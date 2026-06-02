@@ -310,7 +310,7 @@ public class RolloverControllerTests
             .ReturnsAsync(response);
 
         // Act
-        var result = await _controller.GetRolloverCandidatesForExport(workflowRunId, default);
+        var result = await _controller.GetRolloverCandidatesForExport(workflowRunId, TestContext.Current.CancellationToken);
 
         // Assert
         var ok = Assert.IsType<OkObjectResult>(result);
@@ -344,7 +344,7 @@ public class RolloverControllerTests
             .ReturnsAsync(response);
 
         // Act
-        var result = await _controller.GetRolloverCandidatesForExport(workflowRunId, default);
+        var result = await _controller.GetRolloverCandidatesForExport(workflowRunId, TestContext.Current.CancellationToken);
 
         // Assert
         var ok = Assert.IsType<OkObjectResult>(result);
