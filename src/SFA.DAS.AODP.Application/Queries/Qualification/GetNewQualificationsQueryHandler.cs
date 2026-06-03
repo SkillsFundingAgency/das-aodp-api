@@ -27,6 +27,7 @@ namespace SFA.DAS.AODP.Application.Queries.Qualifications
                         Organisation = request.Organisation,
                         QAN = request.QAN, 
                         ProcessStatusIds = request.ProcessStatusIds,
+                        AgeGroups = request.AgeGroups,
                     });
                 if (result != null)
                 {
