@@ -43,9 +43,9 @@ public class RolloverRepositoryTests
             .Options;
 
         var now = DateTime.UtcNow;
-        var e1 = Data.Entities.Rollover.RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", now.AddDays(-2), null, now.AddDays(-2));
-        var e2 = Data.Entities.Rollover.RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", now.AddDays(-1), null, now.AddDays(-1));
-        var e3 = Data.Entities.Rollover.RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", now, null, now);
+        var e1 = Data.Entities.Rollover.RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-2), null, now.AddDays(-2));
+        var e2 = Data.Entities.Rollover.RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-1), null, now.AddDays(-1));
+        var e3 = Data.Entities.Rollover.RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now, null, now);
 
         await using (var db = new ApplicationDbContext(options))
         {
@@ -95,9 +95,9 @@ public class RolloverRepositoryTests
             .Options;
 
         var now = DateTime.UtcNow;
-        var e1 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", now.AddDays(-3), null, now.AddDays(-3));
-        var e2 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", now.AddDays(-2), null, now.AddDays(-2));
-        var e3 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", now.AddDays(-1), null, now.AddDays(-1));
+        var e1 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-3), null, now.AddDays(-3));
+        var e2 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-2), null, now.AddDays(-2));
+        var e3 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-1), null, now.AddDays(-1));
 
         await using (var db = new ApplicationDbContext(options))
         {
@@ -118,51 +118,6 @@ public class RolloverRepositoryTests
             Assert.Contains(result, r => r.CreatedAt == e1.CreatedAt);
             Assert.Contains(result, r => r.CreatedAt == e2.CreatedAt);
             Assert.Contains(result, r => r.CreatedAt == e3.CreatedAt);
-        }
-    }
-
-    [Fact]
-    public async Task UpdateRolloverWorkflowCandidatesAsync_UpdatesEntities()
-    {
-        // Arrange
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase("Rollover_Update_Entities_" + Guid.NewGuid())
-            .Options;
-
-        var now = DateTime.UtcNow;
-        var e1 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", now.AddDays(-1), null, now.AddDays(-1));
-
-        await using (var db = new ApplicationDbContext(options))
-        {
-            await db.RolloverWorkflowCandidates.AddAsync(e1);
-            await db.SaveChangesAsync();
-        }
-
-        RolloverWorkflowCandidate detached;
-        await using (var dbRead = new ApplicationDbContext(options))
-        {
-            detached = await dbRead.RolloverWorkflowCandidates.AsNoTracking().FirstAsync();
-        }
-
-        var beforeUpdate = detached.UpdatedAt;
-
-        detached.SetP1Result(true, null);
-
-        await using (var dbUpdate = new ApplicationDbContext(options))
-        {
-            var sut = new RolloverRepository(dbUpdate);
-
-            // Act
-            await sut.UpdateRolloverWorkflowCandidatesAsync(new[] { detached }, CancellationToken.None);
-        }
-
-        // Assert
-        await using (var dbAssert = new ApplicationDbContext(options))
-        {
-            var saved = await dbAssert.RolloverWorkflowCandidates.AsNoTracking().FirstAsync();
-            Assert.True(saved.PassP1);
-            Assert.Null(saved.P1FailureReason);
-            Assert.True(saved.UpdatedAt > beforeUpdate);
         }
     }
 
@@ -206,10 +161,11 @@ public class RolloverRepositoryTests
             ProposedFundingEndDate = now.Date.AddYears(1),
             FundingStream = "FS1",
             RolloverRound = 1,
-            ThresholdDate = now.Date.AddDays(-10),
+            FundingEndDateThreshold = now.Date.AddDays(-10),
             LatestFundingApprovalEndDate = now.Date.AddDays(-20),
             OperationalStartDate = now.Date.AddYears(-1),
             OperationalEndDate = now.Date.AddMonths(6),
+            OperationalEndDateThreshold = now.Date.AddDays(-5),
             OfferedInEngland = true,
             Glh = 150,
             Tqt = 200,
@@ -228,10 +184,11 @@ public class RolloverRepositoryTests
             ProposedFundingEndDate = null,
             FundingStream = null,
             RolloverRound = 2,
-            ThresholdDate = now.Date.AddDays(30),
+            FundingEndDateThreshold = now.Date.AddDays(30),
             LatestFundingApprovalEndDate = now.Date.AddDays(60),
             OperationalStartDate = now.Date,
             OperationalEndDate = null,
+            OperationalEndDateThreshold = now.Date.AddDays(15),
             OfferedInEngland = false,
             Glh = 50,
             Tqt = 50,
