@@ -33,10 +33,25 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
             countQuery = countQuery.Where(w => w.QualificationReference.Equals(filter.QAN));
         }
 
-        if (filter?.ProcessStatusIds?.Any() ?? false)
+        if (filter?.ProcessStatusIds?.Count > 0)
         {
             query = query.Where(w => filter.ProcessStatusIds.Contains(w.ProcessStatusId ?? Guid.Empty));
             countQuery = countQuery.Where(w => filter.ProcessStatusIds.Contains(w.ProcessStatusId ?? Guid.Empty));
+        }
+
+        if (filter?.AgeGroups?.Count > 0)
+        {
+            query = query.Where(w =>
+                (filter.AgeGroups.Contains(AgeGroup.Pre16) && w.PreSixteen == true)
+                || (filter.AgeGroups.Contains(AgeGroup.SixteenToEighteen) && w.SixteenToEighteen == true)
+                || (filter.AgeGroups.Contains(AgeGroup.EighteenPlus) && w.EighteenPlus == true)
+                || (filter.AgeGroups.Contains(AgeGroup.NineteenPlus) && w.NineteenPlus == true));
+
+            countQuery = countQuery.Where(w =>
+                (filter.AgeGroups.Contains(AgeGroup.Pre16) && w.PreSixteen == true)
+                || (filter.AgeGroups.Contains(AgeGroup.SixteenToEighteen) && w.SixteenToEighteen == true)
+                || (filter.AgeGroups.Contains(AgeGroup.EighteenPlus) && w.EighteenPlus == true)
+                || (filter.AgeGroups.Contains(AgeGroup.NineteenPlus) && w.NineteenPlus == true));
         }
 
         query = query.OrderBy(o => o.QualificationTitle);
@@ -44,27 +59,31 @@ public class ChangedQualificationsRepository(ApplicationDbContext context) : ICh
 
         var skipChecked = skip ?? 0;
         var takeChecked = take ?? 500;
+
+        var sql = query.ToQueryString();
+
+
         var executed = await query
                     .Skip(skipChecked)
                     .Take(takeChecked)
                     .ToListAsync();
 
         var records = executed
-                  .Select(q => new DAS.AODP.Models.Qualifications.ChangedQualification
-                  {
-                      QualificationId = q.QualificationId,
-                      QualificationTitle = q.QualificationTitle,
-                      QualificationReference = q.QualificationReference,
-                      AwardingOrganisation = q.AwardingOrganisation,
-                      ChangedFieldNames = q.ChangedFieldNames,
-                      SectorSubjectArea = q.SectorSubjectArea,
-                      Level = q.Level,
-                      QualificationType = q.QualificationType, 
-                      Subject = q.Subject,                      
-                      AgeGroup = q.AgeGroup,
-                      Status = q.Status,
-                      EligibleForFunding = q.EligibleForFunding,
-                  }).ToList();
+            .Select(q => new DAS.AODP.Models.Qualifications.ChangedQualification
+            {
+                QualificationId = q.QualificationId,
+                QualificationTitle = q.QualificationTitle,
+                QualificationReference = q.QualificationReference,
+                AwardingOrganisation = q.AwardingOrganisation,
+                ChangedFieldNames = q.ChangedFieldNames,
+                SectorSubjectArea = q.SectorSubjectArea,
+                Level = q.Level,
+                QualificationType = q.QualificationType, 
+                Subject = q.Subject,                      
+                AgeGroup = AgeGroupHelper.Build(q.PreSixteen, q.SixteenToEighteen, q.EighteenPlus, q.NineteenPlus),
+                Status = q.Status,
+                EligibleForFunding = q.EligibleForFunding
+            }).ToList();
 
         return new ChangedQualificationsResult()
         {
