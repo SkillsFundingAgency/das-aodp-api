@@ -23,9 +23,9 @@ public partial class RegulatedQaaQualification
 
     public string ContentHash { get; private set; } = null!;
 
-    public string LatestImportComparisonOutcome { get; private set; } = null!;
+    public QaaImportComparisonOutcome LatestImportComparisonOutcome { get; private set; }
 
-    public string LastDateForRegistrationChangeType { get; private set; } = null!;
+    public QaaLastDateForRegistrationChangeType LastDateForRegistrationChangeType { get; private set; }
 
     public Guid? LatestQaaQualificationHistoryId { get; private set; }
 

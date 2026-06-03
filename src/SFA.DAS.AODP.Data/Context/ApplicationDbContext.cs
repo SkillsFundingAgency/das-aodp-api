@@ -116,11 +116,26 @@ namespace SFA.DAS.AODP.Data.Context
                     ssaTier => ssaTier.Name, 
                     ssaName => SectorSubjectArea.FromName(ssaName));
 
+            modelBuilder.Entity<RegulatedQaaQualification>()
+                .Property(q => q.LatestImportComparisonOutcome)
+                .HasConversion<string>()
+                .HasColumnType("nvarchar(50)");
+
+            modelBuilder.Entity<RegulatedQaaQualification>()
+                .Property(q => q.LastDateForRegistrationChangeType)
+                .HasConversion<string>()
+                .HasColumnType("nvarchar(50)");
+
             modelBuilder.Entity<RegulatedQaaQualificationHistory>()
                 .Property(q => q.SectorSubjectArea)
                 .HasConversion(
                     ssaTier => ssaTier.Name,
                     ssaName => SectorSubjectArea.FromName(ssaName));
+
+            modelBuilder.Entity<RegulatedQaaQualificationHistory>()
+                .Property(q => q.LastDateForRegistrationChangeType)
+                .HasConversion<string>()
+                .HasColumnType("nvarchar(50)");
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 
