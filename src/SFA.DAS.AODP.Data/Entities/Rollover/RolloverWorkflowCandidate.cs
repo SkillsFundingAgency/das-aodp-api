@@ -115,14 +115,16 @@ public class RolloverWorkflowCandidate
             dates.Add(p1Check.LatestFundingApprovalEndDate.Value);
         }
 
+        if (p1Check.MaximumApprovalEndDate.HasValue)
+        {
+            dates.Add(p1Check.MaximumApprovalEndDate.Value);
+        }
+
         if (dates.Count > 0)
         {
             SetProposedFundingEndDate(dates.Min());
         }
-        else
-        { 
-            //not sure what to do? should this ever happen
-        }
+
     }
 
     private void EvaluateP1Checks(RolloverWorkflowCandidatesP1Checks checks)

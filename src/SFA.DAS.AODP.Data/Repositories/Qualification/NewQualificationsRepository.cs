@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
-using SFA.DAS.AODP.Data.Enum;
-using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification
@@ -39,10 +37,25 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                 countQuery = countQuery.Where(w => w.QualificationReference.Equals(filter.QAN));
             }
 
-            if (filter?.ProcessStatusIds?.Any() ?? false)
+            if (filter?.ProcessStatusIds?.Count > 0)
             {
                 query = query.Where(w => filter.ProcessStatusIds.Contains(w.ProcessStatusId ?? Guid.Empty));
                 countQuery = countQuery.Where(w => filter.ProcessStatusIds.Contains(w.ProcessStatusId ?? Guid.Empty));
+            }
+
+            if (filter?.AgeGroups?.Count > 0)
+            {
+                query = query.Where(w =>
+                    (filter.AgeGroups.Contains(AgeGroup.Pre16) && w.PreSixteen == true)
+                    || (filter.AgeGroups.Contains(AgeGroup.SixteenToEighteen) && w.SixteenToEighteen == true)
+                    || (filter.AgeGroups.Contains(AgeGroup.EighteenPlus) && w.EighteenPlus == true)
+                    || (filter.AgeGroups.Contains(AgeGroup.NineteenPlus) && w.NineteenPlus == true));
+
+                countQuery = countQuery.Where(w =>
+                    (filter.AgeGroups.Contains(AgeGroup.Pre16) && w.PreSixteen == true)
+                    || (filter.AgeGroups.Contains(AgeGroup.SixteenToEighteen) && w.SixteenToEighteen == true)
+                    || (filter.AgeGroups.Contains(AgeGroup.EighteenPlus) && w.EighteenPlus == true)
+                    || (filter.AgeGroups.Contains(AgeGroup.NineteenPlus) && w.NineteenPlus == true));
             }
 
             query = query.OrderBy(o => o.QualificationTitle);
@@ -53,6 +66,8 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
 
             var skipChecked = skip ?? 0;
             var takeChecked = take ?? 500;
+
+            var sql = query.ToQueryString();
 
             var executed = await query.Skip(skipChecked)
                         .Take(takeChecked)
@@ -66,7 +81,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                           Reference = q.QualificationReference,
                           AwardingOrganisation = q.AwardingOrganisation,
                           Status = "New",
-                          AgeGroup = q.AgeGroup                          
+                          AgeGroup = AgeGroupHelper.Build(q.PreSixteen, q.SixteenToEighteen, q.EighteenPlus, q.NineteenPlus),
                       }).ToList();
 
             return new NewQualificationsResult()

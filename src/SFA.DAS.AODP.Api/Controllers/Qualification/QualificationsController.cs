@@ -5,6 +5,7 @@ using SFA.DAS.AODP.Application.Commands.Qualifications;
 using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Application.Commands.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
+using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Api.Controllers.Qualification;
 [ApiController]
@@ -88,9 +89,10 @@ public class QualificationsController : BaseController
         [FromQuery] string? name,
         [FromQuery] string? organisation,
         [FromQuery] string? qan,
-        [FromQuery] string? processStatusFilter)
+        [FromQuery] List<Guid> processStatusFilter,
+        [FromQuery] List<AgeGroup> ageGroups)
     {
-        var validationResult = ValidateQualificationParams(status, skip, take, name, organisation, qan, processStatusFilter);
+        var validationResult = ValidateQualificationParams(status, skip, take, name, organisation, qan, processStatusFilter, ageGroups);
 
         if (validationResult.IsValid)
         {
@@ -103,7 +105,8 @@ public class QualificationsController : BaseController
                     QAN = qan,
                     Skip = skip,
                     Take = take,
-                    ProcessStatusIds = validationResult.ProcessStatusIds,
+                    ProcessStatusIds = processStatusFilter,
+                    AgeGroups = ageGroups
                 };
 
                 return await SendRequestAsync(query);
@@ -117,7 +120,8 @@ public class QualificationsController : BaseController
                     QAN = qan,
                     Skip = skip,
                     Take = take,
-                    ProcessStatusIds = validationResult.ProcessStatusIds
+                    ProcessStatusIds = processStatusFilter,
+                    AgeGroups = ageGroups
                 };
                 return await SendRequestAsync(query);
             }
@@ -323,7 +327,7 @@ public class QualificationsController : BaseController
     }
 
 
-    private ParamValidationResult ValidateQualificationParams(string? status, int? skip, int? take, string? name, string? organisation, string? qan, string? processStatusFilter)
+    private ParamValidationResult ValidateQualificationParams(string? status, int? skip, int? take, string? name, string? organisation, string? qan, List<Guid> processStatusFilter, List<AgeGroup> ageGroupsFilter)
     {
         var result = new ParamValidationResult() { IsValid = true };
         status = status?.Trim().ToLower();
@@ -350,18 +354,16 @@ public class QualificationsController : BaseController
             result.ErrorMessage = "Take param is invalid.";
         }
 
-        if (!string.IsNullOrEmpty(processStatusFilter))
+        if (processStatusFilter?.Any(id => id == Guid.Empty) == true)
         {
-            var procStatusIdStrings = processStatusFilter.Split(',').Select(v => v.Trim());
-            try
-            {
-                result.ProcessStatusIds = procStatusIdStrings.Select(s => Guid.Parse(s)).ToList();
-            }
-            catch
-            {
-                result.IsValid = false;
-                result.ErrorMessage = "Process status filter param is invalid.";
-            }
+            result.IsValid = false;
+            result.ErrorMessage = "Process status filter contains invalid values.";
+        }
+
+        if (ageGroupsFilter?.Any(a => !Enum.IsDefined(typeof(AgeGroup), a)) == true)
+        {
+            result.IsValid = false;
+            result.ErrorMessage = "Age groups contain invalid values.";
         }
 
         if (!result.IsValid)
@@ -377,7 +379,6 @@ public class QualificationsController : BaseController
         public bool IsValid { get; set; }
         public string? ErrorMessage { get; set; }
         public string? ParsedStatus { get; set; }
-        public List<Guid> ProcessStatusIds { get; set; } = new();
     }
 
 }

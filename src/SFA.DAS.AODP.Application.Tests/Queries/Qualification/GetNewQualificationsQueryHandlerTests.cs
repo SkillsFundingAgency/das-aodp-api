@@ -1,7 +1,6 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoMoq;
 using Moq;
-using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
@@ -17,75 +16,143 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
         public GetNewQualificationsQueryHandlerTests()
         {
             _fixture = new Fixture().Customize(new AutoMoqCustomization());
+
             _repositoryMock = _fixture.Freeze<Mock<INewQualificationsRepository>>();
+
             _handler = _fixture.Create<GetNewQualificationsQueryHandler>();
         }
 
         [Fact]
-        public async Task Then_The_Api_Is_Called_With_The_Request_And_NewQualificationsData_Is_Returned()
+        public async Task Returns_success_and_data()
         {
-            // Arrange
-            var query = _fixture.Create<GetNewQualificationsQuery>();
-            var response = _fixture.Create<BaseMediatrResponse<GetNewQualificationsQueryResponse>>();
-            response.Success = true;
-            response.Value = new GetNewQualificationsQueryResponse()
+            var query = new GetNewQualificationsQuery
             {
-                TotalRecords = 2,
-                Data = _fixture.CreateMany<NewQualification>(2).ToList(),
                 Skip = 10,
                 Take = 20
             };
 
-            _repositoryMock.Setup(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()))
-                           .ReturnsAsync(new NewQualificationsResult() { Data = response.Value.Data, TotalRecords = response.Value.TotalRecords});
+            var repoResult = new NewQualificationsResult
+            {
+                TotalRecords = 2,
+                Data = new List<NewQualification>
+                {
+                    new NewQualification(),
+                    new NewQualification()
+                }
+            };
 
-            // Act
+            _repositoryMock
+                .Setup(x => x.GetAllNewQualificationsAsync(
+                    query.Skip,
+                    query.Take,
+                    It.IsAny<NewQualificationsFilter>()))
+                .ReturnsAsync(repoResult);
+
             var result = await _handler.Handle(query, CancellationToken.None);
 
-            // Assert
-            _repositoryMock.Verify(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()), Times.Once);
+            _repositoryMock.Verify(x =>
+                x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()),
+                Times.Once);
+
             Assert.True(result.Success);
             Assert.Equal(2, result.Value.Data.Count);
+            Assert.Equal(2, result.Value.TotalRecords);
         }
 
         [Fact]
-        public async Task Then_The_Api_Is_Called_With_The_Request_And_Empty_Is_Returned()
+        public async Task Returns_success_even_when_empty()
         {
-            // Arrange
-            var query = _fixture.Create<GetNewQualificationsQuery>();
-            var response = _fixture.Create<BaseMediatrResponse<GetNewQualificationsQueryResponse>>();
-            response.Success = false;
-            response.Value = null;
+            var query = new GetNewQualificationsQuery
+            {
+                Skip = 10,
+                Take = 20
+            };
 
-            _repositoryMock.Setup(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()))
-                           .ReturnsAsync(new NewQualificationsResult());
+            _repositoryMock
+                .Setup(x => x.GetAllNewQualificationsAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<int>(),
+                    It.IsAny<NewQualificationsFilter>()))
+                .ReturnsAsync(new NewQualificationsResult
+                {
+                    Data = new List<NewQualification>(),
+                    TotalRecords = 0
+                });
 
-            // Act
             var result = await _handler.Handle(query, CancellationToken.None);
 
-            // Assert
-            _repositoryMock.Verify(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()), Times.Once);
-            Assert.True(result.Success);           
+            _repositoryMock.Verify(x =>
+                x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()),
+                Times.Once);
+
+            Assert.True(result.Success);
+            Assert.Empty(result.Value.Data);
         }
 
         [Fact]
-        public async Task Then_The_Api_Is_Called_With_The_Request_And_Exception_Is_Handled()
+        public async Task Handles_exception_and_returns_failure()
         {
-            // Arrange
-            var query = _fixture.Create<GetNewQualificationsQuery>();
-            var exceptionMessage = "An error occurred";
-            _repositoryMock.Setup(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()))
-                           .ThrowsAsync(new Exception(exceptionMessage));
+            var query = new GetNewQualificationsQuery
+            {
+                Skip = 10,
+                Take = 20
+            };
 
-            // Act
+            _repositoryMock
+                .Setup(x => x.GetAllNewQualificationsAsync(
+                    It.IsAny<int>(),
+                    It.IsAny<int>(),
+                    It.IsAny<NewQualificationsFilter>()))
+                .ThrowsAsync(new Exception("boom"));
+
             var result = await _handler.Handle(query, CancellationToken.None);
 
-            // Assert
-            _repositoryMock.Verify(x => x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()), Times.Once);
+            _repositoryMock.Verify(x =>
+                x.GetAllNewQualificationsAsync(query.Skip, query.Take, It.IsAny<NewQualificationsFilter>()),
+                Times.Once);
+
             Assert.False(result.Success);
-            Assert.Equal(exceptionMessage, result.ErrorMessage);
+            Assert.Equal("boom", result.ErrorMessage);
+        }
+
+        [Fact]
+        public async Task Handle_Passes_ProcessStatusFilter_And_AgeGroups_To_Repository()
+        {
+            // Arrange
+            var processStatuses = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
+            var ageGroups = new List<AgeGroup> { AgeGroup.Pre16, AgeGroup.NineteenPlus };
+
+            var query = new GetNewQualificationsQuery
+            {
+                Skip = 0,
+                Take = 10,
+                ProcessStatusIds = processStatuses,
+                AgeGroups = ageGroups
+            };
+
+            NewQualificationsFilter? capturedFilter = null;
+
+
+            _repositoryMock
+                .Setup(x => x.GetAllNewQualificationsAsync(
+                    It.IsAny<int?>(),
+                    It.IsAny<int?>(),
+                    It.IsAny<NewQualificationsFilter>()))
+                .Callback<int?, int?, NewQualificationsFilter>((_, _, f) => capturedFilter = f)
+                .ReturnsAsync(new NewQualificationsResult
+                {
+                    Data = new List<NewQualification>(),
+                    TotalRecords = 0
+                });
+
+
+            // Act
+            await _handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            Assert.NotNull(capturedFilter);
+            Assert.Equal(processStatuses, capturedFilter!.ProcessStatusIds);
+            Assert.Equal(ageGroups, capturedFilter.AgeGroups);
         }
     }
 }
-
-

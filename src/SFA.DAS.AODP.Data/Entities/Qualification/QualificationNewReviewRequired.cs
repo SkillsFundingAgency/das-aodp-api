@@ -8,7 +8,10 @@
         public string QualificationTitle { get; set; } = "";
         public string QualificationType { get; set; } = "";
         public string? Level { get; set; }
-        public string? AgeGroup { get; set; }
+        public bool PreSixteen { get; set; }
+        public bool SixteenToEighteen { get; set; }
+        public bool EighteenPlus { get; set; }
+        public bool NineteenPlus { get; set; }
         public string? Subject { get; set; }
         public string? SectorSubjectArea { get; set; }
         public Guid? ProcessStatusId { get; set; }
