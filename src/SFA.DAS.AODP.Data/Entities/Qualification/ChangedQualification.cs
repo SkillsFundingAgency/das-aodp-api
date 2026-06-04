@@ -3,12 +3,16 @@ namespace SFA.DAS.AODP.Data.Entities.Qualification;
 
 public class ChangedQualification
 {
+    public Guid QualificationId { get; set; }
     public string? QualificationReference { get; set; } = string.Empty;
     public string? AwardingOrganisation { get; set; } = string.Empty;
     public string? QualificationTitle { get; set; } = string.Empty;
     public string? QualificationType { get; set; } = string.Empty;
     public string? Level { get; set; } = string.Empty;
-    public string? AgeGroup { get; set; } = string.Empty;
+    public bool PreSixteen { get; set; }
+    public bool SixteenToEighteen { get; set; }
+    public bool EighteenPlus { get; set; }
+    public bool NineteenPlus { get; set; }
     public string? Subject { get; set; } = string.Empty;
     public string? SectorSubjectArea { get; set; } = string.Empty;
     public string? ChangedFieldNames { get; set; }

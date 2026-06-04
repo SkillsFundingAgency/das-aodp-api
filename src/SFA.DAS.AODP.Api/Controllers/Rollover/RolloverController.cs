@@ -29,6 +29,14 @@ public class RolloverController : BaseController
         return Ok(result);
     }
 
+    [HttpPost("p1checks")]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> RolloverWorkflowCandidatesAfterP1Checks([FromBody] UpdateRolloverWorkflowCandidatesAfterP1ChecksCommand command)
+    {
+        return await SendRequestAsync(command);
+    }
+
     [HttpGet("rollovercandidates")]
     [ProducesResponseType(typeof(GetRolloverCandidatesQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

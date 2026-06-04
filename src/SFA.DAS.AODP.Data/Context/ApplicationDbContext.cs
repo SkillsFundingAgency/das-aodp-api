@@ -91,6 +91,7 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<RolloverWorkflowRunFilterValue> RolloverWorkflowRunFilterValues { get; set; }
         public virtual DbSet<RolloverWorkflowCandidate> RolloverWorkflowCandidates { get; set; }
         public virtual DbSet<RolloverDecisionRun> RolloverDecisionRuns { get; set; }
+        public DbSet<RolloverWorkflowCandidatesP1Checks> RolloverWorkflowCandidatesP1Checks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

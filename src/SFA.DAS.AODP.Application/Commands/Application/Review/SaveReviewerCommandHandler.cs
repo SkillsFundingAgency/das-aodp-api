@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application.Commands.Application.Message;
+using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Models.Application;
 
@@ -17,18 +18,29 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
 
         }
 
-        public async Task<BaseMediatrResponse<SaveReviewerCommandResponse>> Handle(SaveReviewerCommand request, CancellationToken cancellationToken)
+        public async Task<BaseMediatrResponse<SaveReviewerCommandResponse>> Handle(
+            SaveReviewerCommand request,
+            CancellationToken cancellationToken)
         {
             var response = new BaseMediatrResponse<SaveReviewerCommandResponse>();
 
             try
             {
                 if (!Enum.TryParse(request.UserType, true, out UserType userType))
-                {
                     throw new ArgumentException($"Invalid User Type: {request.UserType}");
-                }
 
-                var application = await _repository.GetByIdAsync(request.ApplicationId);
+                Data.Entities.Application.Application application;
+
+                try
+                {
+                    application = await _repository.GetByIdAsync(request.ApplicationId);
+                }
+                catch (RecordNotFoundException)
+                {
+                    response.Success = false;
+                    response.ErrorMessage = $"Application {request.ApplicationId} not found.";
+                    return response;
+                }
 
                 var newReviewer = request.ReviewerValue?.Trim();
 
@@ -40,13 +52,13 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                     case nameof(application.Reviewer1):
                         previousReviewer = application.Reviewer1?.Trim();
                         otherReviewer = application.Reviewer2?.Trim();
-                        application.Reviewer1 = newReviewer; 
+                        application.Reviewer1 = newReviewer;
                         break;
 
                     case nameof(application.Reviewer2):
                         previousReviewer = application.Reviewer2?.Trim();
                         otherReviewer = application.Reviewer1?.Trim();
-                        application.Reviewer2 = newReviewer; 
+                        application.Reviewer2 = newReviewer;
                         break;
 
                     default:
@@ -57,7 +69,6 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                 {
                     response.Success = true;
                     return response;
-
                 }
 
                 if (!string.IsNullOrWhiteSpace(newReviewer) &&
@@ -71,7 +82,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
 
                 await _repository.UpdateAsync(application);
 
-                var msgCommand = new CreateApplicationMessageCommand()
+                var msgCommand = new CreateApplicationMessageCommand
                 {
                     ApplicationId = request.ApplicationId,
                     MessageText = $"Previous {request.ReviewerFieldName}: {previousReviewer}\nNew {request.ReviewerFieldName}: {request.ReviewerValue}",
@@ -82,8 +93,8 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                 };
 
                 var msgResult = await _mediator.Send(msgCommand);
-                if (!msgResult.Success) throw new Exception(msgResult.ErrorMessage, msgResult.InnerException);
-
+                if (!msgResult.Success)
+                    throw new Exception(msgResult.ErrorMessage, msgResult.InnerException);
 
                 response.Success = true;
             }
@@ -93,6 +104,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                 response.InnerException = ex;
                 response.Success = false;
             }
+
             return response;
         }
     }

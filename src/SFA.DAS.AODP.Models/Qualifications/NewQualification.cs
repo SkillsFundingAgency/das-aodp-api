@@ -8,6 +8,7 @@ namespace SFA.DAS.AODP.Models.Qualifications
 {
     public class NewQualification
     {
+        public Guid QualificationId { get; set; }
         public string? Title { get; set; }
         public string? Reference { get; set; }
         public string? AwardingOrganisation { get; set; }

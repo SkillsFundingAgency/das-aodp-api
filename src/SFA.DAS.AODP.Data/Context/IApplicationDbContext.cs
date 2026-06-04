@@ -76,6 +76,8 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<RolloverWorkflowCandidate> RolloverWorkflowCandidates { get; set; }
         DbSet<RolloverDecisionRun> RolloverDecisionRuns { get; set; }
 
+        DbSet<RolloverWorkflowCandidatesP1Checks> RolloverWorkflowCandidatesP1Checks { get; set; }
+
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task<IDbContextTransaction> StartTransactionAsync();
     }

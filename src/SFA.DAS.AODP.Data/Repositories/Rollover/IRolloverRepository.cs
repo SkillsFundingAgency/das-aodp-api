@@ -1,20 +1,26 @@
 ﻿using SFA.DAS.AODP.Data.Entities.Rollover;
-using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Data.Repositories.Rollover;
 
 public interface IRolloverRepository
 {
     Task<int> GetRolloverWorkflowCandidatesCountAsync(CancellationToken cancellationToken);
-    Task<IEnumerable<Entities.Rollover.RolloverWorkflowCandidate>> GetAllRolloverWorkflowCandidatesAsync(CancellationToken cancellationToken);
-    Task<IEnumerable<RolloverCandidate>> GetRolloverCandidatesAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<RolloverWorkflowCandidate>> GetAllRolloverWorkflowCandidatesAsync(CancellationToken cancellationToken);
+    Task<IEnumerable<RolloverWorkflowCandidatesP1Checks>> GetRolloverWorkflowCandidatesP1ChecksAsync(CancellationToken cancellationToken);
+
+    Task UpdateRolloverWorkflowCandidatesAsync(IEnumerable<RolloverWorkflowCandidate> candidates, CancellationToken cancellationToken);
+
+    Task<IEnumerable<Models.Rollover.RolloverCandidate>> GetRolloverCandidatesAsync(CancellationToken cancellationToken);
     Task<RolloverWorkflowRun> GeRolloverWorkflowRunByIdAsync(Guid id, CancellationToken cancellationToken);
-    Task<IEnumerable<RolloverCandidate>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, 
+    Task<IEnumerable<Models.Rollover.RolloverCandidate>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, 
         CancellationToken cancellationToken);
     Task<Guid> CreateRolloverWorkflowRunAsync(RolloverWorkflowRun request,
         CancellationToken cancellationToken);
-    Task CreateRolloverWorkflowCandidatesAsync(IEnumerable<Entities.Rollover.RolloverWorkflowCandidate> request,
+
+    Task CreateRolloverWorkflowCandidatesAsync(IEnumerable<RolloverWorkflowCandidate> workflowCandidates,
         CancellationToken cancellationToken);
     Task CreateRolloverWorkflowRunFundingOffersAsync(IEnumerable<RolloverWorkflowRunFundingOffer> request,
         CancellationToken cancellationToken);
+
+    Task SaveChangesAsync(CancellationToken cancellationToken);
 }
