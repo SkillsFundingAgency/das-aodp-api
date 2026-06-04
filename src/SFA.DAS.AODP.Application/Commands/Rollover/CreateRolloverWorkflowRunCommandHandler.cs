@@ -64,6 +64,8 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                     .ToList();
                 await _repository.CreateRolloverWorkflowRunFundingOffersAsync(workflowFundingOffers, cancellationToken);
 
+                await _mediator.Send(new UpdateRolloverWorkflowCandidatesAfterP1ChecksCommand(),cancellationToken);
+
                 response.Value = new CreateRolloverWorkflowRunCommandResponse
                 {
                     RolloverWorkflowRunId = workflowRunId

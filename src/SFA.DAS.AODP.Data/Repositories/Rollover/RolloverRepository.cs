@@ -122,6 +122,56 @@ public class RolloverRepository : IRolloverRepository
         return _context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<RolloverWorkflowCandidatesExportRow>> GetRolloverWorkflowCandidatesByRunId(
+        Guid workflowRunId,
+        CancellationToken cancellationToken)
+    {
+        return await _context.RolloverWorkflowCandidates
+            .AsNoTracking()
+            .Where(rwc => rwc.RolloverWorkflowRunId == workflowRunId
+                       && rwc.IncludedInP1Export)
+            .Select(rwc => new RolloverWorkflowCandidatesExportRow
+            {
+                QAN = rwc.RolloverCandidates.QualificationVersion.Qualification.Qan,
+                QualificationTitle = rwc.RolloverCandidates.QualificationVersion.Qualification.QualificationName ?? string.Empty,
+                AwardingOrganisation = rwc.RolloverCandidates.QualificationVersion.Organisation.NameOfqual ?? string.Empty,
+                QualificationLevel = rwc.RolloverCandidates.QualificationVersion.Level,
+                QualificationType = rwc.RolloverCandidates.QualificationVersion.Type,
+                SSA = rwc.RolloverCandidates.QualificationVersion.Ssa,
+                OperationalEndDate = rwc.RolloverCandidates.QualificationVersion.OperationalEndDate,
+
+                OfferedInEngland = rwc.RolloverCandidates.QualificationVersion.OfferedInEngland,
+                FundedInEngland = rwc.RolloverCandidates.QualificationVersion.IntentionToSeekFundingInEngland ?? false,
+
+                GLH = rwc.RolloverCandidates.QualificationVersion.Glh,
+                TQT = rwc.RolloverCandidates.QualificationVersion.Tqt,
+
+                Pre16 = rwc.RolloverCandidates.QualificationVersion.PreSixteen ?? false,
+                Age16To18 = rwc.RolloverCandidates.QualificationVersion.SixteenToEighteen ?? false,
+                Age18Plus = rwc.RolloverCandidates.QualificationVersion.EighteenPlus ?? false,
+                Age19Plus = rwc.RolloverCandidates.QualificationVersion.NineteenPlus ?? false,
+
+                FundingStreamName = rwc.RolloverCandidates.FundingOffer.Name,
+                FundingApprovalStartDate =
+                    _context.QualificationFundings
+                        .Where(qf =>
+                            qf.QualificationVersionId == rwc.RolloverCandidates.QualificationVersionId &&
+                            qf.FundingOfferId == rwc.RolloverCandidates.FundingOfferId)
+                        .Select(qf => qf.StartDate)
+                        .FirstOrDefault(),
+
+                ProposedOutcome = rwc.PassP1 ? "To Extend" : "To Exclude",
+                RolloverStatus = rwc.RolloverCandidates.RolloverStatus.ToString(),
+                ExclusionReason = rwc.RolloverCandidates.ExclusionReason,
+
+                CurrentFundingApprovalEndDate = rwc.CurrentFundingEndDate,
+                ProposedFundingApprovalEndDate = rwc.ProposedFundingEndDate,
+
+                Comments = string.Empty,
+            })
+            .OrderBy(x => x.QAN)
+            .ToListAsync(cancellationToken);
+    }
     public async Task<RolloverWorkflowRun> GeRolloverWorkflowRunByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await _context.RolloverWorkflowRuns

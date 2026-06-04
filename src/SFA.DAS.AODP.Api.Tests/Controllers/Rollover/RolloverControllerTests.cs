@@ -138,7 +138,8 @@ public class RolloverControllerTests
         // Assert
         var statusResult = Assert.IsType<StatusCodeResult>(result);
         Assert.Equal(500, statusResult.StatusCode);
-    }[Fact]
+    }
+    [Fact]
     public async Task GetRolloverCandidates_ReturnsOk_WhenMediatorReturnsSuccess()
     {
         // Arrange
@@ -285,6 +286,72 @@ public class RolloverControllerTests
         }
 
         _mediatorMock.Verify(m => m.Send(It.IsAny<CreateRolloverWorkflowRunCommand>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetRolloverCandidatesForExport_ReturnsOk_WhenMediatorReturnsSuccess()
+    {
+        // Arrange
+        var workflowRunId = Guid.NewGuid();
+
+        var response = new BaseMediatrResponse<GetRolloverCandidatesForExportQueryResponse>
+        {
+            Success = true,
+            Value = new GetRolloverCandidatesForExportQueryResponse
+            {
+                FileContent = new byte[] { 1, 2, 3 },
+                FileName = "export.csv",
+                ContentType = "text/csv"
+            }
+        };
+
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetRolloverCandidatesForExportQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(response);
+
+        // Act
+        var result = await _controller.GetRolloverCandidatesForExport(workflowRunId, TestContext.Current.CancellationToken);
+
+        // Assert
+        var ok = Assert.IsType<OkObjectResult>(result);
+        var value = Assert.IsType<BaseMediatrResponse<GetRolloverCandidatesForExportQueryResponse>>(ok.Value);
+
+        Assert.True(value.Success);
+        Assert.Equal("export.csv", value.Value.FileName);
+        Assert.Equal("text/csv", value.Value.ContentType);
+        Assert.Equal(new byte[] { 1, 2, 3 }, value.Value.FileContent);
+
+        _mediatorMock.Verify(m => m.Send(
+            It.Is<GetRolloverCandidatesForExportQuery>(q => q.RolloverWorkflowRunId == workflowRunId),
+            It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task GetRolloverCandidatesForExport_ReturnsOk_WhenMediatorReturnsFailure()
+    {
+        // Arrange
+        var workflowRunId = Guid.NewGuid();
+
+        var response = new BaseMediatrResponse<GetRolloverCandidatesForExportQueryResponse>
+        {
+            Success = false,
+            ErrorMessage = "Something went wrong"
+        };
+
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetRolloverCandidatesForExportQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(response);
+
+        // Act
+        var result = await _controller.GetRolloverCandidatesForExport(workflowRunId, TestContext.Current.CancellationToken);
+
+        // Assert
+        var ok = Assert.IsType<OkObjectResult>(result);
+        var value = Assert.IsType<BaseMediatrResponse<GetRolloverCandidatesForExportQueryResponse>>(ok.Value);
+
+        Assert.False(value.Success);
+        Assert.Equal("Something went wrong", value.ErrorMessage);
     }
 
 
