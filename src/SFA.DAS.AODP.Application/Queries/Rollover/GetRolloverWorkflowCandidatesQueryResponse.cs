@@ -8,6 +8,6 @@ namespace SFA.DAS.AODP.Application.Queries.Rollover
         public DateTime? FundingEndDateEligibilityThreshold { get; set; }
         public DateTime? OperationalEndDateEligibilityThreshold { get; set; }
         public DateTime? MaximumApprovalFundingEndDate { get; set; }
-        public IEnumerable<RolloverWorkflowCandidate> RolloverWorkflowCandidates { get; set; } = new List<RolloverWorkflowCandidate>();
+        public IEnumerable<RolloverWorkflowCandidateDto> RolloverWorkflowCandidates { get; set; } = new List<RolloverWorkflowCandidateDto>();
     }
 }

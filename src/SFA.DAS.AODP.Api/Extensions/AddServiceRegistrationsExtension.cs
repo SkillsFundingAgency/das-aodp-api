@@ -51,6 +51,7 @@ public static class AddServiceRegistrationsExtension
         services.AddScoped<IQanValidationService, QanValidationService>();
         services.AddScoped<IQualificationsApi, QualificationsApi>();
         services.AddScoped<IRolloverWorkflowCandidatesCsvBuilder, RolloverWorkflowCandidatesCsvBuilder>();
+        services.AddScoped<IRolloverFundingExtensionValidator, RolloverFundingExtensionValidator>();
 
         return services;
     }

@@ -74,4 +74,12 @@ public class RolloverController : BaseController
         var result = await _mediator.Send(query, cancellationToken);
         return Ok(result);
     }
+
+    [HttpPost("rolloverextensionvalidation")]
+    [ProducesResponseType(typeof(BaseMediatrResponse<ValidateFundingExtensionCandidatesCommandResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> ValidateFundingExtensionCandidatesCommand(ValidateFundingExtensionCandidatesCommand validateFundingExtensionCandidatesCommand)
+    {
+        return await SendRequestAsync(validateFundingExtensionCandidatesCommand);
+    }
 }

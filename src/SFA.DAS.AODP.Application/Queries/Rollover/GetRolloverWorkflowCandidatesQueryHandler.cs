@@ -23,7 +23,7 @@ namespace SFA.DAS.AODP.Application.Queries.Rollover
 
                 if (result != null)
                 {
-                    var workflowCandidates = result.Select(x=> new RolloverWorkflowCandidate 
+                    var workflowCandidates = result.Select(x=> new RolloverWorkflowCandidateDto 
                     {
                         Id = x.Id,
                         RolloverCandidatesId = x.RolloverCandidatesId,

@@ -33,7 +33,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
                 .Create();
 
             var candidates = command.RolloverCandidateIds
-                .Select(id => new RolloverCandidate
+                .Select(id => new RolloverCandidateDto
                 {
                     Id = id,
                     QualificationVersionId = Guid.NewGuid(),
@@ -155,7 +155,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
 
             // Mock: return valid candidates so handler proceeds
             var candidates = command.RolloverCandidateIds
-                .Select(id => new RolloverCandidate
+                .Select(id => new RolloverCandidateDto
                 {
                     Id = id,
                     QualificationVersionId = Guid.NewGuid(),
@@ -213,7 +213,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
 
             // Return valid rollover candidates so handler continues
             var candidates = command.RolloverCandidateIds
-                .Select(id => new RolloverCandidate
+                .Select(id => new RolloverCandidateDto
                 {
                     Id = id,
                     QualificationVersionId = Guid.NewGuid(),
@@ -271,7 +271,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
 
             // Mock valid rollover candidates so the handler passes validation
             var candidates = command.RolloverCandidateIds
-                .Select(id => new RolloverCandidate
+                .Select(id => new RolloverCandidateDto
                 {
                     Id = id,
                     QualificationVersionId = Guid.NewGuid(),

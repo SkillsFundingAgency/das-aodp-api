@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Rollover;
+using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Data.Repositories.Rollover;
 
@@ -22,7 +23,7 @@ public class RolloverRepository : IRolloverRepository
         return totalRecords;
     }
 
-    public async Task<IEnumerable<Entities.Rollover.RolloverWorkflowCandidate>> GetAllRolloverWorkflowCandidatesAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<RolloverWorkflowCandidate>> GetAllRolloverWorkflowCandidatesAsync(CancellationToken cancellationToken)
     {
         return await _context.RolloverWorkflowCandidates.ToListAsync(cancellationToken);
     }
@@ -46,12 +47,12 @@ public class RolloverRepository : IRolloverRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<Models.Rollover.RolloverCandidate>> GetRolloverCandidatesAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<RolloverCandidateDto>> GetRolloverCandidatesAsync(CancellationToken cancellationToken)
     {
         return await _context.RolloverCandidates
             .AsNoTracking()
             .Where(x => x.IsActive)
-            .Select(rc => new Models.Rollover.RolloverCandidate
+            .Select(rc => new RolloverCandidateDto
             {
                 Id = rc.Id,
                 QualificationVersionId = rc.QualificationVersionId,
@@ -64,13 +65,13 @@ public class RolloverRepository : IRolloverRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<Models.Rollover.RolloverCandidate>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, CancellationToken cancellationToken)
+    public async Task<IEnumerable<RolloverCandidateDto>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, CancellationToken cancellationToken)
     {
         return await _context.RolloverCandidates
             .AsNoTracking()
             .Where(rc =>
                 rolloverCandidateIds.Contains(rc.Id) && rc.IsActive)
-            .Select(rc => new Models.Rollover.RolloverCandidate
+            .Select(rc => new RolloverCandidateDto
             {
                 Id = rc.Id,
                 QualificationVersionId = rc.QualificationVersionId,
@@ -177,6 +178,53 @@ public class RolloverRepository : IRolloverRepository
         return await _context.RolloverWorkflowRuns
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    }
+
+    public async Task<FundingExtensionCandidateValidationContext> GetFundingExtensionValidationContextAsync(
+        HashSet<CandidateKey> incomingCandidates,
+        CancellationToken cancellationToken)
+    {
+        var flattened = incomingCandidates
+            .Select(k => $"{k.Qan}|{k.FundingStream}")
+            .ToList();
+
+        var latestRunId = await _context.RolloverWorkflowRuns
+            .AsNoTracking()
+            .OrderByDescending(x => x.CreatedAt)
+            .Select(x => x.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (latestRunId == Guid.Empty)
+            throw new InvalidOperationException("No workflow runs exist");
+
+        var matchingCandidatesInDB = await _context.RolloverCandidates
+            .AsNoTracking()
+            .Where(rc =>
+                flattened.Contains(
+                    rc.QualificationVersion.Qualification.Qan + "|" +
+                    rc.FundingOffer.Name))
+            .Select(rc => new CandidateKey(
+                rc.QualificationVersion.Qualification.Qan,
+                rc.FundingOffer.Name))
+            .ToHashSetAsync(cancellationToken);
+
+        var matchingWorkflowCandidatesInDB = await _context.RolloverWorkflowCandidates
+            .AsNoTracking()
+            .Where(rwc => rwc.RolloverWorkflowRunId == latestRunId)
+            .Where(rwc =>
+                flattened.Contains(
+                    rwc.QualificationVersion.Qualification.Qan + "|" +
+                    rwc.FundingOffer.Name))
+            .Select(rwc => new CandidateKey(
+                rwc.QualificationVersion.Qualification.Qan,
+                rwc.FundingOffer.Name))
+            .ToHashSetAsync(cancellationToken);
+
+        return new FundingExtensionCandidateValidationContext(
+            incomingCandidates,
+            matchingCandidatesInDB,
+            matchingWorkflowCandidatesInDB
+        );
     }
 
 }

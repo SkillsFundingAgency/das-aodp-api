@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SFA.DAS.AODP.Data.Entities.Offer;
+using SFA.DAS.AODP.Data.Entities.Qualification;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SFA.DAS.AODP.Data.Entities.Rollover;
 
@@ -38,6 +40,10 @@ public class RolloverWorkflowCandidate
     public virtual RolloverWorkflowRun RolloverWorkflowRun { get; private set; } = null!;
 
     public virtual RolloverCandidates RolloverCandidates { get; set; } = null!;
+
+    public virtual QualificationVersions QualificationVersion { get; set; } = null!;
+
+    public virtual FundingOffer FundingOffer { get; set; } = null!;
 
     public static RolloverWorkflowCandidate Create(
         Guid workflowRunId,
