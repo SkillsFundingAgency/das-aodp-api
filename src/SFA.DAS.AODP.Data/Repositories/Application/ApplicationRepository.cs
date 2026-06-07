@@ -84,5 +84,14 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
                 .ToListAsync();
 
         }
+
+        public async Task<Entities.Application.Application> GetByReviewIdAsync(Guid applicationReviewId)
+        {
+            var application = await _context.Applications
+                .Where(a => a.ApplicationReview.Id == applicationReviewId)
+                .FirstOrDefaultAsync();
+
+            return application ?? throw new RecordNotFoundException(applicationReviewId);
+        }
     }
 }

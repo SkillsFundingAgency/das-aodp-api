@@ -7,6 +7,7 @@ public class GetQualificationDetailsQueryResponse
     public Guid Id { get; set; }
     public Guid QualificationId { get; set; }
     public Guid VersionFieldChangesId { get; set; }
+    public string Name { get; set; } = null!;
     public string AgeGroup { get; set; }
     public string? VersionFieldChanges { get; set; }
     public string? VersionType { get; set; }
@@ -34,6 +35,7 @@ public class GetQualificationDetailsQueryResponse
     public DateTime? CertificationEndDate { get; set; }
     public DateTime? ReviewDate { get; set; }
     public bool OfferedInEngland { get; set; }
+    public bool? IntentionToSeekFundingInEngland { get; set; }
     public bool OfferedInNi { get; set; }
     public bool? OfferedInternationally { get; set; }
     public string? Specialism { get; set; }
@@ -167,11 +169,12 @@ public class GetQualificationDetailsQueryResponse
         public int? IsOutcomeDecision { get; set; }
     }
 
-    public static implicit operator GetQualificationDetailsQueryResponse(QualificationVersions entity)
+    public static GetQualificationDetailsQueryResponse MapToResponse(QualificationVersions entity)
     {
         return new GetQualificationDetailsQueryResponse
         {
             Id = entity.Id,
+            Name = entity.Name!,
             AgeGroup = GetAgeGroup(entity),
             QualificationId = entity.QualificationId,
             VersionFieldChangesId = entity.VersionFieldChangesId,
@@ -270,6 +273,7 @@ public class GetQualificationDetailsQueryResponse
                 Versions = entity.Qualification.QualificationVersions.ToList().Select(version => new GetQualificationDetailsQueryResponse()
                 {
                     Id = version.Id,
+                    Name = version.Name!,
                     AgeGroup = GetAgeGroup(version),
                     QualificationId = version.QualificationId,
                     VersionFieldChangesId = version.VersionFieldChangesId,

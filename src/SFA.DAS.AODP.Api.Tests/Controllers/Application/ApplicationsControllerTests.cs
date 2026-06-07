@@ -657,5 +657,79 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
             var statusResult = Assert.IsType<StatusCodeResult>(result);
             Assert.Equal(StatusCodes.Status500InternalServerError, statusResult.StatusCode);
         }
+
+        [Fact]
+        public async Task BulkUpdateReviewer_ReturnsOkResult()
+        {
+            // Arrange
+            var request = _fixture.Create<BulkSaveReviewerCommand>();
+            var response = _fixture.Create<BulkSaveReviewerCommandResponse>();
+
+            var wrapper = new BaseMediatrResponse<BulkSaveReviewerCommandResponse>
+            {
+                Value = response,
+                Success = true
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<BulkSaveReviewerCommand>(), default))
+                .ReturnsAsync(wrapper);
+
+            // Act
+            var result = await _controller.BulkUpdateReviewer(request);
+
+            // Assert
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<BulkSaveReviewerCommand>(c =>
+                        c.ApplicationReviewIds.SequenceEqual(request.ApplicationReviewIds) &&
+                        c.Reviewer1 == request.Reviewer1 &&
+                        c.Reviewer2 == request.Reviewer2 &&
+                        c.SentByEmail == request.SentByEmail &&
+                        c.SentByName == request.SentByName
+                    ),
+                    default),
+                Times.Once);
+
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            Assert.Equal(StatusCodes.Status200OK, okResult.StatusCode);
+
+            var model = Assert.IsAssignableFrom<BulkSaveReviewerCommandResponse>(okResult.Value);
+            Assert.Equal(response, model);
+        }
+
+        [Fact]
+        public async Task BulkUpdateReviewer_WhenMediatorFails_ReturnsInternalServerError()
+        {
+            // Arrange
+            var request = _fixture.Create<BulkSaveReviewerCommand>();
+
+            var wrapper = new BaseMediatrResponse<BulkSaveReviewerCommandResponse>
+            {
+                Success = false,
+                ErrorMessage = "Bulk reviewer update failed"
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<BulkSaveReviewerCommand>(), default))
+                .ReturnsAsync(wrapper);
+
+            // Act
+            var result = await _controller.BulkUpdateReviewer(request);
+
+            // Assert
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<BulkSaveReviewerCommand>(c =>
+                        c.ApplicationReviewIds.SequenceEqual(request.ApplicationReviewIds)
+                    ),
+                    default),
+                Times.Once);
+
+            var statusResult = Assert.IsType<StatusCodeResult>(result);
+            Assert.Equal(StatusCodes.Status500InternalServerError, statusResult.StatusCode);
+        }
+
+
     }
 }

@@ -46,6 +46,7 @@ SELECT
     qv.EighteenPlus,
     qv.NineteenPlus,
     -- Funding Details
+    qv.IntentionToSeekFundingInEngland,
     NULL AS FundingInWales,            -- Placeholder
     NULL AS FundingInNorthernIreland,  -- Placeholder
     qv.GcseSizeEquivelence AS GCSESizeEquivalence,

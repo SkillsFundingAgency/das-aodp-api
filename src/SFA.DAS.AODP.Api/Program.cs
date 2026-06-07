@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.OpenApi.Models;
 using SFA.DAS.AODP.Api.Extensions;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Application.Swashbuckle;
 using SFA.DAS.AODP.Data.Search;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.OpenApi.Models;
+using SFA.DAS.Aodp.Api.AppStart;
 
 namespace SFA.DAS.AODP.Api;
 
@@ -83,6 +84,8 @@ public static class Program
         }
 
         var app = builder.Build();
+
+        app.UseSecurityHeaders();
 
         var fuzzySearchEnabled = configuration.GetSection("FuzzySearchSettings").GetValue<bool>("Enabled");
         if (fuzzySearchEnabled)
