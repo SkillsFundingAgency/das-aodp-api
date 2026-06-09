@@ -60,6 +60,26 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
                             .FirstOrDefaultAsync(v => v.Id == applicationReviewId);
 
             return res is null ? throw new RecordNotFoundException(applicationReviewId) : res;
+
         }
+
+        public async Task<DateTime?> GetOperationalStartDateForReview(Guid reviewId)
+        {
+            var qualificationNumber = await _context.ApplicationReviews
+                .Where(ar => ar.Id == reviewId)
+                .Select(ar => ar.Application.QualificationNumber)
+                .FirstOrDefaultAsync();
+
+            if (qualificationNumber == null)
+                return null;
+
+            return await _context.Qualification
+                .Where(q => q.Qan == qualificationNumber)
+                .SelectMany(q => q.QualificationVersions)
+                .OrderByDescending(v => v.Version)
+                .Select(v => v.OperationalStartDate)
+                .FirstOrDefaultAsync();
+        }
+
     }
 }

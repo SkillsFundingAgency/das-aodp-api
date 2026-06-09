@@ -8,13 +8,17 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
     {
         private readonly IApplicationReviewFundingRepository _fundingRepository;
         private readonly IApplicationReviewFeedbackRepository _feedbackRepository;
+        private readonly IApplicationReviewRepository _applicationReviewRepository;
 
-        public SaveQfauFundingReviewOffersCommandHandler(IApplicationReviewFundingRepository repository, IApplicationReviewFeedbackRepository feedbackRepository)
+        public SaveQfauFundingReviewOffersCommandHandler(
+            IApplicationReviewFundingRepository repository, 
+            IApplicationReviewFeedbackRepository feedbackRepository,
+            IApplicationReviewRepository applicationReviewRepository)
         {
             _fundingRepository = repository;
             _feedbackRepository = feedbackRepository;
+            _applicationReviewRepository = applicationReviewRepository;
         }
-
 
         public async Task<BaseMediatrResponse<EmptyResponse>> Handle(SaveQfauFundingReviewOffersCommand request, CancellationToken cancellationToken)
         {
@@ -23,6 +27,13 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
             try
             {
                 var fundedOffers = await _fundingRepository.GetByReviewIdAsync(request.ApplicationReviewId);
+
+                var qualificationOperationalStartDate =
+                    await _applicationReviewRepository.GetOperationalStartDateForReview(request.ApplicationReviewId);
+
+                DateOnly? startDate = qualificationOperationalStartDate.HasValue
+                    ? DateOnly.FromDateTime(qualificationOperationalStartDate.Value)
+                    : null;
 
                 List<ApplicationReviewFunding> create = new();
                 List<ApplicationReviewFunding> remove = new();
@@ -33,7 +44,8 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                     if (offer == null) create.Add(new()
                     {
                         ApplicationReviewId = request.ApplicationReviewId,
-                        FundingOfferId = offerId
+                        FundingOfferId = offerId,
+                        StartDate = startDate,
                     });
                 }
 
