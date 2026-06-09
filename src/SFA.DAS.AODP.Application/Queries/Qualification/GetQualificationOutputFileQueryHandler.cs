@@ -310,5 +310,3 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
         
     }
 }
-
-

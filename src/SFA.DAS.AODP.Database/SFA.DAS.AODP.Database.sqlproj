@@ -177,6 +177,7 @@
     </None>
     <Build Include="Views\v_QualificationFundingStatus.sql" />
     <Build Include="Tables\RegulatedQaaQualification.sql" />
+    <Build Include="Tables\RegulatedQaaQualificationHistory.sql" />
     <None Include="MigrationScripts\MVS1_Drop_OutputChangedQualifications_View.sql" />
     <Build Include="Views\Output\view_OutputQaaQualifications.sql" />
   </ItemGroup>

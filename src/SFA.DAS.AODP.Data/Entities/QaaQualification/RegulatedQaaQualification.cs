@@ -17,6 +17,18 @@ public partial class RegulatedQaaQualification
     /// </summary>
     public DateTime DateOfDataSnapshot { get; private set; }
 
+    public DateTime FirstSeenAt { get; private set; }
+
+    public DateTime LastChangedAt { get; private set; }
+
+    public string ContentHash { get; private set; } = null!;
+
+    public QaaImportComparisonOutcome LatestImportComparisonOutcome { get; private set; }
+
+    public QaaLastDateForRegistrationChangeType LastDateForRegistrationChangeType { get; private set; }
+
+    public Guid? LatestQaaQualificationHistoryId { get; private set; }
+
     /// <summary>
     /// The unique learning AIM code for the qualification.
     /// </summary>
@@ -56,6 +68,10 @@ public partial class RegulatedQaaQualification
     /// When the last date for registration is.
     /// </summary>
     public DateOnly LastDateForRegistration { get; private set; }
+
+    public bool IsDiscontinued { get; private set; }
+
+    public DateOnly? DiscontinuedDate { get; private set; }
 
     /// <summary>
     /// What date is the last date that funding can be approved for, this is set as part of the output file generation.

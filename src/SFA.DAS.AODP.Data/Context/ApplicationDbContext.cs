@@ -81,6 +81,8 @@ namespace SFA.DAS.AODP.Data.Context
 
         public virtual DbSet<RegulatedQaaQualification> RegulatedQaaQualifications { get; set; }
 
+        public virtual DbSet<RegulatedQaaQualificationHistory> RegulatedQaaQualificationHistory { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<QualificationNewReviewRequired>().ToView("v_QualificationNewReviewRequired", "regulated").HasNoKey();
@@ -114,6 +116,27 @@ namespace SFA.DAS.AODP.Data.Context
                 .HasConversion(
                     ssaTier => ssaTier.Name, 
                     ssaName => SectorSubjectArea.FromName(ssaName));
+
+            modelBuilder.Entity<RegulatedQaaQualification>()
+                .Property(q => q.LatestImportComparisonOutcome)
+                .HasConversion<string>()
+                .HasColumnType("nvarchar(50)");
+
+            modelBuilder.Entity<RegulatedQaaQualification>()
+                .Property(q => q.LastDateForRegistrationChangeType)
+                .HasConversion<string>()
+                .HasColumnType("nvarchar(50)");
+
+            modelBuilder.Entity<RegulatedQaaQualificationHistory>()
+                .Property(q => q.SectorSubjectArea)
+                .HasConversion(
+                    ssaTier => ssaTier.Name,
+                    ssaName => SectorSubjectArea.FromName(ssaName));
+
+            modelBuilder.Entity<RegulatedQaaQualificationHistory>()
+                .Property(q => q.LastDateForRegistrationChangeType)
+                .HasConversion<string>()
+                .HasColumnType("nvarchar(50)");
 
             var dateOnlyConverter = new ValueConverter<DateOnly, DateTime>(
                 dateOnly => dateOnly.ToDateTime(TimeOnly.MinValue),
@@ -159,4 +182,3 @@ namespace SFA.DAS.AODP.Data.Context
 
     }
 }
-

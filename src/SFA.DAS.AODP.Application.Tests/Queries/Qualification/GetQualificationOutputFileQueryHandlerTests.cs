@@ -157,6 +157,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                     h.DownloadDate >= DateTime.UtcNow.AddMinutes(-1)
                 ),
                 It.IsAny<CancellationToken>()), Times.Once);
+
         }
 
         [Fact]
