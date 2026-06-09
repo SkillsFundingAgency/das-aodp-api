@@ -1,4 +1,6 @@
-﻿namespace SFA.DAS.AODP.Data.Providers;
+﻿using SFA.DAS.AODP.Data.Extensions;
+
+namespace SFA.DAS.AODP.Data.Providers;
 
 /// <summary>
 /// Implementation for <see cref="IAcademicYearProvider"/>.
@@ -9,9 +11,9 @@ public class AcademicYearProvider(ISystemClockProvider clock) : IAcademicYearPro
     /// <inheritdoc/>.
     public DateOnly GetCurrentAcademicYearEndDate()
     {
-        var today = clock.UtcNow.Date;
+        var today = clock.Today;
 
-        if (today > new DateTime(today.Year, 7, 31))
+        if (today > new DateOnly(today.Year, 7, 31))
         {
             return new DateOnly(today.Year + 1, 7, 31);
         }

@@ -2,10 +2,11 @@
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Repositories.QaaQualification;
+using SFA.DAS.AODP.Testing.Testing;
 
 namespace SFA.DAS.AODP.Data.UnitTests.Repositories.Rollover;
 
-public class QaaRepositoryTests
+public class QaaRepositoryTests : UnitTest
 {
     private readonly ApplicationDbContext _dbContext = new(new DbContextOptionsBuilder<ApplicationDbContext>()
         .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -24,8 +25,8 @@ public class QaaRepositoryTests
             DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(6)),
             SectorSubjectArea.FromTiers("1", "1"));
 
-        await _dbContext.RegulatedQaaQualifications.AddAsync(qaaQualification);
-        await _dbContext.SaveChangesAsync();
+        await _dbContext.RegulatedQaaQualifications.AddAsync(qaaQualification, CurrentContext.CancellationToken);
+        await _dbContext.SaveChangesAsync(CurrentContext.CancellationToken);
 
         // Act
         var result = await sut.GetAllAsync(CancellationToken.None);

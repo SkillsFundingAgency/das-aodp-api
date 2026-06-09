@@ -1,15 +1,16 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoMoq;
+using Markdig.Extensions.Figures;
 using Moq;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
+using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Providers;
+using SFA.DAS.AODP.Data.Repositories.QaaQualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Infrastructure;
 using SFA.DAS.AODP.Models.Settings;
 using System.Text;
-using SFA.DAS.AODP.Data.Entities.QaaQualification;
-using SFA.DAS.AODP.Data.Providers;
-using SFA.DAS.AODP.Data.Repositories.QaaQualification;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 {
@@ -20,7 +21,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         private readonly Mock<IQaaQualificationRepository> _qaaRepo;
         private readonly Mock<IQualificationOutputFileLogRepository> _logRepo;
         private readonly Mock<IBlobStorageService> _blob;
-        private readonly Mock<IAcademicYearProvider> _academicYearProvider;
+        private readonly Mock<IQaaFundingApprovalEndDateCalculator> _fundingApprovalEndDateCalculator;
         private readonly OutputFileBlobStorageSettings _settings;
         private readonly GetQualificationOutputFileQueryHandler _handler;
 
@@ -49,7 +50,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             _qaaRepo = _fixture.Freeze<Mock<IQaaQualificationRepository>>();
             _blob = _fixture.Freeze<Mock<IBlobStorageService>>();
             _logRepo = _fixture.Freeze<Mock<IQualificationOutputFileLogRepository>>();
-            _academicYearProvider = _fixture.Freeze<Mock<IAcademicYearProvider>>();
+            _fundingApprovalEndDateCalculator = _fixture.Freeze<Mock<IQaaFundingApprovalEndDateCalculator>>();
 
             _settings = _fixture.Freeze<OutputFileBlobStorageSettings>();
             _settings.ContainerName = ContainerName;
@@ -291,6 +292,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         public async Task Then_Record_With_EndDate_After_PublicationDate_Is_Set_To_Approved()
         {
             // Arrange: future end date -> should be Approved
+            _fixture.Inject<DateOnly?>(null);
             var academicYearEndDate = new DateOnly(2026, 07, 31);
             var snapshotDate = new DateTime(2026, 01, 01, 12, 00, 00);
             var startDate = new DateOnly(2023, 09, 01);
@@ -308,7 +310,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 QualificationName = "title",
             };
 
-            _academicYearProvider.Setup(o => o.GetCurrentAcademicYearEndDate()).Returns(academicYearEndDate);
+            _fundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDate(lastDateForRegistration, It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Returns(academicYearEndDate);
             _qaaRepo.Setup(o => o.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([qaaQualification]);
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ReturnsAsync(new List<QualificationOutputFile> { future, qaaQualificationInOutputFile });
@@ -347,12 +349,13 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         public async Task Then_PublicationDate_Different_From_RunDate_Is_Handled_Correctly()
         {
             // Arrange
+            _fixture.Inject<DateOnly?>(null);
             var academicYearEndDate = new DateOnly(2026, 07, 31);
             var snapshotDate = new DateTime(2026, 01, 01, 12, 00, 00);
             var startDate = new DateOnly(2023, 09, 01);
             var lastDateForRegistration = new DateOnly(2026, 08, 1);
             var qaaQualification = RegulatedQaaQualification.Create(snapshotDate, "aim", "title", "awarding body", startDate, lastDateForRegistration, SectorSubjectArea.AccountingAndFinance);
-
+            
             var publicationDate = DateTime.UtcNow.AddDays(-7).Date;
             var request = new GetQualificationOutputFileQuery
             {
@@ -366,7 +369,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 Age1619_FundingApprovalEndDate = publicationDate.AddDays(1)
             };
 
-            _academicYearProvider.Setup(o => o.GetCurrentAcademicYearEndDate()).Returns(academicYearEndDate);
+            _fundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDate(lastDateForRegistration, It.IsAny<DateOnly>(), It.IsAny<DateOnly>())).Returns(academicYearEndDate);
             _qaaRepo.Setup(o => o.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([qaaQualification]);
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ReturnsAsync(new List<QualificationOutputFile> { qualification });

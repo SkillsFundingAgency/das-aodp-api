@@ -1,6 +1,6 @@
-﻿using SFA.DAS.AODP.Data.Providers;
+﻿using SFA.DAS.AODP.Data.Extensions;
+using SFA.DAS.AODP.Data.Providers;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Data.Entities.QaaQualification;
 
@@ -103,43 +103,86 @@ public partial class RegulatedQaaQualification
             QualificationTitle = qualificationTitle,
             AwardingBody = awardingBody,
             Level = "Level 3",
-            Type = "Access to HE",
+            Type = "Access to Higher Education",
             Status = "Approved",
             StartDate = startDateForRegistration,
             LastDateForRegistration = lastDateForRegistration,
-            SectorSubjectArea = sectorSubjectArea
+            SectorSubjectArea = sectorSubjectArea,
+            ContentHash = "test"
         };
     }
 
-    public RegulatedQaaQualification SetFundingApprovalEndDate(DateTime publicationDate, IAcademicYearProvider academicYearProvider)
+    public RegulatedQaaQualification SetFundingApprovalEndDate(DateTime publicationDate, IQaaFundingApprovalEndDateCalculator qaaFundingApprovalEndDateCalculator)
     {
-        //If the Last Day for Registration is after the next website publication date then the Funding Approval End Date should be between the Last Day for Registration and the End of the Academic Year
-        // 
-        // If the Last Day for Registration is before the next website publication date but after approval end date  on our current website then the Funding Approval End Date should be the Last Day for Registration
-        // 
-        // If the Last Day for Registration is before the current Funding Approval End Date on the website date then the Funding Approval End Date should be the same as before (i.e. no change to Funding Approval End Date)
-
-        var publicationDateOnly = DateOnly.FromDateTime(publicationDate);
-    
-        if (LastDateForRegistration > publicationDateOnly)
-        {
-            var dates = new List<DateOnly>
-            {
-                LastDateForRegistration,
-                academicYearProvider.GetCurrentAcademicYearEndDate()
-            };
-
-            LastFundingApprovalEndDate = dates.Min();
-        }
-        else if (LastDateForRegistration < publicationDateOnly)
-        {
-            if (LastDateForRegistration > LastFundingApprovalEndDate ||
-                LastFundingApprovalEndDate is null)
-            {
-                LastFundingApprovalEndDate = LastDateForRegistration;
-            }
-        }
-
+        LastFundingApprovalEndDate = qaaFundingApprovalEndDateCalculator.CalculateFundingApprovalEndDate(LastDateForRegistration, LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate));
+        
         return this;
     }
 }
+
+public interface IQaaFundingApprovalEndDateCalculator
+{
+    DateOnly? CalculateFundingApprovalEndDate(DateOnly lastDateForRegistration, DateOnly? currentFundingApprovalEndDate, DateOnly publicationDate);
+}
+
+public class QaaFundingApprovalEndDateCalculator(
+    ISystemClockProvider clockProvider,
+    IIlrSubmissionDeadlinesProvider ilrSubmissionDeadlinesProvider,
+    IAcademicYearProvider academicYearProvider) : IQaaFundingApprovalEndDateCalculator
+{
+    private readonly ISystemClockProvider _clockProvider = clockProvider;
+    private readonly IIlrSubmissionDeadlinesProvider _ilrSubmissionDeadlinesProvider = ilrSubmissionDeadlinesProvider;
+    private readonly IAcademicYearProvider _academicYearProvider = academicYearProvider;
+
+    public DateOnly? CalculateFundingApprovalEndDate(DateOnly lastDateForRegistration, DateOnly? currentFundingApprovalEndDate, DateOnly publicationDate)
+    {
+        var fundingApprovalEndDate = currentFundingApprovalEndDate;
+        if (lastDateForRegistration > publicationDate)
+        {
+            var currentAcademicYear = _academicYearProvider.GetCurrentAcademicYearEndDate();
+            var ilrFinalSubmissionDeadline = _ilrSubmissionDeadlinesProvider.GetFinalSubmissionDeadline();
+
+            if (_clockProvider.Today >= ilrFinalSubmissionDeadline.Date)
+            {
+                currentAcademicYear = currentAcademicYear.AddYears(1);
+            }
+
+            var dates = new List<DateOnly>
+            {
+                lastDateForRegistration,
+                currentAcademicYear
+            };
+
+            fundingApprovalEndDate = dates.Min();
+        }
+        else if (lastDateForRegistration < publicationDate)
+        {
+            if (lastDateForRegistration > currentFundingApprovalEndDate ||
+                currentFundingApprovalEndDate is null)
+            {
+                fundingApprovalEndDate = lastDateForRegistration;
+            }
+        }
+
+        return fundingApprovalEndDate;
+    }
+}
+
+public interface IIlrSubmissionDeadlinesProvider
+{
+    IlrSubmissionDeadline GetFinalSubmissionDeadline();
+}
+
+public class IlrSubmissionDeadlinesProvider(ISystemClockProvider clock) : IIlrSubmissionDeadlinesProvider
+{
+    public IlrSubmissionDeadline GetFinalSubmissionDeadline()
+    {
+        var today = clock.Today;
+        var startingDate = new DateTime(today.Year, 10, 1);
+        var r02DeadlineDate = startingDate.GetSpecificWorkingDateOfMonth(startingDate.Year, startingDate.Month, 3);
+
+        return new IlrSubmissionDeadline("R14", DateOnly.FromDateTime(r02DeadlineDate.AddDays(14).GetClosestDayOfWeek(DayOfWeek.Thursday)));
+    }
+}
+
+public sealed record IlrSubmissionDeadline(string Period, DateOnly Date);

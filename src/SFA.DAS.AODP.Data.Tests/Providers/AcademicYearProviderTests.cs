@@ -1,9 +1,11 @@
 ﻿using Moq;
 using SFA.DAS.AODP.Data.Providers;
+using SFA.DAS.AODP.Testing.Testing;
+using Shouldly;
 
 namespace SFA.DAS.AODP.Data.UnitTests.Providers;
 
-public class AcademicYearProviderTests
+public class AcademicYearProviderTests : UnitTest
 {
     [Fact]
     public void GetCurrentAcademicYearEndDate_CurrentDateIsBeforeThirtyFirstJuly_ReturnCurrentYearsAcademicEndDate()
@@ -13,13 +15,13 @@ public class AcademicYearProviderTests
         var sut = new AcademicYearProvider(mockSystemClock.Object);
 
         // Expectations
-        mockSystemClock.Setup(o => o.UtcNow).Returns(new DateTime(2025, 07, 1));
+        mockSystemClock.Setup(o => o.Today).Returns(new DateOnly(2025, 07, 1));
 
         // Act
         var result = sut.GetCurrentAcademicYearEndDate();
 
         // Assert
-        Assert.Equal(new DateOnly(2025, 07, 31), result);
+        result.ShouldBe(new DateOnly(2025, 07, 31));
     }
 
     [Fact]
@@ -30,12 +32,12 @@ public class AcademicYearProviderTests
         var sut = new AcademicYearProvider(mockSystemClock.Object);
 
         // Expectations
-        mockSystemClock.Setup(o => o.UtcNow).Returns(new DateTime(2025, 08, 1));
+        mockSystemClock.Setup(o => o.Today).Returns(new DateOnly(2025, 08, 1));
 
         // Act
         var result = sut.GetCurrentAcademicYearEndDate();
 
         // Assert
-        Assert.Equal(new DateOnly(2026, 07, 31), result);
+        result.ShouldBe(new DateOnly(2026, 07, 31));
     }
 }

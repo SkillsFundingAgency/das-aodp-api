@@ -1,10 +1,11 @@
 ﻿using Moq;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
-using SFA.DAS.AODP.Data.Providers;
+using SFA.DAS.AODP.Testing.Testing;
+using Shouldly;
 
 namespace SFA.DAS.AODP.Data.UnitTests.Entities;
 
-public class RegulatedQaaQualificationTests
+public class RegulatedQaaQualificationTests : UnitTest
 {
     private const string TestAimCode = "Z1234567";
     private const string TestQualificationTitle = "Access to Higher Education Diploma (Science)";
@@ -28,18 +29,18 @@ public class RegulatedQaaQualificationTests
             _testSectorSubjectArea);
 
         // Assert
-        Assert.Equal(_testSnapshot, qualification.DateOfDataSnapshot);
-        Assert.Equal(TestAimCode, qualification.AimCode);
-        Assert.Equal(TestQualificationTitle, qualification.QualificationTitle);
-        Assert.Equal(TestAwardingBody, qualification.AwardingBody);
-        Assert.Equal(_testStartDate, qualification.StartDate);
-        Assert.Equal(_testLastRegistrationDate, qualification.LastDateForRegistration);
-        Assert.Same(_testSectorSubjectArea, qualification.SectorSubjectArea);
-        Assert.Equal("Level 3", qualification.Level);
-        Assert.Equal("Access to HE", qualification.Type);
-        Assert.Equal("Approved", qualification.Status);
-        Assert.Null(qualification.LastFundingApprovalEndDate);
-        Assert.Equal(Guid.Empty, qualification.Id);
+        qualification.DateOfDataSnapshot.ShouldBe(_testSnapshot);
+        qualification.AimCode.ShouldBe(TestAimCode);
+        qualification.QualificationTitle.ShouldBe(TestQualificationTitle);
+        qualification.AwardingBody.ShouldBe(TestAwardingBody);
+        qualification.StartDate.ShouldBe(_testStartDate);
+        qualification.LastDateForRegistration.ShouldBe(_testLastRegistrationDate);
+        qualification.SectorSubjectArea.ShouldBe(_testSectorSubjectArea);
+        qualification.Level.ShouldBe("Level 3");
+        qualification.Type.ShouldBe("Access to Higher Education");
+        qualification.Status.ShouldBe("Approved");
+        qualification.LastFundingApprovalEndDate.ShouldBeNull();
+        qualification.Id.ShouldBe(Guid.Empty);
     }
 
     [Fact]
@@ -66,18 +67,18 @@ public class RegulatedQaaQualificationTests
             .ToList();
 
         // Assert
-        Assert.Equal(3, createdQualifications.Count);
-        Assert.Equal("Z1234567", createdQualifications[0].AimCode);
-        Assert.Equal("Diploma 1", createdQualifications[0].QualificationTitle);
-        Assert.Equal("Body 1", createdQualifications[0].AwardingBody);
+        createdQualifications.Count.ShouldBe(3);
+        createdQualifications[0].AimCode.ShouldBe("Z1234567");
+        createdQualifications[0].QualificationTitle.ShouldBe("Diploma 1");
+        createdQualifications[0].AwardingBody.ShouldBe("Body 1");
 
-        Assert.Equal("Z7654321", createdQualifications[1].AimCode);
-        Assert.Equal("Diploma 2", createdQualifications[1].QualificationTitle);
-        Assert.Equal("Body 2", createdQualifications[1].AwardingBody);
+        createdQualifications[1].AimCode.ShouldBe("Z7654321");
+        createdQualifications[1].QualificationTitle.ShouldBe("Diploma 2");
+        createdQualifications[1].AwardingBody.ShouldBe("Body 2");
 
-        Assert.Equal("Z1111111", createdQualifications[2].AimCode);
-        Assert.Equal("Diploma 3", createdQualifications[2].QualificationTitle);
-        Assert.Equal("Body 3", createdQualifications[2].AwardingBody);
+        createdQualifications[2].AimCode.ShouldBe("Z1111111");
+        createdQualifications[2].QualificationTitle.ShouldBe("Diploma 3");
+        createdQualifications[2].AwardingBody.ShouldBe("Body 3");
     }
 
     [Fact]
@@ -102,17 +103,16 @@ public class RegulatedQaaQualificationTests
             _testStartDate, _testLastRegistrationDate, _testSectorSubjectArea);
 
         // Assert
-        Assert.Equal(snapshot1, qualification1.DateOfDataSnapshot);
-        Assert.Equal(snapshot2, qualification2.DateOfDataSnapshot);
-        Assert.Equal(snapshot3, qualification3.DateOfDataSnapshot);
+        qualification1.DateOfDataSnapshot.ShouldBe(snapshot1);
+        qualification2.DateOfDataSnapshot.ShouldBe(snapshot2);
+        qualification3.DateOfDataSnapshot.ShouldBe(snapshot3);
     }
 
     [Fact]
     public void SetFundingApprovalEndDate_LastDateForRegistrationAfterPublicationDate_LastDateEarlierThanAcademicYearEnd_ShouldUseLastDateForRegistration()
     {
         // Arrange
-        var mockAcademicYearProvider = new Mock<IAcademicYearProvider>();
-        var academicYearEndDate = new DateOnly(2026, 07, 31);
+        var mockQaaFundingApprovalEndDateCalculator = new Mock<IQaaFundingApprovalEndDateCalculator>();
         var snapshot1 = new DateTime(2024, 02, 15);
         var publicationDate = new DateTime(2026, 03, 10);
         var lastDateForRegistration = new DateOnly(2026, 03, 30);
@@ -121,20 +121,20 @@ public class RegulatedQaaQualificationTests
             _testStartDate, lastDateForRegistration, _testSectorSubjectArea);
 
         // Expectations
-        mockAcademicYearProvider.Setup(o => o.GetCurrentAcademicYearEndDate()).Returns(academicYearEndDate);
+        mockQaaFundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDate(lastDateForRegistration, qualification1.LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate))).Returns(lastDateForRegistration);
 
         // Act
-        qualification1.SetFundingApprovalEndDate(publicationDate, mockAcademicYearProvider.Object);
+        qualification1.SetFundingApprovalEndDate(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object);
 
         // Assert
-        Assert.Equal(lastDateForRegistration, qualification1.LastFundingApprovalEndDate);
+        qualification1.LastFundingApprovalEndDate.ShouldBe(lastDateForRegistration);
     }
 
     [Fact]
     public void SetFundingApprovalEndDate_LastDateForRegistrationAfterPublicationDate_LastDateLaterThanAcademicYearEnd_ShouldUseAcademicYearEnd()
     {
         // Arrange
-        var mockAcademicYearProvider = new Mock<IAcademicYearProvider>();
+        var mockQaaFundingApprovalEndDateCalculator = new Mock<IQaaFundingApprovalEndDateCalculator>();
         var academicYearEndDate = new DateOnly(2026, 07, 31);
         var snapshot1 = new DateTime(2024, 02, 15);
         var publicationDate = new DateTime(2026, 03, 10);
@@ -145,21 +145,20 @@ public class RegulatedQaaQualificationTests
         qualification1.LastFundingApprovalEndDate = new DateOnly(2026, 03, 20);
 
         // Expectations
-        mockAcademicYearProvider.Setup(o => o.GetCurrentAcademicYearEndDate()).Returns(academicYearEndDate);
+        mockQaaFundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDate(lastDateForRegistration, qualification1.LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate))).Returns(academicYearEndDate);
 
         // Act
-        qualification1.SetFundingApprovalEndDate(publicationDate, mockAcademicYearProvider.Object);
+        qualification1.SetFundingApprovalEndDate(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object);
 
         // Assert
-        Assert.Equal(academicYearEndDate, qualification1.LastFundingApprovalEndDate);
+        qualification1.LastFundingApprovalEndDate.ShouldBe(academicYearEndDate);
     }
 
     [Fact]
     public void SetFundingApprovalEndDate_LastDateForRegistrationBeforePublicationDate_LastDateAfterCurrentApproval_UseLastDate()
     {
         // Arrange
-        var mockAcademicYearProvider = new Mock<IAcademicYearProvider>();
-        var academicYearEndDate = new DateOnly(2026, 07, 31);
+        var mockQaaFundingApprovalEndDateCalculator = new Mock<IQaaFundingApprovalEndDateCalculator>();
         var snapshot1 = new DateTime(2024, 02, 15);
         var publicationDate = new DateTime(2026, 04, 30);
         var lastDateForRegistration = new DateOnly(2026, 03, 30);
@@ -169,21 +168,20 @@ public class RegulatedQaaQualificationTests
         qualification1.LastFundingApprovalEndDate = new DateOnly(2026, 03, 20);
 
         // Expectations
-        mockAcademicYearProvider.Setup(o => o.GetCurrentAcademicYearEndDate()).Returns(academicYearEndDate);
+        mockQaaFundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDate(lastDateForRegistration, qualification1.LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate))).Returns(lastDateForRegistration);
 
         // Act
-        qualification1.SetFundingApprovalEndDate(publicationDate, mockAcademicYearProvider.Object);
+        qualification1.SetFundingApprovalEndDate(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object);
 
         // Assert
-        Assert.Equal(lastDateForRegistration, qualification1.LastFundingApprovalEndDate);
+        qualification1.LastFundingApprovalEndDate.ShouldBe(lastDateForRegistration);
     }
 
     [Fact]
     public void SetFundingApprovalEndDate_LastDateForRegistrationBeforePublicationDate_LastDateBeforeCurrentApproval_UseExistingValue()
     {
         // Arrange
-        var mockAcademicYearProvider = new Mock<IAcademicYearProvider>();
-        var academicYearEndDate = new DateOnly(2026, 07, 31);
+        var mockQaaFundingApprovalEndDateCalculator = new Mock<IQaaFundingApprovalEndDateCalculator>();
         var snapshot1 = new DateTime(2024, 02, 15);
         var publicationDate = new DateTime(2026, 04, 30);
         var lastDateForRegistration = new DateOnly(2026, 03, 30);
@@ -193,21 +191,20 @@ public class RegulatedQaaQualificationTests
         qualification1.LastFundingApprovalEndDate = new DateOnly(2026, 04, 20);
 
         // Expectations
-        mockAcademicYearProvider.Setup(o => o.GetCurrentAcademicYearEndDate()).Returns(academicYearEndDate);
+        mockQaaFundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDate(lastDateForRegistration, qualification1.LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate))).Returns(new DateOnly(2026, 04, 20));
 
         // Act
-        qualification1.SetFundingApprovalEndDate(publicationDate, mockAcademicYearProvider.Object);
+        qualification1.SetFundingApprovalEndDate(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object);
 
         // Assert
-        Assert.Equal(new DateOnly(2026, 04, 20), qualification1.LastFundingApprovalEndDate);
+        qualification1.LastFundingApprovalEndDate.ShouldBe(new DateOnly(2026, 04, 20));
     }
 
     [Fact]
     public void SetFundingApprovalEndDate_LastDateForRegistrationBeforePublicationDate_CurrentApprovalNull_UseLastDate()
     {
         // Arrange
-        var mockAcademicYearProvider = new Mock<IAcademicYearProvider>();
-        var academicYearEndDate = new DateOnly(2026, 07, 31);
+        var mockQaaFundingApprovalEndDateCalculator = new Mock<IQaaFundingApprovalEndDateCalculator>();
         var snapshot1 = new DateTime(2024, 02, 15);
         var publicationDate = new DateTime(2026, 04, 30);
         var lastDateForRegistration = new DateOnly(2026, 03, 30);
@@ -217,12 +214,12 @@ public class RegulatedQaaQualificationTests
         qualification1.LastFundingApprovalEndDate = null;
 
         // Expectations
-        mockAcademicYearProvider.Setup(o => o.GetCurrentAcademicYearEndDate()).Returns(academicYearEndDate);
+        mockQaaFundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDate(lastDateForRegistration, qualification1.LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate))).Returns(lastDateForRegistration);
 
         // Act
-        qualification1.SetFundingApprovalEndDate(publicationDate, mockAcademicYearProvider.Object);
+        qualification1.SetFundingApprovalEndDate(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object);
 
         // Assert
-        Assert.Equal(new DateOnly(2026, 03, 30), qualification1.LastFundingApprovalEndDate);
+        qualification1.LastFundingApprovalEndDate.ShouldBe(new DateOnly(2026, 03, 30));
     }
 }
