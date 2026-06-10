@@ -77,7 +77,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
                 .Where(q => q.Qan == qualificationNumber)
                 .SelectMany(q => q.QualificationVersions)
                 .OrderByDescending(v => v.Version)
-                .Select(v => v.OperationalStartDate)
+                .Select(v => (DateTime?)v.OperationalStartDate) 
                 .FirstOrDefaultAsync();
         }
 
