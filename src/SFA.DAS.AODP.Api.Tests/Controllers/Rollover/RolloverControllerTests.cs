@@ -243,22 +243,24 @@ public class RolloverControllerTests
             }
         };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetRolloverCandidatesForExportQuery>(), It.IsAny<CancellationToken>()))
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetRolloverCandidatesForExportQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(response);
 
-        var result = await _controller.GetRolloverCandidatesForExport(workflowRunId, TestContext.Current.CancellationToken);
+        var result = await _controller.GetRolloverCandidatesForExport(
+            workflowRunId,
+            TestContext.Current.CancellationToken);
 
         var ok = Assert.IsType<OkObjectResult>(result);
-        var value = Assert.IsType<BaseMediatrResponse<GetRolloverCandidatesForExportQueryResponse>>(ok.Value);
+        var value = Assert.IsType<GetRolloverCandidatesForExportQueryResponse>(ok.Value);
 
-        Assert.True(value.Success);
-        Assert.Equal("export.csv", value.Value.FileName);
-        Assert.Equal("text/csv", value.Value.ContentType);
-        Assert.Equal(new byte[] { 1, 2, 3 }, value.Value.FileContent);
+        Assert.Equal("export.csv", value.FileName);
+        Assert.Equal("text/csv", value.ContentType);
+        Assert.Equal(new byte[] { 1, 2, 3 }, value.FileContent);
     }
 
     [Fact]
-    public async Task GetRolloverCandidatesForExport_ReturnsOk_WhenMediatorReturnsFailure()
+    public async Task GetRolloverCandidatesForExport_ReturnsInternalServerError_WhenMediatorReturnsFailure()
     {
         var workflowRunId = Guid.NewGuid();
 
@@ -268,16 +270,16 @@ public class RolloverControllerTests
             ErrorMessage = "Something went wrong"
         };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<GetRolloverCandidatesForExportQuery>(), It.IsAny<CancellationToken>()))
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<GetRolloverCandidatesForExportQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(response);
 
-        var result = await _controller.GetRolloverCandidatesForExport(workflowRunId, TestContext.Current.CancellationToken);
+        var result = await _controller.GetRolloverCandidatesForExport(
+            workflowRunId,
+            TestContext.Current.CancellationToken);
 
-        var ok = Assert.IsType<OkObjectResult>(result);
-        var value = Assert.IsType<BaseMediatrResponse<GetRolloverCandidatesForExportQueryResponse>>(ok.Value);
-
-        Assert.False(value.Success);
-        Assert.Equal("Something went wrong", value.ErrorMessage);
+        var statusResult = Assert.IsType<StatusCodeResult>(result);
+        Assert.Equal(500, statusResult.StatusCode);
     }
 
     [Fact]

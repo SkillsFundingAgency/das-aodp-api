@@ -71,8 +71,7 @@ public class RolloverController : BaseController
     public async Task<IActionResult> GetRolloverCandidatesForExport(Guid rolloverWorkflowRunId, CancellationToken cancellationToken)
     {
         var query = new GetRolloverCandidatesForExportQuery { RolloverWorkflowRunId = rolloverWorkflowRunId};
-        var result = await _mediator.Send(query, cancellationToken);
-        return Ok(result);
+        return await SendRequestAsync(query);
     }
 
     [HttpPost("rolloverextensionvalidation")]

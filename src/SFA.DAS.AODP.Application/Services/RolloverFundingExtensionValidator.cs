@@ -23,7 +23,6 @@ namespace SFA.DAS.AODP.Application.Services
                 ValidateRolloverCandidateExists,
                 ValidateRolloverWorkflowCandidateExists,
                 ValidateStatus,
-                ValidateEndDateInFuture,
                 ValidateExclusionReason
             };
         }
@@ -122,20 +121,6 @@ namespace SFA.DAS.AODP.Application.Services
                 {
                     Field = "RolloverStatus",
                     Message = $"This candidate has an invalid RollOver Status ({RolloverStatuses.ToList()})"
-                });
-            }
-        }
-
-        private void ValidateEndDateInFuture(
-            CandidateValidationResult result,
-            FundingExtensionCandidateValidationContext ctx)
-        {
-            if (result.ProposedFundingEndDate <= DateTime.UtcNow.Date)
-            {
-                result.Errors.Add(new ValidationError
-                {
-                    Field = "ProposedFundingEndDate",
-                    Message = "This candidate has an invalid Proposed Funding End Date (End Date must be in the future)"
                 });
             }
         }

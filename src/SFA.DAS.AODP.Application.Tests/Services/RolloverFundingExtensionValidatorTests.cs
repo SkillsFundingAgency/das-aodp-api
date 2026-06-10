@@ -86,19 +86,21 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
                 e => e.Field == "RolloverStatus");
         }
 
-        [Fact]
-        public void Validate_ShouldFail_WhenEndDateNotInFuture()
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(0)]
+        [InlineData(1)]
+        public void Validate_ShouldNotFail_DueToEndDate(int dayOffset)
         {
-            var candidate = CandidateRow(endDate: DateTime.UtcNow.AddDays(-1));
+            var candidate = CandidateRow(endDate: DateTime.UtcNow.Date.AddDays(dayOffset));
             var ctx = ValidationContext(
                 candidates: [new CandidateKey("12345", "LegalEntitlementEnglishandMaths")],
                 workflow: [new CandidateKey("12345", "LegalEntitlementEnglishandMaths")]);
 
             var result = _sut.Validate([candidate], ctx, CancellationToken.None);
 
-            Assert.False(result.IsValid);
-            Assert.Contains(result.Candidates[0].Errors,
-                e => e.Field == "ProposedFundingEndDate");
+            Assert.True(result.IsValid);
+            Assert.Empty(result.Candidates[0].Errors);
         }
 
 
