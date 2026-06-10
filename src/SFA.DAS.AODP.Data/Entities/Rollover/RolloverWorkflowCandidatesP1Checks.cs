@@ -13,11 +13,14 @@ public class RolloverWorkflowCandidatesP1Checks
 
     public string? FundingStream { get; set; }
     public int? RolloverRound { get; set; }
-    public DateTime? ThresholdDate { get; set; }
+    public DateTime? FundingEndDateThreshold { get; set; }
+    public DateTime? OperationalEndDateThreshold { get; set; }
+    public DateTime? MaximumApprovalEndDate { get; set; }
     public DateTime? LatestFundingApprovalEndDate { get; set; }
     public DateTime? OperationalStartDate { get; set; }
     public DateTime? OperationalEndDate { get; set; }
     public bool OfferedInEngland { get; set; }
+    public bool IntentionToSeekFundingInEngland { get; set; }
     public int? Glh { get; set; }
     public int? Tqt { get; set; }
     public bool IsOnDefundingList { get; set; }
