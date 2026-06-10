@@ -6,6 +6,7 @@ using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.FundingOffer;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
+using SFA.DAS.AODP.Shared.UnitTests.Helpers;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 {

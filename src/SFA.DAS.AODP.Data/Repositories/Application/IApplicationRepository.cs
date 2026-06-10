@@ -1,4 +1,5 @@
-﻿using SFA.DAS.AODP.Data.Entities.FormBuilder;
+﻿using SFA.DAS.AODP.Data.Entities.Application;
+using SFA.DAS.AODP.Data.Entities.FormBuilder;
 
 namespace SFA.DAS.AODP.Data.Repositories.Application
 {
@@ -14,5 +15,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
         Task<Entities.Application.Application> GetWithReviewFeedbacksByIdAsync(Guid applicationId);
         Task<List<Data.Entities.Application.Application>> GetByQan(string qan);
         Task<Entities.Application.Application> GetByReviewIdAsync(Guid applicationReviewId);
+        Task<ApplicationExportMetadata> GetApplicationExportMetadataAsync(Guid applicationId);
     }
 }

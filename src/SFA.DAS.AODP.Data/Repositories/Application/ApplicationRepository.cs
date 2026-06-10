@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
+using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Exceptions;
 
@@ -92,6 +93,24 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
                 .FirstOrDefaultAsync();
 
             return application ?? throw new RecordNotFoundException(applicationReviewId);
+        }
+
+        public async Task<ApplicationExportMetadata> GetApplicationExportMetadataAsync(Guid applicationId)
+        {
+            var metadata = await _context.Applications
+                .Where(a => a.Id == applicationId)
+                .Select(a => new ApplicationExportMetadata
+                {
+                    ApplicationId = a.Id,
+                    OrganisationName = a.AwardingOrganisationName ?? string.Empty,
+                    QAN = a.QualificationNumber ?? string.Empty,
+                    QualificationTitle = a.Name,
+                    SubmissionId = a.ReferenceId,
+                    FormName = a.FormVersion.Title
+                })
+                .FirstOrDefaultAsync();
+
+            return metadata ?? throw new RecordNotFoundException(applicationId);
         }
     }
 }
