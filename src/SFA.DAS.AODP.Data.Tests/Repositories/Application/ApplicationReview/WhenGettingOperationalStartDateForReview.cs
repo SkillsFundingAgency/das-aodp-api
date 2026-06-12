@@ -36,7 +36,7 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories.Application.ApplicationReview
             _context.SetupGet(c => c.ApplicationReviews).ReturnsDbSet(reviews);
 
             // Act
-            var result = await _sut.GetOperationalStartDateForReview(reviewId);
+            var result = await _sut.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Null(result);
@@ -65,7 +65,7 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories.Application.ApplicationReview
                 .ReturnsDbSet(new List<Qualification>());
 
             // Act
-            var result = await _sut.GetOperationalStartDateForReview(reviewId);
+            var result = await _sut.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Null(result);
@@ -111,7 +111,7 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories.Application.ApplicationReview
             _context.SetupGet(c => c.Qualification).ReturnsDbSet(qualifications);
 
             // Act
-            var result = await _sut.GetOperationalStartDateForReview(reviewId);
+            var result = await _sut.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Equal(expectedDate, result);
@@ -161,7 +161,7 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories.Application.ApplicationReview
             _context.SetupGet(c => c.Qualification).ReturnsDbSet(qualifications);
 
             // Act
-            var result = await _sut.GetOperationalStartDateForReview(reviewId);
+            var result = await _sut.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Equal(expectedDate, result);

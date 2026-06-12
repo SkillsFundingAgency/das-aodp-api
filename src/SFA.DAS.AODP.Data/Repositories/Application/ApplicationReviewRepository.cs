@@ -63,12 +63,12 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
 
         }
 
-        public async Task<DateTime?> GetOperationalStartDateForReview(Guid reviewId)
+        public async Task<DateTime?> GetOperationalStartDateForReviewAsync(Guid reviewId, CancellationToken cancellationToken   )
         {
             var qualificationNumber = await _context.ApplicationReviews
                 .Where(ar => ar.Id == reviewId)
                 .Select(ar => ar.Application.QualificationNumber)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (qualificationNumber == null)
                 return null;
@@ -78,7 +78,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
                 .SelectMany(q => q.QualificationVersions)
                 .OrderByDescending(v => v.Version)
                 .Select(v => (DateTime?)v.OperationalStartDate) 
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
     }

@@ -38,7 +38,7 @@ public class SaveQfauFundingReviewOffersCommandHandlerTests
             .ReturnsAsync([funding]);
 
         _applicationReviewRepository
-            .Setup(x => x.GetOperationalStartDateForReview(reviewId))
+            .Setup(x => x.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken))
             .ReturnsAsync((DateTime?)null);
 
         await _handler.Handle(new SaveQfauFundingReviewOffersCommand
@@ -63,7 +63,7 @@ public class SaveQfauFundingReviewOffersCommandHandlerTests
             .ReturnsAsync(new List<ApplicationReviewFunding>());
 
         _applicationReviewRepository
-            .Setup(x => x.GetOperationalStartDateForReview(reviewId))
+            .Setup(x => x.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken))
             .ReturnsAsync((DateTime?)null);
 
         await _handler.Handle(new SaveQfauFundingReviewOffersCommand
@@ -98,7 +98,7 @@ public class SaveQfauFundingReviewOffersCommandHandlerTests
             .ReturnsAsync([existingFunding]);
 
         _applicationReviewRepository
-            .Setup(x => x.GetOperationalStartDateForReview(reviewId))
+            .Setup(x => x.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken))
             .ReturnsAsync((DateTime?)null);
 
         await _handler.Handle(new SaveQfauFundingReviewOffersCommand
@@ -122,7 +122,7 @@ public class SaveQfauFundingReviewOffersCommandHandlerTests
             .ThrowsAsync(new Exception());
 
         _applicationReviewRepository
-            .Setup(x => x.GetOperationalStartDateForReview(reviewId))
+            .Setup(x => x.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken))
             .ReturnsAsync((DateTime?)null);
 
         var response = await _handler.Handle(new SaveQfauFundingReviewOffersCommand
@@ -146,7 +146,7 @@ public class SaveQfauFundingReviewOffersCommandHandlerTests
             .ReturnsAsync(new List<ApplicationReviewFunding>());
 
         _applicationReviewRepository
-            .Setup(x => x.GetOperationalStartDateForReview(reviewId))
+            .Setup(x => x.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken))
             .ReturnsAsync((DateTime?)null);
 
         await _handler.Handle(new SaveQfauFundingReviewOffersCommand
@@ -176,7 +176,7 @@ public class SaveQfauFundingReviewOffersCommandHandlerTests
             .ReturnsAsync(new List<ApplicationReviewFunding>());
 
         _applicationReviewRepository
-            .Setup(x => x.GetOperationalStartDateForReview(reviewId))
+            .Setup(x => x.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken))
             .ReturnsAsync(operationalDate);
 
         await _handler.Handle(new SaveQfauFundingReviewOffersCommand
@@ -212,7 +212,7 @@ public class SaveQfauFundingReviewOffersCommandHandlerTests
             .ReturnsAsync(new List<ApplicationReviewFunding> { existingFunding });
 
         _applicationReviewRepository
-            .Setup(x => x.GetOperationalStartDateForReview(reviewId))
+            .Setup(x => x.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken))
             .ReturnsAsync((DateTime?)null);
 
         await _handler.Handle(new SaveQfauFundingReviewOffersCommand

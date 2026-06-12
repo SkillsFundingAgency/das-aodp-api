@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using Lucene.Net.Index;
+using MediatR;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Repositories.Application;
 
@@ -29,7 +30,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                 var fundedOffers = await _fundingRepository.GetByReviewIdAsync(request.ApplicationReviewId);
 
                 var qualificationOperationalStartDate =
-                    await _applicationReviewRepository.GetOperationalStartDateForReview(request.ApplicationReviewId);
+                    await _applicationReviewRepository.GetOperationalStartDateForReviewAsync(request.ApplicationReviewId, cancellationToken);
 
                 DateOnly? startDate = qualificationOperationalStartDate.HasValue
                     ? DateOnly.FromDateTime(qualificationOperationalStartDate.Value)
