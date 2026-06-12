@@ -1,6 +1,4 @@
 ﻿using SFA.DAS.AODP.Application.Constants;
-using System;
-using System.Collections.Generic;
 namespace SFA.DAS.AODP.Application.UnitTests.Constants
 {
     public class RolloverStatusesTests

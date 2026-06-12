@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using SFA.DAS.AODP.Application.Services;
+using SFA.DAS.AODP.Application.Services.Export;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
 
 namespace SFA.DAS.AODP.Application.Queries.Rollover
@@ -7,10 +7,10 @@ namespace SFA.DAS.AODP.Application.Queries.Rollover
     public class GetRolloverCandidatesForExportQueryHandler : IRequestHandler<GetRolloverCandidatesForExportQuery, BaseMediatrResponse<GetRolloverCandidatesForExportQueryResponse>>
     {
         private readonly IRolloverRepository _repository;
-        private readonly IRolloverWorkflowCandidatesCsvBuilder _csvBuilder;
+        private readonly IFundingExtensionCandidatesCsvBuilder _csvBuilder;
 
 
-        public GetRolloverCandidatesForExportQueryHandler(IRolloverRepository repository, IRolloverWorkflowCandidatesCsvBuilder csvBuilder)
+        public GetRolloverCandidatesForExportQueryHandler(IRolloverRepository repository, IFundingExtensionCandidatesCsvBuilder csvBuilder)
         {
             _repository = repository;
             _csvBuilder = csvBuilder;

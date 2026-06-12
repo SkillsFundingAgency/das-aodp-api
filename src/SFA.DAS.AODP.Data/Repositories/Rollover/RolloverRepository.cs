@@ -123,7 +123,7 @@ public class RolloverRepository : IRolloverRepository
         return _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<RolloverWorkflowCandidatesExportRow>> GetRolloverWorkflowCandidatesByRunId(
+    public async Task<IReadOnlyList<FundingExtensionCandidateDto>> GetRolloverWorkflowCandidatesByRunId(
         Guid workflowRunId,
         CancellationToken cancellationToken)
     {
@@ -131,7 +131,7 @@ public class RolloverRepository : IRolloverRepository
             .AsNoTracking()
             .Where(rwc => rwc.RolloverWorkflowRunId == workflowRunId
                        && rwc.IncludedInP1Export)
-            .Select(rwc => new RolloverWorkflowCandidatesExportRow
+            .Select(rwc => new FundingExtensionCandidateDto
             {
                 QAN = rwc.RolloverCandidates.QualificationVersion.Qualification.Qan,
                 QualificationTitle = rwc.RolloverCandidates.QualificationVersion.Qualification.QualificationName ?? string.Empty,

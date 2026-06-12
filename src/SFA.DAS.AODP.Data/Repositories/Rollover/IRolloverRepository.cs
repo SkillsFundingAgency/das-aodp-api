@@ -24,7 +24,7 @@ public interface IRolloverRepository
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
 
-    Task<IReadOnlyList<RolloverWorkflowCandidatesExportRow>> GetRolloverWorkflowCandidatesByRunId(Guid workflowRunId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<FundingExtensionCandidateDto>> GetRolloverWorkflowCandidatesByRunId(Guid workflowRunId, CancellationToken cancellationToken);
 
     Task<FundingExtensionCandidateValidationContext> GetFundingExtensionValidationContextAsync(
         HashSet<CandidateKey> incomingCandidates,

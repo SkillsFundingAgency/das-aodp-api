@@ -1,8 +1,7 @@
 ﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Application.Exceptions;
-using SFA.DAS.AODP.Application.Services;
-using SFA.DAS.AODP.Data.Context;
+using SFA.DAS.AODP.Application.Services.Export;
+using SFA.DAS.AODP.Application.Services.Validation;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
 using SFA.DAS.AODP.Models.Rollover;
@@ -14,11 +13,13 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
     {
         private readonly IRolloverRepository _rolloverRepository;
         private readonly IRolloverFundingExtensionValidator _rolloverFundingExtensionValidator;
+        private readonly IFundingExtensionCandidatesCsvBuilder _rolloverWorkflowCandidatesCsvBuilder;
 
-        public ValidateFundingExtensionCandidatesCommandHandler(IRolloverRepository rolloverRepository, IRolloverFundingExtensionValidator rolloverFundingExtensionValidator)
+        public ValidateFundingExtensionCandidatesCommandHandler(IRolloverRepository rolloverRepository, IRolloverFundingExtensionValidator rolloverFundingExtensionValidator, IFundingExtensionCandidatesCsvBuilder rolloverWorkflowCandidatesCsvBuilder)
         {
             _rolloverRepository = rolloverRepository;
             _rolloverFundingExtensionValidator = rolloverFundingExtensionValidator;
+            _rolloverWorkflowCandidatesCsvBuilder = rolloverWorkflowCandidatesCsvBuilder;
         }
 
         public async Task<BaseMediatrResponse<ValidateFundingExtensionCandidatesCommandResponse>> Handle(ValidateFundingExtensionCandidatesCommand request, CancellationToken cancellationToken)
@@ -35,7 +36,30 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
 
                 var validationResult = _rolloverFundingExtensionValidator.Validate(request.FundingExtensionCandidates, validationContext, cancellationToken);
 
-                response.Value = validationResult;
+                byte[]? csvBytes = null;
+
+                if (!validationResult.IsValid)
+                {
+                    var exportRows = validationResult.Candidates
+                        .Select(c => FundingExtensionCandidateExportMapper.Map(c.CandidateDetails))
+                        .ToList();
+
+                    csvBytes = _rolloverWorkflowCandidatesCsvBuilder.BuildWithValidationErrors(
+                        exportRows,
+                        validationResult.Candidates);
+                }
+
+
+                response.Value = new ValidateFundingExtensionCandidatesCommandResponse
+                {
+                    IsValid = validationResult.IsValid,
+                    TotalCandidates = validationResult.TotalCandidates,
+                    FailedCandidateCount = validationResult.FailedCandidateCount,
+                    FailureSummary = validationResult.FailureSummary,
+                    ValidatedCandidateFile = csvBytes
+                };
+
+
                 response.Success = true;
             }
             catch (RecordLockedException)

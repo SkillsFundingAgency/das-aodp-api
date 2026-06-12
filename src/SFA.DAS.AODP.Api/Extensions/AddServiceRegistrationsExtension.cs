@@ -8,6 +8,8 @@ using SFA.DAS.AODP.Infrastructure.Services;
 using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
 using SFA.DAS.AODP.Models.Settings;
 using System.Diagnostics.CodeAnalysis;
+using SFA.DAS.AODP.Application.Services.Export;
+using SFA.DAS.AODP.Application.Services.Validation;
 
 namespace SFA.DAS.AODP.Api.Extensions;
 
@@ -50,8 +52,8 @@ public static class AddServiceRegistrationsExtension
         });
         services.AddScoped<IQanValidationService, QanValidationService>();
         services.AddScoped<IQualificationsApi, QualificationsApi>();
-        services.AddScoped<IRolloverWorkflowCandidatesCsvBuilder, RolloverWorkflowCandidatesCsvBuilder>();
-        services.AddScoped<IRolloverFundingExtensionValidator, RolloverFundingExtensionValidator>();
+        services.AddScoped<IFundingExtensionCandidatesCsvBuilder, FundingExtensionCandidatesCsvBuilder>();
+        services.AddScoped<IRolloverFundingExtensionValidator, FundingExtensionValidator>();
 
         return services;
     }

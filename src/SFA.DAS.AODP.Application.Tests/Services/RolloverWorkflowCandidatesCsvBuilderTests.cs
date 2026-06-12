@@ -1,23 +1,24 @@
-﻿using SFA.DAS.AODP.Application.Services;
+﻿using SFA.DAS.AODP.Application.Services.Export;
 using SFA.DAS.AODP.Data.Entities.Rollover;
+using SFA.DAS.AODP.Models.Rollover;
 using System.Text;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Services
 {
     public class RolloverWorkflowCandidatesCsvBuilderTests
     {
-        private readonly RolloverWorkflowCandidatesCsvBuilder _sut;
+        private readonly FundingExtensionCandidatesCsvBuilder _sut;
 
         public RolloverWorkflowCandidatesCsvBuilderTests()
         {
-            _sut = new RolloverWorkflowCandidatesCsvBuilder();
+            _sut = new FundingExtensionCandidatesCsvBuilder();
         }
 
         [Fact]
         public void Build_ShouldIncludeHeaders_AndBasicRowContent()
         {
             // Arrange
-            var row = new RolloverWorkflowCandidatesExportRow
+            var row = new FundingExtensionCandidateDto
             {
                 QAN = "12345",
                 QualificationTitle = "Test Qualification",
@@ -53,7 +54,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
             string expectedEscapedOutput)
         {
             // Arrange
-            var row = new RolloverWorkflowCandidatesExportRow
+            var row = new FundingExtensionCandidateDto
             {
                 QAN = "111",
                 QualificationTitle = weirdValue,
@@ -72,7 +73,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
         {
             // Act
             var csv = Encoding.UTF8.GetString(
-                _sut.Build(Enumerable.Empty<RolloverWorkflowCandidatesExportRow>()));
+                _sut.Build(Enumerable.Empty<FundingExtensionCandidateDto>()));
 
             // Assert
             Assert.Contains("QAN,QualificationTitle", csv);

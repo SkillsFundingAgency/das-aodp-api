@@ -2,21 +2,21 @@
 using SFA.DAS.AODP.Application.Constants;
 using SFA.DAS.AODP.Models.Rollover;
 
-namespace SFA.DAS.AODP.Application.Services
+namespace SFA.DAS.AODP.Application.Services.Validation
 {
     public interface IRolloverFundingExtensionValidator
     {
-        ValidateFundingExtensionCandidatesCommandResponse Validate(
+        FundingExtensionValidationResult Validate(
             List<FundingExtensionCandidate> fundingExtensionCandidates,
             FundingExtensionCandidateValidationContext fundingExtensionCandidateValidationContext,
             CancellationToken cancellationToken);
     }
 
-    public class RolloverFundingExtensionValidator : IRolloverFundingExtensionValidator
+    public class FundingExtensionValidator : IRolloverFundingExtensionValidator
     {
         private readonly List<Action<CandidateValidationResult, FundingExtensionCandidateValidationContext>> _rules;
 
-        public RolloverFundingExtensionValidator()
+        public FundingExtensionValidator()
         {
             _rules = new()
             {
@@ -27,12 +27,12 @@ namespace SFA.DAS.AODP.Application.Services
             };
         }
 
-        public ValidateFundingExtensionCandidatesCommandResponse Validate(
+        public FundingExtensionValidationResult Validate(
             List<FundingExtensionCandidate> fundingExtensionCandidates,
             FundingExtensionCandidateValidationContext fundingExtensionCandidateValidationContext,
             CancellationToken cancellationToken)
         {
-            var response = new ValidateFundingExtensionCandidatesCommandResponse
+            var response = new FundingExtensionValidationResult
             {
                 TotalCandidates = fundingExtensionCandidates.Count
             };
@@ -41,12 +41,7 @@ namespace SFA.DAS.AODP.Application.Services
             {
                 var result = new CandidateValidationResult
                 {
-                    Qan = row.Qan,
-                    FundingStreamName = row.FundingStreamName,
-                    RowNumber = row.RowNumber,
-                    RolloverStatus = row.RolloverStatus,
-                    ExclusionReason = row.ExclusionReason,
-                    ProposedFundingEndDate = row.ProposedFundingEndDate
+                    CandidateDetails = row
                 };
 
                 foreach (var rule in _rules)
@@ -54,7 +49,6 @@ namespace SFA.DAS.AODP.Application.Services
                     rule(result, fundingExtensionCandidateValidationContext);
                 }
 
-                result.IsValid = result.Errors.Count == 0;
                 response.Candidates.Add(result);
             }
 
@@ -83,11 +77,11 @@ namespace SFA.DAS.AODP.Application.Services
             CandidateValidationResult result,
             FundingExtensionCandidateValidationContext ctx)
         {
-            var key = new CandidateKey(result.Qan, result.FundingStreamName);
+            var key = new CandidateKey(result.CandidateDetails.Qan, result.CandidateDetails.FundingStreamName);
 
             if (!ctx.CandidatesInDb.Contains(key))
             {
-                result.Errors.Add(new ValidationError
+                result.Errors.Add(new ValidationFailure
                 {
                     Field = "QAN",
                     Message = "This candidate is no longer viable for RollOver"
@@ -99,14 +93,14 @@ namespace SFA.DAS.AODP.Application.Services
             CandidateValidationResult result,
             FundingExtensionCandidateValidationContext ctx)
         {
-            var key = new CandidateKey(result.Qan, result.FundingStreamName);
+            var key = new CandidateKey(result.CandidateDetails.Qan, result.CandidateDetails.FundingStreamName);
 
             if (!ctx.WorkflowCandidatesInDb.Contains(key))
             {
-                result.Errors.Add(new ValidationError
+                result.Errors.Add(new ValidationFailure
                 {
                     Field = "QAN",
-                    Message = "Candidate was not in the original scope for Rollover"
+                    Message = "This candidate was not in the original scope for Rollover"
                 });
             }
         }
@@ -115,9 +109,9 @@ namespace SFA.DAS.AODP.Application.Services
             CandidateValidationResult result,
             FundingExtensionCandidateValidationContext ctx)
         {
-            if (!RolloverStatuses.All.Contains(result.RolloverStatus))
+            if (!RolloverStatuses.All.Contains(result.CandidateDetails.RollOverStatus))
             {
-                result.Errors.Add(new ValidationError
+                result.Errors.Add(new ValidationFailure
                 {
                     Field = "RolloverStatus",
                     Message = $"This candidate has an invalid RollOver Status ({RolloverStatuses.ToList()})"
@@ -129,10 +123,10 @@ namespace SFA.DAS.AODP.Application.Services
             CandidateValidationResult result,
             FundingExtensionCandidateValidationContext ctx)
         {
-            if (result.RolloverStatus == "To Exclude" &&
-                string.IsNullOrWhiteSpace(result.ExclusionReason))
+            if (result.CandidateDetails.RollOverStatus == "To Exclude" &&
+                string.IsNullOrWhiteSpace(result.CandidateDetails.ExclusionReason))
             {
-                result.Errors.Add(new ValidationError
+                result.Errors.Add(new ValidationFailure
                 {
                     Field = "ExclusionReason",
                     Message = "The candidate is missing an Exclusion Reason"

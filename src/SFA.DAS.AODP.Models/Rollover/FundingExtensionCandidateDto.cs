@@ -1,10 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace SFA.DAS.AODP.Data.Entities.Rollover
+namespace SFA.DAS.AODP.Models.Rollover
 {
     [ExcludeFromCodeCoverage]
-    public class RolloverWorkflowCandidatesExportRow
+    public class FundingExtensionCandidateDto
     {
+        public int RowNumber { get; set; }
         public string QAN { get; set; } = string.Empty;
         public string QualificationTitle { get; set; } = string.Empty;
         public string AwardingOrganisation { get; set; } = string.Empty;

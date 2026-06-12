@@ -2,10 +2,10 @@
 using AutoFixture.AutoMoq;
 using Moq;
 using SFA.DAS.AODP.Application.Queries.Rollover;
-using SFA.DAS.AODP.Application.Services;
+using SFA.DAS.AODP.Application.Services.Export;
 using SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications;
-using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
+using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
 {
@@ -13,7 +13,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
     {
         private readonly IFixture _fixture;
         private readonly Mock<IRolloverRepository> _repositoryMock;
-        private readonly Mock<IRolloverWorkflowCandidatesCsvBuilder> _csvBuilderMock;
+        private readonly Mock<IFundingExtensionCandidatesCsvBuilder> _csvBuilderMock;
         private readonly GetRolloverCandidatesForExportQueryHandler _handler;
 
         public GetRolloverCandidatesForExportQueryHandlerTests()
@@ -21,7 +21,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
             _fixture = new Fixture().Customize(new AutoMoqCustomization());
             _fixture.Customizations.Add(new DateOnlySpecimenBuilder());
             _repositoryMock = _fixture.Freeze<Mock<IRolloverRepository>>();
-            _csvBuilderMock = _fixture.Freeze<Mock<IRolloverWorkflowCandidatesCsvBuilder>>();
+            _csvBuilderMock = _fixture.Freeze<Mock<IFundingExtensionCandidatesCsvBuilder>>();
 
             _handler = _fixture.Create<GetRolloverCandidatesForExportQueryHandler>();
         }
@@ -31,7 +31,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
         {
             // Arrange
             var workflowRunId = Guid.NewGuid();
-            var candidates = _fixture.CreateMany<RolloverWorkflowCandidatesExportRow>(3).ToList();
+            var candidates = _fixture.CreateMany<FundingExtensionCandidateDto>(3).ToList();
             var csvBytes = new byte[] { 1, 2, 3 };
 
             _repositoryMock
