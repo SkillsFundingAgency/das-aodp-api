@@ -11,6 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Internal;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Providers;
+using SFA.DAS.AODP.Data.Repositories.Pldns;
 
 namespace SFA.DAS.AODP.Api.Extensions;
 
@@ -58,6 +59,7 @@ public static class AddServiceRegistrationsExtension
         services.AddScoped<IAcademicYearProvider, AcademicYearProvider>();
         services.AddScoped<IIlrSubmissionDeadlinesProvider, IlrSubmissionDeadlinesProvider>();
         services.AddScoped<IQaaFundingApprovalEndDateCalculator, QaaFundingApprovalEndDateCalculator>();
+        services.AddScoped<IPldnsRepository, PldnsRepository>();
 
         return services;
     }

@@ -1,6 +1,4 @@
-﻿using SFA.DAS.AODP.Data.Extensions;
-
-namespace SFA.DAS.AODP.Data.Providers;
+﻿namespace SFA.DAS.AODP.Data.Providers;
 
 /// <summary>
 /// Implementation for <see cref="IAcademicYearProvider"/>.

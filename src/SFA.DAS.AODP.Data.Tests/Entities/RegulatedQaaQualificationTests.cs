@@ -109,10 +109,11 @@ public class RegulatedQaaQualificationTests : UnitTest
     }
 
     [Fact]
-    public void SetFundingApprovalEndDate_LastDateForRegistrationAfterPublicationDate_LastDateEarlierThanAcademicYearEnd_ShouldUseLastDateForRegistration()
+    public async Task SetFundingApprovalEndDate_LastDateForRegistrationAfterPublicationDate_LastDateEarlierThanAcademicYearEnd_ShouldUseLastDateForRegistration()
     {
         // Arrange
         var mockQaaFundingApprovalEndDateCalculator = new Mock<IQaaFundingApprovalEndDateCalculator>();
+        var qan = "qan";
         var snapshot1 = new DateTime(2024, 02, 15);
         var publicationDate = new DateTime(2026, 03, 10);
         var lastDateForRegistration = new DateOnly(2026, 03, 30);
@@ -121,20 +122,21 @@ public class RegulatedQaaQualificationTests : UnitTest
             _testStartDate, lastDateForRegistration, _testSectorSubjectArea);
 
         // Expectations
-        mockQaaFundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDate(lastDateForRegistration, qualification1.LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate))).Returns(lastDateForRegistration);
+        mockQaaFundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDateAsync(qan, lastDateForRegistration, qualification1.LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate), CancellationToken)).ReturnsAsync(lastDateForRegistration);
 
         // Act
-        qualification1.SetFundingApprovalEndDate(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object);
+        await qualification1.SetFundingApprovalEndDateAsync(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object, CancellationToken);
 
         // Assert
         qualification1.LastFundingApprovalEndDate.ShouldBe(lastDateForRegistration);
     }
 
     [Fact]
-    public void SetFundingApprovalEndDate_LastDateForRegistrationAfterPublicationDate_LastDateLaterThanAcademicYearEnd_ShouldUseAcademicYearEnd()
+    public async Task SetFundingApprovalEndDate_LastDateForRegistrationAfterPublicationDate_LastDateLaterThanAcademicYearEnd_ShouldUseAcademicYearEnd()
     {
         // Arrange
         var mockQaaFundingApprovalEndDateCalculator = new Mock<IQaaFundingApprovalEndDateCalculator>();
+        var qan = "qan";
         var academicYearEndDate = new DateOnly(2026, 07, 31);
         var snapshot1 = new DateTime(2024, 02, 15);
         var publicationDate = new DateTime(2026, 03, 10);
@@ -145,20 +147,21 @@ public class RegulatedQaaQualificationTests : UnitTest
         qualification1.LastFundingApprovalEndDate = new DateOnly(2026, 03, 20);
 
         // Expectations
-        mockQaaFundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDate(lastDateForRegistration, qualification1.LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate))).Returns(academicYearEndDate);
+        mockQaaFundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDateAsync(qan, lastDateForRegistration, qualification1.LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate), CancellationToken)).ReturnsAsync(lastDateForRegistration);
 
         // Act
-        qualification1.SetFundingApprovalEndDate(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object);
+        await qualification1.SetFundingApprovalEndDateAsync(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object, CancellationToken);
 
         // Assert
         qualification1.LastFundingApprovalEndDate.ShouldBe(academicYearEndDate);
     }
 
     [Fact]
-    public void SetFundingApprovalEndDate_LastDateForRegistrationBeforePublicationDate_LastDateAfterCurrentApproval_UseLastDate()
+    public async Task SetFundingApprovalEndDate_LastDateForRegistrationBeforePublicationDate_LastDateAfterCurrentApproval_UseLastDate()
     {
         // Arrange
         var mockQaaFundingApprovalEndDateCalculator = new Mock<IQaaFundingApprovalEndDateCalculator>();
+        var qan = "qan";
         var snapshot1 = new DateTime(2024, 02, 15);
         var publicationDate = new DateTime(2026, 04, 30);
         var lastDateForRegistration = new DateOnly(2026, 03, 30);
@@ -168,20 +171,21 @@ public class RegulatedQaaQualificationTests : UnitTest
         qualification1.LastFundingApprovalEndDate = new DateOnly(2026, 03, 20);
 
         // Expectations
-        mockQaaFundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDate(lastDateForRegistration, qualification1.LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate))).Returns(lastDateForRegistration);
+        mockQaaFundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDateAsync(qan, lastDateForRegistration, qualification1.LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate), CancellationToken)).ReturnsAsync(lastDateForRegistration);
 
         // Act
-        qualification1.SetFundingApprovalEndDate(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object);
+        await qualification1.SetFundingApprovalEndDateAsync(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object, CancellationToken);
 
         // Assert
         qualification1.LastFundingApprovalEndDate.ShouldBe(lastDateForRegistration);
     }
 
     [Fact]
-    public void SetFundingApprovalEndDate_LastDateForRegistrationBeforePublicationDate_LastDateBeforeCurrentApproval_UseExistingValue()
+    public async Task SetFundingApprovalEndDate_LastDateForRegistrationBeforePublicationDate_LastDateBeforeCurrentApproval_UseExistingValue()
     {
         // Arrange
         var mockQaaFundingApprovalEndDateCalculator = new Mock<IQaaFundingApprovalEndDateCalculator>();
+        var qan = "qan";
         var snapshot1 = new DateTime(2024, 02, 15);
         var publicationDate = new DateTime(2026, 04, 30);
         var lastDateForRegistration = new DateOnly(2026, 03, 30);
@@ -191,20 +195,21 @@ public class RegulatedQaaQualificationTests : UnitTest
         qualification1.LastFundingApprovalEndDate = new DateOnly(2026, 04, 20);
 
         // Expectations
-        mockQaaFundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDate(lastDateForRegistration, qualification1.LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate))).Returns(new DateOnly(2026, 04, 20));
+        mockQaaFundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDateAsync(qan, lastDateForRegistration, qualification1.LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate), CancellationToken)).ReturnsAsync(new DateOnly(2026, 04, 20));
 
         // Act
-        qualification1.SetFundingApprovalEndDate(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object);
+        await qualification1.SetFundingApprovalEndDateAsync(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object, CancellationToken);
 
         // Assert
         qualification1.LastFundingApprovalEndDate.ShouldBe(new DateOnly(2026, 04, 20));
     }
 
     [Fact]
-    public void SetFundingApprovalEndDate_LastDateForRegistrationBeforePublicationDate_CurrentApprovalNull_UseLastDate()
+    public async Task SetFundingApprovalEndDate_LastDateForRegistrationBeforePublicationDate_CurrentApprovalNull_UseLastDate()
     {
         // Arrange
         var mockQaaFundingApprovalEndDateCalculator = new Mock<IQaaFundingApprovalEndDateCalculator>();
+        var qan = "qan";
         var snapshot1 = new DateTime(2024, 02, 15);
         var publicationDate = new DateTime(2026, 04, 30);
         var lastDateForRegistration = new DateOnly(2026, 03, 30);
@@ -214,10 +219,10 @@ public class RegulatedQaaQualificationTests : UnitTest
         qualification1.LastFundingApprovalEndDate = null;
 
         // Expectations
-        mockQaaFundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDate(lastDateForRegistration, qualification1.LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate))).Returns(lastDateForRegistration);
+        mockQaaFundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDateAsync(qan, lastDateForRegistration, qualification1.LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate), CancellationToken)).ReturnsAsync(lastDateForRegistration);
 
         // Act
-        qualification1.SetFundingApprovalEndDate(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object);
+        await qualification1.SetFundingApprovalEndDateAsync(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object, CancellationToken);
 
         // Assert
         qualification1.LastFundingApprovalEndDate.ShouldBe(new DateOnly(2026, 03, 30));

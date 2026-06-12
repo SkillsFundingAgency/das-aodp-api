@@ -1,6 +1,7 @@
 ﻿using SFA.DAS.AODP.Data.Extensions;
 using SFA.DAS.AODP.Data.Providers;
 using System.ComponentModel.DataAnnotations.Schema;
+using SFA.DAS.AODP.Data.Repositories.Pldns;
 
 namespace SFA.DAS.AODP.Data.Entities.QaaQualification;
 
@@ -112,9 +113,9 @@ public partial class RegulatedQaaQualification
         };
     }
 
-    public RegulatedQaaQualification SetFundingApprovalEndDate(DateTime publicationDate, IQaaFundingApprovalEndDateCalculator qaaFundingApprovalEndDateCalculator)
+    public async Task<RegulatedQaaQualification> SetFundingApprovalEndDateAsync(DateTime publicationDate, IQaaFundingApprovalEndDateCalculator qaaFundingApprovalEndDateCalculator, CancellationToken cancellationToken)
     {
-        LastFundingApprovalEndDate = qaaFundingApprovalEndDateCalculator.CalculateFundingApprovalEndDate(LastDateForRegistration, LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate));
+        LastFundingApprovalEndDate = await qaaFundingApprovalEndDateCalculator.CalculateFundingApprovalEndDateAsync(AimCode, LastDateForRegistration, LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate), cancellationToken);
         
         return this;
     }
@@ -122,19 +123,21 @@ public partial class RegulatedQaaQualification
 
 public interface IQaaFundingApprovalEndDateCalculator
 {
-    DateOnly? CalculateFundingApprovalEndDate(DateOnly lastDateForRegistration, DateOnly? currentFundingApprovalEndDate, DateOnly publicationDate);
+    Task<DateOnly?> CalculateFundingApprovalEndDateAsync(string qan, DateOnly lastDateForRegistration, DateOnly? currentFundingApprovalEndDate, DateOnly publicationDate, CancellationToken cancellationToken);
 }
 
 public class QaaFundingApprovalEndDateCalculator(
     ISystemClockProvider clockProvider,
     IIlrSubmissionDeadlinesProvider ilrSubmissionDeadlinesProvider,
-    IAcademicYearProvider academicYearProvider) : IQaaFundingApprovalEndDateCalculator
+    IAcademicYearProvider academicYearProvider, 
+    IPldnsRepository pldnsRepository) : IQaaFundingApprovalEndDateCalculator
 {
     private readonly ISystemClockProvider _clockProvider = clockProvider;
     private readonly IIlrSubmissionDeadlinesProvider _ilrSubmissionDeadlinesProvider = ilrSubmissionDeadlinesProvider;
     private readonly IAcademicYearProvider _academicYearProvider = academicYearProvider;
+    private readonly IPldnsRepository _pldnsRepository = pldnsRepository;
 
-    public DateOnly? CalculateFundingApprovalEndDate(DateOnly lastDateForRegistration, DateOnly? currentFundingApprovalEndDate, DateOnly publicationDate)
+    public async Task<DateOnly?> CalculateFundingApprovalEndDateAsync(string qan, DateOnly lastDateForRegistration, DateOnly? currentFundingApprovalEndDate, DateOnly publicationDate, CancellationToken cancellationToken)
     {
         var fundingApprovalEndDate = currentFundingApprovalEndDate;
         if (lastDateForRegistration > publicationDate)
@@ -161,6 +164,22 @@ public class QaaFundingApprovalEndDateCalculator(
                 currentFundingApprovalEndDate is null)
             {
                 fundingApprovalEndDate = lastDateForRegistration;
+            }
+        }
+
+        var pldns = await _pldnsRepository.GetPldnsByQanAsync(qan, cancellationToken);
+        if (pldns is not null)
+        {
+
+            var pldnsDates = new List<DateTime?>()
+            {
+                pldns.Loans, pldns.Pldns16To19, pldns.LegalEntitlementL2L3
+            };
+            
+            var minPldnsDate = pldnsDates.Where(o => o is not null).Min();
+            if (minPldnsDate is not null && DateOnly.FromDateTime(minPldnsDate!.Value) < fundingApprovalEndDate)
+            {
+                fundingApprovalEndDate = DateOnly.FromDateTime(minPldnsDate!.Value);
             }
         }
 

@@ -46,7 +46,7 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
             {
                 foreach (var qaaQualification in regulatedQaaQualifications)
                 {
-                    qaaQualification.SetFundingApprovalEndDate(request.PublicationDate, _qaaFundingApprovalEndDateCalculator);
+                    await qaaQualification.SetFundingApprovalEndDateAsync(request.PublicationDate, _qaaFundingApprovalEndDateCalculator, cancellationToken);
                 }
 
                 await _qaaQualificationRepository.SaveChangesAsync(cancellationToken);

@@ -13,11 +13,11 @@
     [Level] [nvarchar](50) NOT NULL,
     [Type] [nvarchar](50) NOT NULL,
     [Status] [nvarchar](100) NOT NULL,
-    [StartDate] datetime2 NOT NULL,
-    [LastDateForRegistration] datetime2 NOT NULL,
+    [StartDate] date NOT NULL,
+    [LastDateForRegistration] date NOT NULL,
     [IsDiscontinued] bit NOT NULL DEFAULT 0,
-    [DiscontinuedDate] datetime2 NULL,
-    [LastFundingApprovalEndDate] datetime2 NULL,
+    [DiscontinuedDate] date NULL,
+    [LastFundingApprovalEndDate] date NULL,
     [SectorSubjectArea] nvarchar(150) NOT NULL,
     CONSTRAINT [PK_QaaQualification] PRIMARY KEY CLUSTERED ([ID] ASC)
     );
