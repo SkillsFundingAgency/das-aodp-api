@@ -9,7 +9,6 @@ using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
 using SFA.DAS.AODP.Models.Settings;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Internal;
-using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Providers;
 using SFA.DAS.AODP.Data.Repositories.Pldns;
 

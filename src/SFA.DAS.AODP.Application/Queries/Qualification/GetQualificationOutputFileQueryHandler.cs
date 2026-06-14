@@ -5,8 +5,8 @@ using SFA.DAS.AODP.Infrastructure;
 using SFA.DAS.AODP.Models.Settings;
 using System.Globalization;
 using System.Text;
-using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Repositories.QaaQualification;
+using SFA.DAS.AODP.Data.Providers;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualifications;
 

@@ -1,5 +1,6 @@
 ﻿using Moq;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
+using SFA.DAS.AODP.Data.Providers;
 using SFA.DAS.AODP.Testing.Testing;
 using Shouldly;
 

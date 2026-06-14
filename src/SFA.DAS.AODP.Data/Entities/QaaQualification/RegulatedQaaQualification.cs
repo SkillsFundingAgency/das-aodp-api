@@ -1,7 +1,5 @@
-﻿using SFA.DAS.AODP.Data.Extensions;
-using SFA.DAS.AODP.Data.Providers;
+﻿using SFA.DAS.AODP.Data.Providers;
 using System.ComponentModel.DataAnnotations.Schema;
-using SFA.DAS.AODP.Data.Repositories.Pldns;
 
 namespace SFA.DAS.AODP.Data.Entities.QaaQualification;
 
@@ -18,16 +16,34 @@ public partial class RegulatedQaaQualification
     /// </summary>
     public DateTime DateOfDataSnapshot { get; private set; }
 
+    /// <summary>
+    /// When the qualification was first seen in the data feed.
+    /// </summary>
     public DateTime FirstSeenAt { get; private set; }
 
+    /// <summary>
+    /// WHen the qualification was last changed.
+    /// </summary>
     public DateTime LastChangedAt { get; private set; }
 
+    /// <summary>
+    /// A hash of the content for the qualification, this is used to determine if the content has changed since the last import, and therefore whether we need to update the record in the database or not.
+    /// </summary>
     public string ContentHash { get; private set; } = null!;
 
+    /// <summary>
+    /// The outcome of the latest import comparison, this is used to determine whether the record was created, updated or unchanged as part of the latest import.
+    /// </summary>
     public QaaImportComparisonOutcome LatestImportComparisonOutcome { get; private set; }
 
+    /// <summary>
+    /// The type of change that caused the last date for registration to change, this is used to determine whether we need to update the record in the database or not, and also to determine whether we need to update the last funding approval end date or not.
+    /// </summary>
     public QaaLastDateForRegistrationChangeType LastDateForRegistrationChangeType { get; private set; }
 
+    /// <summary>
+    /// The unique identifier for the latest qualification history record for this qualification, this is used to link to the history records for the qualification, and to determine whether we need to create a new history record or not.
+    /// </summary>
     public Guid? LatestQaaQualificationHistoryId { get; private set; }
 
     /// <summary>
@@ -70,8 +86,14 @@ public partial class RegulatedQaaQualification
     /// </summary>
     public DateOnly LastDateForRegistration { get; private set; }
 
+    /// <summary>
+    /// Whether the qualification is discontinued, this is determined by the Qaa API that returns this data directly.
+    /// </summary>
     public bool IsDiscontinued { get; private set; }
 
+    /// <summary>
+    /// The date the qualification was discontinued, populated only if <see cref="IsDiscontinued"/> is true. The value comes from the Qaa API.
+    /// </summary>
     public DateOnly? DiscontinuedDate { get; private set; }
 
     /// <summary>
@@ -113,6 +135,13 @@ public partial class RegulatedQaaQualification
         };
     }
 
+    /// <summary>
+    /// Set the funding approval end date for the Qaa qualification. This is only calculated and set at the point when an output file is generated as the calculations use the publication date of the output file.
+    /// </summary>
+    /// <param name="publicationDate">The date on which the output file will be published.</param>
+    /// <param name="qaaFundingApprovalEndDateCalculator">Provides access to a calculator for determining the funding approval end date.</param>
+    /// <param name="cancellationToken">Propagates notification that operations should be cancelled.</param>
+    /// <returns>The updated regulated qualification.</returns>
     public async Task<RegulatedQaaQualification> SetFundingApprovalEndDateAsync(DateTime publicationDate, IQaaFundingApprovalEndDateCalculator qaaFundingApprovalEndDateCalculator, CancellationToken cancellationToken)
     {
         LastFundingApprovalEndDate = await qaaFundingApprovalEndDateCalculator.CalculateFundingApprovalEndDateAsync(AimCode, LastDateForRegistration, LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate), cancellationToken);
@@ -120,88 +149,3 @@ public partial class RegulatedQaaQualification
         return this;
     }
 }
-
-public interface IQaaFundingApprovalEndDateCalculator
-{
-    Task<DateOnly?> CalculateFundingApprovalEndDateAsync(string qan, DateOnly lastDateForRegistration, DateOnly? currentFundingApprovalEndDate, DateOnly publicationDate, CancellationToken cancellationToken);
-}
-
-public class QaaFundingApprovalEndDateCalculator(
-    ISystemClockProvider clockProvider,
-    IIlrSubmissionDeadlinesProvider ilrSubmissionDeadlinesProvider,
-    IAcademicYearProvider academicYearProvider, 
-    IPldnsRepository pldnsRepository) : IQaaFundingApprovalEndDateCalculator
-{
-    private readonly ISystemClockProvider _clockProvider = clockProvider;
-    private readonly IIlrSubmissionDeadlinesProvider _ilrSubmissionDeadlinesProvider = ilrSubmissionDeadlinesProvider;
-    private readonly IAcademicYearProvider _academicYearProvider = academicYearProvider;
-    private readonly IPldnsRepository _pldnsRepository = pldnsRepository;
-
-    public async Task<DateOnly?> CalculateFundingApprovalEndDateAsync(string qan, DateOnly lastDateForRegistration, DateOnly? currentFundingApprovalEndDate, DateOnly publicationDate, CancellationToken cancellationToken)
-    {
-        var fundingApprovalEndDate = currentFundingApprovalEndDate;
-        if (lastDateForRegistration > publicationDate)
-        {
-            var currentAcademicYear = _academicYearProvider.GetCurrentAcademicYearEndDate();
-            var ilrFinalSubmissionDeadline = _ilrSubmissionDeadlinesProvider.GetFinalSubmissionDeadline();
-
-            if (_clockProvider.Today >= ilrFinalSubmissionDeadline.Date)
-            {
-                currentAcademicYear = currentAcademicYear.AddYears(1);
-            }
-
-            var dates = new List<DateOnly>
-            {
-                lastDateForRegistration,
-                currentAcademicYear
-            };
-
-            fundingApprovalEndDate = dates.Min();
-        }
-        else if (lastDateForRegistration < publicationDate)
-        {
-            if (lastDateForRegistration > currentFundingApprovalEndDate ||
-                currentFundingApprovalEndDate is null)
-            {
-                fundingApprovalEndDate = lastDateForRegistration;
-            }
-        }
-
-        var pldns = await _pldnsRepository.GetPldnsByQanAsync(qan, cancellationToken);
-        if (pldns is not null)
-        {
-
-            var pldnsDates = new List<DateTime?>()
-            {
-                pldns.Loans, pldns.Pldns16To19, pldns.LegalEntitlementL2L3
-            };
-            
-            var minPldnsDate = pldnsDates.Where(o => o is not null).Min();
-            if (minPldnsDate is not null && DateOnly.FromDateTime(minPldnsDate!.Value) < fundingApprovalEndDate)
-            {
-                fundingApprovalEndDate = DateOnly.FromDateTime(minPldnsDate!.Value);
-            }
-        }
-
-        return fundingApprovalEndDate;
-    }
-}
-
-public interface IIlrSubmissionDeadlinesProvider
-{
-    IlrSubmissionDeadline GetFinalSubmissionDeadline();
-}
-
-public class IlrSubmissionDeadlinesProvider(ISystemClockProvider clock) : IIlrSubmissionDeadlinesProvider
-{
-    public IlrSubmissionDeadline GetFinalSubmissionDeadline()
-    {
-        var today = clock.Today;
-        var startingDate = new DateTime(today.Year, 10, 1);
-        var r02DeadlineDate = startingDate.GetSpecificWorkingDateOfMonth(startingDate.Year, startingDate.Month, 3);
-
-        return new IlrSubmissionDeadline("R14", DateOnly.FromDateTime(r02DeadlineDate.AddDays(14).GetClosestDayOfWeek(DayOfWeek.Thursday)));
-    }
-}
-
-public sealed record IlrSubmissionDeadline(string Period, DateOnly Date);

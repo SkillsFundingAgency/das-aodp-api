@@ -10,4 +10,11 @@ public interface IAcademicYearProvider
     /// </summary>
     /// <returns></returns>
     DateOnly GetCurrentAcademicYearEndDate();
+
+    /// <summary>
+    /// Determines whether the date is within the current academic year.
+    /// </summary>
+    /// <param name="dateToCheck">The date to check.</param>
+    /// <returns><c>True</c> if the date falls within the current academic year, <c>False</c> otherwise.</returns>
+    bool IsWithinCurrentAcademicYear(DateTime? dateToCheck);
 }
