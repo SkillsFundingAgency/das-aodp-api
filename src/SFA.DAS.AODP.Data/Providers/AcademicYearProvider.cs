@@ -28,7 +28,7 @@ public class AcademicYearProvider(ISystemClockProvider clock) : IAcademicYearPro
         }
 
         var currentAcademicYear = GetCurrentAcademicYearEndDate();
-        if (DateOnly.FromDateTime(dateToCheck.Value) < currentAcademicYear)
+        if (DateOnly.FromDateTime(dateToCheck.Value) < currentAcademicYear && DateOnly.FromDateTime(dateToCheck.Value) >= new DateOnly(currentAcademicYear.Year - 1, 8, 1))
         {
             return true;
         }
