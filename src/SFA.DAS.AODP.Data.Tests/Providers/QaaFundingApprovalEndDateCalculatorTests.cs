@@ -387,5 +387,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
         {
             return currentAcademicYearEndDate;
         }
+
+        public bool IsWithinCurrentAcademicYear(DateTime? dateToCheck) => true;
     }
 }
