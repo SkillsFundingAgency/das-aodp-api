@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using SFA.DAS.AODP.Models.Rollover;
 using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Application.Commands.Rollover
