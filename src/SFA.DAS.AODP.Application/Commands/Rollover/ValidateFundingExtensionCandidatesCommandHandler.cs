@@ -1,5 +1,7 @@
 ﻿using MediatR;
+using SFA.DAS.AODP.Application.Constants;
 using SFA.DAS.AODP.Application.Exceptions;
+using SFA.DAS.AODP.Application.Services;
 using SFA.DAS.AODP.Application.Services.Export;
 using SFA.DAS.AODP.Application.Services.Validation;
 using SFA.DAS.AODP.Data.Exceptions;
@@ -14,29 +16,45 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
         private readonly IRolloverRepository _rolloverRepository;
         private readonly IRolloverFundingExtensionValidator _rolloverFundingExtensionValidator;
         private readonly IFundingExtensionCandidatesCsvBuilder _rolloverWorkflowCandidatesCsvBuilder;
+        private readonly IFundingExtensionProjectionService _fundingExtensionProjectionService;
 
-        public ValidateFundingExtensionCandidatesCommandHandler(IRolloverRepository rolloverRepository, IRolloverFundingExtensionValidator rolloverFundingExtensionValidator, IFundingExtensionCandidatesCsvBuilder rolloverWorkflowCandidatesCsvBuilder)
+        public ValidateFundingExtensionCandidatesCommandHandler(
+            IRolloverRepository rolloverRepository, 
+            IRolloverFundingExtensionValidator rolloverFundingExtensionValidator, 
+            IFundingExtensionCandidatesCsvBuilder rolloverWorkflowCandidatesCsvBuilder,
+            IFundingExtensionProjectionService fundingExtensionProjectionService)
         {
             _rolloverRepository = rolloverRepository;
             _rolloverFundingExtensionValidator = rolloverFundingExtensionValidator;
             _rolloverWorkflowCandidatesCsvBuilder = rolloverWorkflowCandidatesCsvBuilder;
+            _fundingExtensionProjectionService = fundingExtensionProjectionService;
         }
 
-        public async Task<BaseMediatrResponse<ValidateFundingExtensionCandidatesCommandResponse>> Handle(ValidateFundingExtensionCandidatesCommand request, CancellationToken cancellationToken)
+        public async Task<BaseMediatrResponse<ValidateFundingExtensionCandidatesCommandResponse>> Handle(
+            ValidateFundingExtensionCandidatesCommand request,
+            CancellationToken cancellationToken)
         {
             var response = new BaseMediatrResponse<ValidateFundingExtensionCandidatesCommandResponse>();
 
             try
             {
-                var incomingCandidates = request.FundingExtensionCandidates
+                // 1. Extract keys from uploaded file
+                var incomingKeys = request.FundingExtensionCandidates
                     .Select(x => new CandidateKey(x.Qan, x.FundingStreamName))
                     .ToHashSet();
 
-                var validationContext = await _rolloverRepository.GetFundingExtensionValidationContextAsync(incomingCandidates, cancellationToken);
+                // 2. Load validation context
+                var validationContext = await _rolloverRepository
+                    .GetFundingExtensionValidationContextAsync(incomingKeys, cancellationToken);
 
-                var validationResult = _rolloverFundingExtensionValidator.Validate(request.FundingExtensionCandidates, validationContext, cancellationToken);
+                // 3. Validate uploaded candidates
+                var validationResult = _rolloverFundingExtensionValidator
+                    .Validate(request.FundingExtensionCandidates, validationContext, cancellationToken);
 
-                byte[]? csvBytes = null;
+                var validationResponse = new ValidateFundingExtensionCandidatesCommandResponse
+                {
+                    IsValid = validationResult.IsValid
+                };
 
                 if (!validationResult.IsValid)
                 {
@@ -44,22 +62,27 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                         .Select(c => FundingExtensionCandidateExportMapper.Map(c.CandidateDetails))
                         .ToList();
 
-                    csvBytes = _rolloverWorkflowCandidatesCsvBuilder.BuildWithValidationErrors(
-                        exportRows,
-                        validationResult.Candidates);
+                    var csvBytes = _rolloverWorkflowCandidatesCsvBuilder
+                        .BuildWithValidationErrors(exportRows, validationResult.Candidates);
+
+                    validationResponse.ValidationFailureSummary = new ValidationFailureSummary
+                    {
+                        FailedCandidateCount = validationResult.FailedCandidateCount,
+                        ValidatedCandidateFile = csvBytes
+                    };
+
+                    response.Value = validationResponse;
+                    response.Success = true;
+                    return response;
                 }
 
 
-                response.Value = new ValidateFundingExtensionCandidatesCommandResponse
-                {
-                    IsValid = validationResult.IsValid,
-                    TotalCandidates = validationResult.TotalCandidates,
-                    FailedCandidateCount = validationResult.FailedCandidateCount,
-                    FailureSummary = validationResult.FailureSummary,
-                    ValidatedCandidateFile = csvBytes
-                };
+                var dbCandidates = await _rolloverRepository
+                    .GetFundingExtensionCandidatesAsync(cancellationToken);
 
+                validationResponse.ValidationSuccessSummary = _fundingExtensionProjectionService.ProjectSummary(dbCandidates, request.FundingExtensionCandidates);
 
+                response.Value = validationResponse;
                 response.Success = true;
             }
             catch (RecordLockedException)
@@ -81,5 +104,7 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
 
             return response;
         }
+
+
     }
 }

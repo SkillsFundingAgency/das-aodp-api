@@ -2,6 +2,7 @@
 using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.Rollover.Enums;
+using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Data.Entities.Rollover;
 

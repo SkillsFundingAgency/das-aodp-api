@@ -1,5 +1,4 @@
-﻿using SFA.DAS.AODP.Application.Services.Validation;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Application.Commands.Rollover
 {
@@ -8,12 +7,28 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
     {
         public bool IsValid { get; set; }
 
-        public int TotalCandidates { get; set; }
+        public ValidationFailureSummary? ValidationFailureSummary { get; set; }
 
+        public FundingExtensionSummary? ValidationSuccessSummary { get; set; }
+        
+    }
+
+    [ExcludeFromCodeCoverage]
+    public class ValidationFailureSummary
+    {
         public int FailedCandidateCount { get; set; }
-
-        public List<ValidationFailureGroup> FailureSummary { get; set; }
         public byte[]? ValidatedCandidateFile { get; set; }
+    }
+
+    [ExcludeFromCodeCoverage]
+    public class FundingExtensionSummary
+    {
+        public int TotalCandidatesCount { get; set; }
+        public int TotalReviewedCandidatesCount { get; set; }
+        public int PendingExtendedCandidatesCount { get; set; }
+        public int PendingExcludedCandidatesCount { get; set; }
+        public int PendingReviewCandidatesCount { get; set; }
+
     }
 
 }

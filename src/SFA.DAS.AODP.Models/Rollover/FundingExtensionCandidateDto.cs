@@ -24,7 +24,7 @@ namespace SFA.DAS.AODP.Models.Rollover
         public string FundingStreamName { get; set; } = string.Empty;
         public DateOnly? FundingApprovalStartDate { get; set; }
         public string ProposedOutcome { get; set; } = string.Empty;
-        public string RolloverStatus { get; set; } = string.Empty; 
+        public RolloverStatus RolloverStatus { get; set; } = RolloverStatus.None; 
         public string? ExclusionReason { get; set; }
         public DateTime CurrentFundingApprovalEndDate { get; set; }
         public DateTime? ProposedFundingApprovalEndDate { get; set; }

@@ -1,4 +1,4 @@
-﻿namespace SFA.DAS.AODP.Data.Entities.Rollover.Enums;
+﻿namespace SFA.DAS.AODP.Models.Rollover;
 
 public enum RolloverStatus
 {
@@ -6,7 +6,7 @@ public enum RolloverStatus
     NeedsReview = 1,
     InProgress = 2,
     Extended = 3,
-    Rejected = 4,
+    Rejected = 4,  
     Ignored = 5,
     Unknown = 99
 }

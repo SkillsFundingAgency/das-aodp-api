@@ -283,7 +283,7 @@ public class RolloverControllerTests
     }
 
     [Fact]
-    public async Task ValidateFundingExtensionCandidates_ReturnsOk_WhenMediatorReturnsSuccess()
+    public async Task ValidateFundingExtensionCandidates_ReturnsOk_WhenValidationSucceeds()
     {
         var command = _fixture.Create<ValidateFundingExtensionCandidatesCommand>();
 
@@ -292,8 +292,15 @@ public class RolloverControllerTests
             Success = true,
             Value = new ValidateFundingExtensionCandidatesCommandResponse
             {
-                TotalCandidates = 3,
-                FailedCandidateCount = 1
+                IsValid = true,
+                ValidationSuccessSummary = new FundingExtensionSummary
+                {
+                    TotalCandidatesCount = 20,
+                    TotalReviewedCandidatesCount = 10,
+                    PendingExtendedCandidatesCount = 5,
+                    PendingExcludedCandidatesCount = 5,
+                    PendingReviewCandidatesCount = 10
+                }
             }
         };
 
@@ -305,9 +312,44 @@ public class RolloverControllerTests
         var ok = Assert.IsType<OkObjectResult>(result);
         var payload = Assert.IsType<ValidateFundingExtensionCandidatesCommandResponse>(ok.Value);
 
-        Assert.Equal(3, payload.TotalCandidates);
-        Assert.Equal(1, payload.FailedCandidateCount);
+        Assert.True(payload.IsValid);
+        Assert.NotNull(payload.ValidationSuccessSummary);
+        Assert.Equal(20, payload.ValidationSuccessSummary.TotalCandidatesCount);
     }
+
+
+    [Fact]
+    public async Task ValidateFundingExtensionCandidates_ReturnsOk_WhenValidationFails()
+    {
+        var command = _fixture.Create<ValidateFundingExtensionCandidatesCommand>();
+
+        var mediatorResponse = new BaseMediatrResponse<ValidateFundingExtensionCandidatesCommandResponse>
+        {
+            Success = true,
+            Value = new ValidateFundingExtensionCandidatesCommandResponse
+            {
+                IsValid = false,
+                ValidationFailureSummary = new ValidationFailureSummary
+                {
+                    FailedCandidateCount = 3,
+                    ValidatedCandidateFile = new byte[] { 1, 2, 3 }
+                }
+            }
+        };
+
+        _mediatorMock.Setup(m => m.Send(It.IsAny<ValidateFundingExtensionCandidatesCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(mediatorResponse);
+
+        var result = await _controller.ValidateFundingExtensionCandidatesCommand(command);
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        var payload = Assert.IsType<ValidateFundingExtensionCandidatesCommandResponse>(ok.Value);
+
+        Assert.False(payload.IsValid);
+        Assert.NotNull(payload.ValidationFailureSummary);
+        Assert.Equal(3, payload.ValidationFailureSummary.FailedCandidateCount);
+    }
+
 
     [Fact]
     public async Task ValidateFundingExtensionCandidates_Returns500_WhenMediatorReturnsFailure()
@@ -329,22 +371,4 @@ public class RolloverControllerTests
         Assert.Equal(StatusCodes.Status500InternalServerError, status.StatusCode);
     }
 
-    [Fact]
-    public async Task ValidateFundingExtensionCandidates_ReturnsNotFound_WhenMediatorReturnsNotFoundException()
-    {
-        var command = _fixture.Create<ValidateFundingExtensionCandidatesCommand>();
-
-        var mediatorResponse = new BaseMediatrResponse<ValidateFundingExtensionCandidatesCommandResponse>
-        {
-            Success = false,
-            InnerException = new NotFoundException(Guid.NewGuid())
-        };
-
-        _mediatorMock.Setup(m => m.Send(It.IsAny<ValidateFundingExtensionCandidatesCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(mediatorResponse);
-
-        var result = await _controller.ValidateFundingExtensionCandidatesCommand(command);
-
-        Assert.IsType<NotFoundResult>(result);
-    }
 }

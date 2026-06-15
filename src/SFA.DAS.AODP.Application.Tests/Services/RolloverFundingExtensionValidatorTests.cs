@@ -103,8 +103,10 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
 
             Assert.Contains(
                 result.Candidates[0].Errors,
-                e => e.Field == "RolloverStatus");
+                e => e.Field == "RolloverStatus" &&
+                     e.Message.StartsWith("This candidate has an invalid RollOver Status"));
         }
+
 
         [Fact]
         public void Validate_ShouldFail_WhenToExcludeAndNoReason()
@@ -125,8 +127,10 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
 
             Assert.Contains(
                 result.Candidates[0].Errors,
-                e => e.Field == "ExclusionReason");
+                e => e.Field == "ExclusionReason" &&
+                     e.Message.StartsWith("The candidate is missing an Exclusion Reason"));
         }
+
 
         [Fact]
         public void Validate_ShouldCaptureMultipleErrors()
@@ -204,7 +208,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
                 ctx,
                 CancellationToken.None);
 
-            Assert.Equal(2, result.TotalCandidates);
+            Assert.Equal(2, result.Candidates.Count);
         }
 
         [Fact]
@@ -240,7 +244,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
 
             var result = _sut.Validate([valid, invalid], ctx, CancellationToken.None);
 
-            Assert.Equal(2, result.TotalCandidates);
+            Assert.Equal(2, result.Candidates.Count);
             Assert.Equal(1, result.FailedCandidateCount);
             Assert.False(result.IsValid);
         }

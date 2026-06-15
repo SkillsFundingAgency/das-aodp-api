@@ -162,7 +162,7 @@ public class RolloverRepository : IRolloverRepository
                         .FirstOrDefault(),
 
                 ProposedOutcome = rwc.PassP1 ? "To Extend" : "To Exclude",
-                RolloverStatus = rwc.RolloverCandidates.RolloverStatus.ToString(),
+                RolloverStatus = rwc.RolloverCandidates.RolloverStatus,
                 ExclusionReason = rwc.RolloverCandidates.ExclusionReason,
 
                 CurrentFundingApprovalEndDate = rwc.CurrentFundingEndDate,
@@ -227,4 +227,15 @@ public class RolloverRepository : IRolloverRepository
         );
     }
 
+    public async Task<List<FundingExtensionCandidateItem>> GetFundingExtensionCandidatesAsync(CancellationToken cancellationToken)
+    {
+        return await _context.RolloverCandidates
+            .Select(x => new FundingExtensionCandidateItem
+            {
+                Qan = x.QualificationVersion.Qualification.Qan,
+                FundingStreamName = x.FundingOffer.Name,
+                RolloverStatus = x.RolloverStatus
+            })
+            .ToListAsync(cancellationToken);
+    }
 }

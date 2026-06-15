@@ -6,8 +6,6 @@ namespace SFA.DAS.AODP.Application.Services.Validation
     {
         public bool IsValid { get; set; }
 
-        public int TotalCandidates { get; set; }
-
         public int FailedCandidateCount { get; set; }
 
         public List<CandidateValidationResult> Candidates { get; set; }

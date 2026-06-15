@@ -30,4 +30,6 @@ public interface IRolloverRepository
         HashSet<CandidateKey> incomingCandidates,
         CancellationToken cancellationToken);
 
+    Task<List<FundingExtensionCandidateItem>> GetFundingExtensionCandidatesAsync(CancellationToken cancellationToken);
+
 }

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using SFA.DAS.AODP.Models.Rollover;
 using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Application.Commands.Rollover
@@ -31,7 +32,7 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
         public string? FundingStreamName { get; set; }
         public DateTime? FundingApprovalStartDate { get; set; }
         public string? ProposedOutcome { get; set; }
-        public string? RollOverStatus { get; set; }
+        public string RollOverStatus { get; set; } = string.Empty;
         public string? ExclusionReason { get; set; }
         public DateTime? CurrentFundingApprovalEndDate { get; set; }
         public DateTime? ProposedFundingApprovalEndDate { get; set; }

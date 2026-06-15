@@ -32,10 +32,7 @@ namespace SFA.DAS.AODP.Application.Services.Validation
             FundingExtensionCandidateValidationContext fundingExtensionCandidateValidationContext,
             CancellationToken cancellationToken)
         {
-            var response = new FundingExtensionValidationResult
-            {
-                TotalCandidates = fundingExtensionCandidates.Count
-            };
+            var response = new FundingExtensionValidationResult();
 
             foreach (var row in fundingExtensionCandidates)
             {
@@ -106,18 +103,19 @@ namespace SFA.DAS.AODP.Application.Services.Validation
         }
 
         private void ValidateStatus(
-            CandidateValidationResult result,
-            FundingExtensionCandidateValidationContext ctx)
+         CandidateValidationResult result,
+         FundingExtensionCandidateValidationContext ctx)
         {
-            if (!RolloverStatuses.All.Contains(result.CandidateDetails.RollOverStatus))
+            if (!RolloverCsvInput.AllowedStatuses.Contains(result.CandidateDetails.RollOverStatus))
             {
                 result.Errors.Add(new ValidationFailure
                 {
                     Field = "RolloverStatus",
-                    Message = $"This candidate has an invalid RollOver Status ({RolloverStatuses.ToList()})"
+                    Message = $"This candidate has an invalid RollOver Status ({string.Join(", ", RolloverCsvInput.AllowedStatuses)})"
                 });
             }
         }
+
 
         private void ValidateExclusionReason(
             CandidateValidationResult result,

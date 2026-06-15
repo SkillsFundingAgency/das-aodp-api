@@ -1,4 +1,5 @@
 ﻿using SFA.DAS.AODP.Application.Commands.Rollover;
+using SFA.DAS.AODP.Application.Constants;
 using SFA.DAS.AODP.Infrastructure.Extensions;
 using SFA.DAS.AODP.Models.Rollover;
 
@@ -29,7 +30,7 @@ public static class FundingExtensionCandidateExportMapper
             FundingStreamName = c.FundingStreamName.OrEmpty(),
             FundingApprovalStartDate = c.FundingApprovalStartDate.ToDateOnlyOrNull(),
             ProposedOutcome = c.ProposedOutcome.OrEmpty(),
-            RolloverStatus = c.RollOverStatus.OrEmpty(),
+            RolloverStatus = RolloverStatusInfo.FromCsv(c.RollOverStatus),
             ExclusionReason = c.ExclusionReason,
             CurrentFundingApprovalEndDate = c.CurrentFundingApprovalEndDate ?? default,
             ProposedFundingApprovalEndDate = c.ProposedFundingApprovalEndDate,
