@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application.Constants;
 using SFA.DAS.AODP.Application.Exceptions;
-using SFA.DAS.AODP.Application.Services;
 using SFA.DAS.AODP.Application.Services.Export;
+using SFA.DAS.AODP.Application.Services.FundingExtension;
 using SFA.DAS.AODP.Application.Services.Validation;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
@@ -38,16 +38,13 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
 
             try
             {
-                // 1. Extract keys from uploaded file
                 var incomingKeys = request.FundingExtensionCandidates
                     .Select(x => new CandidateKey(x.Qan, x.FundingStreamName))
                     .ToHashSet();
 
-                // 2. Load validation context
                 var validationContext = await _rolloverRepository
                     .GetFundingExtensionValidationContextAsync(incomingKeys, cancellationToken);
 
-                // 3. Validate uploaded candidates
                 var validationResult = _rolloverFundingExtensionValidator
                     .Validate(request.FundingExtensionCandidates, validationContext, cancellationToken);
 

@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Entities.Rollover;
+using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Data.Repositories.Qualification
 {
@@ -45,6 +47,20 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                 _context.QualificationFundings.Add(qualificationFunding);
             }
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<QualificationFundings>> GetRolloverQualificationFundingsAsync(
+            List<QualificationFundingKey> candidates,
+            CancellationToken cancellationToken)
+        {
+            var keySet = candidates
+                .Select(x => x.QualificationVersionId + "|" +  x.FundingOfferId )
+                .ToList();
+
+            return await _context.QualificationFundings
+                .AsNoTracking()
+                .Where(qf => keySet.Contains(qf.QualificationVersionId + "|" + qf.FundingOfferId))
+                .ToListAsync(cancellationToken);
         }
     }
 }

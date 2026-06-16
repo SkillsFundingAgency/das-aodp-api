@@ -296,10 +296,10 @@ public class RolloverControllerTests
                 ValidationSuccessSummary = new FundingExtensionSummary
                 {
                     TotalCandidatesCount = 20,
-                    TotalReviewedCandidatesCount = 10,
-                    PendingExtendedCandidatesCount = 5,
-                    PendingExcludedCandidatesCount = 5,
-                    PendingReviewCandidatesCount = 10
+                    CandidatesExtendedInUploadCount = 10,
+                    TotalCandidatesToBeExtendedCount = 5,
+                    TotalCandidatesToBeExcludedCount = 5,
+                    TotalCandidatesToBeReviewedCount = 10
                 }
             }
         };

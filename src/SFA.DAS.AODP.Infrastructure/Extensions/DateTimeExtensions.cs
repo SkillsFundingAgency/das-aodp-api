@@ -15,5 +15,8 @@ public static class DateTimeExtensions
         return dateOnly.ToString("yyyy/MM/dd");
     }
 
-
+    public static string ToDiscussionHistoryDateFormat(this DateOnly? dateOnly)
+    {
+        return dateOnly?.ToString("yyyy/MM/dd") ?? string.Empty;
+    }
 }

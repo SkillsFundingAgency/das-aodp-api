@@ -4,13 +4,20 @@ namespace SFA.DAS.AODP.Application.Constants
 {
     public static class RolloverStatusInfo
     {
-        public static RolloverStatus FromCsv(string csvValue) =>
-            csvValue switch
+        public static RolloverStatus FromCsv(string csvValue)
+        {
+            if (csvValue is null)
+                return RolloverStatus.Unknown;
+
+            return csvValue.Trim().ToLowerInvariant() switch
             {
-                RolloverCsvInput.ToExtend => RolloverStatus.Extended,
-                RolloverCsvInput.ToExclude => RolloverStatus.Rejected,
-                _ => throw new ArgumentException($"Unknown CSV status: {csvValue}")
+                "to extend" => RolloverStatus.Extended,
+                "to exclude" => RolloverStatus.Rejected,
+                "needs review" => RolloverStatus.NeedsReview,
+                _ => RolloverStatus.Unknown
             };
+        }
+
 
         public static string ToDisplay(this RolloverStatus status) =>
             status switch

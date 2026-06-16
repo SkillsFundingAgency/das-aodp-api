@@ -40,7 +40,9 @@
                    ,[Description])
        VALUES ('00000000-0000-0000-0000-000000000001','No Action Required'),
 	          ('00000000-0000-0000-0000-000000000002','Action Required'),
-	          ('00000000-0000-0000-0000-000000000003','Ignore')
+	          ('00000000-0000-0000-0000-000000000003','Ignore'),
+              ('00000000-0000-0000-0000-000000000004','Rollover - Funding Extended'),
+              ('00000000-0000-0000-0000-000000000005','Rollover - Funding Not Extended')
 
 
         -- Record the script as run

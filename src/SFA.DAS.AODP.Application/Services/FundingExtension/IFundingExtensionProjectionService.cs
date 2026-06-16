@@ -1,7 +1,7 @@
 ﻿using SFA.DAS.AODP.Application.Commands.Rollover;
 using SFA.DAS.AODP.Models.Rollover;
 
-namespace SFA.DAS.AODP.Application.Services
+namespace SFA.DAS.AODP.Application.Services.FundingExtension
 {
     public interface IFundingExtensionProjectionService
     {

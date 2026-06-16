@@ -8,6 +8,11 @@ namespace SFA.DAS.AODP.Models.Rollover
         string FundingStream);
 
     [ExcludeFromCodeCoverage]
+    public record QualificationFundingKey(
+        Guid QualificationVersionId,
+        Guid FundingOfferId);
+
+    [ExcludeFromCodeCoverage]
     public record FundingExtensionCandidateValidationContext(
         HashSet<CandidateKey> IncomingCandidates,
         HashSet<CandidateKey> CandidatesInDb,

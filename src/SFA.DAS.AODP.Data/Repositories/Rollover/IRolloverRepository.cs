@@ -32,4 +32,10 @@ public interface IRolloverRepository
 
     Task<List<FundingExtensionCandidateItem>> GetFundingExtensionCandidatesAsync(CancellationToken cancellationToken);
 
+    Task<List<RolloverCandidates>> GetRolloverApplyEntitiesAsync(
+        List<CandidateKey> keys,
+        CancellationToken cancellationToken);
+
+    Task DeleteAllWorkflowCandidatesAsync(CancellationToken cancellationToken);
+
 }

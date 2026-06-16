@@ -12,11 +12,16 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             _context = context;
         }
 
-       public async Task CreateAsync(QualificationDiscussionHistory qualificationDiscussionHistory)
+        public async Task CreateAsync(QualificationDiscussionHistory qualificationDiscussionHistory)
         {
             qualificationDiscussionHistory.Id = Guid.NewGuid();
             _context.QualificationDiscussionHistory.Add(qualificationDiscussionHistory);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task AddDiscussionHistories(List<QualificationDiscussionHistory> histories)
+        {
+            _context.QualificationDiscussionHistory.AddRange(histories);
         }
     }
 }

@@ -5,5 +5,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
     public interface IQualificationDiscussionHistoryRepository
     {
         Task CreateAsync(QualificationDiscussionHistory qualificationDiscussionHistory);
+
+        Task AddDiscussionHistories(List<QualificationDiscussionHistory> histories);
     }
 }

@@ -2,7 +2,7 @@
 using SFA.DAS.AODP.Application.Constants;
 using SFA.DAS.AODP.Models.Rollover;
 
-namespace SFA.DAS.AODP.Application.Services
+namespace SFA.DAS.AODP.Application.Services.FundingExtension
 {
     public class FundingExtensionProjectionService : IFundingExtensionProjectionService
     {
@@ -33,6 +33,10 @@ namespace SFA.DAS.AODP.Application.Services
                 })
                 .ToList();
 
+            var extendedInUploadCount =
+                uploadedCandidates
+                    .Select(x => RolloverStatusInfo.FromCsv(x.RollOverStatus))
+                    .Count(s => s == RolloverStatus.Extended);
             var extendedCount = projectedStatuses.Count(x => x == RolloverStatus.Extended);
             var excludedCount = projectedStatuses.Count(x => x == RolloverStatus.Rejected);
             var pendingCount = projectedStatuses.Count(x => x == RolloverStatus.NeedsReview);
@@ -40,10 +44,10 @@ namespace SFA.DAS.AODP.Application.Services
             return new FundingExtensionSummary
             {
                 TotalCandidatesCount = dbCandidates.Count,
-                TotalReviewedCandidatesCount = uploadedDistinct.Count,
-                PendingExtendedCandidatesCount = extendedCount,
-                PendingExcludedCandidatesCount = excludedCount,
-                PendingReviewCandidatesCount = pendingCount
+                CandidatesExtendedInUploadCount = extendedInUploadCount,
+                TotalCandidatesToBeExtendedCount = extendedCount,
+                TotalCandidatesToBeExcludedCount = excludedCount,
+                TotalCandidatesToBeReviewedCount = pendingCount
             };
         }
     }

@@ -238,4 +238,31 @@ public class RolloverRepository : IRolloverRepository
             })
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<List<RolloverCandidates>> GetRolloverApplyEntitiesAsync(
+        List<CandidateKey> keys,
+        CancellationToken cancellationToken)
+    {
+        var keySet = keys
+            .Select(x => x.Qan + "|" + x.FundingStream)
+            .ToHashSet();
+
+        return await _context.RolloverCandidates
+            .Include(x => x.QualificationVersion)
+                .ThenInclude(v => v.Qualification)
+            .Include(x => x.FundingOffer)
+            .Where(x =>
+                keySet.Contains(
+                    x.QualificationVersion.Qualification.Qan + "|" +
+                    x.FundingOffer.Name))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task DeleteAllWorkflowCandidatesAsync(CancellationToken cancellationToken)
+    {
+        var items = await _context.RolloverWorkflowCandidates
+            .ToListAsync(cancellationToken);
+
+        _context.RolloverWorkflowCandidates.RemoveRange(items);
+    }
 }

@@ -81,4 +81,12 @@ public class RolloverController : BaseController
     {
         return await SendRequestAsync(validateFundingExtensionCandidatesCommand);
     }
+
+    [HttpPost("applyrolloverextension")]
+    [ProducesResponseType(typeof(BaseMediatrResponse<ApplyFundingExtensionsCommandResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> ApplyFundingExtensionsToCandidates(ApplyFundingExtensionsCommand applyFundingExtensionToCandidatesCommand)
+    {
+        return await SendRequestAsync(applyFundingExtensionToCandidatesCommand);
+    }
 }

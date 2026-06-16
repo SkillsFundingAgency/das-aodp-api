@@ -24,10 +24,10 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
     public class FundingExtensionSummary
     {
         public int TotalCandidatesCount { get; set; }
-        public int TotalReviewedCandidatesCount { get; set; }
-        public int PendingExtendedCandidatesCount { get; set; }
-        public int PendingExcludedCandidatesCount { get; set; }
-        public int PendingReviewCandidatesCount { get; set; }
+        public int CandidatesExtendedInUploadCount { get; set; }
+        public int TotalCandidatesToBeExtendedCount { get; set; }
+        public int TotalCandidatesToBeExcludedCount { get; set; }
+        public int TotalCandidatesToBeReviewedCount { get; set; }
 
     }
 

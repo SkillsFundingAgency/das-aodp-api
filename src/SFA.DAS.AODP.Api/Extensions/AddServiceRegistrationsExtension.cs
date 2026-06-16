@@ -1,15 +1,16 @@
 ﻿using RestEase;
 using SFA.DAS.AODP.Application.Services;
+using SFA.DAS.AODP.Application.Services.Export;
+using SFA.DAS.AODP.Application.Services.FundingExtension;
+using SFA.DAS.AODP.Application.Services.Validation;
 using SFA.DAS.AODP.Data.Extensions;
-using SFA.DAS.AODP.Infrastructure.Clients.Ofqual;
 using SFA.DAS.AODP.Data.Search;
+using SFA.DAS.AODP.Infrastructure.Clients.Ofqual;
 using SFA.DAS.AODP.Infrastructure.Extensions;
 using SFA.DAS.AODP.Infrastructure.Services;
 using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
 using SFA.DAS.AODP.Models.Settings;
 using System.Diagnostics.CodeAnalysis;
-using SFA.DAS.AODP.Application.Services.Export;
-using SFA.DAS.AODP.Application.Services.Validation;
 
 namespace SFA.DAS.AODP.Api.Extensions;
 
@@ -54,6 +55,8 @@ public static class AddServiceRegistrationsExtension
         services.AddScoped<IQualificationsApi, QualificationsApi>();
         services.AddScoped<IFundingExtensionCandidatesCsvBuilder, FundingExtensionCandidatesCsvBuilder>();
         services.AddScoped<IRolloverFundingExtensionValidator, FundingExtensionValidator>();
+        services.AddScoped<IFundingExtensionProjectionService, FundingExtensionProjectionService>();
+        services.AddScoped<IApplyFundingExtensionsService, ApplyFundingExtensionService>();
 
         return services;
     }

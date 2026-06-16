@@ -1,7 +1,7 @@
 ﻿using Moq;
 using SFA.DAS.AODP.Application.Commands.Rollover;
-using SFA.DAS.AODP.Application.Services;
 using SFA.DAS.AODP.Application.Services.Export;
+using SFA.DAS.AODP.Application.Services.FundingExtension;
 using SFA.DAS.AODP.Application.Services.Validation;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
 using SFA.DAS.AODP.Models.Rollover;
@@ -85,10 +85,10 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             var expectedSummary = new FundingExtensionSummary
             {
                 TotalCandidatesCount = 3,
-                TotalReviewedCandidatesCount = 2,
-                PendingExtendedCandidatesCount = 1,
-                PendingExcludedCandidatesCount = 1,
-                PendingReviewCandidatesCount = 1
+                CandidatesExtendedInUploadCount = 2,
+                TotalCandidatesToBeExtendedCount = 1,
+                TotalCandidatesToBeExcludedCount = 1,
+                TotalCandidatesToBeReviewedCount = 1
             };
 
             _projectionService
