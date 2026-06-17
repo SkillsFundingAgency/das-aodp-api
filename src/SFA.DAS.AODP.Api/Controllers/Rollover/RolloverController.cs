@@ -58,7 +58,7 @@ public class RolloverController : BaseController
     }
 
     [HttpPost("rolloverworkflowruns")]
-    [ProducesResponseType(typeof(BaseMediatrResponse<CreateRolloverWorkflowRunCommandResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CreateRolloverWorkflowRunCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CreateRolloverWorkflowRun(CreateRolloverWorkflowRunCommand createRolloverWorkflowRunCommand)
     {
@@ -75,7 +75,7 @@ public class RolloverController : BaseController
     }
 
     [HttpPost("rolloverextensionvalidation")]
-    [ProducesResponseType(typeof(BaseMediatrResponse<ValidateFundingExtensionCandidatesCommandResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidateFundingExtensionCandidatesCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> ValidateFundingExtensionCandidatesCommand(ValidateFundingExtensionCandidatesCommand validateFundingExtensionCandidatesCommand)
     {
@@ -83,7 +83,7 @@ public class RolloverController : BaseController
     }
 
     [HttpPost("applyrolloverextension")]
-    [ProducesResponseType(typeof(BaseMediatrResponse<ApplyFundingExtensionsCommandResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApplyFundingExtensionsCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> ApplyFundingExtensionsToCandidates(ApplyFundingExtensionsCommand applyFundingExtensionToCandidatesCommand)
     {

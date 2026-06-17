@@ -163,7 +163,7 @@ public class RolloverRepository : IRolloverRepository
 
                 ProposedOutcome = rwc.PassP1 ? "To Extend" : "To Exclude",
                 RolloverStatus = rwc.RolloverCandidates.RolloverStatus,
-                ExclusionReason = rwc.RolloverCandidates.ExclusionReason,
+                ExclusionReason = rwc.PassP1 ? rwc.RolloverCandidates.ExclusionReason : rwc.P1FailureReason,
 
                 CurrentFundingApprovalEndDate = rwc.CurrentFundingEndDate,
                 ProposedFundingApprovalEndDate = rwc.ProposedFundingEndDate,
