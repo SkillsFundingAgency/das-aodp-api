@@ -24,18 +24,20 @@ public interface IRolloverRepository
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
 
-    Task<IReadOnlyList<FundingExtensionCandidateDto>> GetRolloverWorkflowCandidatesByRunId(Guid workflowRunId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<RolloverCandidateForExport>> GetRolloverWorkflowCandidatesByRunId(Guid workflowRunId, CancellationToken cancellationToken);
 
     Task<FundingExtensionCandidateValidationContext> GetFundingExtensionValidationContextAsync(
         HashSet<CandidateKey> incomingCandidates,
         CancellationToken cancellationToken);
 
-    Task<List<FundingExtensionCandidateItem>> GetFundingExtensionCandidatesAsync(CancellationToken cancellationToken);
+    Task<List<RolloverCandidateStatusItem>> GetRolloverCandidatesStatusAsync(CancellationToken cancellationToken);
 
-    Task<List<RolloverCandidates>> GetRolloverApplyEntitiesAsync(
+    Task<List<RolloverCandidates>> LoadRolloverCandidateGraphAsync(
         List<CandidateKey> keys,
         CancellationToken cancellationToken);
 
     Task DeleteAllWorkflowCandidatesAsync(CancellationToken cancellationToken);
+
+    Task<Guid?> GetLatestWorkflowRunIdAsync(CancellationToken cancellationToken);
 
 }

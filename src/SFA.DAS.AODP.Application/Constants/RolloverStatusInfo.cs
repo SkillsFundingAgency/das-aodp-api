@@ -11,9 +11,9 @@ namespace SFA.DAS.AODP.Application.Constants
 
             return csvValue.Trim().ToLowerInvariant() switch
             {
-                "to extend" => RolloverStatus.Extended,
-                "to exclude" => RolloverStatus.Rejected,
-                "needs review" => RolloverStatus.NeedsReview,
+                "extended" => RolloverStatus.Extended,
+                "excluded" => RolloverStatus.Excluded,
+                "needsreview" => RolloverStatus.NeedsReview,
                 _ => RolloverStatus.Unknown
             };
         }
@@ -23,7 +23,7 @@ namespace SFA.DAS.AODP.Application.Constants
             status switch
             {
                 RolloverStatus.Extended => "Extended",
-                RolloverStatus.Rejected => "Excluded",
+                RolloverStatus.Excluded => "Excluded",
                 RolloverStatus.NeedsReview => "Needs Review",
                 _ => status.ToString()
             };

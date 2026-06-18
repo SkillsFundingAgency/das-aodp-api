@@ -31,7 +31,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
         {
             // Arrange
             var workflowRunId = Guid.NewGuid();
-            var candidates = _fixture.CreateMany<FundingExtensionCandidateDto>(3).ToList();
+            var candidates = _fixture.CreateMany<RolloverCandidateForExport>(3).ToList();
             var csvBytes = new byte[] { 1, 2, 3 };
 
             _repositoryMock

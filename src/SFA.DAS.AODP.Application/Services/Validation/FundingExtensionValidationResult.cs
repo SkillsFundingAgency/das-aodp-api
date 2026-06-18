@@ -17,7 +17,7 @@ namespace SFA.DAS.AODP.Application.Services.Validation
 
     public class CandidateValidationResult
     {
-        public FundingExtensionCandidate CandidateDetails { get; set; }
+        public RolloverCandidateForValidation CandidateDetails { get; set; }
 
         public List<ValidationFailure> Errors { get; set; }
             = new List<ValidationFailure>();

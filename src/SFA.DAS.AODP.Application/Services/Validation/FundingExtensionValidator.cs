@@ -7,7 +7,7 @@ namespace SFA.DAS.AODP.Application.Services.Validation
     public interface IRolloverFundingExtensionValidator
     {
         FundingExtensionValidationResult Validate(
-            List<FundingExtensionCandidate> fundingExtensionCandidates,
+            List<RolloverCandidateForValidation> fundingExtensionCandidates,
             FundingExtensionCandidateValidationContext fundingExtensionCandidateValidationContext,
             CancellationToken cancellationToken);
     }
@@ -28,7 +28,7 @@ namespace SFA.DAS.AODP.Application.Services.Validation
         }
 
         public FundingExtensionValidationResult Validate(
-            List<FundingExtensionCandidate> fundingExtensionCandidates,
+            List<RolloverCandidateForValidation> fundingExtensionCandidates,
             FundingExtensionCandidateValidationContext fundingExtensionCandidateValidationContext,
             CancellationToken cancellationToken)
         {

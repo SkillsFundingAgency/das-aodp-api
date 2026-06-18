@@ -8,11 +8,11 @@ namespace SFA.DAS.AODP.Application.Services.Export
     public interface IFundingExtensionCandidatesCsvBuilder
     {
         // Builds a CSV containing the core candidate details for review .
-        byte[] Build(IEnumerable<FundingExtensionCandidateDto> rows);
+        byte[] Build(IEnumerable<RolloverCandidateForExport> rows);
 
         // Builds a CSV containing core candidate details plus a column for 'ValidationErrors'.
         byte[] BuildWithValidationErrors(
-            IEnumerable<FundingExtensionCandidateDto> rows,
+            IEnumerable<RolloverCandidateForExport> rows,
             IEnumerable<CandidateValidationResult> validationResults);
     }
 
@@ -46,7 +46,7 @@ namespace SFA.DAS.AODP.Application.Services.Export
             ];
         private static readonly string[] ColumnsWithErrors = CoreColumns.Append("ValidationErrors").ToArray();
 
-        public byte[] Build(IEnumerable<FundingExtensionCandidateDto> rows)
+        public byte[] Build(IEnumerable<RolloverCandidateForExport> rows)
         {
             using var ms = new MemoryStream(4096);
 
@@ -65,7 +65,7 @@ namespace SFA.DAS.AODP.Application.Services.Export
         }
 
         public byte[] BuildWithValidationErrors(
-            IEnumerable<FundingExtensionCandidateDto> rows,
+            IEnumerable<RolloverCandidateForExport> rows,
             IEnumerable<CandidateValidationResult> validationResults)
         {
             using var ms = new MemoryStream(4096);
@@ -101,7 +101,7 @@ namespace SFA.DAS.AODP.Application.Services.Export
         {
             writer.WriteLine(string.Join(",", columns));
         }
-        private void WriteCoreColumns(StreamWriter writer, FundingExtensionCandidateDto r)
+        private void WriteCoreColumns(StreamWriter writer, RolloverCandidateForExport r)
         {
             WriteField(writer, r.QAN); writer.Write(',');
             WriteField(writer, r.QualificationTitle); writer.Write(',');

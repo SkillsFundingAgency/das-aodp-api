@@ -56,7 +56,7 @@ public static class AddServiceRegistrationsExtension
         services.AddScoped<IFundingExtensionCandidatesCsvBuilder, FundingExtensionCandidatesCsvBuilder>();
         services.AddScoped<IRolloverFundingExtensionValidator, FundingExtensionValidator>();
         services.AddScoped<IFundingExtensionProjectionService, FundingExtensionProjectionService>();
-        services.AddScoped<IApplyFundingExtensionsService, ApplyFundingExtensionService>();
+        services.AddScoped<ISubmitFundingExtensionService, SubmitFundingExtensionService>();
 
         return services;
     }

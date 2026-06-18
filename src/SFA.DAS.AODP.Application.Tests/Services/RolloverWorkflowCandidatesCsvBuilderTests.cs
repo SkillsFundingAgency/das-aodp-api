@@ -18,7 +18,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
         public void Build_ShouldIncludeHeaders_AndBasicRowContent()
         {
             // Arrange
-            var row = new FundingExtensionCandidateDto
+            var row = new RolloverCandidateForExport
             {
                 QAN = "12345",
                 QualificationTitle = "Test Qualification",
@@ -54,7 +54,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
             string expectedEscapedOutput)
         {
             // Arrange
-            var row = new FundingExtensionCandidateDto
+            var row = new RolloverCandidateForExport
             {
                 QAN = "111",
                 QualificationTitle = weirdValue,
@@ -73,7 +73,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
         {
             // Act
             var csv = Encoding.UTF8.GetString(
-                _sut.Build(Enumerable.Empty<FundingExtensionCandidateDto>()));
+                _sut.Build(Enumerable.Empty<RolloverCandidateForExport>()));
 
             // Assert
             Assert.Contains("QAN,QualificationTitle", csv);

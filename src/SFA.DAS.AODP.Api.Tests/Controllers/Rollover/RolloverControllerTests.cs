@@ -285,12 +285,12 @@ public class RolloverControllerTests
     [Fact]
     public async Task ValidateFundingExtensionCandidates_ReturnsOk_WhenValidationSucceeds()
     {
-        var command = _fixture.Create<ValidateFundingExtensionCandidatesCommand>();
+        var command = _fixture.Create<ValidateRolloverExtensionCommand>();
 
-        var mediatorResponse = new BaseMediatrResponse<ValidateFundingExtensionCandidatesCommandResponse>
+        var mediatorResponse = new BaseMediatrResponse<ValidateRolloverExtensionCommandResponse>
         {
             Success = true,
-            Value = new ValidateFundingExtensionCandidatesCommandResponse
+            Value = new ValidateRolloverExtensionCommandResponse
             {
                 IsValid = true,
                 ValidationSuccessSummary = new FundingExtensionSummary
@@ -304,13 +304,13 @@ public class RolloverControllerTests
             }
         };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<ValidateFundingExtensionCandidatesCommand>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<ValidateRolloverExtensionCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mediatorResponse);
 
-        var result = await _controller.ValidateFundingExtensionCandidatesCommand(command);
+        var result = await _controller.ValidateRolloverExtension(command);
 
         var ok = Assert.IsType<OkObjectResult>(result);
-        var payload = Assert.IsType<ValidateFundingExtensionCandidatesCommandResponse>(ok.Value);
+        var payload = Assert.IsType<ValidateRolloverExtensionCommandResponse>(ok.Value);
 
         Assert.True(payload.IsValid);
         Assert.NotNull(payload.ValidationSuccessSummary);
@@ -319,14 +319,14 @@ public class RolloverControllerTests
 
 
     [Fact]
-    public async Task ValidateFundingExtensionCandidates_ReturnsOk_WhenValidationFails()
+    public async Task ValidateRolloverExtension_ReturnsOk_WhenValidationFails()
     {
-        var command = _fixture.Create<ValidateFundingExtensionCandidatesCommand>();
+        var command = _fixture.Create<ValidateRolloverExtensionCommand>();
 
-        var mediatorResponse = new BaseMediatrResponse<ValidateFundingExtensionCandidatesCommandResponse>
+        var mediatorResponse = new BaseMediatrResponse<ValidateRolloverExtensionCommandResponse>
         {
             Success = true,
-            Value = new ValidateFundingExtensionCandidatesCommandResponse
+            Value = new ValidateRolloverExtensionCommandResponse
             {
                 IsValid = false,
                 ValidationFailureSummary = new ValidationFailureSummary
@@ -337,13 +337,13 @@ public class RolloverControllerTests
             }
         };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<ValidateFundingExtensionCandidatesCommand>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<ValidateRolloverExtensionCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mediatorResponse);
 
-        var result = await _controller.ValidateFundingExtensionCandidatesCommand(command);
+        var result = await _controller.ValidateRolloverExtension(command);
 
         var ok = Assert.IsType<OkObjectResult>(result);
-        var payload = Assert.IsType<ValidateFundingExtensionCandidatesCommandResponse>(ok.Value);
+        var payload = Assert.IsType<ValidateRolloverExtensionCommandResponse>(ok.Value);
 
         Assert.False(payload.IsValid);
         Assert.NotNull(payload.ValidationFailureSummary);
@@ -352,23 +352,74 @@ public class RolloverControllerTests
 
 
     [Fact]
-    public async Task ValidateFundingExtensionCandidates_Returns500_WhenMediatorReturnsFailure()
+    public async Task ValidateRolloverExtension_Returns500_WhenMediatorReturnsFailure()
     {
-        var command = _fixture.Create<ValidateFundingExtensionCandidatesCommand>();
+        var command = _fixture.Create<ValidateRolloverExtensionCommand>();
 
-        var mediatorResponse = new BaseMediatrResponse<ValidateFundingExtensionCandidatesCommandResponse>
+        var mediatorResponse = new BaseMediatrResponse<ValidateRolloverExtensionCommandResponse>
         {
             Success = false,
             ErrorMessage = "Validation failed"
         };
 
-        _mediatorMock.Setup(m => m.Send(It.IsAny<ValidateFundingExtensionCandidatesCommand>(), It.IsAny<CancellationToken>()))
+        _mediatorMock.Setup(m => m.Send(It.IsAny<ValidateRolloverExtensionCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mediatorResponse);
 
-        var result = await _controller.ValidateFundingExtensionCandidatesCommand(command);
+        var result = await _controller.ValidateRolloverExtension(command);
 
         var status = Assert.IsType<StatusCodeResult>(result);
         Assert.Equal(StatusCodes.Status500InternalServerError, status.StatusCode);
     }
+
+    [Fact]
+    public async Task SubmitRolloverExtension_ReturnsOk_WhenMediatorReturnsSuccess()
+    {
+        var command = _fixture.Create<SubmitRolloverExtensionCommand>();
+
+        var returnMessage = "Not used yet, maybe we should remove it?";
+
+        var mediatorResponse = new BaseMediatrResponse<SubmitRolloverExtensionCommandResponse>
+        {
+            Success = true,
+            Value = new SubmitRolloverExtensionCommandResponse
+            {
+                ResultMessage = returnMessage,
+            }
+        };
+
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<SubmitRolloverExtensionCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(mediatorResponse);
+
+        var result = await _controller.SubmitRolloverExtension(command);
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        var payload = Assert.IsType<SubmitRolloverExtensionCommandResponse>(ok.Value);
+
+        Assert.Equal(returnMessage, payload.ResultMessage);
+    }
+
+    [Fact]
+    public async Task SubmitRolloverExtension_Returns500_WhenMediatorReturnsFailure()
+    {
+        var command = _fixture.Create<SubmitRolloverExtensionCommand>();
+
+        var mediatorResponse = new BaseMediatrResponse<SubmitRolloverExtensionCommandResponse>
+        {
+            Success = false,
+            ErrorMessage = "Submit failed"
+        };
+
+        _mediatorMock
+            .Setup(m => m.Send(It.IsAny<SubmitRolloverExtensionCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(mediatorResponse);
+
+        var result = await _controller.SubmitRolloverExtension(command);
+
+        var status = Assert.IsType<StatusCodeResult>(result);
+        Assert.Equal(StatusCodes.Status500InternalServerError, status.StatusCode);
+    }
+
+
 
 }

@@ -71,8 +71,6 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                     RolloverWorkflowRunId = workflowRunId
                 };
 
-                await _mediator.Send(new UpdateRolloverWorkflowCandidatesAfterP1ChecksCommand(),cancellationToken);
-
                 response.Success = true;
             }
             catch (RecordLockedException)

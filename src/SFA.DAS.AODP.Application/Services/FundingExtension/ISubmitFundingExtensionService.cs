@@ -4,9 +4,9 @@ using SFA.DAS.AODP.Data.Entities.Rollover;
 
 namespace SFA.DAS.AODP.Application.Services.FundingExtension
 {
-    public interface IApplyFundingExtensionsService
+    public interface ISubmitFundingExtensionService
     {
-        Task<bool> ApplyFundingExtensions(
+        Task<bool> Submit(
             List<RolloverCandidates> candidates,
             List<FundingExtensionItem> inputItems,
             List<QualificationFundings> fundings,

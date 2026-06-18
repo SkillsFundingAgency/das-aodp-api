@@ -6,19 +6,21 @@ using SFA.DAS.AODP.Application.Services.FundingExtension;
 using SFA.DAS.AODP.Application.Services.Validation;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
+using SFA.DAS.AODP.Infrastructure.Extensions;
 using SFA.DAS.AODP.Models.Rollover;
+using System.Text;
 
 namespace SFA.DAS.AODP.Application.Commands.Rollover
 {
-    public class ValidateFundingExtensionCandidatesCommandHandler
-        : IRequestHandler<ValidateFundingExtensionCandidatesCommand, BaseMediatrResponse<ValidateFundingExtensionCandidatesCommandResponse>>
+    public class ValidateRolloverExtensionCommandHandler
+        : IRequestHandler<ValidateRolloverExtensionCommand, BaseMediatrResponse<ValidateRolloverExtensionCommandResponse>>
     {
         private readonly IRolloverRepository _rolloverRepository;
         private readonly IRolloverFundingExtensionValidator _rolloverFundingExtensionValidator;
         private readonly IFundingExtensionCandidatesCsvBuilder _rolloverWorkflowCandidatesCsvBuilder;
         private readonly IFundingExtensionProjectionService _fundingExtensionProjectionService;
 
-        public ValidateFundingExtensionCandidatesCommandHandler(
+        public ValidateRolloverExtensionCommandHandler(
             IRolloverRepository rolloverRepository, 
             IRolloverFundingExtensionValidator rolloverFundingExtensionValidator, 
             IFundingExtensionCandidatesCsvBuilder rolloverWorkflowCandidatesCsvBuilder,
@@ -30,15 +32,15 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
             _fundingExtensionProjectionService = fundingExtensionProjectionService;
         }
 
-        public async Task<BaseMediatrResponse<ValidateFundingExtensionCandidatesCommandResponse>> Handle(
-            ValidateFundingExtensionCandidatesCommand request,
+        public async Task<BaseMediatrResponse<ValidateRolloverExtensionCommandResponse>> Handle(
+            ValidateRolloverExtensionCommand request,
             CancellationToken cancellationToken)
         {
-            var response = new BaseMediatrResponse<ValidateFundingExtensionCandidatesCommandResponse>();
+            var response = new BaseMediatrResponse<ValidateRolloverExtensionCommandResponse>();
 
             try
             {
-                var incomingKeys = request.FundingExtensionCandidates
+                var incomingKeys = request.RolloverCandidates
                     .Select(x => new CandidateKey(x.Qan, x.FundingStreamName))
                     .ToHashSet();
 
@@ -46,18 +48,37 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                     .GetFundingExtensionValidationContextAsync(incomingKeys, cancellationToken);
 
                 var validationResult = _rolloverFundingExtensionValidator
-                    .Validate(request.FundingExtensionCandidates, validationContext, cancellationToken);
+                    .Validate(request.RolloverCandidates, validationContext, cancellationToken);
 
-                var validationResponse = new ValidateFundingExtensionCandidatesCommandResponse
+                var validationResponse = new ValidateRolloverExtensionCommandResponse
                 {
                     IsValid = validationResult.IsValid
                 };
 
+
                 if (!validationResult.IsValid)
                 {
-                    var exportRows = validationResult.Candidates
-                        .Select(c => FundingExtensionCandidateExportMapper.Map(c.CandidateDetails))
-                        .ToList();
+                    var latestRunId = await _rolloverRepository.GetLatestWorkflowRunIdAsync(cancellationToken);
+
+                    if (latestRunId == Guid.Empty)
+                        throw new InvalidOperationException("No workflow runs exist");
+
+                    var exportRows = await _rolloverRepository.GetRolloverWorkflowCandidatesByRunId(latestRunId.Value, cancellationToken);
+
+                    var exportLookup = exportRows.ToDictionary(
+                        x => new CandidateKey(x.QAN, x.FundingStreamName));
+
+                    foreach (var result in validationResult.Candidates)
+                    {
+                        var uploaded = result.CandidateDetails;
+
+                        var key = new CandidateKey(uploaded.Qan.OrEmpty(), uploaded.FundingStreamName);
+
+                        if (exportLookup.TryGetValue(key, out var exportRow))
+                        {
+                            RolloverCandidateExportMapper.ApplyUserUpdates(exportRow, uploaded);
+                        }
+                    }
 
                     var csvBytes = _rolloverWorkflowCandidatesCsvBuilder
                         .BuildWithValidationErrors(exportRows, validationResult.Candidates);
@@ -73,11 +94,9 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                     return response;
                 }
 
+                var dbCandidatesStatus = await _rolloverRepository.GetRolloverCandidatesStatusAsync(cancellationToken);
 
-                var dbCandidates = await _rolloverRepository
-                    .GetFundingExtensionCandidatesAsync(cancellationToken);
-
-                validationResponse.ValidationSuccessSummary = _fundingExtensionProjectionService.ProjectSummary(dbCandidates, request.FundingExtensionCandidates);
+                validationResponse.ValidationSuccessSummary = _fundingExtensionProjectionService.ProjectSummary(dbCandidatesStatus, request.RolloverCandidates);
 
                 response.Value = validationResponse;
                 response.Success = true;

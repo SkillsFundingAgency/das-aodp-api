@@ -6,7 +6,8 @@ public enum RolloverStatus
     NeedsReview = 1,
     InProgress = 2,
     Extended = 3,
-    Rejected = 4,  
-    Ignored = 5,
+    Excluded = 4,
+    Rejected = 5,  
+    Ignored = 6,
     Unknown = 99
 }

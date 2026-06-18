@@ -1,7 +1,7 @@
 ﻿
 namespace SFA.DAS.AODP.Models.Rollover
 {
-    public class FundingExtensionCandidateItem
+    public class RolloverCandidateStatusItem
     {
         public string Qan { get; set; } = null!;
         public string FundingStreamName { get; set; } = null!;

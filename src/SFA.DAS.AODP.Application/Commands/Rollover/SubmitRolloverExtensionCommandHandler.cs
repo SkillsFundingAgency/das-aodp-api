@@ -6,17 +6,17 @@ using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Application.Commands.Rollover
 {
-    public class ApplyFundingExtensionsCommandHandler
-        : IRequestHandler<ApplyFundingExtensionsCommand, BaseMediatrResponse<ApplyFundingExtensionsCommandResponse>>
+    public class SubmitRolloverExtensionCommandHandler
+        : IRequestHandler<SubmitRolloverExtensionCommand, BaseMediatrResponse<SubmitRolloverExtensionCommandResponse>>
     {
         private readonly IRolloverRepository _rolloverRepository;
         private readonly IQualificationFundingsRepository _qualificationFundingsRepository;
-        private readonly IApplyFundingExtensionsService _applyFundingExtensionsService;
+        private readonly ISubmitFundingExtensionService _applyFundingExtensionsService;
 
-        public ApplyFundingExtensionsCommandHandler(
+        public SubmitRolloverExtensionCommandHandler(
             IRolloverRepository rolloverRepository,
             IQualificationFundingsRepository qualificationFundingsRepository,
-            IApplyFundingExtensionsService applyFundingExtensionsService
+            ISubmitFundingExtensionService applyFundingExtensionsService
 )
         {
             _rolloverRepository = rolloverRepository;
@@ -24,11 +24,11 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
             _applyFundingExtensionsService = applyFundingExtensionsService;
         }
 
-        public async Task<BaseMediatrResponse<ApplyFundingExtensionsCommandResponse>> Handle(
-            ApplyFundingExtensionsCommand request, 
+        public async Task<BaseMediatrResponse<SubmitRolloverExtensionCommandResponse>> Handle(
+            SubmitRolloverExtensionCommand request, 
             CancellationToken cancellationToken)
         {
-            var response = new BaseMediatrResponse<ApplyFundingExtensionsCommandResponse>();
+            var response = new BaseMediatrResponse<SubmitRolloverExtensionCommandResponse>();
 
             try
             {
@@ -41,7 +41,7 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                     .ToList();
 
                 var candidates = await _rolloverRepository
-                    .GetRolloverApplyEntitiesAsync(keys, cancellationToken);
+                    .LoadRolloverCandidateGraphAsync(keys, cancellationToken);
 
                 if (candidates.Count == 0)
                 {
@@ -60,7 +60,7 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                 var fundings = await _qualificationFundingsRepository
                     .GetRolloverQualificationFundingsAsync(fundingKeys, cancellationToken);
 
-                var success = await _applyFundingExtensionsService.ApplyFundingExtensions(candidates, request.Items, fundings, cancellationToken);
+                var success = await _applyFundingExtensionsService.Submit(candidates, request.Items, fundings, cancellationToken);
 
                 if (!success)
                 {

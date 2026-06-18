@@ -6,8 +6,8 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
     public interface IFundingExtensionProjectionService
     {
         FundingExtensionSummary ProjectSummary(
-            List<FundingExtensionCandidateItem> dbCandidates,
-            List<FundingExtensionCandidate> uploadedCandidates);
+            List<RolloverCandidateStatusItem> dbCandidates,
+            List<RolloverCandidateForValidation> uploadedCandidates);
     }
 
 }

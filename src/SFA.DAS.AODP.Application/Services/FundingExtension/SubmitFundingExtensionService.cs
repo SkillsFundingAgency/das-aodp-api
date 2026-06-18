@@ -9,20 +9,20 @@ using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Application.Services.FundingExtension
 {
-    public class ApplyFundingExtensionService :IApplyFundingExtensionsService
+    public class SubmitFundingExtensionService :ISubmitFundingExtensionService
     {
         private readonly IRolloverRepository _rolloverRepository;
         private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
         private Guid RolloverExtendedActionTypeId = Guid.Parse("00000000-0000-0000-0000-000000000004");
         private Guid RolloverNotExtendedActionTypeId = Guid.Parse("00000000-0000-0000-0000-000000000005");
 
-        public ApplyFundingExtensionService(IRolloverRepository rolloverRepository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository)
+        public SubmitFundingExtensionService(IRolloverRepository rolloverRepository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository)
         {
             _rolloverRepository = rolloverRepository;
             _qualificationDiscussionHistoryRepository = qualificationDiscussionHistoryRepository;
         }
 
-        public async Task<bool> ApplyFundingExtensions(
+        public async Task<bool> Submit(
             List<RolloverCandidates> candidates,
             List<FundingExtensionItem> inputItems,
             List<QualificationFundings> fundings,

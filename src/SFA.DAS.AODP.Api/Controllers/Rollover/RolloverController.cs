@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.Rollover;
 using SFA.DAS.AODP.Application.Queries.Rollover;
 
@@ -74,19 +73,19 @@ public class RolloverController : BaseController
         return await SendRequestAsync(query);
     }
 
-    [HttpPost("rolloverextensionvalidation")]
-    [ProducesResponseType(typeof(ValidateFundingExtensionCandidatesCommandResponse), StatusCodes.Status200OK)]
+    [HttpPost("validaterolloverextension")]
+    [ProducesResponseType(typeof(ValidateRolloverExtensionCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> ValidateFundingExtensionCandidatesCommand(ValidateFundingExtensionCandidatesCommand validateFundingExtensionCandidatesCommand)
+    public async Task<IActionResult> ValidateRolloverExtension(ValidateRolloverExtensionCommand validateRolloverExtensionCommand)
     {
-        return await SendRequestAsync(validateFundingExtensionCandidatesCommand);
+        return await SendRequestAsync(validateRolloverExtensionCommand);
     }
 
-    [HttpPost("applyrolloverextension")]
-    [ProducesResponseType(typeof(ApplyFundingExtensionsCommandResponse), StatusCodes.Status200OK)]
+    [HttpPost("submitrolloverextension")]
+    [ProducesResponseType(typeof(SubmitRolloverExtensionCommandResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> ApplyFundingExtensionsToCandidates(ApplyFundingExtensionsCommand applyFundingExtensionToCandidatesCommand)
+    public async Task<IActionResult> SubmitRolloverExtension(SubmitRolloverExtensionCommand submitRolloverExtensinCommand)
     {
-        return await SendRequestAsync(applyFundingExtensionToCandidatesCommand);
+        return await SendRequestAsync(submitRolloverExtensinCommand);
     }
 }

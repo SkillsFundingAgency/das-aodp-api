@@ -7,8 +7,8 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
     public class FundingExtensionProjectionService : IFundingExtensionProjectionService
     {
         public FundingExtensionSummary ProjectSummary(
-            List<FundingExtensionCandidateItem> dbCandidates,
-            List<FundingExtensionCandidate> uploadedCandidates)
+            List<RolloverCandidateStatusItem> dbCandidates,
+            List<RolloverCandidateForValidation> uploadedCandidates)
         {
             var uploadedDistinct = uploadedCandidates
                 .GroupBy(x => new { x.Qan, x.FundingStreamName })

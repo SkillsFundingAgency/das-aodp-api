@@ -8,18 +8,18 @@ using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
 {
-    public class ValidateFundingExtensionCandidatesCommandHandlerTests
+    public class ValidateRolloverExtensionCommandHandlerTests
     {
         private readonly Mock<IRolloverRepository> _rolloverRepository = new();
         private readonly Mock<IRolloverFundingExtensionValidator> _validator = new();
         private readonly Mock<IFundingExtensionCandidatesCsvBuilder> _csvBuilder = new();
         private readonly Mock<IFundingExtensionProjectionService> _projectionService = new();
 
-        private readonly ValidateFundingExtensionCandidatesCommandHandler _handler;
+        private readonly ValidateRolloverExtensionCommandHandler _handler;
 
-        public ValidateFundingExtensionCandidatesCommandHandlerTests()
+        public ValidateRolloverExtensionCommandHandlerTests()
         {
-            _handler = new ValidateFundingExtensionCandidatesCommandHandler(
+            _handler = new ValidateRolloverExtensionCommandHandler(
                 _rolloverRepository.Object,
                 _validator.Object,
                 _csvBuilder.Object,
@@ -33,9 +33,9 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
         public async Task Handle_Success_UsesProjectionServiceAndReturnsSummary()
         {
             // Arrange
-            var command = new ValidateFundingExtensionCandidatesCommand
+            var command = new ValidateRolloverExtensionCommand
             {
-                FundingExtensionCandidates =
+                RolloverCandidates =
                 [
                     new() { Qan = "111", FundingStreamName = "FS", RollOverStatus = "To Extend" },
                     new() { Qan = "222", FundingStreamName = "FS", RollOverStatus = "To Exclude" }
@@ -61,17 +61,17 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
                 IsValid = true,
                 Candidates =
                 [
-                    new CandidateValidationResult { CandidateDetails = command.FundingExtensionCandidates[0] },
-                    new CandidateValidationResult { CandidateDetails = command.FundingExtensionCandidates[1] }
+                    new CandidateValidationResult { CandidateDetails = command.RolloverCandidates[0] },
+                    new CandidateValidationResult { CandidateDetails = command.RolloverCandidates[1] }
                 ]
             };
 
             _validator
                 .Setup(v => v.Validate(
-                    command.FundingExtensionCandidates, fakeContext, It.IsAny<CancellationToken>()))
+                    command.RolloverCandidates, fakeContext, It.IsAny<CancellationToken>()))
                 .Returns(validationResult);
 
-            var dbCandidates = new List<FundingExtensionCandidateItem>
+            var dbCandidates = new List<RolloverCandidateStatusItem>
             {
                 new() { Qan = "111", FundingStreamName = "FS", RolloverStatus = RolloverStatus.NeedsReview },
                 new() { Qan = "222", FundingStreamName = "FS", RolloverStatus = RolloverStatus.NeedsReview },
@@ -79,7 +79,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             };
 
             _rolloverRepository
-                .Setup(r => r.GetFundingExtensionCandidatesAsync(It.IsAny<CancellationToken>()))
+                .Setup(r => r.GetRolloverCandidatesStatusAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(dbCandidates);
 
             var expectedSummary = new FundingExtensionSummary
@@ -92,7 +92,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             };
 
             _projectionService
-                .Setup(p => p.ProjectSummary(dbCandidates, It.IsAny<List<FundingExtensionCandidate>>()))
+                .Setup(p => p.ProjectSummary(dbCandidates, It.IsAny<List<RolloverCandidateForValidation>>()))
                 .Returns(expectedSummary);
 
             // Act
@@ -104,7 +104,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             Assert.Equal(expectedSummary, result.Value.ValidationSuccessSummary);
 
             _projectionService.Verify(
-                p => p.ProjectSummary(dbCandidates, It.IsAny<List<FundingExtensionCandidate>>()),
+                p => p.ProjectSummary(dbCandidates, It.IsAny<List<RolloverCandidateForValidation>>()),
                 Times.Once);
         }
 
@@ -115,9 +115,9 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
         public async Task Handle_InvalidValidation_BuildsCsvAndReturnsFile()
         {
             // Arrange
-            var command = new ValidateFundingExtensionCandidatesCommand
+            var command = new ValidateRolloverExtensionCommand
             {
-                FundingExtensionCandidates =
+                RolloverCandidates =
                 [
                     new() { Qan = "111", FundingStreamName = "FS", RollOverStatus = "To Extend" }
                 ]
@@ -133,6 +133,11 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
                     It.IsAny<HashSet<CandidateKey>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(fakeContext);
 
+            _rolloverRepository
+                .Setup(r => r.GetLatestWorkflowRunIdAsync(
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Guid.NewGuid());
+
             var validationResult = new FundingExtensionValidationResult
             {
                 IsValid = false,
@@ -140,23 +145,37 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
                 Candidates =
                 [
                     new CandidateValidationResult
-                    {
-                        CandidateDetails = command.FundingExtensionCandidates[0],
-                        Errors = [ new ValidationFailure { Field = "QAN", Message = "Invalid QAN" } ]
-                    }
+            {
+                CandidateDetails = command.RolloverCandidates[0],
+                Errors = [ new ValidationFailure { Field = "QAN", Message = "Invalid QAN" } ]
+            }
                 ]
             };
 
             _validator
                 .Setup(v => v.Validate(
-                    command.FundingExtensionCandidates, fakeContext, It.IsAny<CancellationToken>()))
+                    command.RolloverCandidates, fakeContext, It.IsAny<CancellationToken>()))
                 .Returns(validationResult);
+
+            var exportRows = new List<RolloverCandidateForExport>
+            {
+                new()
+                {
+                    QAN = "111",
+                    FundingStreamName = "FS",
+                }
+            };
+
+            _rolloverRepository
+                .Setup(r => r.GetRolloverWorkflowCandidatesByRunId(
+                    It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(exportRows);
 
             var csvBytes = new byte[] { 1, 2, 3 };
 
             _csvBuilder
                 .Setup(x => x.BuildWithValidationErrors(
-                    It.IsAny<List<FundingExtensionCandidateDto>>(),
+                    exportRows,
                     validationResult.Candidates))
                 .Returns(csvBytes);
 
@@ -170,22 +189,23 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
 
             _csvBuilder.Verify(
                 x => x.BuildWithValidationErrors(
-                    It.IsAny<List<FundingExtensionCandidateDto>>(),
+                    exportRows,
                     validationResult.Candidates),
                 Times.Once);
 
             _projectionService.Verify(
-                p => p.ProjectSummary(It.IsAny<List<FundingExtensionCandidateItem>>(),
-                                      It.IsAny<List<FundingExtensionCandidate>>()),
+                p => p.ProjectSummary(It.IsAny<List<RolloverCandidateStatusItem>>(),
+                                      It.IsAny<List<RolloverCandidateForValidation>>()),
                 Times.Never);
         }
+
 
         [Fact]
         public async Task Handle_GenericException_ReturnsErrorMessage()
         {
-            var command = new ValidateFundingExtensionCandidatesCommand
+            var command = new ValidateRolloverExtensionCommand
             {
-                FundingExtensionCandidates = []
+                RolloverCandidates = []
             };
 
             _rolloverRepository
@@ -202,11 +222,11 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
         [Fact]
         public async Task Handle_NoWorkflowRunsExist_ReturnsFailure()
         {
-            var command = new ValidateFundingExtensionCandidatesCommand
+            var command = new ValidateRolloverExtensionCommand
             {
-                FundingExtensionCandidates =
+                RolloverCandidates =
                 [
-                    new() { Qan = "60110314", FundingStreamName = "FS", RollOverStatus = "To Extend" }
+                    new() { Qan = "60110314", FundingStreamName = "FS", RollOverStatus = "Extended" }
                 ]
             };
 

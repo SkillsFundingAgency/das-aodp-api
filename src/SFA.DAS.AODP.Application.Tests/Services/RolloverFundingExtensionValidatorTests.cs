@@ -24,7 +24,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
                 workflowCandidatesInDb?.ToHashSet() ?? new HashSet<CandidateKey>());
         }
 
-        private FundingExtensionCandidate CandidateRow(
+        private RolloverCandidateForValidation CandidateRow(
             int row = 1,
             string qan = "12345",
             string stream = "LegalEntitlementEnglishandMaths",
@@ -32,7 +32,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
             string? reason = "Some reason",
             DateTime? endDate = null)
         {
-            return new FundingExtensionCandidate
+            return new RolloverCandidateForValidation
             {
                 RowNumber = row,
                 Qan = qan,
