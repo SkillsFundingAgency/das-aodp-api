@@ -5,6 +5,7 @@ using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
+using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Data.UnitTests.Repositories.Rollover;
 
@@ -428,7 +429,7 @@ public class RolloverRepositoryTests
         Assert.Equal("Funding A", row.FundingStreamName);
         Assert.Equal(new DateOnly(2026, 06, 01), row.FundingApprovalStartDate);
 
-        Assert.Equal("To Exclude", row.ProposedOutcome); // PassP1 default = false
+        Assert.Equal(RolloverStatus.Excluded.ToString(), row.ProposedOutcome); // PassP1 default = false
     }
 
     [Fact]

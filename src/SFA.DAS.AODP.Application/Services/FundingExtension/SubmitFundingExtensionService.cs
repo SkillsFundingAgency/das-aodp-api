@@ -80,7 +80,7 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
                         }
                         break;
 
-                    case RolloverStatus.Rejected:
+                    case RolloverStatus.Excluded:
                         c.SetExcluded(input.ExclusionReason!);
                         break;
 
@@ -110,7 +110,7 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
                     .ToList();
 
                 var excluded = group
-                    .Where(c => c.RolloverStatus == RolloverStatus.Rejected)
+                    .Where(c => c.RolloverStatus == RolloverStatus.Excluded)
                     .ToList();
 
                 if (extended.Any())

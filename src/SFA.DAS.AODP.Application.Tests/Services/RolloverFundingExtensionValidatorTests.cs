@@ -28,7 +28,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
             int row = 1,
             string qan = "12345",
             string stream = "LegalEntitlementEnglishandMaths",
-            string status = "To Extend",
+            string status = "Extended",
             string? reason = "Some reason",
             DateTime? endDate = null)
         {
@@ -37,7 +37,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
                 RowNumber = row,
                 Qan = qan,
                 FundingStreamName = stream,
-                RollOverStatus = status,
+                RollOverStatus = status.ToString(),
                 ExclusionReason = reason,
                 ProposedFundingApprovalEndDate = endDate ?? DateTime.UtcNow.AddDays(10)
             };
@@ -112,7 +112,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
         public void Validate_ShouldFail_WhenToExcludeAndNoReason()
         {
             var candidate = CandidateRow(
-                status: "To Exclude",
+                status: RolloverStatus.Excluded.ToString(),
                 reason: "");
 
             var key = new CandidateKey("12345", "LegalEntitlementEnglishandMaths");

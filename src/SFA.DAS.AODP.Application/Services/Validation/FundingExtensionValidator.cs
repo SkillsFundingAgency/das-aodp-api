@@ -16,6 +16,12 @@ namespace SFA.DAS.AODP.Application.Services.Validation
     {
         private readonly List<Action<CandidateValidationResult, FundingExtensionCandidateValidationContext>> _rules;
 
+        public static readonly RolloverStatus[] AllowedStatusForUserInput =
+        [
+            RolloverStatus.Extended,
+            RolloverStatus.Excluded
+        ];
+
         public FundingExtensionValidator()
         {
             _rules = new()
@@ -106,14 +112,25 @@ namespace SFA.DAS.AODP.Application.Services.Validation
          CandidateValidationResult result,
          FundingExtensionCandidateValidationContext ctx)
         {
-            if (!RolloverCsvInput.AllowedStatuses.Contains(result.CandidateDetails.RollOverStatus))
+            if (!Enum.TryParse<RolloverStatus>(result.CandidateDetails.RollOverStatus, true, out var parsed))
             {
                 result.Errors.Add(new ValidationFailure
                 {
                     Field = "RolloverStatus",
-                    Message = $"This candidate has an invalid RollOver Status ({string.Join(", ", RolloverCsvInput.AllowedStatuses)})"
+                    Message = $"This candidate has an invalid RollOver Status ({string.Join(", ", AllowedStatusForUserInput)})"
+                });
+                return;
+            }
+
+            if (!AllowedStatusForUserInput.Contains(parsed))
+            {
+                result.Errors.Add(new ValidationFailure
+                {
+                    Field = "RolloverStatus",
+                    Message = $"This candidate has an invalid RollOver Status ({string.Join(", ", AllowedStatusForUserInput)})"
                 });
             }
+
         }
 
 
@@ -121,7 +138,21 @@ namespace SFA.DAS.AODP.Application.Services.Validation
             CandidateValidationResult result,
             FundingExtensionCandidateValidationContext ctx)
         {
-            if (result.CandidateDetails.RollOverStatus == "To Exclude" &&
+            var raw = result.CandidateDetails.RollOverStatus;
+
+            // Convert string → enum
+            if (!Enum.TryParse<RolloverStatus>(raw, true, out var status))
+            {
+                //result.Errors.Add(new ValidationFailure
+                //{
+                //    Field = "RolloverStatus",
+                //    Message = $"Invalid RollOver Status '{raw}'"
+                //});
+                return;
+            }
+
+            // Now compare enum → enum
+            if (status == RolloverStatus.Excluded &&
                 string.IsNullOrWhiteSpace(result.CandidateDetails.ExclusionReason))
             {
                 result.Errors.Add(new ValidationFailure
@@ -131,6 +162,7 @@ namespace SFA.DAS.AODP.Application.Services.Validation
                 });
             }
         }
+
     }
 
 }

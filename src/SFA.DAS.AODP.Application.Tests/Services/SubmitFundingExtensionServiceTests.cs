@@ -193,7 +193,7 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
             // Assert
             Assert.True(result);
 
-            Assert.Equal(RolloverStatus.NeedsReview, candidate.RolloverStatus);
+            Assert.Equal(RolloverStatus.None, candidate.RolloverStatus);
 
             _historyRepository.Verify(h => h.AddDiscussionHistories(It.IsAny<List<QualificationDiscussionHistory>>()), Times.Once);
         }

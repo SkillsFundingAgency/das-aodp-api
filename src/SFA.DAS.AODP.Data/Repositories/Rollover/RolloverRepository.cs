@@ -161,8 +161,8 @@ public class RolloverRepository : IRolloverRepository
                         .Select(qf => qf.StartDate)
                         .FirstOrDefault(),
 
-                ProposedOutcome = rwc.PassP1 ? "To Extend" : "To Exclude",
-                RolloverStatus = rwc.RolloverCandidates.RolloverStatus,
+                ProposedOutcome = rwc.PassP1 ? RolloverStatus.Extended.ToString() : RolloverStatus.Excluded.ToString(),
+                RolloverStatus = rwc.PassP1 ? RolloverStatus.Extended : RolloverStatus.Excluded,
                 ExclusionReason = rwc.PassP1 ? rwc.RolloverCandidates.ExclusionReason : rwc.P1FailureReason,
 
                 CurrentFundingApprovalEndDate = rwc.CurrentFundingEndDate,

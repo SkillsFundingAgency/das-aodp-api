@@ -37,8 +37,8 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             {
                 RolloverCandidates =
                 [
-                    new() { Qan = "111", FundingStreamName = "FS", RollOverStatus = "To Extend" },
-                    new() { Qan = "222", FundingStreamName = "FS", RollOverStatus = "To Exclude" }
+                    new() { Qan = "111", FundingStreamName = "FS", RollOverStatus = RolloverStatus.Extended.ToString() },
+                    new() { Qan = "222", FundingStreamName = "FS", RollOverStatus = RolloverStatus.Excluded.ToString() }
                 ]
             };
 
@@ -119,7 +119,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             {
                 RolloverCandidates =
                 [
-                    new() { Qan = "111", FundingStreamName = "FS", RollOverStatus = "To Extend" }
+                    new() { Qan = "111", FundingStreamName = "FS", RollOverStatus = RolloverStatus.Extended.ToString() }
                 ]
             };
 

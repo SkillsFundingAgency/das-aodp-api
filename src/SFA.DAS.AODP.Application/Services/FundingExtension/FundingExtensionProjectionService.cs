@@ -38,7 +38,7 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
                     .Select(x => RolloverStatusInfo.FromCsv(x.RollOverStatus))
                     .Count(s => s == RolloverStatus.Extended);
             var extendedCount = projectedStatuses.Count(x => x == RolloverStatus.Extended);
-            var excludedCount = projectedStatuses.Count(x => x == RolloverStatus.Rejected);
+            var excludedCount = projectedStatuses.Count(x => x == RolloverStatus.Excluded);
             var pendingCount = projectedStatuses.Count(x => x == RolloverStatus.NeedsReview);
 
             return new FundingExtensionSummary

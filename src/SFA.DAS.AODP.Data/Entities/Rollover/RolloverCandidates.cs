@@ -76,7 +76,7 @@ public class RolloverCandidates
 
     public void SetExcluded(string exclusionReason)
     {
-        RolloverStatus = RolloverStatus.Rejected;
+        RolloverStatus = RolloverStatus.Excluded;
         ExclusionReason = exclusionReason;
     }
 }
