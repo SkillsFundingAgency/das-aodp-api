@@ -1,5 +1,7 @@
 using Moq;
 using SFA.DAS.AODP.Data.Entities.Import;
+using SFA.DAS.AODP.Data.Entities.QaaQualification;
+using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Providers;
 using SFA.DAS.AODP.Data.Repositories.Pldns;
 using SFA.DAS.AODP.Testing.Stubs;
@@ -11,18 +13,19 @@ namespace SFA.DAS.AODP.Data.UnitTests.Providers;
 public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
 {
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsAfterPublicationDate_AndBeforeIlrDeadline_ReturnsEarlierOfLastDateForRegistrationAndCurrentAcademicYear()
+    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsAfterPublicationDate_AndBeforeIlrDeadline_AndNotInCurrentAcademicYear_ReturnEndOfNextAcademicYear()
     {
         // Arrange
         var qan = "QAN-001";
         var lastDateForRegistration = new DateOnly(2026, 9, 30);
-        var currentFundingApprovalEndDate = (DateOnly?)null;
         var publicationDate = new DateOnly(2026, 6, 12);
 
         var clockProvider = new FakeSystemClockProvider(new DateOnly(2026, 10, 15));
         var ilrSubmissionDeadlinesProvider = new FakeIlrSubmissionDeadlinesProvider(new IlrSubmissionDeadline("R14", new DateOnly(2026, 10, 22)));
         var academicYearProvider = new FakeAcademicYearProvider(new DateOnly(2026, 7, 31));
         var pldnsRepository = CreatePldnsRepositoryReturningNull();
+
+        var qualification = RegulatedQaaQualification.Create(new DateTime(2026, 01, 02), qan, "title", "ao", new DateOnly(2025, 09, 01), lastDateForRegistration, SectorSubjectArea.AccountingAndFinance);
 
         var sut = new QaaFundingApprovalEndDateCalculator(
             clockProvider,
@@ -32,18 +35,17 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
 
         // Act
         var result = await sut.CalculateFundingApprovalEndDateAsync(
-            qan,
-            lastDateForRegistration,
-            currentFundingApprovalEndDate,
+            qualification,
+            FundingStream.Age1619,
             publicationDate,
             CancellationToken);
 
         // Assert
-        result.ShouldBe(new DateOnly(2026, 7, 31));
+        result.ShouldBe(new DateOnly(2027, 7, 31));
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsAfterPublicationDate_AndOnOrAfterIlrDeadline_UsesNextAcademicYear()
+    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsAfterPublicationDate_AndOnOrAfterIlrDeadline_UsesAcademicYearOfTheFollowingYear()
     {
         // Arrange
         var qan = "QAN-002";
@@ -55,6 +57,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
         var ilrSubmissionDeadlinesProvider = new FakeIlrSubmissionDeadlinesProvider(new IlrSubmissionDeadline("R14", new DateOnly(2026, 10, 22)));
         var academicYearProvider = new FakeAcademicYearProvider(new DateOnly(2026, 7, 31));
         var pldnsRepository = CreatePldnsRepositoryReturningNull();
+        var qualification = RegulatedQaaQualification.Create(new DateTime(2026, 01, 02), qan, "title", "ao", new DateOnly(2025, 09, 01), lastDateForRegistration, SectorSubjectArea.AccountingAndFinance);
 
         var sut = new QaaFundingApprovalEndDateCalculator(
             clockProvider,
@@ -64,29 +67,28 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
 
         // Act
         var result = await sut.CalculateFundingApprovalEndDateAsync(
-            qan,
-            lastDateForRegistration,
-            currentFundingApprovalEndDate,
+            qualification,
+            FundingStream.Age1619,
             publicationDate,
             CancellationToken);
 
         // Assert
-        result.ShouldBe(new DateOnly(2027, 7, 31));
+        result.ShouldBe(new DateOnly(2028, 7, 31));
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsAfterPublicationDate_AndLastDateIsBeforeAcademicYear_ReturnsLastDateForRegistration()
+    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsAfterPublicationDate_AndLastDateIsBeforeAcademicYear_ReturnsEndOfCurrentAcademicYear()
     {
         // Arrange
         var qan = "QAN-003";
         var lastDateForRegistration = new DateOnly(2026, 6, 30);
-        var currentFundingApprovalEndDate = (DateOnly?)null;
         var publicationDate = new DateOnly(2026, 6, 1);
 
-        var clockProvider = new FakeSystemClockProvider(new DateOnly(2026, 10, 15));
+        var clockProvider = new FakeSystemClockProvider(new DateOnly(2026, 5, 15));
         var ilrSubmissionDeadlinesProvider = new FakeIlrSubmissionDeadlinesProvider(new IlrSubmissionDeadline("R14", new DateOnly(2026, 10, 22)));
         var academicYearProvider = new FakeAcademicYearProvider(new DateOnly(2026, 7, 31));
         var pldnsRepository = CreatePldnsRepositoryReturningNull();
+        var qualification = RegulatedQaaQualification.Create(new DateTime(2026, 01, 02), qan, "title", "ao", new DateOnly(2025, 09, 01), lastDateForRegistration, SectorSubjectArea.AccountingAndFinance);
 
         var sut = new QaaFundingApprovalEndDateCalculator(
             clockProvider,
@@ -96,23 +98,21 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
 
         // Act
         var result = await sut.CalculateFundingApprovalEndDateAsync(
-            qan,
-            lastDateForRegistration,
-            currentFundingApprovalEndDate,
+            qualification,
+            FundingStream.Age1619,
             publicationDate,
             CancellationToken);
 
         // Assert
-        result.ShouldBe(lastDateForRegistration);
+        result.ShouldBe(new DateOnly(2026, 07, 31));
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsBeforePublicationDate_AndCurrentFundingApprovalEndDateIsNull_ReturnsLastDateForRegistration()
+    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsBeforePublicationDate_AndCurrentFundingApprovalEndDateIsNull_ReturnsHardStopOnPublicationDate()
     {
         // Arrange
         var qan = "QAN-004";
         var lastDateForRegistration = new DateOnly(2026, 5, 31);
-        DateOnly? currentFundingApprovalEndDate = null;
         var publicationDate = new DateOnly(2026, 6, 12);
 
         var pldnsRepository = CreatePldnsRepositoryReturningNull();
@@ -123,20 +123,21 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
             new FakeAcademicYearProvider(new DateOnly(2026, 7, 31)),
             pldnsRepository.Object);
 
+        var qualification = RegulatedQaaQualification.Create(new DateTime(2026, 01, 02), qan, "title", "ao", new DateOnly(2025, 09, 01), lastDateForRegistration, SectorSubjectArea.AccountingAndFinance);
+
         // Act
         var result = await sut.CalculateFundingApprovalEndDateAsync(
-            qan,
-            lastDateForRegistration,
-            currentFundingApprovalEndDate,
+            qualification,
+            FundingStream.Age1619,
             publicationDate,
             CancellationToken);
 
         // Assert
-        result.ShouldBe(lastDateForRegistration);
+        result.ShouldBe(publicationDate);
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsBeforePublicationDate_AndAfterCurrentFundingApprovalEndDate_ReturnsLastDateForRegistration()
+    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsBeforePublicationDate_AndAfterCurrentFundingApprovalEndDate_ReturnsPublicationDate()
     {
         // Arrange
         var qan = "QAN-005";
@@ -146,6 +147,8 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
         
         var pldnsRepository = CreatePldnsRepositoryReturningNull();
 
+        var qualification = RegulatedQaaQualification.Create(new DateTime(2026, 01, 02), qan, "title", "ao", new DateOnly(2025, 09, 01), lastDateForRegistration, SectorSubjectArea.AccountingAndFinance, currentFundingApprovalEndDate);
+
         var sut = new QaaFundingApprovalEndDateCalculator(
             new FakeSystemClockProvider(new DateOnly(2026, 6, 12)),
             new FakeIlrSubmissionDeadlinesProvider(new IlrSubmissionDeadline("R14", new DateOnly(2026, 10, 22))),
@@ -154,14 +157,13 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
 
         // Act
         var result = await sut.CalculateFundingApprovalEndDateAsync(
-            qan,
-            lastDateForRegistration,
-            currentFundingApprovalEndDate,
+            qualification,
+            FundingStream.Age1619,
             publicationDate,
             CancellationToken);
 
         // Assert
-        result.ShouldBe(lastDateForRegistration);
+        result.ShouldBe(publicationDate);
     }
 
     [Fact]
@@ -175,6 +177,8 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
         
         var pldnsRepository = CreatePldnsRepositoryReturningNull();
 
+        var qualification = RegulatedQaaQualification.Create(new DateTime(2026, 01, 02), qan, "title", "ao", new DateOnly(2025, 09, 01), lastDateForRegistration, SectorSubjectArea.AccountingAndFinance, currentFundingApprovalEndDate);
+
         var sut = new QaaFundingApprovalEndDateCalculator(
             new FakeSystemClockProvider(new DateOnly(2026, 6, 12)),
             new FakeIlrSubmissionDeadlinesProvider(new IlrSubmissionDeadline("R14", new DateOnly(2026, 10, 22))),
@@ -183,9 +187,8 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
 
         // Act
         var result = await sut.CalculateFundingApprovalEndDateAsync(
-            qan,
-            lastDateForRegistration,
-            currentFundingApprovalEndDate,
+            qualification,
+            FundingStream.Age1619,
             publicationDate,
             CancellationToken);
 
@@ -204,6 +207,8 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
 
         var pldnsRepository = CreatePldnsRepositoryReturningNull();
 
+        var qualification = RegulatedQaaQualification.Create(new DateTime(2026, 01, 02), qan, "title", "ao", new DateOnly(2025, 09, 01), lastDateForRegistration, SectorSubjectArea.AccountingAndFinance, currentFundingApprovalEndDate);
+
         var sut = new QaaFundingApprovalEndDateCalculator(
             new FakeSystemClockProvider(new DateOnly(2026, 6, 12)),
             new FakeIlrSubmissionDeadlinesProvider(new IlrSubmissionDeadline("R14", new DateOnly(2026, 10, 22))),
@@ -212,9 +217,8 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
 
         // Act
         var result = await sut.CalculateFundingApprovalEndDateAsync(
-            qan,
-            lastDateForRegistration,
-            currentFundingApprovalEndDate,
+            qualification,
+            FundingStream.Age1619,
             publicationDate,
             CancellationToken);
 
@@ -228,7 +232,6 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
         // Arrange
         var qan = "QAN-008";
         var lastDateForRegistration = new DateOnly(2026, 9, 30);
-        var currentFundingApprovalEndDate = (DateOnly?)null;
         var publicationDate = new DateOnly(2026, 6, 12);
 
         var pldnsRepository = CreatePldnsRepositoryReturning(
@@ -242,11 +245,12 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
             new FakeAcademicYearProvider(new DateOnly(2026, 7, 31)),
             pldnsRepository.Object);
 
+        var qualification = RegulatedQaaQualification.Create(new DateTime(2026, 01, 02), qan, "title", "ao", new DateOnly(2025, 09, 01), lastDateForRegistration, SectorSubjectArea.AccountingAndFinance);
+
         // Act
         var result = await sut.CalculateFundingApprovalEndDateAsync(
-            qan,
-            lastDateForRegistration,
-            currentFundingApprovalEndDate,
+            qualification,
+            FundingStream.Age1619,
             publicationDate,
             CancellationToken);
 
@@ -255,12 +259,11 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenPldnsDatesAreLaterThanCalculatedDate_KeepsCalculatedFundingApprovalEndDate()
+    public async Task CalculateFundingApprovalEndDateAsync_WhenPldnsComesSoonerThanEndOfAcademicYear_AndLastDateForRegistrationInCurrentAcademicYear_ReturnPldnsDate()
     {
         // Arrange
         var qan = "QAN-009";
         var lastDateForRegistration = new DateOnly(2026, 9, 30);
-        var currentFundingApprovalEndDate = (DateOnly?)null;
         var publicationDate = new DateOnly(2026, 6, 12);
 
         var pldnsRepository = CreatePldnsRepositoryReturning(
@@ -274,16 +277,17 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
             new FakeAcademicYearProvider(new DateOnly(2026, 7, 31)),
             pldnsRepository.Object);
 
+        var qualification = RegulatedQaaQualification.Create(new DateTime(2026, 01, 02), qan, "title", "ao", new DateOnly(2025, 09, 01), lastDateForRegistration, SectorSubjectArea.AccountingAndFinance);
+
         // Act
         var result = await sut.CalculateFundingApprovalEndDateAsync(
-            qan,
-            lastDateForRegistration,
-            currentFundingApprovalEndDate,
+            qualification,
+            FundingStream.Age1619,
             publicationDate,
             CancellationToken);
 
         // Assert
-        result.ShouldBe(new DateOnly(2026, 7, 31));
+        result.ShouldBe(new DateOnly(2026, 8, 31));
     }
 
     [Fact]
@@ -292,7 +296,6 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
         // Arrange
         var qan = "QAN-010";
         var lastDateForRegistration = new DateOnly(2026, 9, 30);
-        var currentFundingApprovalEndDate = (DateOnly?)null;
         var publicationDate = new DateOnly(2026, 6, 12);
 
         var pldnsRepository = CreatePldnsRepositoryReturning(
@@ -303,47 +306,20 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
         var sut = new QaaFundingApprovalEndDateCalculator(
             new FakeSystemClockProvider(new DateOnly(2026, 10, 15)),
             new FakeIlrSubmissionDeadlinesProvider(new IlrSubmissionDeadline("R14", new DateOnly(2026, 10, 22))),
-            new FakeAcademicYearProvider(new DateOnly(2026, 7, 31)),
+            new FakeAcademicYearProvider(new DateOnly(2027, 7, 31)),
             pldnsRepository.Object);
+
+        var qualification = RegulatedQaaQualification.Create(new DateTime(2026, 01, 02), qan, "title", "ao", new DateOnly(2025, 09, 01), lastDateForRegistration, SectorSubjectArea.AccountingAndFinance);
 
         // Act
         var result = await sut.CalculateFundingApprovalEndDateAsync(
-            qan,
-            lastDateForRegistration,
-            currentFundingApprovalEndDate,
+            qualification,
+            FundingStream.Age1619,
             publicationDate,
             CancellationToken);
 
         // Assert
-        result.ShouldBe(new DateOnly(2026, 7, 31));
-    }
-
-    [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_PassesQanAndCancellationTokenToPldnsRepository()
-    {
-        // Arrange
-        var qan = "QAN-011";
-
-        var pldnsRepository = CreatePldnsRepositoryReturningNull();
-
-        var sut = new QaaFundingApprovalEndDateCalculator(
-            new FakeSystemClockProvider(new DateOnly(2026, 6, 12)),
-            new FakeIlrSubmissionDeadlinesProvider(new IlrSubmissionDeadline("R14", new DateOnly(2026, 10, 22))),
-            new FakeAcademicYearProvider(new DateOnly(2026, 7, 31)),
-            pldnsRepository.Object);
-
-        // Act
-        await sut.CalculateFundingApprovalEndDateAsync(
-            qan,
-            new DateOnly(2026, 6, 12),
-            new DateOnly(2026, 7, 31),
-            new DateOnly(2026, 6, 12),
-            CancellationToken);
-
-        // Assert
-        pldnsRepository.Verify(
-            repository => repository.GetPldnsByQanAsync(qan, CancellationToken),
-            Times.Once);
+        result.ShouldBe(new DateOnly(2027, 7, 31));
     }
 
     private static Mock<IPldnsRepository> CreatePldnsRepositoryReturningNull()
@@ -386,6 +362,11 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
         public DateOnly GetCurrentAcademicYearEndDate()
         {
             return currentAcademicYearEndDate;
+        }
+
+        public DateOnly GetAcademicYearEndForDate(DateOnly dateOnly)
+        {
+            return dateOnly;
         }
 
         public bool IsWithinCurrentAcademicYear(DateTime? dateToCheck) => true;

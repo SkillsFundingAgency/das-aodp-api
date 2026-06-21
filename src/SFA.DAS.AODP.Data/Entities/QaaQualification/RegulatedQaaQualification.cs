@@ -1,8 +1,13 @@
-﻿using SFA.DAS.AODP.Data.Providers;
+﻿using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Providers;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SFA.DAS.AODP.Data.Entities.QaaQualification;
 
+/// <summary>
+/// Represents a Qaa qualification entity.
+/// </summary>
+/// <remarks>A Qaa qualification funding is only applicable for the Age 16-19, Advanced Learner Loans and Legal Entitlement L2-L3 funding streams.</remarks>
 [Table("QaaQualification", Schema = "regulated")]
 public partial class RegulatedQaaQualification
 {
@@ -27,11 +32,6 @@ public partial class RegulatedQaaQualification
     public DateTime LastChangedAt { get; private set; }
 
     /// <summary>
-    /// A hash of the content for the qualification, this is used to determine if the content has changed since the last import, and therefore whether we need to update the record in the database or not.
-    /// </summary>
-    public string ContentHash { get; private set; } = null!;
-
-    /// <summary>
     /// The outcome of the latest import comparison, this is used to determine whether the record was created, updated or unchanged as part of the latest import.
     /// </summary>
     public QaaImportComparisonOutcome LatestImportComparisonOutcome { get; private set; }
@@ -40,6 +40,23 @@ public partial class RegulatedQaaQualification
     /// The type of change that caused the last date for registration to change, this is used to determine whether we need to update the record in the database or not, and also to determine whether we need to update the last funding approval end date or not.
     /// </summary>
     public QaaLastDateForRegistrationChangeType LastDateForRegistrationChangeType { get; private set; }
+
+    /// <summary>
+    /// Calculates whether we need to recalculate the funding approval end date based on whether the last date for registration has changed.
+    /// </summary>
+    protected bool NeedToRecalculateFundingApprovalEndDate => HasLastDateForRegistrationChanged && HasComparisonOutcomeChanged;
+
+    /// <summary>
+    /// Is the qualification New to QFAST or has the last registration date changed, both of these warrant a funding approval end date recalculation.
+    /// </summary>
+    protected bool HasComparisonOutcomeChanged => LatestImportComparisonOutcome is QaaImportComparisonOutcome.New
+        or QaaImportComparisonOutcome.LastDateForRegistrationChanged;
+
+    /// <summary>
+    /// Has the last date for registration changed.
+    /// </summary>
+    protected bool HasLastDateForRegistrationChanged => LastDateForRegistrationChangeType is QaaLastDateForRegistrationChangeType.BroughtForward
+        or QaaLastDateForRegistrationChangeType.Extended;
 
     /// <summary>
     /// The unique identifier for the latest qualification history record for this qualification, this is used to link to the history records for the qualification, and to determine whether we need to create a new history record or not.
@@ -97,9 +114,19 @@ public partial class RegulatedQaaQualification
     public DateOnly? DiscontinuedDate { get; private set; }
 
     /// <summary>
-    /// What date is the last date that funding can be approved for, this is set as part of the output file generation.
+    /// The last date that this qualification will be funded to for the Age 16-19 funding stream.
     /// </summary>
-    public DateOnly? LastFundingApprovalEndDate { get; set; }
+    public DateOnly? Age1619FundingApprovalEndDate { get; set; }
+
+    /// <summary>
+    /// The last date that this qualification will be funded to for the Advanced Learner Loans funding stream.
+    /// </summary>
+    public DateOnly? AdvancedLearnerLoansFundingApprovalEndDate { get; set; }
+
+    /// <summary>
+    /// The last date that this qualification will be funded to for the Legal entitlement L2-L3 funding stream.
+    /// </summary>
+    public DateOnly? LegalEntitlementL2L3FundingApprovalEndDate { get; set; }
 
     /// <summary>
     /// A value object representation for the sector subject area.
@@ -117,7 +144,8 @@ public partial class RegulatedQaaQualification
         string awardingBody,
         DateOnly startDateForRegistration,
         DateOnly lastDateForRegistration,
-        SectorSubjectArea sectorSubjectArea)
+        SectorSubjectArea sectorSubjectArea,
+        DateOnly? fundingApprovalEndDate = null)
     {
         return new RegulatedQaaQualification
         {
@@ -131,12 +159,14 @@ public partial class RegulatedQaaQualification
             StartDate = startDateForRegistration,
             LastDateForRegistration = lastDateForRegistration,
             SectorSubjectArea = sectorSubjectArea,
-            ContentHash = "test"
+            Age1619FundingApprovalEndDate = fundingApprovalEndDate,
+            AdvancedLearnerLoansFundingApprovalEndDate = fundingApprovalEndDate,
+            LegalEntitlementL2L3FundingApprovalEndDate = fundingApprovalEndDate
         };
     }
 
     /// <summary>
-    /// Set the funding approval end date for the Qaa qualification. This is only calculated and set at the point when an output file is generated as the calculations use the publication date of the output file.
+    /// Set the funding approval end date for the Qaa qualification for the applicable funding streams. This is only calculated and set at the point when an output file is generated as the calculations use the publication date of the output file.
     /// </summary>
     /// <param name="publicationDate">The date on which the output file will be published.</param>
     /// <param name="qaaFundingApprovalEndDateCalculator">Provides access to a calculator for determining the funding approval end date.</param>
@@ -144,8 +174,50 @@ public partial class RegulatedQaaQualification
     /// <returns>The updated regulated qualification.</returns>
     public async Task<RegulatedQaaQualification> SetFundingApprovalEndDateAsync(DateTime publicationDate, IQaaFundingApprovalEndDateCalculator qaaFundingApprovalEndDateCalculator, CancellationToken cancellationToken)
     {
-        LastFundingApprovalEndDate = await qaaFundingApprovalEndDateCalculator.CalculateFundingApprovalEndDateAsync(AimCode, LastDateForRegistration, LastFundingApprovalEndDate, DateOnly.FromDateTime(publicationDate), cancellationToken);
+        // We want to calculate the funding approval end dates individually for each of the applicable funding streams.
+        // The reason for this is that there is a possibility that not all funding streams will have the same approval end date, this could be down to PLDNS having different values for different streams.
         
+        if (NeedToRecalculateFundingApprovalEndDate)
+        {
+            Age1619FundingApprovalEndDate = await qaaFundingApprovalEndDateCalculator.CalculateFundingApprovalEndDateAsync(this, FundingStream.Age1619, DateOnly.FromDateTime(publicationDate), cancellationToken);
+            AdvancedLearnerLoansFundingApprovalEndDate = await qaaFundingApprovalEndDateCalculator.CalculateFundingApprovalEndDateAsync(this, FundingStream.AdvancedLearnerLoans, DateOnly.FromDateTime(publicationDate), cancellationToken);
+            LegalEntitlementL2L3FundingApprovalEndDate = await qaaFundingApprovalEndDateCalculator.CalculateFundingApprovalEndDateAsync(this, FundingStream.LegalEntitlementL2L3, DateOnly.FromDateTime(publicationDate), cancellationToken);
+        }
+
+        return this;
+    }
+
+    /// <summary>
+    /// Returns the applicable funding approval end date based on the <see cref="FundingStream"/> provided.
+    /// </summary>
+    /// <param name="fundingStream">The funding stream to look up on.</param>
+    /// <returns>The funding approval end date for the funding stream.</returns>
+    public DateOnly? GetFundingApprovalEndDateForFundingStream(FundingStream fundingStream)
+    {
+        if (fundingStream == FundingStream.Age1619)
+        {
+            return Age1619FundingApprovalEndDate;
+        }
+
+        if (fundingStream == FundingStream.AdvancedLearnerLoans)
+        {
+            return AdvancedLearnerLoansFundingApprovalEndDate;
+        }
+
+        return LegalEntitlementL2L3FundingApprovalEndDate;
+    }
+
+    /// <summary>
+    /// Sets the change outcome for the qualification. Only for testing to allow for setting the entity in a specific state.
+    /// </summary>
+    /// <param name="outcome">The outcome to set.</param>
+    /// <param name="changeType">The change type to set.</param>
+    /// <returns>The updated instance.</returns>
+    public RegulatedQaaQualification SetChangeOutcome(QaaImportComparisonOutcome outcome, QaaLastDateForRegistrationChangeType changeType)
+    {
+        LastDateForRegistrationChangeType = changeType;
+        LatestImportComparisonOutcome = outcome;
+
         return this;
     }
 }

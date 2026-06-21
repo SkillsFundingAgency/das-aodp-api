@@ -1,4 +1,6 @@
-﻿using SFA.DAS.AODP.Data.Repositories.Pldns;
+﻿using SFA.DAS.AODP.Data.Entities.QaaQualification;
+using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Repositories.Pldns;
 
 namespace SFA.DAS.AODP.Data.Providers;
 
@@ -17,11 +19,12 @@ public class QaaFundingApprovalEndDateCalculator(
     private readonly IPldnsRepository _pldnsRepository = pldnsRepository;
 
     /// <inheritdoc/>.
-    public async Task<DateOnly?> CalculateFundingApprovalEndDateAsync(string qan, DateOnly lastDateForRegistration, DateOnly? currentFundingApprovalEndDate, DateOnly publicationDate, CancellationToken cancellationToken)
+    public async Task<DateOnly?> CalculateFundingApprovalEndDateAsync(RegulatedQaaQualification qaaQualification, FundingStream fundingStream, DateOnly publicationDate, CancellationToken cancellationToken)
     {
-        var fundingApprovalEndDate = currentFundingApprovalEndDate;
+        var fundingApprovalEndDate = qaaQualification.GetFundingApprovalEndDateForFundingStream(fundingStream);
+        var lastDateForRegistration = qaaQualification.LastDateForRegistration;
 
-        var pldns = await _pldnsRepository.GetPldnsByQanAsync(qan, cancellationToken);
+        var pldns = await _pldnsRepository.GetPldnsByQanAsync(qaaQualification.AimCode, cancellationToken);
         if (pldns is not null)
         {
             var pldnsDates = new List<DateTime?>()
@@ -30,7 +33,7 @@ public class QaaFundingApprovalEndDateCalculator(
             };
 
             var minPldnsDate = pldnsDates.Where(o => o is not null).Min();
-            if (minPldnsDate is not null && _academicYearProvider.IsWithinCurrentAcademicYear(minPldnsDate))
+            if (minPldnsDate is not null)
             {
                 fundingApprovalEndDate = DateOnly.FromDateTime(minPldnsDate!.Value);
                 return fundingApprovalEndDate;
@@ -40,29 +43,28 @@ public class QaaFundingApprovalEndDateCalculator(
         if (lastDateForRegistration > publicationDate)
         {
             var currentAcademicYear = _academicYearProvider.GetCurrentAcademicYearEndDate();
+            var academicYearForLastDateForRegistration = _academicYearProvider.GetAcademicYearEndForDate(lastDateForRegistration);
+
             var ilrFinalSubmissionDeadline = _ilrSubmissionDeadlinesProvider.GetFinalSubmissionDeadline();
 
-            if (_clockProvider.Today >= ilrFinalSubmissionDeadline.Date)
+            if (academicYearForLastDateForRegistration > currentAcademicYear)
             {
-                currentAcademicYear = currentAcademicYear.AddYears(1);
+                fundingApprovalEndDate = _clockProvider.Today >= ilrFinalSubmissionDeadline.Date ? currentAcademicYear.AddYears(2) : currentAcademicYear.AddYears(1);
             }
-
-            var dates = new List<DateOnly>
+            else
             {
-                lastDateForRegistration,
-                currentAcademicYear
-            };
-
-            fundingApprovalEndDate = dates.Min();
+                fundingApprovalEndDate = currentAcademicYear;
+            }
+            
             return fundingApprovalEndDate;
         }
         
         if (lastDateForRegistration < publicationDate)
         {
-            if (lastDateForRegistration > currentFundingApprovalEndDate ||
-                currentFundingApprovalEndDate is null)
+            if (lastDateForRegistration > qaaQualification.GetFundingApprovalEndDateForFundingStream(fundingStream) ||
+                qaaQualification.GetFundingApprovalEndDateForFundingStream(fundingStream) is null)
             {
-                fundingApprovalEndDate = lastDateForRegistration;
+                fundingApprovalEndDate = publicationDate;
             }
         }
 

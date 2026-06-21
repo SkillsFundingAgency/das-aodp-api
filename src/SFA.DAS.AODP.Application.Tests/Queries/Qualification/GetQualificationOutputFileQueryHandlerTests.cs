@@ -1,6 +1,5 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoMoq;
-using Markdig.Extensions.Figures;
 using Moq;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
@@ -312,7 +311,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 QualificationName = "title",
             };
 
-            _fundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDateAsync(qan, lastDateForRegistration, It.IsAny<DateOnly>(), It.IsAny<DateOnly>(), CancellationToken)).ReturnsAsync(academicYearEndDate);
+            _fundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDateAsync(qaaQualification, FundingStream.Age1619, It.IsAny<DateOnly>(), CancellationToken)).ReturnsAsync(academicYearEndDate);
             _qaaRepo.Setup(o => o.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([qaaQualification]);
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ReturnsAsync(new List<QualificationOutputFile> { future, qaaQualificationInOutputFile });
@@ -372,7 +371,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 Age1619_FundingApprovalEndDate = publicationDate.AddDays(1)
             };
 
-            _fundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDateAsync(qan, lastDateForRegistration, It.IsAny<DateOnly>(), It.IsAny<DateOnly>(), CancellationToken)).ReturnsAsync(academicYearEndDate);
+            _fundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDateAsync(qaaQualification, FundingStream.Age1619, It.IsAny<DateOnly>(), CancellationToken)).ReturnsAsync(academicYearEndDate);
             _qaaRepo.Setup(o => o.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([qaaQualification]);
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ReturnsAsync(new List<QualificationOutputFile> { qualification });

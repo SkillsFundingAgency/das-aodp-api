@@ -17,7 +17,9 @@ SELECT
 	, Status
 	, StartDate
 	, LastDateForRegistration
-	, LastFundingApprovalEndDate
+	, Age1619FundingApprovalEndDate
+    , AdvancedLearnerLoansFundingApprovalEndDate
+    , LegalEntitlementL2L3FundingApprovalEndDate
 	, SectorSubjectArea
 FROM regulated.QaaQualification
 

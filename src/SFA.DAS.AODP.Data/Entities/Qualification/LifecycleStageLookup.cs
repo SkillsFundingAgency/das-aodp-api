@@ -1,5 +1,8 @@
-﻿namespace SFA.DAS.AODP.Data.Entities.Qualification;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace SFA.DAS.AODP.Data.Entities.Qualification;
+
+[ExcludeFromCodeCoverage]
 public record LifecycleStageLookup
 {
     public static readonly LifecycleStageLookup New = new(Guid.Parse("00000000-0000-0000-0000-000000000001"), "New");

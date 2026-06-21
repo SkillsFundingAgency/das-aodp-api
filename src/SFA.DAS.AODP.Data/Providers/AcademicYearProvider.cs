@@ -20,6 +20,17 @@ public class AcademicYearProvider(ISystemClockProvider clock) : IAcademicYearPro
     }
 
     /// <inheritdoc/>.
+    public DateOnly GetAcademicYearEndForDate(DateOnly dateOnly)
+    {
+        if (dateOnly > new DateOnly(dateOnly.Year, 7, 31))
+        {
+            return new DateOnly(dateOnly.Year + 1, 7, 31);
+        }
+
+        return new DateOnly(dateOnly.Year, 7, 31);
+    }
+
+    /// <inheritdoc/>.
     public bool IsWithinCurrentAcademicYear(DateTime? dateToCheck)
     {
         if (dateToCheck is null)

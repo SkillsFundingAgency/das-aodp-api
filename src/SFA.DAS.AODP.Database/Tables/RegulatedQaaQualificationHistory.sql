@@ -4,7 +4,6 @@ CREATE TABLE [regulated].[QaaQualificationHistory] (
     [AimCode] nvarchar(10) NOT NULL,
     [DateOfDataSnapshot] datetime2 NOT NULL,
     [ChangedAt] datetime2 NOT NULL,
-    [ContentHash] nvarchar(64) NOT NULL,
     [QualificationTitle] nvarchar(250) NULL,
     [AwardingBody] nvarchar(250) NOT NULL,
     [StartDate] datetime2 NOT NULL,
@@ -13,6 +12,9 @@ CREATE TABLE [regulated].[QaaQualificationHistory] (
     [DiscontinuedDate] datetime2 NULL,
     [SectorSubjectArea] nvarchar(150) NOT NULL,
     [LastDateForRegistrationChangeType] nvarchar(50) NOT NULL,
+    [Age1619FundingApprovalEndDate] date NULL,
+    [AdvancedLearnerLoansFundingApprovalEndDate] date NULL,
+    [LegalEntitlementL2L3FundingApprovalEndDate] date NULL,
     CONSTRAINT [PK_QaaQualificationHistory] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_QaaQualificationHistory_QaaQualification] FOREIGN KEY ([QaaQualificationId])
         REFERENCES [regulated].[QaaQualification] ([Id])

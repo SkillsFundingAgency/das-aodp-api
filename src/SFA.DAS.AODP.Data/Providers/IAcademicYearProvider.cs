@@ -12,6 +12,13 @@ public interface IAcademicYearProvider
     DateOnly GetCurrentAcademicYearEndDate();
 
     /// <summary>
+    /// Gets the academic year-end date for the provided date.
+    /// </summary>
+    /// <param name="dateOnly"></param>
+    /// <returns></returns>
+    DateOnly GetAcademicYearEndForDate(DateOnly dateOnly);
+
+    /// <summary>
     /// Determines whether the date is within the current academic year.
     /// </summary>
     /// <param name="dateToCheck">The date to check.</param>
