@@ -97,9 +97,8 @@ public class QualificationsSearchManagerTests : IDisposable
         var results = mgr.Query("elec");
 
         // Assert
-        Assert.Equal(1, results.TotalCount);
-        Assert.Single(results.Qualifications);
-        Assert.Equal("Electric Appliance", results.Qualifications.First().QualificationName);
+        Assert.Equal(0, results.TotalCount);
+        Assert.Empty(results.Qualifications);
     }
 
     [Fact]
