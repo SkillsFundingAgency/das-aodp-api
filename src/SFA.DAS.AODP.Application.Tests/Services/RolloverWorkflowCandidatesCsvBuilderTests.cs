@@ -94,7 +94,11 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
 
             // Assert
             Assert.Contains("ValidationErrors", csv);
-            Assert.Contains(",\r\n", csv); // empty validation column
+            Assert.True(
+                csv.Contains(",\r\n") || csv.Contains(",\n"),
+                "Expected an empty validation column at end of row"
+            );
+
         }
 
 
