@@ -19,4 +19,9 @@ public static class DateTimeExtensions
     {
         return dateOnly?.ToString("yyyy/MM/dd") ?? string.Empty;
     }
+
+    public static string ToFilenameDateFormat(this DateOnly dateOnly)
+    {
+        return dateOnly.ToString("ddMMyyyy");
+    }
 }

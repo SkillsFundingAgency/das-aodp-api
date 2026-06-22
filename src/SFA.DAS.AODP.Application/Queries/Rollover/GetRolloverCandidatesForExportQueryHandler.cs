@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application.Services.Export;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
+using SFA.DAS.AODP.Infrastructure.Extensions;
 
 namespace SFA.DAS.AODP.Application.Queries.Rollover
 {
@@ -26,10 +27,12 @@ namespace SFA.DAS.AODP.Application.Queries.Rollover
 
                 var csvContent = _csvBuilder.Build(result);
 
+                var currentDateString = DateOnly.FromDateTime(DateTime.UtcNow).ToFilenameDateFormat();
+
                 response.Value = new GetRolloverCandidatesForExportQueryResponse
                 {
                     FileContent = csvContent,
-                    FileName = $"RolloverCandidates_{request.RolloverWorkflowRunId}.csv",
+                    FileName = $"RolloverCandidates_SystemDraft_{currentDateString}.csv",
                     ContentType = "text/csv"
                 };
                 response.Success = true;
