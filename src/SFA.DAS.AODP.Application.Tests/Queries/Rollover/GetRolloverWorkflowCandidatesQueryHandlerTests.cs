@@ -26,23 +26,19 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
         public async Task Handle_ReturnsSuccess_WhenRepositoryReturnsData()
         {
             // Arrange
-            var workflowRunId = Guid.NewGuid();
-
-            var candidates = _fixture.Build<RolloverWorkflowCandidate>()
-                .With(x => x.RolloverWorkflowRunId, workflowRunId)
-                .CreateMany(3)
-                .ToList();
-
             var workflowRun = _fixture.Build<RolloverWorkflowRun>()
-                .With(x => x.Id, workflowRunId)
                 .Create();
+
+            var candidates = CreateCandidates(3, workflowRun.Id);
+
+
 
             _repositoryMock
                 .Setup(r => r.GetAllRolloverWorkflowCandidatesAsync(It.IsAny<CancellationToken>()))
                 .ReturnsAsync(candidates);
 
             _repositoryMock
-                .Setup(r => r.GeRolloverWorkflowRunByIdAsync(workflowRunId, It.IsAny<CancellationToken>()))
+                .Setup(r => r.GeRolloverWorkflowRunByIdAsync(workflowRun.Id, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(workflowRun);
 
             var query = new GetRolloverWorkflowCandidatesQuery();
@@ -53,7 +49,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
             // Assert
             Assert.True(result.Success);
             Assert.NotNull(result.Value);
-            Assert.Equal(workflowRunId, result.Value.WorkflowRunId);
+            Assert.Equal(workflowRun.Id, result.Value.WorkflowRunId);
             Assert.Equal(3, result.Value.RolloverWorkflowCandidates.Count());
             Assert.Equal(workflowRun.OperationalEndDateEligibilityThreshold,
                          result.Value.FundingEndDateEligibilityThreshold);
@@ -68,10 +64,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
             // Arrange
             var workflowRunId = Guid.NewGuid();
 
-            var candidates = _fixture.Build<RolloverWorkflowCandidate>()
-                .With(x => x.RolloverWorkflowRunId, workflowRunId)
-                .CreateMany(2)
-                .ToList();
+            var candidates = CreateCandidates(2, workflowRunId);
 
             _repositoryMock
                 .Setup(r => r.GetAllRolloverWorkflowCandidatesAsync(It.IsAny<CancellationToken>()))
@@ -134,6 +127,30 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
             Assert.False(result.Success);
             Assert.Equal("DB exploded", result.ErrorMessage);
             Assert.Same(exception, result.InnerException);
+        }
+
+        private List<RolloverWorkflowCandidate> CreateCandidates(int count, Guid workflowRunId)
+        {
+            List<RolloverWorkflowCandidate> candidates = new List<RolloverWorkflowCandidate>();
+            DateTime now = DateTime.UtcNow;
+
+            for(int i = 0; i < count; i++)
+            {
+                candidates.Add(
+                    RolloverWorkflowCandidate.Create(
+                    workflowRunId,
+                    Guid.NewGuid(),          // rolloverCandidateRecordId
+                    Guid.NewGuid(),          // qualificationVersionId
+                    Guid.NewGuid(),          // fundingOfferId
+                    "2024",                  // academicYear
+                    1,                       // rolloverRound
+                    now,                     // currentFundingEndDate
+                    now.AddYears(1),         // proposedFundingEndDate
+                    now                      // createdAt
+                ));
+
+            }
+            return candidates;
         }
     }
 }

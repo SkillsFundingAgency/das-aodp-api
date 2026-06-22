@@ -1,10 +1,14 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoMoq;
 using Microsoft.EntityFrameworkCore;
+using SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications;
 using SFA.DAS.AODP.Data.Context;
+using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Models.Rollover;
+using static SFA.DAS.AODP.Application.Queries.Qualification.GetQualificationVersionsForQualificationByReferenceQueryResponse;
+using QualificationVersions = SFA.DAS.AODP.Data.Entities.Qualification.QualificationVersions;
 
 namespace SFA.DAS.AODP.Data.UnitTests.Repositories
 {
@@ -15,6 +19,10 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories
         public QualificationFundingsRepositoryTests()
         {
             _fixture = new Fixture().Customize(new AutoMoqCustomization());
+            _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
+                .ForEach(b => _fixture.Behaviors.Remove(b));
+            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            _fixture.Customizations.Add(new DateOnlySpecimenBuilder());
         }
 
         private ApplicationDbContext CreateInMemoryContext()
@@ -33,15 +41,15 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories
 
             var versionId = Guid.NewGuid();
 
-            var funding1 = _fixture.Build<QualificationFundings>()
-                .With(x => x.QualificationVersionId, versionId)
-                .Create();
+            var fundings = CreateFundings(2, versionId);
 
-            var funding2 = _fixture.Build<QualificationFundings>()
-                .With(x => x.QualificationVersionId, versionId)
-                .Create();
+            context.AddRange(
+                fundings[0].QualificationVersion.Qualification,
+                fundings[0].QualificationVersion,
+                fundings[0].FundingOffer,
+                fundings[0],
+                fundings[1]);
 
-            context.QualificationFundings.AddRange(funding1, funding2);
             await context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var repo = new QualificationFundingsRepository(context);
@@ -77,16 +85,18 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories
         {
             using var context = CreateInMemoryContext();
 
-            var funding = _fixture.Create<QualificationFundings>();
-            context.QualificationFundings.Add(funding);
+            var versionId = Guid.NewGuid();
+            var fundings = CreateFundings(1, versionId);
+
+            context.QualificationFundings.Add(fundings[0]);
             await context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var repo = new QualificationFundingsRepository(context);
 
-            funding.Comments = "Updated";
+            fundings[0].Comments = "Updated";
 
             // Act
-            await repo.UpdateAsync(new List<QualificationFundings> { funding });
+            await repo.UpdateAsync(new List<QualificationFundings> { fundings[0] });
 
             // Assert
             var updated = context.QualificationFundings.First();
@@ -98,14 +108,17 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories
         {
             using var context = CreateInMemoryContext();
 
-            var funding = _fixture.Create<QualificationFundings>();
-            context.QualificationFundings.Add(funding);
+            var versionId = Guid.NewGuid();
+
+            var fundings = CreateFundings(1, versionId);
+            context.QualificationFundings.Add(fundings[0]);
+
             await context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var repo = new QualificationFundingsRepository(context);
 
             // Act
-            await repo.RemoveAsync(new List<QualificationFundings> { funding });
+            await repo.RemoveAsync(new List<QualificationFundings> { fundings[0] });
 
             // Assert
             Assert.Empty(context.QualificationFundings);
@@ -116,19 +129,18 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories
         {
             using var context = CreateInMemoryContext();
 
-            var f1 = _fixture.Create<QualificationFundings>();
-            var f2 = _fixture.Create<QualificationFundings>();
-            var f3 = _fixture.Create<QualificationFundings>(); // non-match
+            var versionId = Guid.NewGuid();
+            var fundingList = CreateFundings(3, versionId);
 
-            context.QualificationFundings.AddRange(f1, f2, f3);
+            context.QualificationFundings.AddRange(fundingList);
             await context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
             var repo = new QualificationFundingsRepository(context);
 
             var keys = new List<QualificationFundingKey>
             {
-                new(f1.QualificationVersionId, f1.FundingOfferId),
-                new(f2.QualificationVersionId, f2.FundingOfferId)
+                new(versionId, fundingList[0].FundingOfferId),
+                new(versionId, fundingList[1].FundingOfferId)
             };
 
             // Act
@@ -136,9 +148,61 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories
 
             // Assert
             Assert.Equal(2, result.Count);
-            Assert.Contains(result, x => x.Id == f1.Id);
-            Assert.Contains(result, x => x.Id == f2.Id);
-            Assert.DoesNotContain(result, x => x.Id == f3.Id);
+            Assert.Contains(result, x => x.Id == fundingList[0].Id);
+            Assert.Contains(result, x => x.Id == fundingList[1].Id);
+            Assert.DoesNotContain(result, x => x.Id == fundingList[2].Id);
+        }
+
+        private List<QualificationFundings> CreateFundings(int count, Guid versionId)
+        {
+            DateTime now = DateTime.UtcNow;
+
+            List<QualificationFundings> fundings = new();
+
+            var qualification = new Qualification
+            {
+                Id = Guid.NewGuid(),
+                QualificationName = "Test Qualification",
+                Qan = "XXXX1234"
+            };
+
+            var qualificationVersion = new QualificationVersions
+            {
+                QualificationId = qualification.Id,
+                Qualification = qualification,
+                Version = 1,
+                EqfLevel = "Efq level example",
+                Level = "Level example",
+                Ssa = "Ssa example",
+                Status = "Status example",
+                SubLevel = "Sub level example",
+                Type = "Type example",
+                Id = versionId
+            };
+
+            for (int i = 0; i < count; i++)
+            {
+                var fundingOffer = new FundingOffer
+                {
+                    Id = Guid.NewGuid(),
+                    Name = $"Test Funding Offer {i}"
+                };
+
+                var funding = new QualificationFundings
+                {
+                    Id = Guid.NewGuid(),
+                    QualificationVersionId = qualificationVersion.Id,
+                    QualificationVersion = qualificationVersion,
+                    FundingOfferId = fundingOffer.Id,
+                    FundingOffer = fundingOffer,
+                    StartDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-1)),
+                    EndDate = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(1))
+                };
+
+                fundings.Add(funding);
+            }
+
+            return fundings;
         }
     }
 }

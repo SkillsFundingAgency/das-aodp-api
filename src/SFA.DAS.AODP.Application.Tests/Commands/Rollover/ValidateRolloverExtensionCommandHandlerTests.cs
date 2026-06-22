@@ -199,13 +199,34 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
                 Times.Never);
         }
 
+        [Fact]
+        public async Task Handle_NoCandidatesProvided_ReturnsGeneralFailureResponse()
+        {
+            var command = new ValidateRolloverExtensionCommand
+            {
+                RolloverCandidates = []
+            };
+
+            var result = await _handler.Handle(command, CancellationToken.None);
+
+            Assert.True(result.Success);
+            Assert.False(result.Value.IsValid);
+            Assert.Equal("No rollover candidates were provided for validation.",
+                         result.Value.ValidationFailureSummary?.GeneralFailureMessage);
+
+            _validator.Verify(v => v.Validate(It.IsAny<List<RolloverCandidateForValidation>>(),
+                                             It.IsAny<FundingExtensionCandidateValidationContext>(),
+                                             It.IsAny<CancellationToken>()),
+                              Times.Never);
+        }
+
 
         [Fact]
         public async Task Handle_GenericException_ReturnsErrorMessage()
         {
             var command = new ValidateRolloverExtensionCommand
             {
-                RolloverCandidates = []
+                RolloverCandidates = [new() { Qan = "123", FundingStreamName = "FS", }]
             };
 
             _rolloverRepository
@@ -230,15 +251,30 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
                 ]
             };
 
+            var fakeContext = new FundingExtensionCandidateValidationContext(
+                new HashSet<CandidateKey>(), new HashSet<CandidateKey>(), new HashSet<CandidateKey>());
+
             _rolloverRepository
                 .Setup(r => r.GetFundingExtensionValidationContextAsync(
                     It.IsAny<HashSet<CandidateKey>>(), It.IsAny<CancellationToken>()))
-                .ThrowsAsync(new InvalidOperationException("No workflow runs exist"));
+                .ReturnsAsync(fakeContext);
+
+            _validator
+                .Setup(v => v.Validate(
+                    It.IsAny<List<RolloverCandidateForValidation>>(),
+                    fakeContext,
+                    It.IsAny<CancellationToken>()))
+                .Returns(new FundingExtensionValidationResult { IsValid = false });
+
+            _rolloverRepository
+                .Setup(r => r.GetLatestWorkflowRunIdAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Guid.Empty);
 
             var result = await _handler.Handle(command, CancellationToken.None);
 
             Assert.False(result.Success);
             Assert.Contains("No workflow runs exist", result.ErrorMessage);
         }
+
     }
 }
