@@ -25,21 +25,14 @@ public class QaaFundingApprovalEndDateCalculator(
         var lastDateForRegistration = qaaQualification.LastDateForRegistration;
 
         var pldns = await _pldnsRepository.GetPldnsByQanAsync(qaaQualification.AimCode, cancellationToken);
-        if (pldns is not null)
-        {
-            var pldnsDates = new List<DateTime?>()
-            {
-                pldns.Loans, pldns.Pldns16To19, pldns.LegalEntitlementL2L3
-            };
-
-            var minPldnsDate = pldnsDates.Where(o => o is not null).Min();
-            if (minPldnsDate is not null)
-            {
-                fundingApprovalEndDate = DateOnly.FromDateTime(minPldnsDate!.Value);
-                return fundingApprovalEndDate;
-            }
-        } 
+        var pldnsDate = pldns?.ForFundingStream(fundingStream);
         
+        if (pldnsDate is not null && _academicYearProvider.IsWithinCurrentAcademicYear(pldnsDate))
+        {
+            fundingApprovalEndDate = DateOnly.FromDateTime(pldnsDate.Value);
+            return fundingApprovalEndDate;
+        }
+
         if (lastDateForRegistration > publicationDate)
         {
             var currentAcademicYear = _academicYearProvider.GetCurrentAcademicYearEndDate();
@@ -58,14 +51,16 @@ public class QaaFundingApprovalEndDateCalculator(
             
             return fundingApprovalEndDate;
         }
-        
-        if (lastDateForRegistration < publicationDate)
+
+        if (lastDateForRegistration >= publicationDate)
         {
-            if (lastDateForRegistration > qaaQualification.GetFundingApprovalEndDateForFundingStream(fundingStream) ||
-                qaaQualification.GetFundingApprovalEndDateForFundingStream(fundingStream) is null)
-            {
-                fundingApprovalEndDate = publicationDate;
-            }
+            return fundingApprovalEndDate;
+        }
+
+        if (lastDateForRegistration > qaaQualification.GetFundingApprovalEndDateForFundingStream(fundingStream) ||
+            qaaQualification.GetFundingApprovalEndDateForFundingStream(fundingStream) is null)
+        {
+            fundingApprovalEndDate = publicationDate;
         }
 
         return fundingApprovalEndDate;
