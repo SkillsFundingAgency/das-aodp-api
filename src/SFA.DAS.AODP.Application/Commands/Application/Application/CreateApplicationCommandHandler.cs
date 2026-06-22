@@ -1,10 +1,13 @@
 ﻿using MediatR;
-using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
 using SFA.DAS.AODP.Models.Application;
 using SFA.DAS.AODP.Models.Form;
+using System.Diagnostics.CodeAnalysis;
+namespace SFA.DAS.AODP.Application.Commands.Application;
+
+[ExcludeFromCodeCoverage]
 
 public class CreateApplicationCommandHandler : IRequestHandler<CreateApplicationCommand, BaseMediatrResponse<CreateApplicationCommandResponse>>
 {
