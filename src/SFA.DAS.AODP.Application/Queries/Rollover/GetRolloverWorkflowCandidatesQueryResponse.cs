@@ -1,7 +1,9 @@
 ﻿using SFA.DAS.AODP.Models.Rollover;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Application.Queries.Rollover
 {
+    [ExcludeFromCodeCoverage]
     public class GetRolloverWorkflowCandidatesQueryResponse
     {
         public Guid WorkflowRunId { get; set; }

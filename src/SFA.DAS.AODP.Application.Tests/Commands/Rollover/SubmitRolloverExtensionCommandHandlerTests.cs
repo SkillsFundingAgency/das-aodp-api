@@ -96,7 +96,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             {
                 Items =
                 [
-                    new() { Qan = "999", FundingStreamName = "FS" }
+                    new() { Qan = "999", FundingStreamName = "FS", RolloverStatus = "Extended" }
                 ]
             };
 
@@ -177,7 +177,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             // Arrange
             var command = new SubmitRolloverExtensionCommand
             {
-                Items = [new() { Qan = "111", FundingStreamName = "FS" }]
+                Items = [new() { Qan = "111", FundingStreamName = "FS", RolloverStatus = "Extended" }]
             };
 
             _rolloverRepository
@@ -202,8 +202,8 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             {
                 Items =
                 [
-                    new() { Qan = "A1", FundingStreamName = "FS1" },
-                    new() { Qan = "B2", FundingStreamName = "FS2" }
+                    new() { Qan = "A1", FundingStreamName = "FS1", RolloverStatus = "Extended" },
+                    new() { Qan = "B2", FundingStreamName = "FS2", RolloverStatus = "Extended" }
                 ]
             };
 
@@ -329,141 +329,5 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
                     It.IsAny<CancellationToken>()),
                 Times.Once);
         }
-
-
-        
-    }
-
-    //// ------------------------------------------------------------
-    //// SUCCESS — NO MATCHING CANDIDATES
-    //// ------------------------------------------------------------
-    //[Fact]
-    //public async Task Handle_NoMatchingCandidates_ReturnsSuccessWithMessage()
-    //{
-    //    // Arrange
-    //    var command = new SubmitRolloverExtensionCommand
-    //    {
-    //        Items = [new() { Qan = "999", FundingStreamName = "FS" }]
-    //    };
-
-    //    _rolloverRepository
-    //        .Setup(r => r.LoadRolloverCandidateGraphAsync(
-    //            It.IsAny<List<CandidateKey>>(), It.IsAny<CancellationToken>()))
-    //        .ReturnsAsync(new List<RolloverCandidate>());
-
-    //    // Act
-    //    var result = await _handler.Handle(command, CancellationToken.None);
-
-    //    // Assert
-    //    Assert.True(result.Success);
-    //    Assert.Equal("No matching rollover candidates were found.", result.Value.ResultMessage);
-
-    //    _applyService.Verify(s => s.ApplyFundingExtensions(
-    //        It.IsAny<List<RolloverCandidate>>(),
-    //        It.IsAny<List<SubmitRolloverExtensionItem>>(),
-    //        It.IsAny<List<QualificationFunding>>(),
-    //        It.IsAny<CancellationToken>()),
-    //        Times.Never);
-    //}
-
-    //// ------------------------------------------------------------
-    //// FAILURE — APPLY EXTENSIONS RETURNS FALSE
-    //// ------------------------------------------------------------
-    //[Fact]
-    //public async Task Handle_ApplyFundingExtensionsFails_ReturnsFailureMessage()
-    //{
-    //    // Arrange
-    //    var command = new SubmitRolloverExtensionCommand
-    //    {
-    //        Items = [new() { Qan = "111", FundingStreamName = "FS" }]
-    //    };
-
-    //    var candidates = new List<RolloverCandidate>
-    //    {
-    //        new() { Qan = "111", FundingStreamName = "FS", QualificationVersionId = 1, FundingOfferId = 10 }
-    //    };
-
-    //    _rolloverRepository
-    //        .Setup(r => r.LoadRolloverCandidateGraphAsync(
-    //            It.IsAny<List<CandidateKey>>(), It.IsAny<CancellationToken>()))
-    //        .ReturnsAsync(candidates);
-
-    //    _fundingsRepository
-    //        .Setup(r => r.GetRolloverQualificationFundingsAsync(
-    //            It.IsAny<List<QualificationFundingKey>>(), It.IsAny<CancellationToken>()))
-    //        .ReturnsAsync(new List<QualificationFunding>());
-
-    //    _applyService
-    //        .Setup(s => s.ApplyFundingExtensions(
-    //            candidates, command.Items, It.IsAny<List<QualificationFunding>>(), It.IsAny<CancellationToken>()))
-    //        .ReturnsAsync(false);
-
-    //    // Act
-    //    var result = await _handler.Handle(command, CancellationToken.None);
-
-    //    // Assert
-    //    Assert.True(result.Success);
-    //    Assert.Equal("Failed to apply funding extensions.", result.Value.ResultMessage);
-
-    //    _rolloverRepository.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
-    //}
-
-    //// ------------------------------------------------------------
-    //// EXCEPTION — RETURNS FAILURE RESPONSE
-    //// ------------------------------------------------------------
-    //[Fact]
-    //public async Task Handle_ExceptionThrown_ReturnsErrorMessage()
-    //{
-    //    // Arrange
-    //    var command = new SubmitRolloverExtensionCommand
-    //    {
-    //        Items = [new() { Qan = "111", FundingStreamName = "FS" }]
-    //    };
-
-    //    _rolloverRepository
-    //        .Setup(r => r.LoadRolloverCandidateGraphAsync(
-    //            It.IsAny<List<CandidateKey>>(), It.IsAny<CancellationToken>()))
-    //        .ThrowsAsync(new Exception("Boom"));
-
-    //    // Act
-    //    var result = await _handler.Handle(command, CancellationToken.None);
-
-    //    // Assert
-    //    Assert.False(result.Success);
-    //    Assert.Equal("Boom", result.ErrorMessage);
-    //    Assert.IsType<Exception>(result.InnerException);
-    //}
-
-    //// ------------------------------------------------------------
-    //// ARGUMENT VERIFICATION — CORRECT KEYS PASSED TO REPOSITORY
-    //// ------------------------------------------------------------
-    //[Fact]
-    //public async Task Handle_PassesCorrectCandidateKeysToRepository()
-    //{
-    //    // Arrange
-    //    var command = new SubmitRolloverExtensionCommand
-    //    {
-    //        Items =
-    //        [
-    //            new() { Qan = "A1", FundingStreamName = "FS1" },
-    //            new() { Qan = "B2", FundingStreamName = "FS2" }
-    //        ]
-    //    };
-
-    //    List<CandidateKey>? capturedKeys = null;
-
-    //    _rolloverRepository
-    //        .Setup(r => r.LoadRolloverCandidateGraphAsync(
-    //            It.IsAny<List<CandidateKey>>(), It.IsAny<CancellationToken>()))
-    //        .Callback<List<CandidateKey>, CancellationToken>((keys, _) => capturedKeys = keys)
-    //        .ReturnsAsync(new List<RolloverCandidate>());
-
-    //    // Act
-    //    await _handler.Handle(command, CancellationToken.None);
-
-    //    // Assert
-    //    Assert.NotNull(capturedKeys);
-    //    Assert.Contains(capturedKeys!, k => k.Qan == "A1" && k.FundingStreamName == "FS1");
-    //    Assert.Contains(capturedKeys!, k => k.Qan == "B2" && k.FundingStreamName == "FS2");
-    //}
+    } 
 }

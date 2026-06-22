@@ -13,7 +13,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
             _sut = new FundingExtensionValidator();
         }
 
-        private FundingExtensionCandidateValidationContext ValidationContext(
+        private static FundingExtensionCandidateValidationContext ValidationContext(
             IEnumerable<CandidateKey>? incomingCandidates = null,
             IEnumerable<CandidateKey>? candidatesInDb = null,
             IEnumerable<CandidateKey>? workflowCandidatesInDb = null)
@@ -24,7 +24,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
                 workflowCandidatesInDb?.ToHashSet() ?? new HashSet<CandidateKey>());
         }
 
-        private RolloverCandidateForValidation CandidateRow(
+        private static RolloverCandidateForValidation CandidateRow(
             int row = 1,
             string qan = "12345",
             string stream = "LegalEntitlementEnglishandMaths",

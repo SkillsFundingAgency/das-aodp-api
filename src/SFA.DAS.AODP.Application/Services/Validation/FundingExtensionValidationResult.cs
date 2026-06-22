@@ -17,7 +17,7 @@ namespace SFA.DAS.AODP.Application.Services.Validation
 
     public class CandidateValidationResult
     {
-        public RolloverCandidateForValidation CandidateDetails { get; set; }
+        public RolloverCandidateForValidation CandidateDetails { get; set; } = new();
 
         public List<ValidationFailure> Errors { get; set; }
             = new List<ValidationFailure>();
@@ -27,14 +27,14 @@ namespace SFA.DAS.AODP.Application.Services.Validation
 
     public class ValidationFailure
     {
-        public string Field { get; set; }
-        public string Message { get; set; }
+        public string Field { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
     }
 
     public class ValidationFailureGroup
     {
-        public string Field { get; set; }
-        public string Message { get; set; }
+        public string Field { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
         public int Count { get; set; }
     }
 

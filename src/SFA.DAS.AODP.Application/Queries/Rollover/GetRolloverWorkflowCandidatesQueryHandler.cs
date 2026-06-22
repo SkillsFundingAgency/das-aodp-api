@@ -46,6 +46,14 @@ namespace SFA.DAS.AODP.Application.Queries.Rollover
 
                     var workflowRunResult = await _repository.GeRolloverWorkflowRunByIdAsync(workflowRunId, cancellationToken);
 
+                    if (workflowRunResult == null)
+                    {
+                        response.Success = false;
+                        response.ErrorMessage = $"Workflow run {workflowRunId} was not found.";
+                        return response;
+                    }
+
+
                     response.Value = new GetRolloverWorkflowCandidatesQueryResponse
                     {
                         RolloverWorkflowCandidates = workflowCandidates,

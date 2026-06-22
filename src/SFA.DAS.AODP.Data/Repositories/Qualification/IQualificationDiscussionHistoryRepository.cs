@@ -6,6 +6,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
     {
         Task CreateAsync(QualificationDiscussionHistory qualificationDiscussionHistory);
 
-        Task AddDiscussionHistories(List<QualificationDiscussionHistory> histories);
+        void AddDiscussionHistories(List<QualificationDiscussionHistory> histories);
     }
 }

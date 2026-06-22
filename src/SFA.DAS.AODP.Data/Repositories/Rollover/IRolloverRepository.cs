@@ -11,7 +11,7 @@ public interface IRolloverRepository
     Task UpdateRolloverWorkflowCandidatesAsync(IEnumerable<RolloverWorkflowCandidate> candidates, CancellationToken cancellationToken);
 
     Task<IEnumerable<RolloverCandidateDto>> GetRolloverCandidatesAsync(CancellationToken cancellationToken);
-    Task<RolloverWorkflowRun> GeRolloverWorkflowRunByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<RolloverWorkflowRun?> GeRolloverWorkflowRunByIdAsync(Guid id, CancellationToken cancellationToken);
     Task<IEnumerable<Models.Rollover.RolloverCandidateDto>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, 
         CancellationToken cancellationToken);
     Task<Guid> CreateRolloverWorkflowRunAsync(RolloverWorkflowRun request,

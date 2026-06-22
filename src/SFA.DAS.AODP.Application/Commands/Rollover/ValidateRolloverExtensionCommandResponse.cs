@@ -16,6 +16,7 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
     [ExcludeFromCodeCoverage]
     public class ValidationFailureSummary
     {
+        public string? GeneralFailureMessage { get; set; }
         public int FailedCandidateCount { get; set; }
         public byte[]? ValidatedCandidateFile { get; set; }
     }

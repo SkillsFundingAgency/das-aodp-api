@@ -83,7 +83,7 @@ namespace SFA.DAS.AODP.Application.Services.Export
                     var result = validationResults
                         .FirstOrDefault(v => v.CandidateDetails.RowNumber == r.RowNumber);
 
-                    var errorText = result?.Errors?.Any() == true
+                    var errorText = result?.Errors?.Count > 0
                         ? string.Join("; ", result.Errors.Select(e => e.Message))
                         : string.Empty;
 
@@ -97,11 +97,11 @@ namespace SFA.DAS.AODP.Application.Services.Export
         }
 
 
-        private void WriteHeader(StreamWriter writer, IEnumerable<string> columns)
+        private static void WriteHeader(StreamWriter writer, IEnumerable<string> columns)
         {
             writer.WriteLine(string.Join(",", columns));
         }
-        private void WriteCoreColumns(StreamWriter writer, RolloverCandidateForExport r)
+        private static void WriteCoreColumns(StreamWriter writer, RolloverCandidateForExport r)
         {
             WriteField(writer, r.QAN); writer.Write(',');
             WriteField(writer, r.QualificationTitle); writer.Write(',');

@@ -1,5 +1,4 @@
 ﻿using SFA.DAS.AODP.Application.Commands.Rollover;
-using SFA.DAS.AODP.Application.Constants;
 using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Application.Services.Validation
@@ -35,7 +34,7 @@ namespace SFA.DAS.AODP.Application.Services.Validation
 
         public FundingExtensionValidationResult Validate(
             List<RolloverCandidateForValidation> fundingExtensionCandidates,
-            FundingExtensionCandidateValidationContext fundingExtensionCandidateValidationContext,
+            FundingExtensionCandidateValidationContext ctx,
             CancellationToken cancellationToken)
         {
             var response = new FundingExtensionValidationResult();
@@ -47,9 +46,14 @@ namespace SFA.DAS.AODP.Application.Services.Validation
                     CandidateDetails = row
                 };
 
-                foreach (var rule in _rules)
+                ValidateRequiredFields(result, ctx);
+
+                if (result.IsValid)
                 {
-                    rule(result, fundingExtensionCandidateValidationContext);
+                    foreach (var rule in _rules)
+                    {
+                        rule(result, ctx);
+                    }
                 }
 
                 response.Candidates.Add(result);
@@ -72,15 +76,51 @@ namespace SFA.DAS.AODP.Application.Services.Validation
             return response;
         }
 
-        // -------------------------
-        // Validation Rules
-        // -------------------------
+        // -------------------------------------------------------
+        // ⭐ RULE 1 — Required Fields (QAN, FundingStreamName, Status)
+        // -------------------------------------------------------
+        private void ValidateRequiredFields(
+            CandidateValidationResult result,
+            FundingExtensionCandidateValidationContext ctx)
+        {
+            if (string.IsNullOrWhiteSpace(result.CandidateDetails?.Qan))
+            {
+                result.Errors.Add(new ValidationFailure
+                {
+                    Field = "QAN",
+                    Message = "QAN is required"
+                });
+            }
 
+            if (string.IsNullOrWhiteSpace(result.CandidateDetails?.FundingStreamName))
+            {
+                result.Errors.Add(new ValidationFailure
+                {
+                    Field = "FundingStreamName",
+                    Message = "Funding Stream Name is required"
+                });
+            }
+
+            if (string.IsNullOrWhiteSpace(result.CandidateDetails?.RollOverStatus))
+            {
+                result.Errors.Add(new ValidationFailure
+                {
+                    Field = "RolloverStatus",
+                    Message = "Rollover Status is required"
+                });
+            }
+        }
+
+        // -------------------------------------------------------
+        // RULE 2 — Candidate must exist in DB
+        // -------------------------------------------------------
         private void ValidateRolloverCandidateExists(
             CandidateValidationResult result,
             FundingExtensionCandidateValidationContext ctx)
         {
-            var key = new CandidateKey(result.CandidateDetails.Qan, result.CandidateDetails.FundingStreamName);
+            var key = new CandidateKey(
+                result.CandidateDetails.Qan!,
+                result.CandidateDetails.FundingStreamName);
 
             if (!ctx.CandidatesInDb.Contains(key))
             {
@@ -92,11 +132,16 @@ namespace SFA.DAS.AODP.Application.Services.Validation
             }
         }
 
+        // -------------------------------------------------------
+        // RULE 3 — Candidate must exist in workflow scope
+        // -------------------------------------------------------
         private void ValidateRolloverWorkflowCandidateExists(
             CandidateValidationResult result,
             FundingExtensionCandidateValidationContext ctx)
         {
-            var key = new CandidateKey(result.CandidateDetails.Qan, result.CandidateDetails.FundingStreamName);
+            var key = new CandidateKey(
+                result.CandidateDetails.Qan!,
+                result.CandidateDetails.FundingStreamName);
 
             if (!ctx.WorkflowCandidatesInDb.Contains(key))
             {
@@ -108,21 +153,15 @@ namespace SFA.DAS.AODP.Application.Services.Validation
             }
         }
 
+        // -------------------------------------------------------
+        // RULE 4 — Status must be valid and allowed
+        // -------------------------------------------------------
         private void ValidateStatus(
-         CandidateValidationResult result,
-         FundingExtensionCandidateValidationContext ctx)
+            CandidateValidationResult result,
+            FundingExtensionCandidateValidationContext ctx)
         {
-            if (!Enum.TryParse<RolloverStatus>(result.CandidateDetails.RollOverStatus, true, out var parsed))
-            {
-                result.Errors.Add(new ValidationFailure
-                {
-                    Field = "RolloverStatus",
-                    Message = $"This candidate has an invalid RollOver Status ({string.Join(", ", AllowedStatusForUserInput)})"
-                });
-                return;
-            }
-
-            if (!AllowedStatusForUserInput.Contains(parsed))
+            if (!Enum.TryParse<RolloverStatus>(result.CandidateDetails.RollOverStatus, true, out var parsed) ||
+                !AllowedStatusForUserInput.Contains(parsed))
             {
                 result.Errors.Add(new ValidationFailure
                 {
@@ -130,28 +169,18 @@ namespace SFA.DAS.AODP.Application.Services.Validation
                     Message = $"This candidate has an invalid RollOver Status ({string.Join(", ", AllowedStatusForUserInput)})"
                 });
             }
-
         }
 
-
+        // -------------------------------------------------------
+        // RULE 5 — ExclusionReason required when status = Excluded
+        // -------------------------------------------------------
         private void ValidateExclusionReason(
             CandidateValidationResult result,
             FundingExtensionCandidateValidationContext ctx)
         {
-            var raw = result.CandidateDetails.RollOverStatus;
-
-            // Convert string → enum
-            if (!Enum.TryParse<RolloverStatus>(raw, true, out var status))
-            {
-                //result.Errors.Add(new ValidationFailure
-                //{
-                //    Field = "RolloverStatus",
-                //    Message = $"Invalid RollOver Status '{raw}'"
-                //});
+            if (!Enum.TryParse<RolloverStatus>(result.CandidateDetails.RollOverStatus, true, out var status))
                 return;
-            }
 
-            // Now compare enum → enum
             if (status == RolloverStatus.Excluded &&
                 string.IsNullOrWhiteSpace(result.CandidateDetails.ExclusionReason))
             {
@@ -162,7 +191,5 @@ namespace SFA.DAS.AODP.Application.Services.Validation
                 });
             }
         }
-
     }
-
 }

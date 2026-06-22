@@ -173,7 +173,7 @@ public class RolloverRepository : IRolloverRepository
             .OrderBy(x => x.QAN)
             .ToListAsync(cancellationToken);
     }
-    public async Task<RolloverWorkflowRun> GeRolloverWorkflowRunByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<RolloverWorkflowRun?> GeRolloverWorkflowRunByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await _context.RolloverWorkflowRuns
                 .AsNoTracking()

@@ -40,6 +40,11 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
 
             try
             {
+                if (request.RolloverCandidates == null || request.RolloverCandidates.Count == 0)
+                {
+                    return GeneralFailureResponse("No rollover candidates were provided for validation.");
+                }
+
                 var incomingKeys = request.RolloverCandidates
                     .Select(x => new CandidateKey(x.Qan, x.FundingStreamName))
                     .ToHashSet();
@@ -55,9 +60,9 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                     IsValid = validationResult.IsValid
                 };
 
-
                 if (!validationResult.IsValid)
                 {
+
                     var latestRunId = await _rolloverRepository.GetLatestWorkflowRunIdAsync(cancellationToken);
 
                     if (latestRunId == Guid.Empty)
@@ -121,6 +126,21 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
             return response;
         }
 
+        private BaseMediatrResponse<ValidateRolloverExtensionCommandResponse> GeneralFailureResponse(string message)
+        {
+            return new BaseMediatrResponse<ValidateRolloverExtensionCommandResponse>
+            {
+                Success = true,
+                Value = new ValidateRolloverExtensionCommandResponse
+                {
+                    IsValid = false,
+                    ValidationFailureSummary = new ValidationFailureSummary
+                    {
+                        GeneralFailureMessage = message,
+                    }
+                }
+            };
+        }
 
     }
 }

@@ -32,7 +32,7 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
             {
                 ApplyCandidateAndFundingUpdates(candidates, inputItems, fundings);
 
-                await CreateDiscussionHistoriesAsync(candidates, fundings, cancellationToken);
+                await CreateDiscussionHistoriesAsync(candidates, fundings);
 
                 await _rolloverRepository.DeleteAllWorkflowCandidatesAsync(cancellationToken);
 
@@ -44,7 +44,7 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
             }
         }
 
-        private void ApplyCandidateAndFundingUpdates(
+        private static void ApplyCandidateAndFundingUpdates(
             List<RolloverCandidates> candidates,
             List<FundingExtensionItem> inputItems,
             List<QualificationFundings> fundings)
@@ -93,8 +93,7 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
 
         private async Task CreateDiscussionHistoriesAsync(
             List<RolloverCandidates> candidates,
-            List<QualificationFundings> fundings,
-            CancellationToken cancellationToken)
+            List<QualificationFundings> fundings)
         {
             var historyEntries = new List<QualificationDiscussionHistory>();
 
@@ -113,7 +112,7 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
                     .Where(c => c.RolloverStatus == RolloverStatus.Excluded)
                     .ToList();
 
-                if (extended.Any())
+                if (extended.Count > 0)
                 {
                     var lines = extended.Select(c =>
                     {
@@ -137,7 +136,7 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
                     });
                 }
 
-                if (excluded.Any())
+                if (excluded.Count > 0)
                 {
                     var lines = excluded.Select(c =>
                         $"{c.FundingOffer.Name} was not extended due to {c.ExclusionReason}");
@@ -154,7 +153,7 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
                 }
             }
 
-            await _qualificationDiscussionHistoryRepository.AddDiscussionHistories(historyEntries);
+            _qualificationDiscussionHistoryRepository.AddDiscussionHistories(historyEntries);
         }
 
 

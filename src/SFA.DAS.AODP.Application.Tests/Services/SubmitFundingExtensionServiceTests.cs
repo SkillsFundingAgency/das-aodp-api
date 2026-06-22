@@ -214,7 +214,7 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
 
             _historyRepository
                 .Setup(h => h.AddDiscussionHistories(It.IsAny<List<QualificationDiscussionHistory>>()))
-                .ThrowsAsync(new Exception("Boom"));
+                .Throws(new Exception("Boom"));
 
             // Act
             var result = await _service.Submit([candidate], [], [funding], CancellationToken.None);

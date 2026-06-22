@@ -185,7 +185,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             // Assert
             Assert.True(result.Success);
             Assert.False(result.Value.IsValid);
-            Assert.Equal(csvBytes, result.Value.ValidationFailureSummary.ValidatedCandidateFile);
+            Assert.Equal(csvBytes, result.Value.ValidationFailureSummary?.ValidatedCandidateFile);
 
             _csvBuilder.Verify(
                 x => x.BuildWithValidationErrors(

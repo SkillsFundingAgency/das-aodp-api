@@ -13,11 +13,11 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
     public class RolloverCandidateForValidation
     {
         public int RowNumber { get; set; }
-        public string? Qan { get; set; }
+        public string Qan { get; set; } = string.Empty;
         public string FundingStreamName { get; set; } = string.Empty;
         public string RollOverStatus { get; set; } = string.Empty;
         public string? ExclusionReason { get; set; }
-        public DateTime? ProposedFundingApprovalEndDate { get; set; }
+        public DateTime ProposedFundingApprovalEndDate { get; set; }
         public string? Comments { get; init; }
     }
 }

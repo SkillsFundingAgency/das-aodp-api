@@ -19,7 +19,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             await _context.SaveChangesAsync();
         }
 
-        public async Task AddDiscussionHistories(List<QualificationDiscussionHistory> histories)
+        public void AddDiscussionHistories(List<QualificationDiscussionHistory> histories)
         {
             _context.QualificationDiscussionHistory.AddRange(histories);
         }
