@@ -1,8 +1,6 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoMoq;
-using AutoFixture.Kernel;
 using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -15,6 +13,7 @@ using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
+using SFA.DAS.AODP.Testing.Helpers;
 using ChangedQualification = SFA.DAS.AODP.Models.Qualifications.ChangedQualification;
 
 namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
@@ -47,19 +46,6 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification
             _loggerMock = _fixture.Freeze<Mock<ILogger<QualificationsController>>>();
             _mediatorMock = _fixture.Freeze<Mock<IMediator>>();
             _controller = new QualificationsController(_mediatorMock.Object, _loggerMock.Object);
-        }
-
-        public class DateOnlySpecimenBuilder : ISpecimenBuilder
-        {
-            public object Create(object request, ISpecimenContext context)
-            {
-                if (request is Type type && type == typeof(DateOnly))
-                {
-                    return DateOnly.FromDateTime(DateTime.Now);
-                }
-
-                return new NoSpecimen();
-            }
         }
 
         [Fact]
