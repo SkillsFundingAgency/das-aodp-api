@@ -11,6 +11,7 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
     {
         private readonly FundingExtensionProjectionService _service;
         private readonly IFixture _fixture;
+        private readonly DateTime _defaultEndDate = DateTime.UtcNow.AddDays(20);
 
         public FundingExtensionProjectionServiceTests()
         {
@@ -39,7 +40,7 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
 
             var uploaded = new List<RolloverCandidateForValidation>
             {
-                new() { Qan = "123", FundingStreamName = "FS1", RollOverStatus = "Extended" }
+                new() { Qan = "123", FundingStreamName = "FS1", RollOverStatus = "Extended", ProposedFundingApprovalEndDate =  _defaultEndDate }
             };
 
             // Act
@@ -64,8 +65,8 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
 
             var uploaded = new List<RolloverCandidateForValidation>
             {
-                new() { Qan = "123", FundingStreamName = "FS1", RollOverStatus = "Extended" },
-                new() { Qan = "123", FundingStreamName = "FS1", RollOverStatus = "Excluded" } // duplicate
+                new() { Qan = "123", FundingStreamName = "FS1", RollOverStatus = "Extended", ProposedFundingApprovalEndDate =  _defaultEndDate },
+                new() { Qan = "123", FundingStreamName = "FS1", RollOverStatus = "Excluded", ProposedFundingApprovalEndDate =  _defaultEndDate } // duplicate
             };
 
             // Act
@@ -113,7 +114,7 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
 
             var uploaded = new List<RolloverCandidateForValidation>
             {
-                new() { Qan = "123", FundingStreamName = "FS1", RollOverStatus = "Excluded" }
+                new() { Qan = "123", FundingStreamName = "FS1", RollOverStatus = "Excluded", ProposedFundingApprovalEndDate= _defaultEndDate }
             };
 
             // Act

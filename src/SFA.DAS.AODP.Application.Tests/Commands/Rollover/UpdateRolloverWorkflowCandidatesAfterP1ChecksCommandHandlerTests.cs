@@ -49,8 +49,6 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
             OperationalEndDateThreshold = DateTime.UtcNow.AddDays(-10),
             OfferedInEngland = true,
             IntentionToSeekFundingInEngland = true,
-            Glh = 10,
-            Tqt = 20,
             IsOnDefundingList = false
         };
 
@@ -88,8 +86,6 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
             OperationalEndDateThreshold = DateTime.UtcNow.AddDays(-18),
             OfferedInEngland = false,
             IntentionToSeekFundingInEngland = false,
-            Glh = 200,
-            Tqt = 10,
             IsOnDefundingList = true
         };
 
@@ -115,7 +111,6 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
         Assert.Contains("Operating End Date is before the Threshold", candidate.P1FailureReason);
         Assert.Contains("Not Offered in England", candidate.P1FailureReason);
         Assert.Contains("Not Funded in England", candidate.P1FailureReason);
-        Assert.Contains("GLH > TQT", candidate.P1FailureReason);
         Assert.Contains("Qualification is on Defunding (Defunded) List", candidate.P1FailureReason);
     }
 
@@ -178,8 +173,6 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
             OperationalEndDateThreshold = new DateTime(2023, 12, 31),
             OfferedInEngland = true,
             IntentionToSeekFundingInEngland = true,
-            Glh = 1,
-            Tqt = 2,
             IsOnDefundingList = false,
             AcademicYear = "2024/25"
         };
@@ -219,8 +212,6 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
             OperationalEndDateThreshold = new DateTime(2020, 12, 31),
             OfferedInEngland = true,
             IntentionToSeekFundingInEngland = true,
-            Glh = 1,
-            Tqt = 2,
             IsOnDefundingList = false,
             AcademicYear = "2020/21"
         };
@@ -258,8 +249,6 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
             OperationalEndDate = new DateTime(2024, 5, 1),
             OperationalEndDateThreshold = new DateTime(2024, 1, 1),
             OfferedInEngland = false,
-            Glh = 10,
-            Tqt = 5,
             IsOnDefundingList = true,
             AcademicYear = "2024/25"
         };
@@ -296,8 +285,6 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
             OperationalEndDate = new DateTime(2024, 5, 1),
             OperationalEndDateThreshold = new DateTime(2024, 1, 1),
             OfferedInEngland = false,
-            Glh = 10,
-            Tqt = 5,
             IsOnDefundingList = true,
             AcademicYear = "2024/25"
         };

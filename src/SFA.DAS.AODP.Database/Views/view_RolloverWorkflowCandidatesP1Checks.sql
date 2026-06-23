@@ -59,8 +59,6 @@ SELECT
     qv.OperationalEndDate,
     qv.OfferedInEngland,
     qv.IntentionToSeekFundingInEngland,
-    qv.Glh,
-    qv.Tqt,
     CASE WHEN dl.Id IS NOT NULL THEN CAST(1 AS bit) ELSE CAST(0 AS bit) END AS IsOnDefundingList,
         pldns.[PLDNS14-16] AS Age1416,
         pldns.[PLDNS16-19] AS Age1619,

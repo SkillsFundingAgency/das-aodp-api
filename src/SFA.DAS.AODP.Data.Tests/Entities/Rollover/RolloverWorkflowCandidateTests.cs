@@ -117,8 +117,6 @@ public class RolloverWorkflowCandidateTests
             FundingStream = null,
             OfferedInEngland = false,
             IntentionToSeekFundingInEngland = false,
-            Glh = 50,
-            Tqt = 10,
             IsOnDefundingList = true,
             FundingEndDateThreshold = new DateTime(2025, 01, 01),
             OperationalEndDateThreshold = new DateTime(2025, 01, 01),
@@ -136,7 +134,6 @@ public class RolloverWorkflowCandidateTests
         Assert.Contains("Funding Stream out of scope", candidate.P1FailureReason);
         Assert.Contains("Not Offered in England", candidate.P1FailureReason);
         Assert.Contains("Not Funded in England", candidate.P1FailureReason);
-        Assert.Contains("GLH > TQT", candidate.P1FailureReason);
         Assert.Contains("Qualification is on Defunding", candidate.P1FailureReason);
     }
 
@@ -343,8 +340,6 @@ public class RolloverWorkflowCandidateTests
             FundingStream = "Age1416",
             OfferedInEngland = true,
             IntentionToSeekFundingInEngland = true,
-            Glh = 10,
-            Tqt = 20,
             IsOnDefundingList = false,
 
             FundingEndDateThreshold = new DateTime(2025, 01, 01),

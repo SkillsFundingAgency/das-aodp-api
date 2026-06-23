@@ -80,8 +80,10 @@ namespace SFA.DAS.AODP.Application.Services.Export
                     WriteCoreColumns(writer, r);
                     writer.Write(',');
 
-                    var result = validationResults
-                        .FirstOrDefault(v => v.CandidateDetails.RowNumber == r.RowNumber);
+                    var result = validationResults.FirstOrDefault(v =>
+                        string.Equals(v.CandidateDetails.Qan, r.QAN, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(v.CandidateDetails.FundingStreamName, r.FundingStreamName, StringComparison.OrdinalIgnoreCase)
+                    );
 
                     var errorText = result?.Errors?.Count > 0
                         ? string.Join("; ", result.Errors.Select(e => e.Message))

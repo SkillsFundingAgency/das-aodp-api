@@ -62,7 +62,6 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
 
                 if (!validationResult.IsValid)
                 {
-
                     var latestRunId = await _rolloverRepository.GetLatestWorkflowRunIdAsync(cancellationToken);
 
                     if (latestRunId == Guid.Empty)
@@ -73,15 +72,21 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                     var exportLookup = exportRows.ToDictionary(
                         x => new CandidateKey(x.QAN, x.FundingStreamName));
 
+                    var missingCandidates = new List<CandidateNotIncludedInRollover>();
+
                     foreach (var result in validationResult.Candidates)
                     {
                         var uploaded = result.CandidateDetails;
-
+                       
                         var key = new CandidateKey(uploaded.Qan.OrEmpty(), uploaded.FundingStreamName);
 
                         if (exportLookup.TryGetValue(key, out var exportRow))
                         {
                             RolloverCandidateExportMapper.ApplyUserUpdates(exportRow, uploaded);
+                        }
+                        else
+                        {
+                            missingCandidates.Add(new CandidateNotIncludedInRollover(result));
                         }
                     }
 
@@ -91,7 +96,9 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                     validationResponse.ValidationFailureSummary = new ValidationFailureSummary
                     {
                         FailedCandidateCount = validationResult.FailedCandidateCount,
-                        ValidatedCandidateFile = csvBytes
+                        ValidatedCandidateFile = csvBytes,
+                        NotIncludedInRollover = missingCandidates
+
                     };
 
                     response.Value = validationResponse;

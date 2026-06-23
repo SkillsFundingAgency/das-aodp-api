@@ -16,6 +16,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
         private readonly Mock<IFundingExtensionProjectionService> _projectionService = new();
 
         private readonly ValidateRolloverExtensionCommandHandler _handler;
+        private readonly DateTime _defaultEndDate = DateTime.UtcNow.AddDays(20);
 
         public ValidateRolloverExtensionCommandHandlerTests()
         {
@@ -37,8 +38,8 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             {
                 RolloverCandidates =
                 [
-                    new() { Qan = "111", FundingStreamName = "FS", RollOverStatus = RolloverStatus.Extended.ToString() },
-                    new() { Qan = "222", FundingStreamName = "FS", RollOverStatus = RolloverStatus.Excluded.ToString() }
+                    new() { Qan = "111", FundingStreamName = "FS", RollOverStatus = RolloverStatus.Extended.ToString(), ProposedFundingApprovalEndDate =  _defaultEndDate},
+                    new() { Qan = "222", FundingStreamName = "FS", RollOverStatus = RolloverStatus.Excluded.ToString(), ProposedFundingApprovalEndDate =  _defaultEndDate }
                 ]
             };
 
@@ -119,7 +120,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             {
                 RolloverCandidates =
                 [
-                    new() { Qan = "111", FundingStreamName = "FS", RollOverStatus = RolloverStatus.Extended.ToString() }
+                    new() { Qan = "222", FundingStreamName = "FS", RollOverStatus = RolloverStatus.Excluded.ToString(), ProposedFundingApprovalEndDate = _defaultEndDate }
                 ]
             };
 
@@ -226,7 +227,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
         {
             var command = new ValidateRolloverExtensionCommand
             {
-                RolloverCandidates = [new() { Qan = "123", FundingStreamName = "FS", }]
+                RolloverCandidates = [new() { Qan = "222", FundingStreamName = "FS", RollOverStatus = RolloverStatus.Excluded.ToString(), ProposedFundingApprovalEndDate = _defaultEndDate }]
             };
 
             _rolloverRepository
@@ -247,7 +248,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             {
                 RolloverCandidates =
                 [
-                    new() { Qan = "60110314", FundingStreamName = "FS", RollOverStatus = "Extended" }
+                    new() { Qan = "222", FundingStreamName = "FS", RollOverStatus = RolloverStatus.Excluded.ToString(), ProposedFundingApprovalEndDate =  _defaultEndDate }
                 ]
             };
 

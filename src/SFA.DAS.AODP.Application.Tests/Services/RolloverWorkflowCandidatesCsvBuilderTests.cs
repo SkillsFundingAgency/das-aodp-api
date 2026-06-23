@@ -24,13 +24,14 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
             {
                 RowNumber = 1,
                 QAN = "123",
+                FundingStreamName ="1",
                 QualificationTitle = "Test",
                 Comments = "None"
             };
 
             var validation = new CandidateValidationResult
             {
-                CandidateDetails = new RolloverCandidateForValidation { RowNumber = 1 },
+                CandidateDetails = new RolloverCandidateForValidation { RowNumber = 1, FundingStreamName="1", Qan="123", ProposedFundingApprovalEndDate = DateTime.UtcNow.AddDays(20), RollOverStatus = "NeedsReview"},
                 Errors =
                 {
                     new ValidationFailure { Message = "Error A" },
@@ -60,7 +61,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
 
             var validation = new CandidateValidationResult
             {
-                CandidateDetails = new RolloverCandidateForValidation { RowNumber = 2 }
+                CandidateDetails = new RolloverCandidateForValidation { RowNumber = 2, Qan="123456", FundingStreamName="Stream1", ProposedFundingApprovalEndDate = DateTime.UtcNow, RollOverStatus="NeedsReview"}
             };
 
             // Act

@@ -179,8 +179,6 @@ public class RolloverRepositoryTests
             OperationalEndDate = now.Date.AddMonths(6),
             OperationalEndDateThreshold = now.Date.AddDays(-5),
             OfferedInEngland = true,
-            Glh = 150,
-            Tqt = 200,
             IsOnDefundingList = false
         };
 
@@ -202,8 +200,6 @@ public class RolloverRepositoryTests
             OperationalEndDate = null,
             OperationalEndDateThreshold = now.Date.AddDays(15),
             OfferedInEngland = false,
-            Glh = 50,
-            Tqt = 50,
             IsOnDefundingList = true
         };
 
@@ -229,15 +225,11 @@ public class RolloverRepositoryTests
             var fetched1 = result.Single(r => r.WorkflowCandidateId == e1.WorkflowCandidateId);
             Assert.Equal(e1.AcademicYear, fetched1.AcademicYear);
             Assert.Equal(e1.FundingStream, fetched1.FundingStream);
-            Assert.Equal(e1.Glh, fetched1.Glh);
-            Assert.Equal(e1.Tqt, fetched1.Tqt);
             Assert.Equal(e1.IsOnDefundingList, fetched1.IsOnDefundingList);
 
             var fetched2 = result.Single(r => r.WorkflowCandidateId == e2.WorkflowCandidateId);
             Assert.Equal(e2.AcademicYear, fetched2.AcademicYear);
             Assert.Equal(e2.FundingStream, fetched2.FundingStream);
-            Assert.Equal(e2.Glh, fetched2.Glh);
-            Assert.Equal(e2.Tqt, fetched2.Tqt);
             Assert.Equal(e2.IsOnDefundingList, fetched2.IsOnDefundingList);
         }
     }

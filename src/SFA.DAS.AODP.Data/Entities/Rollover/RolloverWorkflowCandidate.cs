@@ -157,9 +157,6 @@ public class RolloverWorkflowCandidate
         if (!checks.IntentionToSeekFundingInEngland)
             failures.Add("Not Funded in England");
 
-        // 6) GLH <= TQT
-        if (checks.Glh > checks.Tqt)
-            failures.Add("GLH > TQT");
 
         // 7) Does the Qualification appear in the Defunding (Defunded) List
         if (checks.IsOnDefundingList)
