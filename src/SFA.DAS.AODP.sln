@@ -30,6 +30,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SFA.DAS.AODP.Shared.UnitTests", "SFA.DAS.AODP.Shared.UnitTests\SFA.DAS.AODP.Shared.UnitTests.csproj", "{F655216E-6896-4BE7-A5DD-C2A768ACF7C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,6 +80,10 @@ Global
 		{44F33783-6BBD-41B8-8DF1-64D65893FF20}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44F33783-6BBD-41B8-8DF1-64D65893FF20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44F33783-6BBD-41B8-8DF1-64D65893FF20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F655216E-6896-4BE7-A5DD-C2A768ACF7C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F655216E-6896-4BE7-A5DD-C2A768ACF7C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F655216E-6896-4BE7-A5DD-C2A768ACF7C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F655216E-6896-4BE7-A5DD-C2A768ACF7C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -87,6 +93,7 @@ Global
 		{FB74FB4A-5171-40CE-964D-742BB8DFF2E1} = {352D93C0-FC99-424B-8C40-62DF305297D9}
 		{17E1FA1D-D77E-4B2A-8C9F-7D4C4CA0C031} = {352D93C0-FC99-424B-8C40-62DF305297D9}
 		{44F33783-6BBD-41B8-8DF1-64D65893FF20} = {352D93C0-FC99-424B-8C40-62DF305297D9}
+		{F655216E-6896-4BE7-A5DD-C2A768ACF7C0} = {352D93C0-FC99-424B-8C40-62DF305297D9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D52B722B-F623-43D2-9F44-232704168EBF}

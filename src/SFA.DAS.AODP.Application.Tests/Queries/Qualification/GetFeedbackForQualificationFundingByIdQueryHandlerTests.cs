@@ -5,6 +5,7 @@ using Moq;
 using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
+using SFA.DAS.AODP.Shared.UnitTests.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -33,19 +34,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             _handler = new GetFeedbackForQualificationFundingByIdQueryHandler(
                 _qualificationFundingFeedbackRepositoryMock.Object,
                 _qualificationFundingsRepositoryMock.Object);
-        }
-
-        public class DateOnlySpecimenBuilder : ISpecimenBuilder
-        {
-            public object Create(object request, ISpecimenContext context)
-            {
-                if (request is Type type && type == typeof(DateOnly))
-                {
-                    return DateOnly.FromDateTime(DateTime.Now);
-                }
-
-                return new NoSpecimen();
-            }
         }
 
         [Fact]
