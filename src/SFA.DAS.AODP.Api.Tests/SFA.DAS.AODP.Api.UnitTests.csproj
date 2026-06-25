@@ -29,7 +29,7 @@
     <ProjectReference Include="..\SFA.DAS.AODP.Api\SFA.DAS.AODP.Api.csproj" />
     <ProjectReference Include="..\SFA.DAS.AODP.Application\SFA.DAS.AODP.Application.csproj" />
     <ProjectReference Include="..\SFA.DAS.AODP.Models\SFA.DAS.AODP.Models.csproj" />
-    <ProjectReference Include="..\SFA.DAS.AODP.Shared.UnitTests\SFA.DAS.AODP.Shared.UnitTests.csproj" />
+    <ProjectReference Include="..\SFA.DAS.AODP.Testing\SFA.DAS.AODP.Testing.csproj" />
   </ItemGroup>
 
   <ItemGroup>

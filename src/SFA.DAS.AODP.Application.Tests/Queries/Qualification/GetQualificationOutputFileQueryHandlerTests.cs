@@ -2,20 +2,26 @@
 using AutoFixture.AutoMoq;
 using Moq;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
+using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Providers;
+using SFA.DAS.AODP.Data.Repositories.QaaQualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Infrastructure;
 using SFA.DAS.AODP.Models.Settings;
 using System.Text;
+using SFA.DAS.AODP.Testing.Testing;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
 {
-    public class GetQualificationOutputFileQueryHandlerTests
+    public class GetQualificationOutputFileQueryHandlerTests : UnitTest
     {
         private readonly IFixture _fixture;
         private readonly Mock<IQualificationOutputFileRepository> _repo;
+        private readonly Mock<IQaaQualificationRepository> _qaaRepo;
         private readonly Mock<IQualificationOutputFileLogRepository> _logRepo;
         private readonly Mock<IBlobStorageService> _blob;
+        private readonly Mock<IQaaFundingApprovalEndDateCalculator> _fundingApprovalEndDateCalculator;
         private readonly OutputFileBlobStorageSettings _settings;
         private readonly GetQualificationOutputFileQueryHandler _handler;
 
@@ -41,8 +47,10 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             _fixture = new Fixture().Customize(new AutoMoqCustomization { ConfigureMembers = true });
 
             _repo = _fixture.Freeze<Mock<IQualificationOutputFileRepository>>();
+            _qaaRepo = _fixture.Freeze<Mock<IQaaQualificationRepository>>();
             _blob = _fixture.Freeze<Mock<IBlobStorageService>>();
             _logRepo = _fixture.Freeze<Mock<IQualificationOutputFileLogRepository>>();
+            _fundingApprovalEndDateCalculator = _fixture.Freeze<Mock<IQaaFundingApprovalEndDateCalculator>>();
 
             _settings = _fixture.Freeze<OutputFileBlobStorageSettings>();
             _settings.ContainerName = ContainerName;
@@ -66,6 +74,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 Age1619_FundingApprovalEndDate = publicationDate.AddDays(-2)
             };
 
+            _qaaRepo.Setup(o => o.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([]);
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ReturnsAsync(new List<QualificationOutputFile> { active, archived });
 
@@ -149,12 +158,14 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                     h.DownloadDate >= DateTime.UtcNow.AddMinutes(-1)
                 ),
                 It.IsAny<CancellationToken>()), Times.Once);
+
         }
 
         [Fact]
         public async Task Then_No_Qualifications_Returns_Failure_And_No_Uploads()
         {
             // Arrange
+            _qaaRepo.Setup(o => o.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([]);
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ReturnsAsync(new List<QualificationOutputFile>());
 
@@ -181,6 +192,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         {
             // Arrange
             var ex = new Exception(ErrorGeneric);
+            _qaaRepo.Setup(o => o.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([]);
             _repo.Setup(x => x.GetQualificationOutputFile()).ThrowsAsync(ex);
 
             // Act
@@ -230,6 +242,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 Age1619_FundingApprovalEndDate = todayUtc
             };
 
+            _qaaRepo.Setup(o => o.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([]);
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ReturnsAsync(new List<QualificationOutputFile> { edge });
 
@@ -279,6 +292,13 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         public async Task Then_Record_With_EndDate_After_PublicationDate_Is_Set_To_Approved()
         {
             // Arrange: future end date -> should be Approved
+            _fixture.Inject<DateOnly?>(null);
+            var qan = "qan";
+            var academicYearEndDate = new DateOnly(2026, 07, 31);
+            var snapshotDate = new DateTime(2026, 01, 01, 12, 00, 00);
+            var startDate = new DateOnly(2023, 09, 01);
+            var lastDateForRegistration = new DateOnly(2026, 08, 1);
+            var qaaQualification = RegulatedQaaQualification.Create(snapshotDate, "aim", "title", "awarding body", startDate, lastDateForRegistration, SectorSubjectArea.AccountingAndFinance);
             var todayUtc = DateTime.UtcNow.Date;
             var future = new QualificationOutputFile
             {
@@ -286,8 +306,15 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 Age1619_FundingApprovalEndDate = todayUtc.AddDays(5)
             };
 
+            var qaaQualificationInOutputFile = new QualificationOutputFile
+            {
+                QualificationName = "title",
+            };
+
+            _fundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDateAsync(qaaQualification, FundingStream.Age1619, It.IsAny<DateOnly>(), CancellationToken)).ReturnsAsync(academicYearEndDate);
+            _qaaRepo.Setup(o => o.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([qaaQualification]);
             _repo.Setup(x => x.GetQualificationOutputFile())
-                 .ReturnsAsync(new List<QualificationOutputFile> { future });
+                 .ReturnsAsync(new List<QualificationOutputFile> { future, qaaQualificationInOutputFile });
 
             _blob.Setup(x => x.UploadFileAsync(
                     It.IsAny<string>(),
@@ -311,8 +338,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             var csv = Encoding.UTF8.GetString(result.Value.FileContent);
             var lines = csv.Replace("\r", "").Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
-            Assert.True(lines.Length >= 2, "CSV should contain header + one row");
-            var row = lines.Skip(1).Single();
+            Assert.True(lines.Length >= 3, "CSV should contain header + two rows");
+            var row = lines.Skip(1).First();
 
             Assert.Contains("Future Q", row);
             Assert.Contains(",Approved,", row);
@@ -323,6 +350,14 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         public async Task Then_PublicationDate_Different_From_RunDate_Is_Handled_Correctly()
         {
             // Arrange
+            _fixture.Inject<DateOnly?>(null);
+            var qan = "qan";
+            var academicYearEndDate = new DateOnly(2026, 07, 31);
+            var snapshotDate = new DateTime(2026, 01, 01, 12, 00, 00);
+            var startDate = new DateOnly(2023, 09, 01);
+            var lastDateForRegistration = new DateOnly(2026, 08, 1);
+            var qaaQualification = RegulatedQaaQualification.Create(snapshotDate, "aim", "title", "awarding body", startDate, lastDateForRegistration, SectorSubjectArea.AccountingAndFinance);
+            
             var publicationDate = DateTime.UtcNow.AddDays(-7).Date;
             var request = new GetQualificationOutputFileQuery
             {
@@ -336,6 +371,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
                 Age1619_FundingApprovalEndDate = publicationDate.AddDays(1)
             };
 
+            _fundingApprovalEndDateCalculator.Setup(o => o.CalculateFundingApprovalEndDateAsync(qaaQualification, FundingStream.Age1619, It.IsAny<DateOnly>(), CancellationToken)).ReturnsAsync(academicYearEndDate);
+            _qaaRepo.Setup(o => o.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([qaaQualification]);
             _repo.Setup(x => x.GetQualificationOutputFile())
                  .ReturnsAsync(new List<QualificationOutputFile> { qualification });
 

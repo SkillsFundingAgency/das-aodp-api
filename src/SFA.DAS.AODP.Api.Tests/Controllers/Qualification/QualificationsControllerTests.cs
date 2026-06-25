@@ -1,13 +1,10 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoMoq;
-using AutoFixture.Kernel;
 using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.AODP.Api.Controllers.Qualification;
-using SFA.DAS.AODP.Api.UnitTests;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.Qualification;
 using SFA.DAS.AODP.Application.Commands.Qualifications;
@@ -16,7 +13,7 @@ using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
-using SFA.DAS.AODP.Shared.UnitTests.Helpers;
+using SFA.DAS.AODP.Testing.Helpers;
 using ChangedQualification = SFA.DAS.AODP.Models.Qualifications.ChangedQualification;
 
 namespace SFA.DAS.AODP.Api.Tests.Controllers.Qualification

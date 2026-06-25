@@ -19,5 +19,3 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
         }
     }
 }
-
-
