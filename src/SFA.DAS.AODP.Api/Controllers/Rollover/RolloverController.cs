@@ -78,6 +78,11 @@ public class RolloverController : BaseController
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> ValidateRolloverExtension(ValidateRolloverExtensionCommand validateRolloverExtensionCommand)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         return await SendRequestAsync(validateRolloverExtensionCommand);
     }
 
