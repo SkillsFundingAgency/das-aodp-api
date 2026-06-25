@@ -57,7 +57,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
                 .ToList();
 
             return await _context.QualificationFundings
-                .AsNoTracking()
                 .Where(qf => keySet.Contains(qf.QualificationVersionId + "|" + qf.FundingOfferId))
                 .ToListAsync(cancellationToken);
         }
