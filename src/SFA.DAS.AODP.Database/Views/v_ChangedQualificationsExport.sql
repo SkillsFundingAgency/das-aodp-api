@@ -75,7 +75,8 @@ FROM dbo.Qualification q
 Left Outer Join regulated.QualificationVersions qv ON q.Id = qv.QualificationId
 Left Outer Join dbo.AwardingOrganisation ao ON qv.AwardingOrganisationId = ao.Id
 Left Outer Join regulated.LifecycleStage ls ON qv.LifecycleStageId = ls.Id
+Left Outer Join regulated.ProcessStatus ps ON qv.ProcessStatusId = ps.Id
  
 WHERE ls.Name = 'Changed'
-    and qv.EligibleForFunding = 1;
+and (PS.name = 'Decision Required' or PS.Name = 'On Hold')
 GO
