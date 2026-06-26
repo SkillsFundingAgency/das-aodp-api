@@ -80,7 +80,7 @@ public class RegulatedQaaQualificationTests : UnitTest
     }
 
     [Theory]
-    [InlineData(QaaImportComparisonOutcome.Unchanged, QaaLastDateForRegistrationChangeType.NotChanged)]
+    [InlineData(QaaImportComparisonOutcome.NotChanged, QaaLastDateForRegistrationChangeType.NotChanged)]
     [InlineData(QaaImportComparisonOutcome.Discontinued, QaaLastDateForRegistrationChangeType.NotChanged)]
     public async Task SetFundingApprovalEndDate_WhenDoNotNeedToRecalculate_EnsureFundingApprovalCalculatorDoesNotRun_FundingApprovalRemainsNull(QaaImportComparisonOutcome outcome, QaaLastDateForRegistrationChangeType changeType)
     {
