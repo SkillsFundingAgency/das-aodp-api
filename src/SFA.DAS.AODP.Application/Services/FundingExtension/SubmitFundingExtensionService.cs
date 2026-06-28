@@ -5,6 +5,7 @@ using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
 using SFA.DAS.AODP.Infrastructure.Extensions;
+using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
 using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Application.Services.FundingExtension
@@ -13,13 +14,17 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
     {
         private readonly IRolloverRepository _rolloverRepository;
         private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
+        private readonly ISystemClockService _clockService;
+        private readonly IGuidProvider _guidProvider;
         private Guid RolloverExtendedActionTypeId = Guid.Parse("00000000-0000-0000-0000-000000000004");
         private Guid RolloverNotExtendedActionTypeId = Guid.Parse("00000000-0000-0000-0000-000000000005");
 
-        public SubmitFundingExtensionService(IRolloverRepository rolloverRepository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository)
+        public SubmitFundingExtensionService(IRolloverRepository rolloverRepository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository, ISystemClockService clockService, IGuidProvider guidProvider)
         {
             _rolloverRepository = rolloverRepository;
             _qualificationDiscussionHistoryRepository = qualificationDiscussionHistoryRepository;
+            _clockService = clockService;
+            _guidProvider = guidProvider;
         }
 
         public async Task<bool> Submit(
@@ -127,13 +132,7 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
 
                     var notes = string.Join("\n", lines);
 
-                    historyEntries.Add(new QualificationDiscussionHistory
-                    {
-                        Id = Guid.NewGuid(),
-                        ActionTypeId = RolloverExtendedActionTypeId,
-                        QualificationId = qualificationId,
-                        Notes = notes
-                    });
+                    historyEntries.Add(CreateDiscussionHistoryEntry(notes, RolloverExtendedActionTypeId, qualificationId));
                 }
 
                 if (excluded.Count > 0)
@@ -143,19 +142,28 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
 
                     var notes = string.Join("\n", lines);
 
-                    historyEntries.Add(new QualificationDiscussionHistory
-                    {
-                        Id = Guid.NewGuid(),
-                        ActionTypeId = RolloverNotExtendedActionTypeId,
-                        QualificationId = qualificationId,
-                        Notes = notes
-                    });
+                    historyEntries.Add(CreateDiscussionHistoryEntry(notes, RolloverNotExtendedActionTypeId, qualificationId));
                 }
             }
 
             _qualificationDiscussionHistoryRepository.AddDiscussionHistories(historyEntries);
         }
 
-
+        private QualificationDiscussionHistory CreateDiscussionHistoryEntry(
+            string note, 
+            Guid actionTypeId,
+            Guid qualificationId)
+        {
+            return new QualificationDiscussionHistory
+            {
+                Id = _guidProvider.NewGuid(),
+                Title = "Rollover Funding Decision",
+                UserDisplayName = "Rollover System",
+                ActionTypeId = actionTypeId,
+                QualificationId = qualificationId,
+                Notes = note,
+                Timestamp = _clockService.UtcNow
+            };
+        }
     }
 }

@@ -58,6 +58,9 @@ public static class AddServiceRegistrationsExtension
         services.AddScoped<IFundingExtensionProjectionService, FundingExtensionProjectionService>();
         services.AddScoped<ISubmitFundingExtensionService, SubmitFundingExtensionService>();
 
+        services.AddScoped<ISystemClockService, SystemClockService>();
+        services.AddScoped<IGuidProvider, DefaultGuidProvider>();
+
         return services;
     }
 }

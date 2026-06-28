@@ -8,6 +8,7 @@ using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
+using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
 using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
@@ -16,6 +17,8 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
     {
         private readonly Mock<IRolloverRepository> _rolloverRepository = new();
         private readonly Mock<IQualificationDiscussionHistoryRepository> _historyRepository = new();
+        private readonly Mock<ISystemClockService> _clockService = new();
+        private readonly Mock<IGuidProvider> _guidProvider = new();
         private readonly IFixture _fixture = new Fixture().Customize(new AutoMoqCustomization());
 
         private readonly SubmitFundingExtensionService _service;
@@ -31,7 +34,9 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
 
             _service = new SubmitFundingExtensionService(
                 _rolloverRepository.Object,
-                _historyRepository.Object);
+                _historyRepository.Object,
+                _clockService.Object,
+                _guidProvider.Object);
         }
 
         // ------------------------------------------------------------
@@ -46,19 +51,48 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
                 Qan = "111",
                 FundingStreamName = "FS",
                 RolloverStatus = "Extended",
-                ProposedFundingApprovalEndDate = DateTime.UtcNow.AddYears(1),
+                ProposedFundingApprovalEndDate = new DateTime(2027, 10, 06, 00,00, 00),
                 Comments = "Test comment"
             };
 
-            var candidate = CandidateHelper.BuildCandidate(_fixture, item.Qan, item.FundingStreamName);
+            var historyId = Guid.NewGuid();
+            var qualificationId = Guid.NewGuid();
+            var qualificationVersionId = Guid.NewGuid();
+            var timestamp = new DateTime(2026, 10, 01, 12, 00, 00);
+
+            var candidate = CandidateHelper.BuildCandidate(_fixture, item.Qan, item.FundingStreamName, qualificationVersionId, qualificationId);
+
             var funding = new QualificationFundings
             {
-                QualificationVersionId = candidate.QualificationVersionId,
+                EndDate = new DateOnly(2027, 10, 06),
+                QualificationVersionId = qualificationVersionId,
+                QualificationVersion = new QualificationVersions
+                {
+                    Id = qualificationVersionId,
+                    QualificationId = qualificationId
+                },
                 FundingOfferId = candidate.FundingOfferId
             };
 
             var candidates = new List<RolloverCandidates> { candidate };
             var fundings = new List<QualificationFundings> { funding };
+
+            _guidProvider.Setup(o => o.NewGuid()).Returns(historyId);
+            _clockService.Setup(o => o.UtcNow).Returns(new DateTime(2026, 10, 01, 12, 00, 00));
+
+            var expectedQualificationDiscussionHistories = new List<QualificationDiscussionHistory>
+            {
+                new QualificationDiscussionHistory
+                {
+                    Id = historyId,
+                    QualificationId = qualificationId,
+                    UserDisplayName = "Rollover System",
+                    Title = "Rollover Funding Decision",
+                    Timestamp = timestamp,
+                    Notes = "FS extended to 2027/10/06",
+                    ActionTypeId = Guid.Parse("00000000-0000-0000-0000-000000000004")
+                }
+            };
 
             // Act
             var result = await _service.Submit(candidates, [item], fundings, CancellationToken.None);
@@ -71,7 +105,7 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
             Assert.Equal(item.Comments, funding.Comments);
 
             _historyRepository.Verify(h =>
-                h.AddDiscussionHistories(It.IsAny<List<QualificationDiscussionHistory>>()),
+                h.AddDiscussionHistories(expectedQualificationDiscussionHistories),
                 Times.Once);
 
             _rolloverRepository.Verify(r => r.DeleteAllWorkflowCandidatesAsync(It.IsAny<CancellationToken>()), Times.Once);
