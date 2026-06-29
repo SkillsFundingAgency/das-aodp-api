@@ -5,6 +5,7 @@ using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
+using SFA.DAS.AODP.Infrastructure.Extensions;
 using SFA.DAS.AODP.Models.Application;
 using System.Text;
 using ProcessStatus = SFA.DAS.AODP.Data.Enum.ProcessStatus;
@@ -179,8 +180,8 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                     if (fundingOffer != null)
                     {
                         qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
+                        qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate.ToFundingEndDateFormat()}");
+                        qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate.ToFundingEndDateFormat()}");
                         if (!string.IsNullOrWhiteSpace(qf.Comments)) qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
                         qualificationDiscussionHistoryNotes.AppendLine();
                     }
@@ -197,8 +198,8 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                     if (fundingOffer != null)
                     {
                         qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
+                        qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate.ToFundingEndDateFormat()}");
+                        qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate.ToFundingEndDateFormat()}");
                         if (!string.IsNullOrWhiteSpace(qf.Comments)) qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
                         qualificationDiscussionHistoryNotes.AppendLine();
                     }

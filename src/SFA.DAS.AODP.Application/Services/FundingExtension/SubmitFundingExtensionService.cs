@@ -125,7 +125,7 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
                             x.QualificationVersionId == c.QualificationVersionId &&
                             x.FundingOfferId == c.FundingOfferId);
 
-                        var endDate = f?.EndDate.ToDiscussionHistoryDateFormat();
+                        var endDate = f?.EndDate.ToFundingEndDateFormat();
 
                         return $"{c.FundingOffer.Name} extended to {endDate}";
                     });
