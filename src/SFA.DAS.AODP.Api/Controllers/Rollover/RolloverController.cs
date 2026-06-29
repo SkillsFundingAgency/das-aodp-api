@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application;
 using SFA.DAS.AODP.Application.Commands.Rollover;
 using SFA.DAS.AODP.Application.Queries.Rollover;
+using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Api.Controllers.Rollover;
 
@@ -45,6 +46,24 @@ public class RolloverController : BaseController
     {
         var query = new GetRolloverCandidatesQuery();
         return await SendRequestAsync(query);
+    }
+
+    [HttpPost("querybuilder/awardingorganisations")]
+    [ProducesResponseType(typeof(GetAwardingOrganisationsForRolloverQueryBuilderQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetAwardingOrganisationsForRolloverQueryBuilder(
+        [FromBody] RolloverQueryBuilderRequest filters)
+    {
+        return await SendRequestAsync(new GetAwardingOrganisationsForRolloverQueryBuilderQuery(filters));
+    }
+
+    [HttpPost("querybuilder/qualificationversions")]
+    [ProducesResponseType(typeof(GetQualificationVersionsForRolloverQueryBuilderQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetQualificationVersionsForRolloverQueryBuilder(
+        [FromBody] RolloverQueryBuilderRequest filters)
+    {
+        return await SendRequestAsync(new GetQualificationVersionsForRolloverQueryBuilderQuery(filters));
     }
 
     [HttpPost("rolloverworkflowruns")]
