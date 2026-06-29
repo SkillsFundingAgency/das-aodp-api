@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
+using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Models.Rollover;
 
@@ -65,6 +66,52 @@ public class RolloverRepository : IRolloverRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IEnumerable<RolloverQueryBuilderAwardingOrganisation>> GetAwardingOrganisationsForRolloverQueryBuilderAsync(
+        RolloverQueryBuilderRequest filters,
+        CancellationToken cancellationToken)
+    {
+        return await ApplyRolloverQueryBuilderFilters(
+                _context.QualificationVersions.AsNoTracking(),
+                filters,
+                includeAwardingOrganisations: false)
+            .Select(qv => qv.Organisation)
+            .Distinct()
+            .OrderBy(organisation => organisation.NameOfqual)
+            .ThenBy(organisation => organisation.NameLegal)
+            .Select(organisation => new RolloverQueryBuilderAwardingOrganisation
+            {
+                Id = organisation.Id,
+                Ukprn = organisation.Ukprn,
+                RecognitionNumber = organisation.RecognitionNumber,
+                NameLegal = organisation.NameLegal,
+                NameOfqual = organisation.NameOfqual,
+                NameGovUk = organisation.NameGovUk,
+                Name_Dsi = organisation.Name_Dsi,
+                Acronym = organisation.Acronym
+            })
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<RolloverQualificationVersion>> GetQualificationVersionsForRolloverQueryBuilderAsync(
+        RolloverQueryBuilderRequest filters,
+        CancellationToken cancellationToken)
+    {
+        return await ApplyRolloverQueryBuilderFilters(
+                _context.QualificationVersions.AsNoTracking(),
+                filters,
+                includeAwardingOrganisations: true)
+            .OrderBy(qv => qv.Qualification.Qan)
+            .ThenBy(qv => qv.Name ?? qv.Qualification.QualificationName)
+            .Select(qv => new RolloverQualificationVersion
+            {
+                Id = qv.Id,
+                QualificationReference = qv.Qualification.Qan,
+                QualificationName = qv.Name ?? qv.Qualification.QualificationName,
+                AwardingOrganisationId = qv.AwardingOrganisationId
+            })
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IEnumerable<RolloverCandidate>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, CancellationToken cancellationToken)
     {
         return await _context.RolloverCandidates
@@ -121,6 +168,53 @@ public class RolloverRepository : IRolloverRepository
     public Task SaveChangesAsync(CancellationToken cancellationToken)
     {
         return _context.SaveChangesAsync(cancellationToken);
+    }
+
+    private IQueryable<QualificationVersions> ApplyRolloverQueryBuilderFilters(
+        IQueryable<QualificationVersions> query,
+        RolloverQueryBuilderRequest filters,
+        bool includeAwardingOrganisations)
+    {
+        var allQualificationVersions = _context.QualificationVersions.AsNoTracking();
+
+        query = query
+            .Where(qv => qv.EligibleForFunding == true)
+            .Where(qv => !allQualificationVersions.Any(otherVersion =>
+                otherVersion.QualificationId == qv.QualificationId &&
+                (
+                    (otherVersion.Version ?? 0) > (qv.Version ?? 0) ||
+                    (
+                        (otherVersion.Version ?? 0) == (qv.Version ?? 0) &&
+                        otherVersion.LastUpdatedDate > qv.LastUpdatedDate
+                    ) ||
+                    (
+                        (otherVersion.Version ?? 0) == (qv.Version ?? 0) &&
+                        otherVersion.LastUpdatedDate == qv.LastUpdatedDate &&
+                        otherVersion.InsertedDate > qv.InsertedDate
+                    )
+                )));
+
+        if (filters.LevelIds.Count > 0)
+        {
+            query = query.Where(qv => qv.LevelId.HasValue && filters.LevelIds.Contains(qv.LevelId.Value));
+        }
+
+        if (filters.TypeIds.Count > 0)
+        {
+            query = query.Where(qv => qv.TypeId.HasValue && filters.TypeIds.Contains(qv.TypeId.Value));
+        }
+
+        if (filters.SectorSubjectAreaIds.Count > 0)
+        {
+            query = query.Where(qv => filters.SectorSubjectAreaIds.Contains(qv.Ssa));
+        }
+
+        if (includeAwardingOrganisations && filters.AwardingOrganisationIds.Count > 0)
+        {
+            query = query.Where(qv => filters.AwardingOrganisationIds.Contains(qv.AwardingOrganisationId));
+        }
+
+        return query;
     }
 
 }

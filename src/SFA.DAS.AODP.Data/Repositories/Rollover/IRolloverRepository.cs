@@ -13,6 +13,14 @@ public interface IRolloverRepository
 
     Task<IEnumerable<RolloverCandidate>> GetRolloverCandidatesAsync(CancellationToken cancellationToken);
 
+    Task<IEnumerable<RolloverQueryBuilderAwardingOrganisation>> GetAwardingOrganisationsForRolloverQueryBuilderAsync(
+        RolloverQueryBuilderRequest filters,
+        CancellationToken cancellationToken);
+
+    Task<IEnumerable<RolloverQualificationVersion>> GetQualificationVersionsForRolloverQueryBuilderAsync(
+        RolloverQueryBuilderRequest filters,
+        CancellationToken cancellationToken);
+
     Task<IEnumerable<RolloverCandidate>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, 
         CancellationToken cancellationToken);
 
