@@ -24,8 +24,7 @@ public class RolloverController : BaseController
     public async Task<IActionResult> GetRolloverWorkflowCandidatesCount(CancellationToken cancellationToken)
     {
         var query = new GetRolloverWorkflowCandidatesCountQuery();
-        var result = await _mediator.Send(query, cancellationToken);
-        return Ok(result);
+        return await SendRequestAsync(query);
     }
 
     [HttpPost("p1checks")]

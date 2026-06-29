@@ -14,7 +14,7 @@ using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Api.UnitTests.Controllers.Rollover;
 
-public class RolloverControllerTests
+public class RolloverControllerTests : UnitTest
 {
     private readonly IFixture _fixture;
     private readonly Mock<IMediator> _mediatorMock;
@@ -39,11 +39,11 @@ public class RolloverControllerTests
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetRolloverWorkflowCandidatesCountQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(response);
 
-        var result = await _controller.GetRolloverWorkflowCandidatesCount(default);
+        var result = await _controller.GetRolloverWorkflowCandidatesCount(CancellationToken);
 
         var ok = Assert.IsType<OkObjectResult>(result);
-        var value = Assert.IsType<BaseMediatrResponse<GetRolloverWorkflowCandidatesCountQueryResponse>>(ok.Value);
-        Assert.Equal(2, value.Value.TotalRecords);
+        var value = Assert.IsType<GetRolloverWorkflowCandidatesCountQueryResponse>(ok.Value);
+        Assert.Equal(2, value.TotalRecords);
     }
 
     [Fact]
@@ -58,12 +58,10 @@ public class RolloverControllerTests
         _mediatorMock.Setup(m => m.Send(It.IsAny<GetRolloverWorkflowCandidatesCountQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(response);
 
-        var result = await _controller.GetRolloverWorkflowCandidatesCount(default);
+        var result = await _controller.GetRolloverWorkflowCandidatesCount(CancellationToken);
 
-        var status = Assert.IsType<OkObjectResult>(result);
-        var value = Assert.IsType<BaseMediatrResponse<GetRolloverWorkflowCandidatesCountQueryResponse>>(status.Value);
-        Assert.False(value.Success);
-        Assert.Equal("Failed to get the count", value.ErrorMessage);
+        var status = Assert.IsType<StatusCodeResult>(result);
+        Assert.Equal(500, status.StatusCode);
     }
 
     [Fact]
