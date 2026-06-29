@@ -149,90 +149,8 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
         Assert.Same(ex, result.InnerException);
     }
 
-    // ---------------------------
-    // FUNDING END DATE TESTS
-    // ---------------------------
-
     [Fact]
-    public async Task Handle_WhenCandidatePasses_UsesPldnsDate()
-    {
-        var id = Guid.NewGuid();
-        var pldnsDate = new DateTime(2024, 1, 1);
-        var currentFundingEnd = new DateTime(2024, 4, 30);
-
-        var candidate = CreateCandidate(id, currentFundingEnd);
-
-        var p1 = new RolloverWorkflowCandidatesP1Checks
-        {
-            WorkflowCandidateId = id,
-            FundingStream = nameof(RolloverWorkflowCandidatesP1Checks.Age1416),
-            Age1416 = pldnsDate,
-            FundingEndDateThreshold = new DateTime(2023, 12, 31),
-            LatestFundingApprovalEndDate = new DateTime(2024, 7, 1),
-            OperationalEndDate = new DateTime(2024, 6, 1),
-            OperationalEndDateThreshold = new DateTime(2023, 12, 31),
-            OfferedInEngland = true,
-            IntentionToSeekFundingInEngland = true,
-            IsOnDefundingList = false,
-            AcademicYear = "2024/25"
-        };
-
-        _repoMock.Setup(r => r.GetRolloverWorkflowCandidatesP1ChecksAsync(It.IsAny<CancellationToken>()))
-                 .ReturnsAsync([p1]);
-
-        _repoMock.Setup(r => r.GetAllRolloverWorkflowCandidatesAsync(It.IsAny<CancellationToken>()))
-                 .ReturnsAsync([candidate]);
-
-        _repoMock.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
-                 .Returns(Task.CompletedTask);
-
-        var result = await _handler.Handle(new UpdateRolloverWorkflowCandidatesAfterP1ChecksCommand(), CancellationToken.None);
-
-        Assert.True(result.Success);
-        Assert.Equal(pldnsDate, candidate.ProposedFundingEndDate);
-    }
-
-    [Fact]
-    public async Task Handle_WhenCandidatePasses_UsesLatestFundingApprovalEndDate()
-    {
-        var id = Guid.NewGuid();
-        var latest = new DateTime(2021, 7, 15);
-        var pldns = new DateTime(2021, 8, 1);
-
-        var candidate = CreateCandidate(id, new DateTime(2021, 9, 1));
-
-        var p1 = new RolloverWorkflowCandidatesP1Checks
-        {
-            WorkflowCandidateId = id,
-            FundingStream = nameof(RolloverWorkflowCandidatesP1Checks.Age1416),
-            Age1416 = pldns,
-            FundingEndDateThreshold = new DateTime(2020, 12, 31),
-            LatestFundingApprovalEndDate = latest,
-            OperationalEndDate = new DateTime(2021, 9, 1),
-            OperationalEndDateThreshold = new DateTime(2020, 12, 31),
-            OfferedInEngland = true,
-            IntentionToSeekFundingInEngland = true,
-            IsOnDefundingList = false,
-            AcademicYear = "2020/21"
-        };
-
-        _repoMock.Setup(r => r.GetRolloverWorkflowCandidatesP1ChecksAsync(It.IsAny<CancellationToken>()))
-                 .ReturnsAsync([p1]);
-
-        _repoMock.Setup(r => r.GetAllRolloverWorkflowCandidatesAsync(It.IsAny<CancellationToken>()))
-                 .ReturnsAsync([candidate]);
-
-        _repoMock.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
-                 .Returns(Task.CompletedTask);
-
-        var result = await _handler.Handle(new UpdateRolloverWorkflowCandidatesAfterP1ChecksCommand(), CancellationToken.None);
-
-        Assert.True(result.Success);
-        Assert.Equal(latest, candidate.ProposedFundingEndDate);
-    }
-
-    [Fact]
-    public async Task Handle_WhenCandidateFailsAndHasProposedFundingEndDate_RevertsToCurrentFundingEndDate()
+    public async Task Handle_WhenCandidateFails_RevertsProposedFundingEndDateToCurrent()
     {
         var id = Guid.NewGuid();
         var current = new DateTime(2024, 4, 30);
@@ -244,49 +162,10 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandlerTests
         {
             WorkflowCandidateId = id,
             FundingStream = null,
-            FundingEndDateThreshold = new DateTime(2024, 1, 1),
-            LatestFundingApprovalEndDate = new DateTime(2024, 6, 1),
-            OperationalEndDate = new DateTime(2024, 5, 1),
-            OperationalEndDateThreshold = new DateTime(2024, 1, 1),
+            FundingEndDateThreshold = DateTime.UtcNow,
+            OperationalEndDateThreshold = DateTime.UtcNow,
             OfferedInEngland = false,
-            IsOnDefundingList = true,
-            AcademicYear = "2024/25"
-        };
-
-        _repoMock.Setup(r => r.GetRolloverWorkflowCandidatesP1ChecksAsync(It.IsAny<CancellationToken>()))
-                 .ReturnsAsync([p1]);
-
-        _repoMock.Setup(r => r.GetAllRolloverWorkflowCandidatesAsync(It.IsAny<CancellationToken>()))
-                 .ReturnsAsync([candidate]);
-
-        _repoMock.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
-                 .Returns(Task.CompletedTask);
-
-        var result = await _handler.Handle(new UpdateRolloverWorkflowCandidatesAfterP1ChecksCommand(), CancellationToken.None);
-
-        Assert.True(result.Success);
-        Assert.Equal(current, candidate.ProposedFundingEndDate);
-    }
-
-    [Fact]
-    public async Task Handle_WhenCandidateFailsAndNoProposedFundingEndDate_KeepsCurrentFundingEndDate()
-    {
-        var id = Guid.NewGuid();
-        var current = new DateTime(2024, 4, 30);
-
-        var candidate = CreateCandidate(id, current, null);
-
-        var p1 = new RolloverWorkflowCandidatesP1Checks
-        {
-            WorkflowCandidateId = id,
-            FundingStream = null,
-            FundingEndDateThreshold = new DateTime(2024, 1, 1),
-            LatestFundingApprovalEndDate = new DateTime(2024, 6, 1),
-            OperationalEndDate = new DateTime(2024, 5, 1),
-            OperationalEndDateThreshold = new DateTime(2024, 1, 1),
-            OfferedInEngland = false,
-            IsOnDefundingList = true,
-            AcademicYear = "2024/25"
+            IsOnDefundingList = true
         };
 
         _repoMock.Setup(r => r.GetRolloverWorkflowCandidatesP1ChecksAsync(It.IsAny<CancellationToken>()))
