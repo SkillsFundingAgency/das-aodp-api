@@ -78,7 +78,7 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
             var fundings = new List<QualificationFundings> { funding };
 
             _guidProvider.Setup(o => o.NewGuid()).Returns(historyId);
-            _clockService.Setup(o => o.UtcNow).Returns(new DateTime(2026, 10, 01, 12, 00, 00));
+            _clockService.Setup(o => o.UtcNow).Returns(timestamp);
 
             var expectedQualificationDiscussionHistories = new List<QualificationDiscussionHistory>
             {
@@ -89,7 +89,7 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
                     UserDisplayName = "Rollover System",
                     Title = "Rollover Funding Decision",
                     Timestamp = timestamp,
-                    Notes = "FS extended to 2027/10/06",
+                    Notes = "FS extended to 06-10-2027",
                     ActionTypeId = Guid.Parse("00000000-0000-0000-0000-000000000004")
                 }
             };
