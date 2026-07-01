@@ -10,5 +10,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
         Task<ApplicationReview> GetByIdAsync(Guid id);
         Task<bool> CheckIfReviewExistsByApplicationIdAsync(Guid applicationId);
         Task UpdateAsync(ApplicationReview applicationReview);
+        Task<DateTime?> GetOperationalStartDateForReviewAsync(Guid reviewId, CancellationToken cancellationToken);
     }
 }
