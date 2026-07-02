@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SFA.DAS.AODP.Data.Entities.Qualification;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Data.Entities.QaaQualification;

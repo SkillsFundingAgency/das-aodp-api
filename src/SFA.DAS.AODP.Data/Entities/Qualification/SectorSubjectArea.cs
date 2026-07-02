@@ -1,4 +1,4 @@
-﻿namespace SFA.DAS.AODP.Data.Entities.QaaQualification;
+﻿namespace SFA.DAS.AODP.Data.Entities.Qualification;
 
 public record SectorSubjectArea
 {
@@ -87,6 +87,11 @@ public record SectorSubjectArea
     {
         var lookupCode = $"{tier1}.{tier2}";
         return CodeLookup.GetValueOrDefault(lookupCode, NotSpecified);
+    }
+
+    public static SectorSubjectArea FromFullCode(string fullCode)
+    {
+        return CodeLookup.GetValueOrDefault(fullCode, NotSpecified);
     }
 
     public static SectorSubjectArea FromName(string name) =>

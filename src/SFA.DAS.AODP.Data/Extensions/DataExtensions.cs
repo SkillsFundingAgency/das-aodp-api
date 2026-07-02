@@ -10,6 +10,7 @@ using SFA.DAS.AODP.Data.Repositories.Jobs;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 
 namespace SFA.DAS.AODP.Data.Extensions
 {
