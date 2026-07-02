@@ -3,11 +3,10 @@ using AutoFixture.AutoMoq;
 using Moq;
 using SFA.DAS.AODP.Application.Queries.Rollover;
 using SFA.DAS.AODP.Application.Services.Export;
-using SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications;
-using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
 using SFA.DAS.AODP.Infrastructure.Extensions;
 using SFA.DAS.AODP.Models.Rollover;
+using SFA.DAS.AODP.Shared.UnitTests.Helpers;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
 {

@@ -7,6 +7,7 @@ using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Models.Rollover;
+using SFA.DAS.AODP.Shared.UnitTests.Helpers;
 using static SFA.DAS.AODP.Application.Queries.Qualification.GetQualificationVersionsForQualificationByReferenceQueryResponse;
 using QualificationVersions = SFA.DAS.AODP.Data.Entities.Qualification.QualificationVersions;
 
