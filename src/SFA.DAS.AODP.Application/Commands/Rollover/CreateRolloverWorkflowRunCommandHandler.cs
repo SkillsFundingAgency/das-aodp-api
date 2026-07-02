@@ -24,7 +24,7 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
 
             try
             {
-                if (request.RolloverCandidateIds == null || !request.RolloverCandidateIds.Any())
+                if (request.RolloverCandidateIds == null || !(request.RolloverCandidateIds.Count > 0))
                 {
                     throw new InvalidOperationException("At least one rollover candidate must be provided.");
                 }
@@ -70,8 +70,6 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                 {
                     RolloverWorkflowRunId = workflowRunId
                 };
-
-                await _mediator.Send(new UpdateRolloverWorkflowCandidatesAfterP1ChecksCommand(),cancellationToken);
 
                 response.Success = true;
             }

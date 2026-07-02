@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SFA.DAS.AODP.Data.Entities.Offer;
+using SFA.DAS.AODP.Data.Entities.Qualification;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SFA.DAS.AODP.Data.Entities.Rollover;
 
@@ -38,6 +40,10 @@ public class RolloverWorkflowCandidate
     public virtual RolloverWorkflowRun RolloverWorkflowRun { get; private set; } = null!;
 
     public virtual RolloverCandidates RolloverCandidates { get; set; } = null!;
+
+    public virtual QualificationVersions QualificationVersion { get; set; } = null!;
+
+    public virtual FundingOffer FundingOffer { get; set; } = null!;
 
     public static RolloverWorkflowCandidate Create(
         Guid workflowRunId,
@@ -91,40 +97,36 @@ public class RolloverWorkflowCandidate
         }
 
         var pldnsDate = p1Check.GetPldnsDate();
+        var operationalEndDate = p1Check.OperationalEndDate;
+        var maximumApprovalEndDate = p1Check.MaximumApprovalEndDate;
+        var (academicYearStart, academicYearEnd) = p1Check.GetAcademicYearDates();
 
-        var dates = new List<DateTime>();
-
-        //include pldns if it is valid for the academic year
-        if (pldnsDate.HasValue)
+        //Use pldns if it is before the max end date
+        if (pldnsDate.HasValue && pldnsDate.Value < maximumApprovalEndDate)
         {
-            var (_, academicYearEnd) = p1Check.GetAcademicYearDates();
+            SetProposedFundingEndDate(pldnsDate.Value);
+            return;
+        }
 
-            if (!academicYearEnd.HasValue || pldnsDate.Value.Date <= academicYearEnd.Value)
+        //Use operational end date if it is before max date and is not in the same academic year
+        if (operationalEndDate.HasValue && operationalEndDate < maximumApprovalEndDate)
+        {
+            bool sameAcademicYear =
+               academicYearStart.HasValue &&
+               academicYearEnd.HasValue &&
+               operationalEndDate.Value >= academicYearStart.Value &&
+               operationalEndDate.Value <= academicYearEnd.Value &&
+               maximumApprovalEndDate >= academicYearStart.Value &&
+               maximumApprovalEndDate <= academicYearEnd.Value;
+
+            if (!sameAcademicYear)
             {
-                dates.Add(pldnsDate.Value);
+                SetProposedFundingEndDate(operationalEndDate);
+                return;
             }
         }
 
-        if (p1Check.OperationalEndDate.HasValue)
-        {
-            dates.Add(p1Check.OperationalEndDate.Value);
-        }
-
-        if (p1Check.LatestFundingApprovalEndDate.HasValue)
-        {
-            dates.Add(p1Check.LatestFundingApprovalEndDate.Value);
-        }
-
-        if (p1Check.MaximumApprovalEndDate.HasValue)
-        {
-            dates.Add(p1Check.MaximumApprovalEndDate.Value);
-        }
-
-        if (dates.Count > 0)
-        {
-            SetProposedFundingEndDate(dates.Min());
-        }
-
+        SetProposedFundingEndDate(maximumApprovalEndDate);
     }
 
     private void EvaluateP1Checks(RolloverWorkflowCandidatesP1Checks checks)
@@ -151,9 +153,6 @@ public class RolloverWorkflowCandidate
         if (!checks.IntentionToSeekFundingInEngland)
             failures.Add("Not Funded in England");
 
-        // 6) GLH <= TQT
-        if (checks.Glh > checks.Tqt)
-            failures.Add("GLH > TQT");
 
         // 7) Does the Qualification appear in the Defunding (Defunded) List
         if (checks.IsOnDefundingList)

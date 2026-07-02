@@ -1,6 +1,5 @@
 ﻿using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Models.Rollover;
-
 namespace SFA.DAS.AODP.Data.Repositories.Rollover;
 
 public interface IRolloverRepository
@@ -11,22 +10,34 @@ public interface IRolloverRepository
 
     Task UpdateRolloverWorkflowCandidatesAsync(IEnumerable<RolloverWorkflowCandidate> candidates, CancellationToken cancellationToken);
 
-    Task<IEnumerable<RolloverCandidate>> GetRolloverCandidatesAsync(CancellationToken cancellationToken);
-
-    Task<IEnumerable<RolloverCandidate>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, 
+    Task<IEnumerable<RolloverCandidateDto>> GetRolloverCandidatesAsync(CancellationToken cancellationToken);
+    Task<RolloverWorkflowRun?> GeRolloverWorkflowRunByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<IEnumerable<Models.Rollover.RolloverCandidateDto>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, 
         CancellationToken cancellationToken);
-
     Task<Guid> CreateRolloverWorkflowRunAsync(RolloverWorkflowRun request,
         CancellationToken cancellationToken);
 
     Task CreateRolloverWorkflowCandidatesAsync(IEnumerable<RolloverWorkflowCandidate> workflowCandidates,
         CancellationToken cancellationToken);
-
     Task CreateRolloverWorkflowRunFundingOffersAsync(IEnumerable<RolloverWorkflowRunFundingOffer> request,
         CancellationToken cancellationToken);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
 
-    Task<IReadOnlyList<RolloverWorkflowCandidatesExportRow>> GetRolloverWorkflowCandidatesByRunId(Guid workflowRunId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<RolloverCandidateForExport>> GetRolloverWorkflowCandidatesByRunId(Guid workflowRunId, CancellationToken cancellationToken);
+
+    Task<FundingExtensionCandidateValidationContext> GetFundingExtensionValidationContextAsync(
+        HashSet<CandidateKey> incomingCandidates,
+        CancellationToken cancellationToken);
+
+    Task<List<RolloverCandidateStatusItem>> GetRolloverCandidatesStatusAsync(CancellationToken cancellationToken);
+
+    Task<List<RolloverCandidates>> LoadRolloverCandidateGraphAsync(
+        List<CandidateKey> keys,
+        CancellationToken cancellationToken);
+
+    Task DeleteAllWorkflowCandidatesAsync(CancellationToken cancellationToken);
+
+    Task<Guid?> GetLatestWorkflowRunIdAsync(CancellationToken cancellationToken);
 
 }

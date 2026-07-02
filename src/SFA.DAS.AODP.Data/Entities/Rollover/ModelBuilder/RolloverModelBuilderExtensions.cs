@@ -22,7 +22,7 @@ public static class RolloverModelBuilderExtensions
                 .HasConversion<string>();
 
             b.HasOne(x => x.RolloverDecisionRun)
-                .WithMany()
+                .WithMany(r => r.CandidateRows)
                 .HasForeignKey(x => x.RolloverDecisionRunId)
                 .OnDelete(DeleteBehavior.SetNull);
         });

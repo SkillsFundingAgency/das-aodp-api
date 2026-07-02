@@ -5,6 +5,7 @@ using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
+using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Data.UnitTests.Repositories.Rollover;
 
@@ -17,7 +18,7 @@ public class RolloverRepositoryTests
         _fixture = new Fixture().Customize(new AutoMoqCustomization());
     }
 
-    private ApplicationDbContext CreateDb(string name)
+    private static ApplicationDbContext CreateDb(string name)
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase($"{name}_{Guid.NewGuid()}")
@@ -43,7 +44,6 @@ public class RolloverRepositoryTests
         var result = await sut.GetRolloverWorkflowCandidatesCountAsync(TestContext.Current.CancellationToken);
 
         // Assert
-        Assert.NotNull(result);
         Assert.Equal(0, result);
     }
 
@@ -63,7 +63,7 @@ public class RolloverRepositoryTests
         await using (var db = new ApplicationDbContext(options))
         {
             await db.RolloverWorkflowCandidates.AddRangeAsync(new[] { e1, e2, e3 });
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
         }
 
         await using (var db = new ApplicationDbContext(options))
@@ -74,7 +74,6 @@ public class RolloverRepositoryTests
             var result = await sut.GetRolloverWorkflowCandidatesCountAsync(TestContext.Current.CancellationToken);
 
             // Assert
-            Assert.NotNull(result);
             Assert.Equal(3, result);
 
         }
@@ -115,7 +114,7 @@ public class RolloverRepositoryTests
         await using (var db = new ApplicationDbContext(options))
         {
             await db.RolloverWorkflowCandidates.AddRangeAsync(new[] { e1, e2, e3 });
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
         }
 
         await using (var db = new ApplicationDbContext(options))
@@ -180,8 +179,6 @@ public class RolloverRepositoryTests
             OperationalEndDate = now.Date.AddMonths(6),
             OperationalEndDateThreshold = now.Date.AddDays(-5),
             OfferedInEngland = true,
-            Glh = 150,
-            Tqt = 200,
             IsOnDefundingList = false
         };
 
@@ -203,15 +200,13 @@ public class RolloverRepositoryTests
             OperationalEndDate = null,
             OperationalEndDateThreshold = now.Date.AddDays(15),
             OfferedInEngland = false,
-            Glh = 50,
-            Tqt = 50,
             IsOnDefundingList = true
         };
 
         await using (var db = new ApplicationDbContext(options))
         {
             await db.RolloverWorkflowCandidatesP1Checks.AddRangeAsync(new[] { e1, e2 });
-            await db.SaveChangesAsync();
+            await db.SaveChangesAsync(TestContext.Current.CancellationToken);
         }
 
         await using (var db = new ApplicationDbContext(options))
@@ -230,15 +225,11 @@ public class RolloverRepositoryTests
             var fetched1 = result.Single(r => r.WorkflowCandidateId == e1.WorkflowCandidateId);
             Assert.Equal(e1.AcademicYear, fetched1.AcademicYear);
             Assert.Equal(e1.FundingStream, fetched1.FundingStream);
-            Assert.Equal(e1.Glh, fetched1.Glh);
-            Assert.Equal(e1.Tqt, fetched1.Tqt);
             Assert.Equal(e1.IsOnDefundingList, fetched1.IsOnDefundingList);
 
             var fetched2 = result.Single(r => r.WorkflowCandidateId == e2.WorkflowCandidateId);
             Assert.Equal(e2.AcademicYear, fetched2.AcademicYear);
             Assert.Equal(e2.FundingStream, fetched2.FundingStream);
-            Assert.Equal(e2.Glh, fetched2.Glh);
-            Assert.Equal(e2.Tqt, fetched2.Tqt);
             Assert.Equal(e2.IsOnDefundingList, fetched2.IsOnDefundingList);
         }
     }
@@ -251,7 +242,7 @@ public class RolloverRepositoryTests
         var sut = new RolloverRepository(db);
 
         // Act
-        var result = await sut.GetRolloverWorkflowCandidatesByRunId(Guid.NewGuid(), default);
+        var result = await sut.GetRolloverWorkflowCandidatesByRunId(Guid.NewGuid(), TestContext.Current.CancellationToken);
 
         // Assert
         Assert.NotNull(result);
@@ -309,18 +300,17 @@ public class RolloverRepositoryTests
             "2024/25", 1, now, null, now);
         differentRun.RolloverCandidates = candidate;
 
-        await db.Qualification.AddAsync(qualification);
-        await db.QualificationVersions.AddAsync(qualVersion);
-        await db.AwardingOrganisation.AddAsync(organisation);
-        await db.FundingOffers.AddAsync(fundingOffer);
-        await db.RolloverCandidates.AddAsync(candidate);
+        await db.Qualification.AddAsync(qualification, TestContext.Current.CancellationToken);
+        await db.QualificationVersions.AddAsync(qualVersion, TestContext.Current.CancellationToken);
+        await db.AwardingOrganisation.AddAsync(organisation, TestContext.Current.CancellationToken);
+        await db.FundingOffers.AddAsync(fundingOffer, TestContext.Current.CancellationToken);
+        await db.RolloverCandidates.AddAsync(candidate, TestContext.Current.CancellationToken);
         await db.RolloverWorkflowCandidates.AddRangeAsync(included, excluded, differentRun);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = new RolloverRepository(db);
 
-        var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, default)).ToList();
-
+        var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, TestContext.Current.CancellationToken)).ToList();
         var row = Assert.Single(result);
         Assert.Equal("QAN-123", row.QAN);
         Assert.Equal("Funding A", row.FundingStreamName);
@@ -392,18 +382,18 @@ public class RolloverRepositoryTests
             "2024/25", 1, DateTime.UtcNow, null, DateTime.UtcNow);
         workflowCandidate.RolloverCandidates = candidate;
 
-        await db.Qualification.AddAsync(qualification);
-        await db.QualificationVersions.AddAsync(qualVersion);
-        await db.AwardingOrganisation.AddAsync(organisation);
-        await db.FundingOffers.AddAsync(fundingOffer);
-        await db.QualificationFundings.AddAsync(funding);
-        await db.RolloverCandidates.AddAsync(candidate);
-        await db.RolloverWorkflowCandidates.AddAsync(workflowCandidate);
-        await db.SaveChangesAsync();
+        await db.Qualification.AddAsync(qualification, TestContext.Current.CancellationToken);
+        await db.QualificationVersions.AddAsync(qualVersion, TestContext.Current.CancellationToken);
+        await db.AwardingOrganisation.AddAsync(organisation, TestContext.Current.CancellationToken);
+        await db.FundingOffers.AddAsync(fundingOffer, TestContext.Current.CancellationToken);
+        await db.QualificationFundings.AddAsync(funding, TestContext.Current.CancellationToken);
+        await db.RolloverCandidates.AddAsync(candidate, TestContext.Current.CancellationToken);
+        await db.RolloverWorkflowCandidates.AddAsync(workflowCandidate, TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = new RolloverRepository(db);
 
-        var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, default)).ToList();
+        var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, TestContext.Current.CancellationToken)).ToList();
         var row = Assert.Single(result);
 
         Assert.Equal("QAN-999", row.QAN);
@@ -428,7 +418,7 @@ public class RolloverRepositoryTests
         Assert.Equal("Funding A", row.FundingStreamName);
         Assert.Equal(new DateOnly(2026, 06, 01), row.FundingApprovalStartDate);
 
-        Assert.Equal("To Exclude", row.ProposedOutcome); // PassP1 default = false
+        Assert.Equal(RolloverStatus.Excluded.ToString(), row.ProposedOutcome); // PassP1 default = false
     }
 
     [Fact]
@@ -464,16 +454,15 @@ public class RolloverRepositoryTests
 
         await db.Qualification.AddRangeAsync(qualificationA, qualificationB);
         await db.QualificationVersions.AddRangeAsync(versionA, versionB);
-        await db.AwardingOrganisation.AddAsync(organisation);
-        await db.FundingOffers.AddAsync(funding);
+        await db.AwardingOrganisation.AddAsync(organisation, TestContext.Current.CancellationToken);
+        await db.FundingOffers.AddAsync(funding, TestContext.Current.CancellationToken);
         await db.RolloverCandidates.AddRangeAsync(candidateA, candidateB);
         await db.RolloverWorkflowCandidates.AddRangeAsync(wcB, wcA);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = new RolloverRepository(db);
 
-        var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, default)).ToList();
-
+        var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, TestContext.Current.CancellationToken)).ToList();
         Assert.Equal("A111", result[0].QAN);
         Assert.Equal("B222", result[1].QAN);
     }

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.Qualification;
-using SFA.DAS.AODP.Data.Entities.Rollover.Enums;
+using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Data.Entities.Rollover;
 
@@ -66,5 +66,17 @@ public class RolloverCandidates
             UpdatedAt = createdAt,
             IsActive = true
         };
+    }
+
+    public void SetExtended(DateTime fundingEndDate)
+    {
+        RolloverStatus = RolloverStatus.Extended;
+        NewFundingEndDate = fundingEndDate;
+    }
+
+    public void SetExcluded(string exclusionReason)
+    {
+        RolloverStatus = RolloverStatus.Excluded;
+        ExclusionReason = exclusionReason;
     }
 }
