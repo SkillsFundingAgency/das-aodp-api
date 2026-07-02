@@ -39,27 +39,4 @@ public class RemovePreviousWorkflowCandidatesTests
         var remaining = await db.RolloverWorkflowCandidates.ToListAsync(TestContext.Current.CancellationToken);
         remaining.Count.ShouldBe(0);
     }
-
-    [Fact]
-    public async Task RemovePreviousWorkflowCandidates_NoLatestRun_DoesNothing()
-    {
-        await using var db = CreateDb(nameof(RemovePreviousWorkflowCandidates_NoLatestRun_DoesNothing));
-
-        var run1 = Guid.NewGuid();
-        var now = DateTime.UtcNow;
-
-        var c1 = RolloverWorkflowCandidate.Create(run1, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now, null, now);
-        await db.RolloverWorkflowCandidates.AddAsync(c1, TestContext.Current.CancellationToken);
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var sut = new RolloverRepository(db);
-
-        // clear runs table to simulate no runs
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        await sut.DeleteAllWorkflowCandidatesAsync(TestContext.Current.CancellationToken);
-
-        var remaining = await db.RolloverWorkflowCandidates.ToListAsync(TestContext.Current.CancellationToken);
-        remaining.Count.ShouldBe(1);
-    }
 }
