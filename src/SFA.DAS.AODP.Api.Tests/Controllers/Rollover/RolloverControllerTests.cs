@@ -417,7 +417,4 @@ public class RolloverControllerTests : UnitTest
         var status = Assert.IsType<StatusCodeResult>(result);
         Assert.Equal(StatusCodes.Status500InternalServerError, status.StatusCode);
     }
-
-
-
 }
