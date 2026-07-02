@@ -63,6 +63,15 @@ public class RolloverController : BaseController
         return await SendRequestAsync(createRolloverWorkflowRunCommand);
     }
 
+    [HttpPost("removepreviousworkflowcandidates")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> RemovePreviousWorkflowCandidates()
+    {
+        var command = new RemovePreviousWorkflowCandidatesCommand();
+        return await SendRequestAsync(command);
+    }
+
     [HttpGet("{rolloverWorkflowRunId}/rollovercandidatesforexport")]
     [ProducesResponseType(typeof(GetRolloverCandidatesForExportQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

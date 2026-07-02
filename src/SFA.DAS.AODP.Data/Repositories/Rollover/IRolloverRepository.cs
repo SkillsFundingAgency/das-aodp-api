@@ -39,5 +39,4 @@ public interface IRolloverRepository
     Task DeleteAllWorkflowCandidatesAsync(CancellationToken cancellationToken);
 
     Task<Guid?> GetLatestWorkflowRunIdAsync(CancellationToken cancellationToken);
-
 }

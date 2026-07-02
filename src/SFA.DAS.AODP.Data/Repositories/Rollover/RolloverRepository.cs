@@ -260,6 +260,7 @@ public class RolloverRepository : IRolloverRepository
             .ToListAsync(cancellationToken);
 
         _context.RolloverWorkflowCandidates.RemoveRange(items);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<Guid?> GetLatestWorkflowRunIdAsync(CancellationToken cancellationToken)
