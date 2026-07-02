@@ -33,7 +33,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
                 .Create();
 
             var candidates = command.RolloverCandidateIds
-                .Select(id => new RolloverCandidate
+                .Select(id => new RolloverCandidateDto
                 {
                     Id = id,
                     QualificationVersionId = Guid.NewGuid(),
@@ -70,7 +70,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
 
             _repositoryMock
                 .Setup(r => r.CreateRolloverWorkflowCandidatesAsync(
-                    It.IsAny<IEnumerable<RolloverWorkflowCandidate>>(),
+                    It.IsAny<IEnumerable<Data.Entities.Rollover.RolloverWorkflowCandidate>>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
@@ -101,7 +101,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
 
             _repositoryMock.Verify(r =>
                 r.CreateRolloverWorkflowCandidatesAsync(
-                    It.IsAny<IEnumerable<RolloverWorkflowCandidate>>(),
+                    It.IsAny<IEnumerable<Data.Entities.Rollover.RolloverWorkflowCandidate>>(),
                     It.IsAny<CancellationToken>()),
                 Times.Once);
 
@@ -155,7 +155,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
 
             // Mock: return valid candidates so handler proceeds
             var candidates = command.RolloverCandidateIds
-                .Select(id => new RolloverCandidate
+                .Select(id => new RolloverCandidateDto
                 {
                     Id = id,
                     QualificationVersionId = Guid.NewGuid(),
@@ -183,7 +183,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
             // Must mock downstream methods even if never reached
             _repositoryMock
                 .Setup(r => r.CreateRolloverWorkflowCandidatesAsync(
-                    It.IsAny<IEnumerable<RolloverWorkflowCandidate>>(),
+                    It.IsAny<IEnumerable<Data.Entities.Rollover.RolloverWorkflowCandidate>>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
@@ -213,7 +213,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
 
             // Return valid rollover candidates so handler continues
             var candidates = command.RolloverCandidateIds
-                .Select(id => new RolloverCandidate
+                .Select(id => new RolloverCandidateDto
                 {
                     Id = id,
                     QualificationVersionId = Guid.NewGuid(),
@@ -241,7 +241,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
             // Must mock downstream calls (even though never reached)
             _repositoryMock
                 .Setup(r => r.CreateRolloverWorkflowCandidatesAsync(
-                    It.IsAny<IEnumerable<RolloverWorkflowCandidate>>(),
+                    It.IsAny<IEnumerable<Data.Entities.Rollover.RolloverWorkflowCandidate>>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 
@@ -271,7 +271,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
 
             // Mock valid rollover candidates so the handler passes validation
             var candidates = command.RolloverCandidateIds
-                .Select(id => new RolloverCandidate
+                .Select(id => new RolloverCandidateDto
                 {
                     Id = id,
                     QualificationVersionId = Guid.NewGuid(),
@@ -301,7 +301,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
             // Downstream methods must still be mocked
             _repositoryMock
                 .Setup(r => r.CreateRolloverWorkflowCandidatesAsync(
-                    It.IsAny<IEnumerable<RolloverWorkflowCandidate>>(),
+                    It.IsAny<IEnumerable<Data.Entities.Rollover.RolloverWorkflowCandidate>>(),
                     It.IsAny<CancellationToken>()))
                 .Returns(Task.CompletedTask);
 

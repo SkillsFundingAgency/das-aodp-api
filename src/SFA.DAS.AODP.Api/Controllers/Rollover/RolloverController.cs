@@ -47,11 +47,38 @@ public class RolloverController : BaseController
         return await SendRequestAsync(query);
     }
 
+    [HttpGet("rolloverworkflowcandidates")]
+    [ProducesResponseType(typeof(GetRolloverWorkflowCandidatesQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetRolloverWorkflowCandidates()
+    {
+        var query = new GetRolloverWorkflowCandidatesQuery();
+        return await SendRequestAsync(query);
+    }
+
     [HttpPost("rolloverworkflowruns")]
     [ProducesResponseType(typeof(BaseMediatrResponse<CreateRolloverWorkflowRunCommandResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CreateRolloverWorkflowRun(CreateRolloverWorkflowRunCommand createRolloverWorkflowRunCommand)
     {
         return await SendRequestAsync(createRolloverWorkflowRunCommand);
+    }
+
+    [HttpGet("{rolloverWorkflowRunId}/rollovercandidatesforexport")]
+    [ProducesResponseType(typeof(GetRolloverCandidatesForExportQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetRolloverCandidatesForExport(Guid rolloverWorkflowRunId, CancellationToken cancellationToken)
+    {
+        var query = new GetRolloverCandidatesForExportQuery { RolloverWorkflowRunId = rolloverWorkflowRunId};
+        return await SendRequestAsync(query);
+    }
+
+    [HttpPost("rolloverextensionvalidation")]
+    [ProducesResponseType(typeof(BaseMediatrResponse<ValidateFundingExtensionCandidatesCommandResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> ValidateFundingExtensionCandidatesCommand(ValidateFundingExtensionCandidatesCommand validateFundingExtensionCandidatesCommand)
+    {
+        return await SendRequestAsync(validateFundingExtensionCandidatesCommand);
     }
 }
