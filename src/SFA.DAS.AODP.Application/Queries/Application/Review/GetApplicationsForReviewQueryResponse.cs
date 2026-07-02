@@ -22,6 +22,7 @@ namespace SFA.DAS.AODP.Application.Queries.Application.Review
 
             public string? Reviewer1 { get; set; }
             public string? Reviewer2 { get; set; }
+            public DateTime? SubmittedAt { get; set; }
         }
         public static GetApplicationsForReviewQueryResponse Map(List<ApplicationReviewFeedback> reviews, int totalRecords)
         {
@@ -46,6 +47,7 @@ namespace SFA.DAS.AODP.Application.Queries.Application.Review
                     ApplicationReviewId = review.ApplicationReviewId,
                     Reviewer1 = review.ApplicationReview.Application.Reviewer1,
                     Reviewer2 = review.ApplicationReview.Application.Reviewer2,
+                    SubmittedAt = review.ApplicationReview.Application.SubmittedAt,
                 };
 
                 response.Applications.Add(application);

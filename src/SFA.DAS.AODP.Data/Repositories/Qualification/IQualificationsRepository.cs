@@ -30,4 +30,6 @@ public interface IQualificationsRepository
         CancellationToken cancellationToken = default);
 
     Task<QualificationVersions?> GetQualificationVersionByQanAsync(string qualificationReference, int? version, CancellationToken cancellationToken);
+
+    Task<DateOnly> GetQualificationVersionOperationalStartDateById(Guid id, CancellationToken cancellationToken);
 }
