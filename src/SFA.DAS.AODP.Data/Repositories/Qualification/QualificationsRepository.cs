@@ -259,6 +259,15 @@ public class QualificationsRepository(ApplicationDbContext context) : IQualifica
             .ToListAsync();
     }
 
+    public async Task<DateOnly> GetQualificationVersionOperationalStartDateById(Guid id, CancellationToken cancellationToken)
+    {
+        return await _context.QualificationVersions
+            .Where(v => v.Id == id)
+            .Select(v => DateOnly.FromDateTime(v.OperationalStartDate))
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+
     private static BulkUpdateQualificationStatusWithHistoryResult CreateEmptyResult(
         ProcessStatus status,
         IReadOnlyCollection<Guid>? missingIds = null)

@@ -9,102 +9,228 @@ public class SaveQfauFundingReviewOffersCommandHandlerTests
 {
     private readonly Mock<IApplicationReviewFundingRepository> _applicationReviewFundingRepository = new();
     private readonly Mock<IApplicationReviewFeedbackRepository> _applicationReviewFeedbackRepository = new();
-    private readonly SaveQfauFundingReviewOffersCommandHandler _saveQfauFundingReviewOffersCommandHandler;
+    private readonly Mock<IApplicationReviewRepository> _applicationReviewRepository = new();
+
+    private readonly SaveQfauFundingReviewOffersCommandHandler _handler;
 
     public SaveQfauFundingReviewOffersCommandHandlerTests()
     {
-        _saveQfauFundingReviewOffersCommandHandler = new(_applicationReviewFundingRepository.Object, _applicationReviewFeedbackRepository.Object);
+        _handler = new SaveQfauFundingReviewOffersCommandHandler(
+            _applicationReviewFundingRepository.Object,
+            _applicationReviewFeedbackRepository.Object,
+            _applicationReviewRepository.Object);
     }
 
+    
     [Fact]
     public async Task Test_Funding_Offer_Old_Offers_Removed()
     {
-        // Arrange
-        var funding = new Data.Entities.Application.ApplicationReviewFunding()
+        var reviewId = Guid.NewGuid();
+
+        var funding = new ApplicationReviewFunding
         {
             FundingOfferId = Guid.NewGuid(),
-            ApplicationReviewId = Guid.NewGuid(),
+            ApplicationReviewId = reviewId
         };
-        _applicationReviewFundingRepository.Setup(a => a.GetByReviewIdAsync(funding.ApplicationReviewId)).ReturnsAsync([funding]);
 
+        _applicationReviewFundingRepository
+            .Setup(a => a.GetByReviewIdAsync(reviewId))
+            .ReturnsAsync([funding]);
 
-        // Act
-        var response = await _saveQfauFundingReviewOffersCommandHandler.Handle(new()
+        _applicationReviewRepository
+            .Setup(x => x.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken))
+            .ReturnsAsync((DateTime?)null);
+
+        await _handler.Handle(new SaveQfauFundingReviewOffersCommand
         {
-            ApplicationReviewId = funding.ApplicationReviewId,
-            SelectedOfferIds = [Guid.NewGuid()]
-        }, default);
+            ApplicationReviewId = reviewId,
+            SelectedOfferIds = new List<Guid> { Guid.NewGuid() }
+        }, TestContext.Current.CancellationToken);
 
-        // Assert
-        _applicationReviewFundingRepository.Verify(a => a.RemoveAsync(It.Is<List<ApplicationReviewFunding>>(a => a.Contains(funding))), Times.Once());
+        _applicationReviewFundingRepository.Verify(a =>
+            a.RemoveAsync(It.Is<List<ApplicationReviewFunding>>(list => list.Contains(funding))),
+            Times.Once);
     }
 
     [Fact]
     public async Task Test_Funding_Offer_Added_If_Not_Exists()
     {
-        // Arrange
-        var funding = new Data.Entities.Application.ApplicationReviewFunding()
+        var reviewId = Guid.NewGuid();
+        var newOfferId = Guid.NewGuid();
+
+        _applicationReviewFundingRepository
+            .Setup(a => a.GetByReviewIdAsync(reviewId))
+            .ReturnsAsync(new List<ApplicationReviewFunding>());
+
+        _applicationReviewRepository
+            .Setup(x => x.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken))
+            .ReturnsAsync((DateTime?)null);
+
+        await _handler.Handle(new SaveQfauFundingReviewOffersCommand
         {
-            FundingOfferId = Guid.NewGuid(),
-            ApplicationReviewId = Guid.NewGuid(),
-        };
-        _applicationReviewFundingRepository.Setup(a => a.GetByReviewIdAsync(funding.ApplicationReviewId)).ReturnsAsync([funding]);
+            ApplicationReviewId = reviewId,
+            SelectedOfferIds = new List<Guid> { newOfferId }
+        }, TestContext.Current.CancellationToken);
 
-
-        // Act
-        var response = await _saveQfauFundingReviewOffersCommandHandler.Handle(new()
-        {
-            ApplicationReviewId = funding.ApplicationReviewId,
-            SelectedOfferIds = [Guid.NewGuid()]
-        }, default);
-
-        // Assert
-        _applicationReviewFundingRepository.Verify(a => a.CreateAsync(It.IsAny<List<ApplicationReviewFunding>>()), Times.Once());
+        _applicationReviewFundingRepository.Verify(a =>
+            a.CreateAsync(It.Is<List<ApplicationReviewFunding>>(list =>
+                list.Count == 1 &&
+                list[0].FundingOfferId == newOfferId &&
+                list[0].StartDate == null
+            )),
+            Times.Once);
     }
 
     [Fact]
     public async Task Test_Funding_Offer_Not_Added_If_Exists()
     {
-        // Arrange
-        var funding = new Data.Entities.Application.ApplicationReviewFunding()
+        var reviewId = Guid.NewGuid();
+        var offerId = Guid.NewGuid();
+
+        var existingFunding = new ApplicationReviewFunding
         {
-            FundingOfferId = Guid.NewGuid(),
-            ApplicationReviewId = Guid.NewGuid(),
+            FundingOfferId = offerId,
+            ApplicationReviewId = reviewId
         };
-        _applicationReviewFundingRepository.Setup(a => a.GetByReviewIdAsync(funding.ApplicationReviewId)).ReturnsAsync([funding]);
 
+        _applicationReviewFundingRepository
+            .Setup(a => a.GetByReviewIdAsync(reviewId))
+            .ReturnsAsync([existingFunding]);
 
-        // Act
-        var response = await _saveQfauFundingReviewOffersCommandHandler.Handle(new()
+        _applicationReviewRepository
+            .Setup(x => x.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken))
+            .ReturnsAsync((DateTime?)null);
+
+        await _handler.Handle(new SaveQfauFundingReviewOffersCommand
         {
-            ApplicationReviewId = funding.ApplicationReviewId,
-            SelectedOfferIds = [funding.FundingOfferId]
-        }, default);
+            ApplicationReviewId = reviewId,
+            SelectedOfferIds = new List<Guid> { offerId }
+        }, TestContext.Current.CancellationToken);
 
-        // Assert
-        _applicationReviewFundingRepository.Verify(a => a.CreateAsync(It.IsAny<List<ApplicationReviewFunding>>()), Times.Never);
-
+        _applicationReviewFundingRepository.Verify(a =>
+            a.CreateAsync(It.IsAny<List<ApplicationReviewFunding>>()),
+            Times.Never);
     }
 
     [Fact]
     public async Task Test_Exception_Thrown_For_Incomplete_ApplicationReviewId()
     {
-        // Arrange
-        var funding = new Data.Entities.Application.ApplicationReviewFunding()
+        var reviewId = Guid.NewGuid();
+
+        _applicationReviewFundingRepository
+            .Setup(a => a.GetByReviewIdAsync(reviewId))
+            .ThrowsAsync(new Exception());
+
+        _applicationReviewRepository
+            .Setup(x => x.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken))
+            .ReturnsAsync((DateTime?)null);
+
+        var response = await _handler.Handle(new SaveQfauFundingReviewOffersCommand
         {
-            ApplicationReviewId = Guid.NewGuid(),
-        };
+            ApplicationReviewId = reviewId,
+            SelectedOfferIds = new List<Guid>()
+        }, TestContext.Current.CancellationToken);
 
-        _applicationReviewFundingRepository.Setup(a => a.GetByReviewIdAsync(funding.ApplicationReviewId)).ThrowsAsync(new Exception());
-
-        // Act
-        var response = await _saveQfauFundingReviewOffersCommandHandler.Handle(new()
-        {
-            ApplicationReviewId = funding.ApplicationReviewId,
-        }, default);
-
-        // Assert
         Assert.False(response.Success);
         Assert.IsAssignableFrom<Exception>(response.InnerException);
+    }
+
+    [Fact]
+    public async Task Test_Funding_Offer_Created_With_Null_StartDate_When_OperationalDate_Is_Null()
+    {
+        var reviewId = Guid.NewGuid();
+        var newOfferId = Guid.NewGuid();
+
+        _applicationReviewFundingRepository
+            .Setup(x => x.GetByReviewIdAsync(reviewId))
+            .ReturnsAsync(new List<ApplicationReviewFunding>());
+
+        _applicationReviewRepository
+            .Setup(x => x.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken))
+            .ReturnsAsync((DateTime?)null);
+
+        await _handler.Handle(new SaveQfauFundingReviewOffersCommand
+        {
+            ApplicationReviewId = reviewId,
+            SelectedOfferIds = new List<Guid> { newOfferId }
+        }, TestContext.Current.CancellationToken);
+
+        _applicationReviewFundingRepository.Verify(x =>
+            x.CreateAsync(It.Is<List<ApplicationReviewFunding>>(list =>
+                list.Count == 1 &&
+                list[0].FundingOfferId == newOfferId &&
+                list[0].StartDate == null
+            )),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task Test_Funding_Offer_Created_With_StartDate_When_OperationalDate_Exists()
+    {
+        var reviewId = Guid.NewGuid();
+        var newOfferId = Guid.NewGuid();
+        var operationalDate = new DateTime(2024, 01, 15);
+
+        _applicationReviewFundingRepository
+            .Setup(x => x.GetByReviewIdAsync(reviewId))
+            .ReturnsAsync(new List<ApplicationReviewFunding>());
+
+        _applicationReviewRepository
+            .Setup(x => x.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken))
+            .ReturnsAsync(operationalDate);
+
+        await _handler.Handle(new SaveQfauFundingReviewOffersCommand
+        {
+            ApplicationReviewId = reviewId,
+            SelectedOfferIds = new List<Guid> { newOfferId }
+        }, TestContext.Current.CancellationToken);
+
+        _applicationReviewFundingRepository.Verify(x =>
+            x.CreateAsync(It.Is<List<ApplicationReviewFunding>>(list =>
+                list.Count == 1 &&
+                list[0].FundingOfferId == newOfferId &&
+                list[0].StartDate == DateOnly.FromDateTime(operationalDate)
+            )),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task Test_Funding_Mixed_Create_And_Remove_With_StartDate()
+    {
+        var reviewId = Guid.NewGuid();
+        var existingOfferId = Guid.NewGuid();
+        var newOfferId = Guid.NewGuid();
+
+        var existingFunding = new ApplicationReviewFunding
+        {
+            FundingOfferId = existingOfferId,
+            ApplicationReviewId = reviewId
+        };
+
+        _applicationReviewFundingRepository
+            .Setup(a => a.GetByReviewIdAsync(reviewId))
+            .ReturnsAsync(new List<ApplicationReviewFunding> { existingFunding });
+
+        _applicationReviewRepository
+            .Setup(x => x.GetOperationalStartDateForReviewAsync(reviewId, TestContext.Current.CancellationToken))
+            .ReturnsAsync((DateTime?)null);
+
+        await _handler.Handle(new SaveQfauFundingReviewOffersCommand
+        {
+            ApplicationReviewId = reviewId,
+            SelectedOfferIds = new List<Guid> { newOfferId }
+        }, TestContext.Current.CancellationToken);
+
+        _applicationReviewFundingRepository.Verify(x =>
+            x.RemoveAsync(It.Is<List<ApplicationReviewFunding>>(r => r.Contains(existingFunding))),
+            Times.Once);
+
+        _applicationReviewFundingRepository.Verify(x =>
+            x.CreateAsync(It.Is<List<ApplicationReviewFunding>>(c =>
+                c.Count == 1 &&
+                c[0].FundingOfferId == newOfferId &&
+                c[0].StartDate == null
+            )),
+            Times.Once);
     }
 }
