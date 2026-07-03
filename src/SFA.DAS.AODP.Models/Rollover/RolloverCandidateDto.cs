@@ -3,7 +3,7 @@
 namespace SFA.DAS.AODP.Models.Rollover
 {
     [ExcludeFromCodeCoverage]
-    public class RolloverCandidate
+    public class RolloverCandidateDto
     {
         public Guid Id { get; set; }
         public Guid QualificationVersionId { get; set; }

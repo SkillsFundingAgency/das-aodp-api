@@ -24,7 +24,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
         public async Task Handle_ReturnsSuccess_WhenRepositoryReturnsData()
         {
             // Arrange
-            var candidates = _fixture.CreateMany<RolloverCandidate>(3).ToList();
+            var candidates = _fixture.CreateMany<RolloverCandidateDto>(3).ToList();
 
             _repositoryMock
                 .Setup(r => r.GetRolloverCandidatesAsync(default))
@@ -48,7 +48,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
             // Arrange
             _repositoryMock
                 .Setup(r => r.GetRolloverCandidatesAsync(default))
-                .ReturnsAsync((List<RolloverCandidate>)null!);
+                .ReturnsAsync((List<RolloverCandidateDto>)null!);
 
             var query = new GetRolloverCandidatesQuery();
 

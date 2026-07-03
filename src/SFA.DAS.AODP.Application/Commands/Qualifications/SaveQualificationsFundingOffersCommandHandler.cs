@@ -2,6 +2,7 @@
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.FundingOffer;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
+using SFA.DAS.AODP.Infrastructure.Extensions;
 using System.Text;
 
 namespace SFA.DAS.AODP.Application.Commands.Qualifications
@@ -11,14 +12,16 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
         private readonly IQualificationFundingsRepository _qualificationFundingsrepository;
         private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
         private readonly IFundingOfferRepository _fundingOfferRepository;
+        private readonly IQualificationsRepository _qualificationsRepository;
 
 
 
-        public SaveQualificationsFundingOffersCommandHandler(IQualificationFundingsRepository repository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository, IFundingOfferRepository fundingOfferRepository)
+        public SaveQualificationsFundingOffersCommandHandler(IQualificationFundingsRepository repository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository, IFundingOfferRepository fundingOfferRepository, IQualificationsRepository qualificationsRepository)
         {
             _qualificationFundingsrepository = repository;
             _qualificationDiscussionHistoryRepository = qualificationDiscussionHistoryRepository;
             _fundingOfferRepository = fundingOfferRepository;
+            _qualificationsRepository = qualificationsRepository;
         }
 
         public async Task<BaseMediatrResponse<EmptyResponse>> Handle(SaveQualificationsFundingOffersCommand request, CancellationToken cancellationToken)
@@ -29,6 +32,7 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
             {
                 var qualificationfundedOffers = await _qualificationFundingsrepository.GetByIdAsync(request.QualificationVersionId);
                 var fundingOffers = await _fundingOfferRepository.GetFundingOffersAsync();
+                var operationalStartDate = await _qualificationsRepository.GetQualificationVersionOperationalStartDateById(request.QualificationVersionId, cancellationToken);
 
                 List<QualificationFundings> create = new();
                 List<QualificationFundings> remove = new();
@@ -39,7 +43,8 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                     if (offer == null) create.Add(new()
                     {
                         QualificationVersionId = request.QualificationVersionId,
-                        FundingOfferId = offerId
+                        FundingOfferId = offerId,
+                        StartDate = operationalStartDate
                     });
                 }
 
@@ -69,8 +74,8 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                             if (fundingOffer != null)
                             {
                                 qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
-                                qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
-                                qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
+                                qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate.ToFundingEndDateFormat()}");
+                                qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate.ToFundingEndDateFormat()}");
                                 if (!string.IsNullOrWhiteSpace(qf.Comments)) qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
                                 qualificationDiscussionHistoryNotes.AppendLine();
                             }
@@ -87,8 +92,8 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                             if (fundingOffer != null)
                             {
                                 qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
-                                qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
-                                qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
+                                qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate.ToFundingEndDateFormat()}");
+                                qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate.ToFundingEndDateFormat()}");
                                 if (!string.IsNullOrWhiteSpace(qf.Comments)) qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
                                 qualificationDiscussionHistoryNotes.AppendLine();
                             }

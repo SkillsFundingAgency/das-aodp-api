@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application;
+using SFA.DAS.AODP.Application.Extensions;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 
@@ -23,7 +24,7 @@ public class GetRelatedQualificationForApplicationQueryHandler : IRequestHandler
             var application = await _applicationRepository.GetByIdAsync(request.ApplicationId);
             if (string.IsNullOrWhiteSpace(application.QualificationNumber)) throw new Exception("No QAN has been provided for the application");
 
-            var qualification = await _qualificationsRepository.GetQualificationDetailsByIdAsync(application.QualificationNumber);
+            var qualification = await _qualificationsRepository.GetQualificationDetailsByIdAsync(application.QualificationNumber.RemoveSlashes());
             response.Value = new()
             {
                 Qan = qualification.Qualification.Qan,

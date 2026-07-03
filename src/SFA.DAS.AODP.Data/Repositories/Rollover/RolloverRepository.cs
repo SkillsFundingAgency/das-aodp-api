@@ -3,6 +3,7 @@ using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.QueryExtensions;
 using SFA.DAS.AODP.Data.Entities.Rollover;
+using SFA.DAS.AODP.Data.ValueObjects;
 using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Data.Repositories.Rollover;
@@ -49,12 +50,12 @@ public class RolloverRepository : IRolloverRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<RolloverCandidate>> GetRolloverCandidatesAsync(CancellationToken cancellationToken)
+    public async Task<IEnumerable<RolloverCandidateDto>> GetRolloverCandidatesAsync(CancellationToken cancellationToken)
     {
         return await _context.RolloverCandidates
             .AsNoTracking()
             .Where(x => x.IsActive)
-            .Select(rc => new RolloverCandidate
+            .Select(rc => new RolloverCandidateDto
             {
                 Id = rc.Id,
                 QualificationVersionId = rc.QualificationVersionId,
@@ -109,13 +110,13 @@ public class RolloverRepository : IRolloverRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<RolloverCandidate>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, CancellationToken cancellationToken)
+    public async Task<IEnumerable<RolloverCandidateDto>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, CancellationToken cancellationToken)
     {
         return await _context.RolloverCandidates
             .AsNoTracking()
             .Where(rc =>
                 rolloverCandidateIds.Contains(rc.Id) && rc.IsActive)
-            .Select(rc => new RolloverCandidate
+            .Select(rc => new RolloverCandidateDto
             {
                 Id = rc.Id,
                 QualificationVersionId = rc.QualificationVersionId,
@@ -167,6 +168,155 @@ public class RolloverRepository : IRolloverRepository
         return _context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<RolloverCandidateForExport>> GetRolloverWorkflowCandidatesByRunId(
+        Guid workflowRunId,
+        CancellationToken cancellationToken)
+    {
+        return await _context.RolloverWorkflowCandidates
+            .AsNoTracking()
+            .Where(rwc => rwc.RolloverWorkflowRunId == workflowRunId
+                       && rwc.IncludedInP1Export)
+            .Select(rwc => new RolloverCandidateForExport
+            {
+                QAN = rwc.RolloverCandidates.QualificationVersion.Qualification.Qan,
+                QualificationTitle = rwc.RolloverCandidates.QualificationVersion.Qualification.QualificationName ?? string.Empty,
+                AwardingOrganisation = rwc.RolloverCandidates.QualificationVersion.Organisation.NameOfqual ?? string.Empty,
+                QualificationLevel = rwc.RolloverCandidates.QualificationVersion.Level,
+                QualificationType = rwc.RolloverCandidates.QualificationVersion.Type,
+                SSA = rwc.RolloverCandidates.QualificationVersion.Ssa,
+                OperationalEndDate = rwc.RolloverCandidates.QualificationVersion.OperationalEndDate,
+
+                OfferedInEngland = rwc.RolloverCandidates.QualificationVersion.OfferedInEngland,
+                FundedInEngland = rwc.RolloverCandidates.QualificationVersion.IntentionToSeekFundingInEngland ?? false,
+
+                GLH = rwc.RolloverCandidates.QualificationVersion.Glh,
+                TQT = rwc.RolloverCandidates.QualificationVersion.Tqt,
+
+                Pre16 = rwc.RolloverCandidates.QualificationVersion.PreSixteen ?? false,
+                Age16To18 = rwc.RolloverCandidates.QualificationVersion.SixteenToEighteen ?? false,
+                Age18Plus = rwc.RolloverCandidates.QualificationVersion.EighteenPlus ?? false,
+                Age19Plus = rwc.RolloverCandidates.QualificationVersion.NineteenPlus ?? false,
+
+                FundingStreamName = rwc.RolloverCandidates.FundingOffer.Name,
+                FundingApprovalStartDate =
+                    _context.QualificationFundings
+                        .Where(qf =>
+                            qf.QualificationVersionId == rwc.RolloverCandidates.QualificationVersionId &&
+                            qf.FundingOfferId == rwc.RolloverCandidates.FundingOfferId)
+                        .Select(qf => qf.StartDate)
+                        .FirstOrDefault(),
+
+                ProposedOutcome = rwc.PassP1 ? RolloverStatus.Extended.ToString() : RolloverStatus.Excluded.ToString(),
+                RolloverStatus = rwc.PassP1 ? RolloverStatus.Extended : RolloverStatus.Excluded,
+                ExclusionReason = rwc.PassP1 ? rwc.RolloverCandidates.ExclusionReason : rwc.P1FailureReason,
+
+                CurrentFundingApprovalEndDate = rwc.CurrentFundingEndDate,
+                ProposedFundingApprovalEndDate = rwc.ProposedFundingEndDate,
+
+                Comments = string.Empty,
+            })
+            .OrderBy(x => x.QAN)
+            .ToListAsync(cancellationToken);
+    }
+    public async Task<RolloverWorkflowRun?> GeRolloverWorkflowRunByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await _context.RolloverWorkflowRuns
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    }
+
+    public async Task<FundingExtensionCandidateValidationContext> GetFundingExtensionValidationContextAsync(
+        HashSet<CandidateKey> incomingCandidates,
+        CancellationToken cancellationToken)
+    {
+        var flattened = incomingCandidates
+            .Select(k => $"{k.Qan}|{k.FundingStream}")
+            .ToList();
+
+        var latestRunId = await GetLatestWorkflowRunIdAsync(cancellationToken);
+
+        if (latestRunId == Guid.Empty)
+            throw new InvalidOperationException("No workflow runs exist");
+
+        var matchingCandidatesInDB = await _context.RolloverCandidates
+            .AsNoTracking()
+            .Where(rc =>
+                flattened.Contains(
+                    rc.QualificationVersion.Qualification.Qan + "|" +
+                    rc.FundingOffer.Name))
+            .Select(rc => new CandidateKey(
+                rc.QualificationVersion.Qualification.Qan,
+                rc.FundingOffer.Name))
+            .ToHashSetAsync(cancellationToken);
+
+        var matchingWorkflowCandidatesInDB = await _context.RolloverWorkflowCandidates
+            .AsNoTracking()
+            .Where(rwc => rwc.RolloverWorkflowRunId == latestRunId)
+            .Where(rwc =>
+                flattened.Contains(
+                    rwc.QualificationVersion.Qualification.Qan + "|" +
+                    rwc.FundingOffer.Name))
+            .Select(rwc => new CandidateKey(
+                rwc.QualificationVersion.Qualification.Qan,
+                rwc.FundingOffer.Name))
+            .ToHashSetAsync(cancellationToken);
+
+        return new FundingExtensionCandidateValidationContext(
+            incomingCandidates,
+            matchingCandidatesInDB,
+            matchingWorkflowCandidatesInDB
+        );
+    }
+
+    public async Task<List<RolloverCandidateStatusItem>> GetRolloverCandidatesStatusAsync(CancellationToken cancellationToken)
+    {
+        return await _context.RolloverCandidates
+            .Select(x => new RolloverCandidateStatusItem
+            {
+                Qan = x.QualificationVersion.Qualification.Qan,
+                FundingStreamName = x.FundingOffer.Name,
+                RolloverStatus = x.RolloverStatus
+            })
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<RolloverCandidates>> LoadRolloverCandidateGraphAsync(
+        List<CandidateKey> keys,
+        CancellationToken cancellationToken)
+    {
+        var keySet = keys
+            .Select(x => x.Qan + "|" + x.FundingStream)
+            .ToHashSet();
+
+        return await _context.RolloverCandidates
+            .Include(x => x.QualificationVersion)
+                .ThenInclude(v => v.Qualification)
+            .Include(x => x.FundingOffer)
+            .Where(x =>
+                keySet.Contains(
+                    x.QualificationVersion.Qualification.Qan + "|" +
+                    x.FundingOffer.Name))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task DeleteAllWorkflowCandidatesAsync(CancellationToken cancellationToken)
+    {
+        var items = await _context.RolloverWorkflowCandidates
+            .ToListAsync(cancellationToken);
+
+        _context.RolloverWorkflowCandidates.RemoveRange(items);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<Guid?> GetLatestWorkflowRunIdAsync(CancellationToken cancellationToken)
+    {
+        return await _context.RolloverWorkflowRuns
+            .AsNoTracking()
+            .OrderByDescending(x => x.CreatedAt)
+            .Select(x => x.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     private IQueryable<QualificationVersions> ApplyRolloverQueryBuilderFilters(
         IQueryable<QualificationVersions> query,
         RolloverQueryBuilderRequest filters,
@@ -198,99 +348,4 @@ public class RolloverRepository : IRolloverRepository
 
         return query;
     }
-}
-
-public record QualificationLevel
-{
-    public static readonly QualificationLevel EntryLevel = new(0, "Entry level");
-    public static readonly QualificationLevel Level1 = new(1, "Level 1");
-    public static readonly QualificationLevel Level1Or2 = new(12, "Level 1/Level 2");
-    public static readonly QualificationLevel Level2 = new(2, "Level 2");
-    public static readonly QualificationLevel Level3 = new(3, "Level 3");
-    public static readonly QualificationLevel Level4 = new(4, "Level 4");
-    public static readonly QualificationLevel Level5 = new(5, "Level 5");
-    public static readonly QualificationLevel Level6 = new(6, "Level 6");
-    public static readonly QualificationLevel Level7 = new(7, "Level 7");
-    public static readonly QualificationLevel Unspecified = new(99, "Unspecified");
-
-    public int Id { get; }
-    public string Name { get; set; } = null!;
-
-    public QualificationLevel(int id, string name)
-    {
-        Id = id;
-        Name = name;
-    }
-
-    public static readonly IReadOnlyCollection<QualificationLevel> All = new List<QualificationLevel>
-    {
-        EntryLevel, Level1, Level1Or2, Level2, Level3, Level4, Level5, Level6, Level7
-    }.OrderBy(o => o.Name).ToList();
-
-    public static QualificationLevel FromId(int id) => All.FirstOrDefault(x => x.Id == id) ?? Unspecified;
-
-    public override string ToString() => Name;
-}
-
-public record QualificationType
-{
-    public static readonly QualificationType None = new(0, "None");
-    public static readonly QualificationType AccessToHigherEducation = new(1, "Access to Higher Education");
-    public static readonly QualificationType AdvancedExtensionAward = new(2, "Advanced Extension Award");
-    public static readonly QualificationType AlternativeAcademicQualification = new(3, "Alternative Academic Qualification");
-    public static readonly QualificationType DigitalFunctionalSkillsQualification = new(4, "Digital Functional Skills Qualification");
-    public static readonly QualificationType EnglishForSpeakersOfOtherLanguages = new(5, "English For Speakers of Other Languages");
-    public static readonly QualificationType EssentialDigitalSkills = new(6, "Essential Digital Skills");
-    public static readonly QualificationType FunctionalSkills = new(7, "Functional Skills");
-    public static readonly QualificationType GCEAlevel = new(8, "GCE A Level");
-    public static readonly QualificationType GCEASLevel = new(9, "GCE AS Level");
-    public static readonly QualificationType GCSE9To1 = new(10, "GCSE (9 to 1)");
-    public static readonly QualificationType OccupationalQualification = new(11, "Occupational Qualification");
-    public static readonly QualificationType OtherGeneralQualification = new(12, "Other General Qualification");
-    public static readonly QualificationType OtherLifeSkillsQualification = new(13, "Other Life Skills Qualification");
-    public static readonly QualificationType OtherVocationalQualification = new(14, "Other Vocational Qualification");
-    public static readonly QualificationType PerformingArtsGradedExamination = new(15, "Performing Arts Graded Examination");
-    public static readonly QualificationType PrincipalLearning = new(16, "Principal Learning");
-    public static readonly QualificationType Project = new(17, "Project");
-    public static readonly QualificationType TechnicalOccupationQualification = new(18, "Technical Occupation Qualification");
-    public static readonly QualificationType TechnicalQualification = new(19, "Technical Qualification");
-    public static readonly QualificationType VocationallyRelatedQualification = new(20, "Vocationally-Related Qualification");
-    public static readonly QualificationType Unknown = new(99, "Unknown");
-
-    public int Id { get; }
-    public string Name { get; }
-
-    private QualificationType(int id, string name)
-    {
-        Id = id;
-        Name = name;
-    }
-
-    public static readonly IReadOnlyCollection<QualificationType> All = new List<QualificationType>
-    {
-        AccessToHigherEducation,
-        AdvancedExtensionAward,
-        AlternativeAcademicQualification,
-        DigitalFunctionalSkillsQualification,
-        EnglishForSpeakersOfOtherLanguages,
-        EssentialDigitalSkills,
-        FunctionalSkills,
-        GCEAlevel,
-        GCEASLevel,
-        GCSE9To1,
-        OccupationalQualification,
-        OtherGeneralQualification,
-        OtherLifeSkillsQualification,
-        OtherVocationalQualification,
-        PerformingArtsGradedExamination,
-        PrincipalLearning,
-        Project,
-        TechnicalOccupationQualification,
-        TechnicalQualification,
-        VocationallyRelatedQualification
-    }.OrderBy(o => o.Name).ToList();
-
-    public static QualificationType FromId(int id) => All.FirstOrDefault(x => x.Id == id) ?? Unknown;
-
-    public override string ToString() => Name;
 }

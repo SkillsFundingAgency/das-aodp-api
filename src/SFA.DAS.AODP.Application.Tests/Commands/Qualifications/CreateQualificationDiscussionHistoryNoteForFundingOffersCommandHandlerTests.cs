@@ -5,6 +5,7 @@ using Moq;
 using SFA.DAS.AODP.Application.Commands.Qualifications;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
+using SFA.DAS.AODP.Shared.UnitTests.Helpers;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 {
@@ -114,19 +115,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             // Assert
             Assert.False(result.Success);
             Assert.Equal("Qualification Id is required", result.ErrorMessage);
-        }
-    }
-
-    public class DateOnlySpecimenBuilder : ISpecimenBuilder
-    {
-        public object Create(object request, ISpecimenContext context)
-        {
-            if (request is Type type && type == typeof(DateOnly))
-            {
-                return DateOnly.FromDateTime(DateTime.Now);
-            }
-
-            return new NoSpecimen();
         }
     }
 }

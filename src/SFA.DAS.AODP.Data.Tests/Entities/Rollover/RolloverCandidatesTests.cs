@@ -1,4 +1,6 @@
-﻿namespace SFA.DAS.AODP.Data.UnitTests.Entities.Rollover;
+﻿using SFA.DAS.AODP.Models.Rollover;
+
+namespace SFA.DAS.AODP.Data.UnitTests.Entities.Rollover;
 
 public class RolloverCandidatesTests
 {
