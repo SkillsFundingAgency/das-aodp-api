@@ -21,7 +21,7 @@ public class IlrSubmissionDeadlinesProviderTests : UnitTest
     }
 
     [Theory]
-    [InlineData(2025, 10, 16)]
+    [InlineData(2025, 10, 23)]
     [InlineData(2026, 10, 22)]
     [InlineData(2027, 10, 21)]
     public void GetFinalSubmissionDeadline_ReturnsDeadlineForCurrentClockYear(int clockYear, int expectedMonth, int expectedDay)
