@@ -40,4 +40,55 @@ public class AcademicYearProviderTests : UnitTest
         // Assert
         result.ShouldBe(new DateOnly(2026, 07, 31));
     }
+
+    [Fact]
+    public void AreDatesWithinSameAcademicYear_BothDatesWithinSameAcademicYear()
+    {
+        // Arrange
+        var mockSystemClock = new Mock<ISystemClockProvider>();
+        var sut = new AcademicYearProvider(mockSystemClock.Object);
+
+        // Expectations
+        mockSystemClock.Setup(o => o.Today).Returns(new DateOnly(2025, 08, 1));
+
+        // Act
+        var result = sut.AreDatesWithinSameAcademicYear(new DateTime(2025, 08, 1), new DateOnly(2026, 07, 31));
+
+        // Assert
+        result.ShouldBe(true);
+    }
+
+    [Fact]
+    public void AreDatesWithinSameAcademicYear_BothDatesNotWithinSameAcademicYear()
+    {
+        // Arrange
+        var mockSystemClock = new Mock<ISystemClockProvider>();
+        var sut = new AcademicYearProvider(mockSystemClock.Object);
+
+        // Expectations
+        mockSystemClock.Setup(o => o.Today).Returns(new DateOnly(2025, 08, 1));
+
+        // Act
+        var result = sut.AreDatesWithinSameAcademicYear(new DateTime(2025, 08, 1), new DateOnly(2026, 08, 01));
+
+        // Assert
+        result.ShouldBe(false);
+    }
+
+    [Fact]
+    public void AreDatesWithinSameAcademicYear_BothDatesAreSameSoAreWithinSameAcademicYear()
+    {
+        // Arrange
+        var mockSystemClock = new Mock<ISystemClockProvider>();
+        var sut = new AcademicYearProvider(mockSystemClock.Object);
+
+        // Expectations
+        mockSystemClock.Setup(o => o.Today).Returns(new DateOnly(2025, 08, 1));
+
+        // Act
+        var result = sut.AreDatesWithinSameAcademicYear(new DateTime(2025, 08, 1), new DateOnly(2025, 08, 01));
+
+        // Assert
+        result.ShouldBe(true);
+    }
 }

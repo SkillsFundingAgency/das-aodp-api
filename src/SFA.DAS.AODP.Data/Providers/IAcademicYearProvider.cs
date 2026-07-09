@@ -24,4 +24,12 @@ public interface IAcademicYearProvider
     /// <param name="dateToCheck">The date to check.</param>
     /// <returns><c>True</c> if the date falls within the current academic year, <c>False</c> otherwise.</returns>
     bool IsWithinCurrentAcademicYear(DateTime? dateToCheck);
+
+    /// <summary>
+    /// Determines whether the date is within the current academic year.
+    /// </summary>
+    /// <param name="firstDateToCheck">The first date to check.</param>
+    /// <param name="secondDateToCheck">The second date to check.</param>
+    /// <returns><c>True</c> if the date falls within the current academic year, <c>False</c> otherwise.</returns>
+    bool AreDatesWithinSameAcademicYear(DateTime? firstDateToCheck, DateOnly? secondDateToCheck);
 }

@@ -26,12 +26,6 @@ public class QaaFundingApprovalEndDateCalculator(
 
         var pldns = await _pldnsRepository.GetPldnsByQanAsync(qaaQualification.AimCode, cancellationToken);
         var pldnsDate = pldns?.ForFundingStream(fundingStream);
-        
-        if (pldnsDate is not null && _academicYearProvider.IsWithinCurrentAcademicYear(pldnsDate))
-        {
-            fundingApprovalEndDate = DateOnly.FromDateTime(pldnsDate.Value);
-            return fundingApprovalEndDate;
-        }
 
         if (lastDateForRegistration > publicationDate)
         {
@@ -42,21 +36,23 @@ public class QaaFundingApprovalEndDateCalculator(
 
             if (academicYearForLastDateForRegistration > currentAcademicYear)
             {
-                fundingApprovalEndDate = _clockProvider.Today >= ilrFinalSubmissionDeadline.Date ? currentAcademicYear.AddYears(2) : currentAcademicYear.AddYears(1);
+                fundingApprovalEndDate = publicationDate >= ilrFinalSubmissionDeadline.Date ? currentAcademicYear.AddYears(2) : currentAcademicYear.AddYears(1);
             }
             else
             {
                 fundingApprovalEndDate = currentAcademicYear;
             }
-            
+
+            if (pldnsDate is not null && _academicYearProvider.AreDatesWithinSameAcademicYear(pldnsDate, fundingApprovalEndDate))
+            {
+                fundingApprovalEndDate = DateOnly.FromDateTime(pldnsDate!.Value);
+            }
+
             return fundingApprovalEndDate;
         }
 
-        if (lastDateForRegistration >= publicationDate)
-        {
-            return fundingApprovalEndDate;
-        }
-
+        // Captures when the last date for registration is before the publication date but the last date for registration is after the funding approval end date for the funding stream or if the funding approval end date for the funding stream is null
+        // then it means we can set the funding approval end date to the publication date as theres more time to fund it between the last date of registration and the publication date.
         if (lastDateForRegistration > qaaQualification.GetFundingApprovalEndDateForFundingStream(fundingStream) ||
             qaaQualification.GetFundingApprovalEndDateForFundingStream(fundingStream) is null)
         {

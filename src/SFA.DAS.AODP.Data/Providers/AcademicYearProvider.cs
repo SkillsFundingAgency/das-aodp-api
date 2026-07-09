@@ -46,4 +46,18 @@ public class AcademicYearProvider(ISystemClockProvider clock) : IAcademicYearPro
 
         return false;
     }
+
+    /// <inheritdoc/>.
+    public bool AreDatesWithinSameAcademicYear(DateTime? firstDateToCheck, DateOnly? secondDateToCheck)
+    {
+        if (firstDateToCheck is null || secondDateToCheck is null)
+        {
+            return false;
+        }
+
+        var academicYearForFirstDate = GetAcademicYearEndForDate(DateOnly.FromDateTime(firstDateToCheck.Value));
+        var academicYearForSecondDate = GetAcademicYearEndForDate(secondDateToCheck.Value);
+
+        return academicYearForFirstDate == academicYearForSecondDate;
+    }
 }
