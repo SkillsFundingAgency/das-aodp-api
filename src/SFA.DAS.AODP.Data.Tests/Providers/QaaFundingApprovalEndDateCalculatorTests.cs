@@ -18,7 +18,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
         // Arrange
         var mockAcademicYearProvider = new Mock<IAcademicYearProvider>();
         var qan = "QAN-001";
-        var lastDateForRegistration = new DateOnly(2026, 6, 30);
+        var lastDateForRegistration = new DateOnly(2026, 6, 5);
         var publicationDate = new DateOnly(2026, 6, 12);
 
         var clockProvider = new FakeSystemClockProvider(new DateOnly(2026, 10, 15));
@@ -44,7 +44,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
             CancellationToken);
 
         // Assert
-        result.ShouldBe(new DateOnly(2026, 7, 31));
+        result.ShouldBe(new DateOnly(2026, 6, 12));
     }
 
     [Fact]
