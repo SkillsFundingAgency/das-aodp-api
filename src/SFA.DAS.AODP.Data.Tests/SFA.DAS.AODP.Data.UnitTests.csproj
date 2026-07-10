@@ -38,5 +38,9 @@
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Entities\QueryExtensions\" />
+  </ItemGroup>
 
 </Project>

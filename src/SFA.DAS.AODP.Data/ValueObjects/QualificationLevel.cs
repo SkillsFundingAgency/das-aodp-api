@@ -32,5 +32,7 @@ public record QualificationLevel
 
     public static QualificationLevel FromId(int id) => All.FirstOrDefault(x => x.Id == id) ?? Unspecified;
 
+    public static QualificationLevel FromName(string name) => All.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase)) ?? Unspecified;
+
     public override string ToString() => Name;
 }

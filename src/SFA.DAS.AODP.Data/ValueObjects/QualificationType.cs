@@ -63,5 +63,8 @@ public record QualificationType
 
     public static QualificationType FromId(int id) => All.FirstOrDefault(x => x.Id == id) ?? Unknown;
 
+    public static QualificationType FromName(string name) =>
+        All.FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase)) ?? Unknown;
+
     public override string ToString() => Name;
 }

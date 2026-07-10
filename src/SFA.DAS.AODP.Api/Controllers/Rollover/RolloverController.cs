@@ -107,7 +107,7 @@ public class RolloverController : BaseController
     [ProducesResponseType(typeof(GetAwardingOrganisationsForRolloverQueryBuilderQueryResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetAwardingOrganisationsForRolloverQueryBuilder(
-        [FromBody] RolloverQueryBuilderRequest filters)
+        [FromBody] RolloverQueryBuilderAwardingOrganisationsRequest filters)
     {
         return await SendRequestAsync(new GetAwardingOrganisationsForRolloverQueryBuilderQuery(filters));
     }
@@ -119,5 +119,29 @@ public class RolloverController : BaseController
         [FromBody] RolloverQueryBuilderRequest filters)
     {
         return await SendRequestAsync(new GetQualificationVersionsForRolloverQueryBuilderQuery(filters));
+    }
+
+    [HttpGet("querybuilder/levels")]
+    [ProducesResponseType(typeof(GetLevelsForRolloverQueryBuilderQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetLevelsForRolloverQueryBuilder()
+    {
+        return await SendRequestAsync(new GetLevelsForRolloverQueryBuilderQuery());
+    }
+
+    [HttpPost("querybuilder/types")]
+    [ProducesResponseType(typeof(GetTypesForRolloverQueryBuilderQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetTypesForRolloverQueryBuilder([FromBody] RolloverQueryBuilderTypesRequest filters)
+    {
+        return await SendRequestAsync(new GetTypesForRolloverQueryBuilderQuery(filters));
+    }
+
+    [HttpPost("querybuilder/sectorsubjectarea")]
+    [ProducesResponseType(typeof(GetSectorSubjectAreasForRolloverQueryBuilderQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetSectorSubjectAreasForRolloverQueryBuilder([FromBody] RolloverQueryBuilderSectorSubjectAreaRequest filters)
+    {
+        return await SendRequestAsync(new GetSectorSubjectAreasForRolloverQueryBuilderQuery(filters));
     }
 }
