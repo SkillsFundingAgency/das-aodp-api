@@ -101,7 +101,11 @@
         "storageAccountName": "[concat(replace(replace(variables('resourceNamePrefix'), 'api', ''), '-', ''), 'str')]",
         "storageAccount2Name": "[concat(replace(replace(variables('resourceNamePrefix'), 'api', ''), '-', ''), 'str2')]",
         "configNames": "SFA.DAS.AODP.Api",
-        "privateLinkScopeName": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-shared-ampls'))]"
+        "privateLinkScopeName": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-shared-ampls'))]",
+        "jobsFunctionAppName": "[concat('das-', parameters('resourceEnvironmentName'), '-aodp-jobs-fa')]",
+        "jobsFunctionAppResourceGroup": "[concat('das-', parameters('resourceEnvironmentName'), '-aodp-jobs-rg')]",
+        "malwareScanHandlerFunctionName": "DefenderScanResultFunction",
+        "malwareScanEventGridTopicName": "[concat(variables('storageAccountName'), '-malware-topic')]"
     },
     "resources": [
         {
@@ -438,6 +442,36 @@
                 "[concat(variables('appServiceName'), '-', parameters('utcValue'))]",
                 "[concat(variables('appServiceName'), '-application-insights-', parameters('utcValue'))]",
                 "[concat('role-assignment-', variables('appServiceName'), '-', parameters('utcValue'))]"
+            ]
+        },
+        {
+            "apiVersion": "2021-04-01",
+            "name": "[concat(variables('storageAccountName'), '-malware-event-grid-', parameters('utcValue'))]",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'),'event-grid-malware-subscription.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                  "storageAccountName": {
+                      "value": "[variables('storageAccount2Name')]"
+                  },
+                  "functionAppName": {
+                      "value": "[variables('jobsFunctionAppName')]"
+                  },
+                  "functionName": {
+                      "value": "[variables('malwareScanHandlerFunctionName')]"
+                  },
+                  "functionResourceGroup": {
+                      "value": "[variables('jobsFunctionAppResourceGroup')]"
+                  }
+              }
+            },
+            "dependsOn": [
+                "[concat(variables('storageAccountName'), '-defender-', parameters('utcValue'))]"
             ]
         },
         {
