@@ -445,36 +445,6 @@
             ]
         },
         {
-            "apiVersion": "2021-04-01",
-            "name": "[concat(variables('storageAccount2Name'), '-malware-event-grid-', parameters('utcValue'))]",
-            "resourceGroup": "[variables('resourceGroupName')]",
-            "type": "Microsoft.Resources/deployments",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[concat(variables('deploymentUrlBase'),'event-grid-malware-subscription.json')]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                  "storageAccountName": {
-                      "value": "[variables('storageAccount2Name')]"
-                  },
-                  "functionAppName": {
-                      "value": "[variables('jobsFunctionAppName')]"
-                  },
-                  "functionName": {
-                      "value": "[variables('malwareScanHandlerFunctionName')]"
-                  },
-                  "functionResourceGroup": {
-                      "value": "[variables('jobsFunctionAppResourceGroup')]"
-                  }
-              }
-            },
-            "dependsOn": [
-                "[concat(variables('storageAccount2Name'), '-defender-', parameters('utcValue'))]"
-            ]
-        },
-        {
             "condition": "[parameters('deployPrivateLinkedScopedResource')]",
             "apiVersion": "2021-04-01",
             "name": "[concat(variables('appServiceName'), '-private-link-scoped-', parameters('utcValue'))]",
