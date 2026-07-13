@@ -446,7 +446,7 @@
         },
         {
             "apiVersion": "2021-04-01",
-            "name": "[concat(variables('storageAccountName'), '-malware-event-grid-', parameters('utcValue'))]",
+            "name": "[concat(variables('storageAccount2Name'), '-malware-event-grid-', parameters('utcValue'))]",
             "resourceGroup": "[variables('resourceGroupName')]",
             "type": "Microsoft.Resources/deployments",
             "properties": {
@@ -471,7 +471,7 @@
               }
             },
             "dependsOn": [
-                "[concat(variables('storageAccountName'), '-defender-', parameters('utcValue'))]"
+                "[concat(variables('storageAccount2Name'), '-defender-', parameters('utcValue'))]"
             ]
         },
         {
