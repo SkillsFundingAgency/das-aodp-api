@@ -24,7 +24,8 @@ public class GetChangedQualificationsQueryHandler(IChangedQualificationsReposito
                     Name = request.Name,
                     Organisation = request.Organisation,
                     QAN = request.QAN,
-                    ProcessStatusIds=request.ProcessStatusIds
+                    ProcessStatusIds=request.ProcessStatusIds,
+                    AgeGroups = request.AgeGroups,
                 });
             if (result != null)
             {

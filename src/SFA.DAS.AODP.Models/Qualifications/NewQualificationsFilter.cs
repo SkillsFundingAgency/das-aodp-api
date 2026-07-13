@@ -6,5 +6,6 @@
         public string? Organisation { get; set; }
         public string? QAN { get; set; }
         public List<Guid>? ProcessStatusIds { get; set; }
+        public List<AgeGroup> AgeGroups { get; set; } = new();
     }
 }

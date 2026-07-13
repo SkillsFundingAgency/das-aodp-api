@@ -1,12 +1,11 @@
-﻿CREATE VIEW [dbo].[view_OutputChangedQualifications] AS
+﻿CREATE VIEW [dbo].[view_OutputFundedQualifications] AS
 
 /*##################################################################################################
-	-Name:			Output Changed Qualifications
-	-Description:		All Changed qualifications that have been funded during the current review cycle
-	                    The must have a lifecycle stage of 'Changed' and a Process Status of 'Approved'
-				The latest qualification version must be used
-	-Date of Creation:	10/04/2025
-	-Created By:		Robert Rybnikar
+	-Name:			    Output Funded Qualifications
+	-Description:		All qualifications that have been funded during the current review cycle
+                        The latest qualification version must be used
+	-Date of Creation:	19/04/2026
+	-Created By:		Hamzah Shakeel
 ####################################################################################################*/
 
 WITH LatestQualificationGroup AS (
@@ -21,8 +20,7 @@ WITH LatestQualificationGroup AS (
         ver.InsertedTimestamp,
         ROW_NUMBER() OVER (PARTITION BY ver.QualificationId ORDER BY ver.Version DESC) AS rn
     FROM regulated.QualificationVersions ver
-    WHERE ver.ProcessStatusId = '00000000-0000-0000-0000-000000000004' --approved
-      AND ver.LifecycleStageId = '00000000-0000-0000-0000-000000000002' --changed
+    Where exists (select 1 from funded.QualificationFundings qf where qf.QualificationVersionId = ver.Id)
 ),
 LatestQualifications AS (
     SELECT *
@@ -135,7 +133,7 @@ CombinedPivotData AS (
     JOIN PivotEndDate fe ON fa.QualificationVersionId = fe.QualificationVersionId
 )
 SELECT
-    'ApprovedChanged' AS Status,
+    'ApprovedCompleted' AS Status,
     latestversion.InsertedTimeStamp AS DateOfOfqualDataSnapshot,
     qual.QualificationName AS Title,
     ao.NameOfqual AS OrganisationName,
@@ -187,5 +185,4 @@ INNER JOIN dbo.AwardingOrganisation ao ON ao.Id = latestversion.AwardingOrganisa
 LEFT JOIN CombinedPivotData pivotdata ON pivotdata.QualificationVersionId = latestversion.Id
 LEFT JOIN PivotOfferNotes AS onp ON onp.QualificationVersionId = latestversion.Id
 LEFT JOIN funded.Qualifications fq ON fq.Id = latestversion.QualificationId
-
 GO

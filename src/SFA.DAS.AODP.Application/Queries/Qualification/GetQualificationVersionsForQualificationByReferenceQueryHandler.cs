@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using SFA.DAS.AODP.Application.Extensions;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualification;
@@ -19,7 +20,7 @@ public class GetQualificationVersionsForQualificationByReferenceQueryHandler : I
         response.Success = false;
         try
         {
-            var qualification = await _qualificationsRepository.GetByIdAsync(request.QualificationReference);
+            var qualification = await _qualificationsRepository.GetByIdAsync(request.QualificationReference.RemoveSlashes());
             if (qualification == null)
             {
                 response.ErrorMessage = "Qualification not found";

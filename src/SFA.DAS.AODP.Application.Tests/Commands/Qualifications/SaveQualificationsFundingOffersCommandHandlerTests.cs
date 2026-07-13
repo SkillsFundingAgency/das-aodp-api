@@ -6,6 +6,7 @@ using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.FundingOffer;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
+using SFA.DAS.AODP.Shared.UnitTests.Helpers;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 {
@@ -15,6 +16,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         private readonly Mock<IQualificationFundingsRepository> _qualificationFundingsRepositoryMock;
         private readonly Mock<IQualificationDiscussionHistoryRepository> _qualificationDiscussionHistoryRepositoryMock;
         private readonly Mock<IFundingOfferRepository> _fundingOfferRepositoryMock;
+        private readonly Mock<IQualificationsRepository> _qualificationsRepositoryMock;
         private readonly SaveQualificationsFundingOffersCommandHandler _handler;
 
         public SaveQualificationsFundingOffersCommandHandlerTests()
@@ -27,10 +29,11 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 
             _qualificationFundingsRepositoryMock = _fixture.Freeze<Mock<IQualificationFundingsRepository>>();
             _qualificationDiscussionHistoryRepositoryMock = _fixture.Freeze<Mock<IQualificationDiscussionHistoryRepository>>();
+            _qualificationsRepositoryMock = _fixture.Freeze<Mock<IQualificationsRepository>>();
             _fundingOfferRepositoryMock = _fixture.Freeze<Mock<IFundingOfferRepository>>();
 
             _handler = new SaveQualificationsFundingOffersCommandHandler(
-                _qualificationFundingsRepositoryMock.Object, _qualificationDiscussionHistoryRepositoryMock.Object, _fundingOfferRepositoryMock.Object);
+                _qualificationFundingsRepositoryMock.Object, _qualificationDiscussionHistoryRepositoryMock.Object, _fundingOfferRepositoryMock.Object, _qualificationsRepositoryMock.Object);
         }
 
         [Fact]
@@ -146,6 +149,67 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             Assert.True(result.Success);
             _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.Is<QualificationDiscussionHistory>(qdh =>
                 qdh.Notes.Contains("The following offers have been selected"))), Times.Once);
+        }
+
+        [Fact]
+        public async Task Handle_CallsRepositoryToGetOperationalStartDate()
+        {
+            var command = _fixture.Create<SaveQualificationsFundingOffersCommand>();
+            var existingFundings = new List<QualificationFundings>();
+            var fundingOffers = _fixture.CreateMany<FundingOffer>(2).ToList();
+
+            _qualificationFundingsRepositoryMock
+                .Setup(r => r.GetByIdAsync(command.QualificationVersionId))
+                .ReturnsAsync(existingFundings);
+
+            _fundingOfferRepositoryMock
+                .Setup(r => r.GetFundingOffersAsync())
+                .ReturnsAsync(fundingOffers);
+
+            _qualificationsRepositoryMock
+                .Setup(r => r.GetQualificationVersionOperationalStartDateById(command.QualificationVersionId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new DateOnly(2024, 1, 1));
+
+            await _handler.Handle(command, CancellationToken.None);
+
+            _qualificationsRepositoryMock.Verify(r =>
+                r.GetQualificationVersionOperationalStartDateById(command.QualificationVersionId, It.IsAny<CancellationToken>()),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task Handle_SetsStartDateOnNewFundingRecords()
+        {
+            var command = _fixture.Create<SaveQualificationsFundingOffersCommand>();
+            command.SelectedOfferIds = new List<Guid> { Guid.NewGuid() };
+
+            var existingFundings = new List<QualificationFundings>();
+            var fundingOffers = _fixture.CreateMany<FundingOffer>(1).ToList();
+
+            var expectedStartDate = new DateOnly(2024, 1, 1);
+
+            _qualificationFundingsRepositoryMock
+                .Setup(r => r.GetByIdAsync(command.QualificationVersionId))
+                .ReturnsAsync(existingFundings);
+
+            _fundingOfferRepositoryMock
+                .Setup(r => r.GetFundingOffersAsync())
+                .ReturnsAsync(fundingOffers);
+
+            _qualificationsRepositoryMock
+                .Setup(r => r.GetQualificationVersionOperationalStartDateById(command.QualificationVersionId, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(expectedStartDate);
+
+            List<QualificationFundings> created = null!;
+            _qualificationFundingsRepositoryMock
+                .Setup(r => r.CreateAsync(It.IsAny<List<QualificationFundings>>()))
+                .Callback<List<QualificationFundings>>(c => created = c);
+
+            await _handler.Handle(command, CancellationToken.None);
+
+            Assert.NotNull(created);
+            Assert.Single(created);
+            Assert.Equal(expectedStartDate, created[0].StartDate);
         }
     }
 }

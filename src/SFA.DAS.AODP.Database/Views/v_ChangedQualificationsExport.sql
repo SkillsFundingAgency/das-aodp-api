@@ -77,7 +77,5 @@ Left Outer Join dbo.AwardingOrganisation ao ON qv.AwardingOrganisationId = ao.Id
 Left Outer Join regulated.LifecycleStage ls ON qv.LifecycleStageId = ls.Id
  
 WHERE ls.Name = 'Changed'
-    and qv.EligibleForFunding = 1
-	and qv.Type != 'Alternative Academic Qualification'
-    and qv.Type != 'Technical Occupation Qualification';
+    and qv.EligibleForFunding = 1;
 GO

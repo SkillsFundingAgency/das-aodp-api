@@ -93,6 +93,46 @@ namespace SFA.DAS.AODP.Tests.Application.Queries
             Assert.False(result.Success);
             Assert.Equal(exceptionMessage, result.ErrorMessage);
         }
+
+        [Fact]
+        public async Task Handle_Passes_ProcessStatusIds_And_AgeGroups_To_Repository()
+        {
+            // Arrange
+            var processIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
+            var ageGroups = new List<AgeGroup> { AgeGroup.NineteenPlus, AgeGroup.EighteenPlus };
+
+            var query = new GetChangedQualificationsQuery
+            {
+                Skip = 0,
+                Take = 10,
+                ProcessStatusIds = processIds,
+                AgeGroups = ageGroups
+            };
+
+            QualificationsFilter? capturedFilter = null;
+
+            _repositoryMock
+                .Setup(x => x.GetAllChangedQualificationsAsync(
+                    It.IsAny<int?>(),
+                    It.IsAny<int?>(),
+                    It.IsAny<QualificationsFilter?>()))
+                .Callback<int?, int?, QualificationsFilter>((_, _, f) => capturedFilter = f)
+                .ReturnsAsync(new ChangedQualificationsResult
+                {
+                    Data = new List<ChangedQualification>(),
+                    TotalRecords = 0
+                });
+
+
+            // Act
+            await _handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            Assert.NotNull(capturedFilter);
+            Assert.Equal(processIds, capturedFilter!.ProcessStatusIds);
+            Assert.Equal(ageGroups, capturedFilter.AgeGroups);
+        }
+
     }
 }
 

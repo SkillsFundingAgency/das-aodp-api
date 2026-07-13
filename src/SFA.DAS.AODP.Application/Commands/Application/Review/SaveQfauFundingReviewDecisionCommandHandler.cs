@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application.Commands.Application.Message;
 using SFA.DAS.AODP.Application.Commands.Qualifications;
+using SFA.DAS.AODP.Application.Extensions;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Application;
@@ -36,7 +37,7 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
             try
             {
                 var review = await _reviewRepository.GeyByReviewIdAndUserType(request.ApplicationReviewId, UserType.Qfau);
-                var qan = review.ApplicationReview?.Application?.QualificationNumber;
+                var qan = review.ApplicationReview?.Application?.QualificationNumber?.RemoveSlashes();
 
                 if (review.Status == ApplicationStatus.Approved.ToString() && string.IsNullOrWhiteSpace(qan))
                 {
