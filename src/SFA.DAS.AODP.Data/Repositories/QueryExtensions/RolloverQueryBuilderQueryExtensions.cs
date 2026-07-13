@@ -1,4 +1,6 @@
-﻿using SFA.DAS.AODP.Data.Entities.Qualification;
+﻿using Microsoft.EntityFrameworkCore;
+using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.ValueObjects;
 
 namespace SFA.DAS.AODP.Data.Repositories.QueryExtensions;
@@ -14,9 +16,10 @@ public static class RolloverQueryBuilderQueryExtensions
     /// <param name="query">The query to filter.</param>
     /// <param name="levelIds">The level IDs to match.</param>
     /// <returns>The filtered query.</returns>
-    public static IQueryable<QualificationVersions> WithLevelFilter(
-        this IQueryable<QualificationVersions> query, IEnumerable<int> levelIds) 
-        => query.Where(qv => levelIds.Select(o => QualificationLevel.FromId(o).ToString()).Contains(qv.Level));
+    public static IQueryable<RolloverCandidates> WithLevelFilter(
+        this IQueryable<RolloverCandidates> query, IEnumerable<int> levelIds) 
+        => query
+            .Where(qv => levelIds.Select(o => QualificationLevel.FromId(o).ToString()).Contains(qv.QualificationVersion.Level));
 
     /// <summary>
     /// Adds a filter to the query to include only qualifications that match the specified type IDs.
@@ -24,9 +27,9 @@ public static class RolloverQueryBuilderQueryExtensions
     /// <param name="query">The query to filter.</param>
     /// <param name="typeIds">The type IDs to match.</param>
     /// <returns>The filtered query.</returns>
-    public static IQueryable<QualificationVersions> WithTypeFilter(
-        this IQueryable<QualificationVersions> query, IEnumerable<int> typeIds) 
-        => query.Where(qv => typeIds.Select(o => QualificationType.FromId(o).ToString()).Contains(qv.Type));
+    public static IQueryable<RolloverCandidates> WithTypeFilter(
+        this IQueryable<RolloverCandidates> query, IEnumerable<int> typeIds) 
+        => query.Where(qv => typeIds.Select(o => QualificationType.FromId(o).ToString()).Contains(qv.QualificationVersion.Type));
 
     /// <summary>
     /// Adds a filter to the query to include only qualifications that match the specified sector subject area IDs.
@@ -34,9 +37,9 @@ public static class RolloverQueryBuilderQueryExtensions
     /// <param name="query">The query to filter.</param>
     /// <param name="sectorSubjectAreaIds">The sector subject area IDs to match.</param>
     /// <returns>The filtered query.</returns>
-    public static IQueryable<QualificationVersions> WithSectorSubjectAreaFilter(
-        this IQueryable<QualificationVersions> query, IEnumerable<string> sectorSubjectAreaIds) 
-        => query.Where(qv => sectorSubjectAreaIds.Select(o => SectorSubjectArea.FromFullCode(o).ToString()).Contains(qv.Ssa));
+    public static IQueryable<RolloverCandidates> WithSectorSubjectAreaFilter(
+        this IQueryable<RolloverCandidates> query, IEnumerable<string> sectorSubjectAreaIds) 
+        => query.Where(qv => sectorSubjectAreaIds.Select(o => SectorSubjectArea.FromFullCode(o).ToString()).Contains(qv.QualificationVersion.Ssa));
 
     /// <summary>
     /// Adds a filter to the query to include only qualifications that match the specified awarding organisation IDs.
@@ -44,9 +47,10 @@ public static class RolloverQueryBuilderQueryExtensions
     /// <param name="query">The query to filter.</param>
     /// <param name="awardingOrganisationIds">The awarding organisation IDs to match.</param>
     /// <returns>The filtered query.</returns>
-    public static IQueryable<QualificationVersions> WithAwardingOrganisationFilter(
-        this IQueryable<QualificationVersions> query, IEnumerable<Guid> awardingOrganisationIds) 
-        => query.Where(qv => awardingOrganisationIds.Contains(qv.AwardingOrganisationId));
+    public static IQueryable<RolloverCandidates> WithAwardingOrganisationFilter(
+        this IQueryable<RolloverCandidates> query, IEnumerable<string> awardingOrganisationIds)
+        => query
+            .Where(o => awardingOrganisationIds.Contains(o.QualificationVersion.Organisation.RecognitionNumber));
 
     /// <summary>
     /// Applies all specified filters (level, type, sector subject area, and awarding organisation) to the query.
@@ -57,12 +61,12 @@ public static class RolloverQueryBuilderQueryExtensions
     /// <param name="sectorSubjectAreaIds">The sector subject area IDs to match.</param>
     /// <param name="awardingOrganisationIds">The awarding organisation IDs to match.</param>
     /// <returns>The filtered query.</returns>
-    public static IQueryable<QualificationVersions> WithAllFilters(
-        this IQueryable<QualificationVersions> query,
+    public static IQueryable<RolloverCandidates> WithAllFilters(
+        this IQueryable<RolloverCandidates> query,
         IEnumerable<int> levelIds, 
         IEnumerable<int> typeIds, 
         IEnumerable<string> sectorSubjectAreaIds, 
-        IEnumerable<Guid> awardingOrganisationIds) 
+        IEnumerable<string> awardingOrganisationIds) 
         => query
             .WithLevelFilter(levelIds)
             .WithTypeFilter(typeIds)

@@ -4,5 +4,5 @@ namespace SFA.DAS.AODP.Application.Queries.Rollover;
 
 public class GetQualificationVersionsForRolloverQueryBuilderQueryResponse
 {
-    public IEnumerable<RolloverQualificationVersion> QualificationVersions { get; set; } = [];
+    public IEnumerable<RolloverCandidateDto> QualificationVersions { get; set; } = [];
 }

@@ -5,7 +5,7 @@ public sealed record RolloverQueryBuilderRequest : IQueryBuilderFilterRequest
     public IReadOnlyCollection<int> LevelIds { get; init; } = [];
     public IReadOnlyCollection<int> TypeIds { get; init; } = [];
     public IReadOnlyCollection<string> SectorSubjectAreaIds { get; init; } = [];
-    public IReadOnlyCollection<Guid> AwardingOrganisationIds { get; init; } = [];
+    public IReadOnlyCollection<string> AwardingOrganisationIds { get; init; } = [];
 }
 
 public sealed record RolloverQueryBuilderTypesRequest(IReadOnlyCollection<int> LevelIds) : IQueryBuilderFilterRequest;

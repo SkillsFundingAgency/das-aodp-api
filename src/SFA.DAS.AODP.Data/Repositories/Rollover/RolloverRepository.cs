@@ -268,17 +268,20 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<RolloverQualificationVersion>> GetQualificationVersionsForRolloverQueryBuilderAsync(
+    public async Task<IEnumerable<RolloverCandidateDto>> GetQualificationVersionsForRolloverQueryBuilderAsync(
         RolloverQueryBuilderRequest filters,
         CancellationToken cancellationToken)
     {
         return await ApplyRolloverQueryBuilderFilters(filters)
-            .Select(qv => new RolloverQualificationVersion
+            .Select(rc => new RolloverCandidateDto
             {
-                Id = qv.Id,
-                QualificationReference = qv.Qualification.Qan,
-                QualificationName = qv.Name ?? qv.Qualification.QualificationName,
-                AwardingOrganisationId = qv.AwardingOrganisationId
+                Id = rc.Id,
+                QualificationVersionId = rc.QualificationVersionId,
+                FundingOfferId = rc.FundingOfferId,
+                RolloverRound = rc.RolloverRound,
+                AcademicYear = rc.AcademicYear,
+                PreviousFundingEndDate = rc.PreviousFundingEndDate,
+                NewFundingEndDate = rc.NewFundingEndDate
             })
             .ToListAsync(cancellationToken);
     }
@@ -303,7 +306,7 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
         var result = ApplyRolloverQueryBuilderFilters(requestFilters);
 
         return await result
-            .Select(o => new RolloverQueryBuilderType { Id = QualificationType.FromName(o.Type).Id, Name = o.Type })
+            .Select(o => new RolloverQueryBuilderType { Id = QualificationType.FromName(o.QualificationVersion.Type).Id, Name = o.QualificationVersion.Type })
             .Distinct()
             .ToListAsync(cancellationToken);
     }
@@ -315,8 +318,8 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
         return await result
             .Select(o => new RolloverQueryBuilderSectorSubjectArea
             {
-                Id = SectorSubjectArea.FromName(o.Ssa).Code,
-                Name = SectorSubjectArea.FromName(o.Ssa).Name
+                Id = SectorSubjectArea.FromName(o.QualificationVersion.Ssa).Code,
+                Name = SectorSubjectArea.FromName(o.QualificationVersion.Ssa).Name
             })
             .Distinct()
             .ToListAsync(cancellationToken);
@@ -327,7 +330,7 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
         CancellationToken cancellationToken)
     {
         return await ApplyRolloverQueryBuilderFilters(filters)
-            .Select(qv => qv.Organisation)
+            .Select(qv => qv.QualificationVersion.Organisation)
             .Distinct()
             .Select(organisation => new RolloverQueryBuilderAwardingOrganisation
             {
@@ -343,13 +346,14 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
             .ToListAsync(cancellationToken);
     }
 
-    private IQueryable<QualificationVersions> ApplyRolloverQueryBuilderFilters(
+    private IQueryable<RolloverCandidates> ApplyRolloverQueryBuilderFilters(
         IQueryBuilderFilterRequest filters)
     {
         var query = context.RolloverCandidates
             .AsNoTracking()
             .Include(o => o.QualificationVersion)
-            .Select(o => o.QualificationVersion);
+            .ThenInclude(o => o.Organisation)
+            .Select(o => o);
 
         if (filters is RolloverQueryBuilderTypesRequest { LevelIds.Count: > 0 } typeFilters)
         {

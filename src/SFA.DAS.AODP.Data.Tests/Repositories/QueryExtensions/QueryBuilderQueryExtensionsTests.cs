@@ -12,11 +12,19 @@ public class RolloverQueryBuilderQueryExtensionsTests
     {
         // Arrange
         var targetLevel = QualificationLevel.Level1.ToString();
+        var matchingQualification = new QualificationVersions { Level = targetLevel };
+        var nonMatchingQualification = new QualificationVersions { Level = QualificationLevel.Level2.ToString() };
 
-        var qualifications = new[]
+        var rolloverCandidates = new[]
         {
-            new QualificationVersions { Level = targetLevel },
-            new QualificationVersions { Level = QualificationLevel.Level2.ToString() }
+            new RolloverCandidates
+            {
+                QualificationVersion = matchingQualification
+            },
+            new RolloverCandidates
+            {
+                QualificationVersion = nonMatchingQualification
+            }
         }.AsQueryable();
 
         var levelIds = new[]
@@ -25,11 +33,11 @@ public class RolloverQueryBuilderQueryExtensionsTests
         };
 
         // Act
-        var result = qualifications.WithLevelFilter(levelIds).ToList();
+        var result = rolloverCandidates.WithLevelFilter(levelIds).ToList();
 
         // Assert
         result.Count.ShouldBe(1);
-        result.Single().Level.ShouldBe(targetLevel);
+        result.Single().QualificationVersion.Level.ShouldBe(targetLevel);
     }
 
     [Fact]
@@ -37,11 +45,19 @@ public class RolloverQueryBuilderQueryExtensionsTests
     {
         // Arrange
         var targetType = QualificationType.AccessToHigherEducation.ToString();
+        var matchingQualification = new QualificationVersions { Type = targetType };
+        var nonMatchingQualification = new QualificationVersions { Type = QualificationType.AdvancedExtensionAward.ToString()};
 
-        var qualifications = new[]
+        var rolloverCandidates = new[]
         {
-            new QualificationVersions { Type = targetType },
-            new QualificationVersions { Type = QualificationType.AdvancedExtensionAward.ToString() }
+            new RolloverCandidates
+            {
+                QualificationVersion = matchingQualification
+            },
+            new RolloverCandidates
+            {
+                QualificationVersion = nonMatchingQualification
+            }
         }.AsQueryable();
 
         var typeIds = new[]
@@ -50,11 +66,11 @@ public class RolloverQueryBuilderQueryExtensionsTests
         };
 
         // Act
-        var result = qualifications.WithTypeFilter(typeIds).ToList();
+        var result = rolloverCandidates.WithTypeFilter(typeIds).ToList();
 
         // Assert
         result.Count.ShouldBe(1);
-        result.Single().Type.ShouldBe(targetType);
+        result.Single().QualificationVersion.Type.ShouldBe(targetType);
     }
 
     [Fact]
@@ -62,21 +78,29 @@ public class RolloverQueryBuilderQueryExtensionsTests
     {
         // Arrange
         var targetSsa = SectorSubjectArea.FromFullCode("1.1").ToString();
+        var matchingQualification = new QualificationVersions { Ssa = targetSsa };
+        var nonMatchingQualification = new QualificationVersions { Ssa = SectorSubjectArea.FromFullCode("2.1").ToString() };
 
-        var qualifications = new[]
+        var rolloverCandidates = new[]
         {
-            new QualificationVersions { Ssa = targetSsa },
-            new QualificationVersions { Ssa = SectorSubjectArea.FromFullCode("2.1").ToString() }
+            new RolloverCandidates
+            {
+                QualificationVersion = matchingQualification
+            },
+            new RolloverCandidates
+            {
+                QualificationVersion = nonMatchingQualification
+            }
         }.AsQueryable();
 
         var ssaCodes = new[] { "1.1" };
 
         // Act
-        var result = qualifications.WithSectorSubjectAreaFilter(ssaCodes).ToList();
+        var result = rolloverCandidates.WithSectorSubjectAreaFilter(ssaCodes).ToList();
 
         // Assert
         result.Count.ShouldBe(1);
-        result.Single().Ssa.ShouldBe(targetSsa);
+        result.Single().QualificationVersion.Ssa.ShouldBe(targetSsa);
     }
 
     [Fact]
@@ -84,27 +108,42 @@ public class RolloverQueryBuilderQueryExtensionsTests
     {
         // Arrange
         var matchingId = Guid.NewGuid();
-
-        var qualifications = new[]
+        var matchingQualification = new QualificationVersions {
+            AwardingOrganisationId = matchingId,
+            Organisation = new AwardingOrganisation
+            {
+                RecognitionNumber = "RN12345"
+            }
+        };
+        var nonMatchingQualification = new QualificationVersions
         {
-            new QualificationVersions
+            AwardingOrganisationId = Guid.NewGuid(),
+            Organisation = new AwardingOrganisation
             {
-                AwardingOrganisationId = matchingId
+                RecognitionNumber = "RN4567"
+            }
+        };
+
+        var rolloverCandidates = new[]
+        {
+            new RolloverCandidates
+            {
+                QualificationVersion = matchingQualification
             },
-            new QualificationVersions
+            new RolloverCandidates
             {
-                AwardingOrganisationId = Guid.NewGuid()
+                QualificationVersion = nonMatchingQualification
             }
         }.AsQueryable();
 
         // Act
-        var result = qualifications
-            .WithAwardingOrganisationFilter([matchingId])
+        var result = rolloverCandidates
+            .WithAwardingOrganisationFilter(["RN12345"])
             .ToList();
 
         // Assert
         result.Count.ShouldBe(1);
-        result.Single().AwardingOrganisationId.ShouldBe(matchingId);
+        result.Single().QualificationVersion.AwardingOrganisationId.ShouldBe(matchingId);
     }
 
     [Fact]
@@ -118,7 +157,11 @@ public class RolloverQueryBuilderQueryExtensionsTests
             Level = QualificationLevel.EntryLevel.ToString(),
             Type = QualificationType.AdvancedExtensionAward.ToString(),
             Ssa = SectorSubjectArea.FromFullCode("1.1").ToString(),
-            AwardingOrganisationId = organisationId
+            AwardingOrganisationId = organisationId,
+            Organisation = new AwardingOrganisation
+            {
+                RecognitionNumber = "RN12345"
+            }
         };
 
         var nonMatchingQualification = new QualificationVersions
@@ -126,25 +169,35 @@ public class RolloverQueryBuilderQueryExtensionsTests
             Level = QualificationLevel.Level1.ToString(),
             Type = QualificationType.EssentialDigitalSkills.ToString(),
             Ssa = SectorSubjectArea.FromFullCode("2.1").ToString(),
-            AwardingOrganisationId = Guid.NewGuid()
+            AwardingOrganisationId = Guid.NewGuid(),
+            Organisation = new AwardingOrganisation
+            {
+                RecognitionNumber = "RN5674"
+            }
         };
 
-        var qualifications = new[]
+        var rolloverCandidates = new[]
         {
-            matchingQualification,
-            nonMatchingQualification
+            new RolloverCandidates
+            {
+                QualificationVersion = matchingQualification
+            },
+            new RolloverCandidates
+            {
+                QualificationVersion = nonMatchingQualification
+            }
         }.AsQueryable();
 
         // Act
-        var result = qualifications.WithAllFilters(
+        var result = rolloverCandidates.WithAllFilters(
                 [QualificationLevel.EntryLevel.Id],
                 [QualificationType.AdvancedExtensionAward.Id],
                 ["1.1"],
-                [organisationId])
+                ["RN12345"])
             .ToList();
 
         // Assert
         result.Count.ShouldBe(1);
-        result.Single().ShouldBe(matchingQualification);
+        result.Single().QualificationVersion.ShouldBe(matchingQualification);
     }
 }
