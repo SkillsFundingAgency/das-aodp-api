@@ -34,6 +34,8 @@
             @ScriptName_MVS1_OfferTypes_DisplayName,
             GETDATE()
         )
+
+        ALTER TABLE [dbo].[FundingOffers] ALTER COLUMN [DisplayName] NVARCHAR(50) NOT NULL;
     END
     
     COMMIT TRANSACTION
