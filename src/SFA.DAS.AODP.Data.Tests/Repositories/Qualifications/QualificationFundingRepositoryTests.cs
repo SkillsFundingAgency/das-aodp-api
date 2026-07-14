@@ -186,7 +186,8 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories
                 var fundingOffer = new FundingOffer
                 {
                     Id = Guid.NewGuid(),
-                    Name = $"Test Funding Offer {i}"
+                    Name = $"Test Funding Offer {i}",
+                    DisplayName = $"Test Funding Offer {i}"
                 };
 
                 var funding = new QualificationFundings

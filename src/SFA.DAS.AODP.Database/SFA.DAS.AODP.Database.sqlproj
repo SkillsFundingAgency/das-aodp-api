@@ -188,6 +188,9 @@
     <Build Include="Views\view_RolloverWorkflowCandidatesP1Checks.sql" />
     <None Include="MigrationScripts\MVS1_Drop_OutputChangedQualifications_View.sql" />
     <None Include="MigrationScripts\MVS1_AWARD_1047_Rollover_action_types.sql" />
+    <None Include="MigrationScripts\MVS1_OfferTypes_DisplayName.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />

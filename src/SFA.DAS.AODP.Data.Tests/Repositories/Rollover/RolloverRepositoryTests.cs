@@ -277,7 +277,7 @@ public class RolloverRepositoryTests
             SubLevel = "Sublevel",
             Type = "Type"
         };
-        var fundingOffer = new FundingOffer { Id = Guid.NewGuid(), Name = "Funding A" };
+        var fundingOffer = new FundingOffer { Id = Guid.NewGuid(), Name = "Funding A", DisplayName = "Funding A" };
 
         var candidate = RolloverCandidates.CreateInitialRound(
             qualVersion.Id, fundingOffer.Id, "2024/25", now);
@@ -334,7 +334,7 @@ public class RolloverRepositoryTests
         var versionA = new QualificationVersions { Id = Guid.NewGuid(), Qualification = qualificationA, Organisation = organisation,EqfLevel = "Efq", Level = "Level", Ssa = "ssa", Status = "Status",SubLevel = "Sublevel",Type = "Type"};
         var versionB = new QualificationVersions { Id = Guid.NewGuid(), Qualification = qualificationB, Organisation = organisation, EqfLevel = "Efq", Level = "Level", Ssa = "ssa", Status = "Status", SubLevel = "Sublevel", Type = "Type" };
 
-        var funding = new FundingOffer { Id = Guid.NewGuid(), Name = "Funding" };
+        var funding = new FundingOffer { Id = Guid.NewGuid(), Name = "Funding", DisplayName = "Funding" };
 
         var candidateA = RolloverCandidates.CreateInitialRound(versionA.Id, funding.Id, "2024/25", now);
         candidateA.QualificationVersion = versionA;
@@ -436,7 +436,7 @@ public class RolloverRepositoryTests
 
         var qualification = new Qualification { Id = Guid.NewGuid(), Qan = "Q-1" };
         var qualVersion = new QualificationVersions { Id = Guid.NewGuid(), QualificationId = qualification.Id, Qualification = qualification, EqfLevel = "Efq", Level = "Level", Ssa = "ssa", Status = "Status", SubLevel = "Sublevel", Type = "Type" };
-        var funding = new FundingOffer { Id = Guid.NewGuid(), Name = "FundX" };
+        var funding = new FundingOffer { Id = Guid.NewGuid(), Name = "FundX", DisplayName = "Fund X"};
 
         var active = RolloverCandidates.CreateInitialRound(qualVersion.Id, funding.Id, "2024/25", DateTime.UtcNow);
         // CreateInitialRound sets IsActive = true so no setter needed
@@ -685,7 +685,7 @@ public class RolloverRepositoryTests
 
         var qualification = new Qualification { Id = Guid.NewGuid(), Qan = "Q-STAT" };
         var version = new QualificationVersions { Id = Guid.NewGuid(), QualificationId = qualification.Id, Qualification = qualification, Status = "Approved", Type = "Standard", Ssa = "001", Level = "3", SubLevel = "A", EqfLevel = "EQF3" };
-        var funding = new FundingOffer { Id = Guid.NewGuid(), Name = "FundStat" };
+        var funding = new FundingOffer { Id = Guid.NewGuid(), Name = "FundStat", DisplayName = "Fund Stat" };
 
         var candidate = RolloverCandidates.CreateInitialRound(version.Id, funding.Id, "2024/25", DateTime.UtcNow);
         candidate.QualificationVersion = version;
@@ -733,7 +733,7 @@ public class RolloverRepositoryTests
             SubLevel = "A",
             EqfLevel = "E1"
         };
-        var funding = new FundingOffer { Id = Guid.NewGuid(), Name = "FundG" };
+        var funding = new FundingOffer { Id = Guid.NewGuid(), Name = "FundG", DisplayName = "Funding G" };
 
         var candidate = RolloverCandidates.CreateInitialRound(version.Id, funding.Id, "2024/25", DateTime.UtcNow);
         candidate.QualificationVersion = version;

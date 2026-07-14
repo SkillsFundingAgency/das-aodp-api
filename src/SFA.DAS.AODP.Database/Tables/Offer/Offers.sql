@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[FundingOffers](
 	[Id] [uniqueidentifier] NOT NULL,
 	[Name] [nvarchar](4000) NOT NULL,
+	[DisplayName] [nvarchar](50) NOT NULL,
  CONSTRAINT [PK_FundingOffers] PRIMARY KEY CLUSTERED 
 (
 	[Id] ASC

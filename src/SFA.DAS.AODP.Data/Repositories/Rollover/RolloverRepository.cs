@@ -278,10 +278,13 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
                 Id = rc.Id,
                 QualificationVersionId = rc.QualificationVersionId,
                 FundingOfferId = rc.FundingOfferId,
+                FundingOfferName = rc.FundingOffer.DisplayName,
                 RolloverRound = rc.RolloverRound,
                 AcademicYear = rc.AcademicYear,
                 PreviousFundingEndDate = rc.PreviousFundingEndDate,
-                NewFundingEndDate = rc.NewFundingEndDate
+                NewFundingEndDate = rc.NewFundingEndDate,
+                QualificationNumber = rc.QualificationVersion.Qualification.Qan,
+                QualificationName = rc.QualificationVersion.Qualification.QualificationName
             })
             .ToListAsync(cancellationToken);
     }
