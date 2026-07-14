@@ -5,7 +5,7 @@ namespace SFA.DAS.AODP.Data.Repositories.Files
     public interface IFileRecordRepository
     {
         Task<List<FileRecord>> GetFilesAsync(
-            FileCategory category,
+            IEnumerable<FileCategory> categories,
             Guid? applicationId,
             Guid? messageId,
             Guid? questionId);

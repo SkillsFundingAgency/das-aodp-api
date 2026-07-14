@@ -114,13 +114,13 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Files
 
             var query = new GetFileMetadataQuery
             {
-                FileCategory = FileCategory.MessageAttachment,
+                FileCategories = [FileCategory.MessageAttachment],
                 ApplicationId = Guid.NewGuid()
             };
 
             _repository
                 .Setup(r => r.GetFilesAsync(
-                    query.FileCategory,
+                    query.FileCategories,
                     query.ApplicationId,
                     query.MessageId,
                     query.QuestionId))
@@ -150,12 +150,12 @@ namespace SFA.DAS.AODP.Application.Tests.Queries.Files
             // Arrange
             var query = new GetFileMetadataQuery
             {
-                FileCategory = FileCategory.QuestionUpload
+                FileCategories = [FileCategory.QuestionUpload]
             };
 
             _repository
                 .Setup(r => r.GetFilesAsync(
-                    It.IsAny<FileCategory>(),
+                    It.IsAny<IEnumerable<FileCategory>>(),
                     It.IsAny<Guid?>(),
                     It.IsAny<Guid?>(),
                     It.IsAny<Guid?>()))

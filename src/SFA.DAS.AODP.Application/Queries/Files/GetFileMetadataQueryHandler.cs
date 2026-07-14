@@ -38,7 +38,7 @@ namespace SFA.DAS.AODP.Application.Queries.Files
                 else
                 {
                     records = await _fileRecordRepository.GetFilesAsync(
-                        request.FileCategory,
+                        request.FileCategories,
                         request.ApplicationId,
                         request.MessageId,
                         request.QuestionId);
@@ -50,6 +50,7 @@ namespace SFA.DAS.AODP.Application.Queries.Files
                     {
                         FileId = f.Id,
                         FileName = f.FileName,
+                        FileCategory = f.FileCategory,
                         ApplicationId = f.ApplicationId,
                         MessageId = f.MessageId,
                         QuestionId = f.QuestionId,
