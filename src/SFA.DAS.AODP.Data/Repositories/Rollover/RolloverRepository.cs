@@ -53,7 +53,7 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
                 Id = rc.Id,
                 QualificationVersionId = rc.QualificationVersionId,
                 FundingOfferId = rc.FundingOfferId,
-                FundingOfferName = rc.FundingOffer != null ? rc.FundingOffer.Name : null,
+                FundingOfferName = rc.FundingOffer != null ? rc.FundingOffer.DisplayName : null,
                 QualificationNumber = rc.QualificationVersion != null && rc.QualificationVersion.Qualification != null ?
                     rc.QualificationVersion.Qualification.Qan : null,
                 AcademicYear = rc.AcademicYear

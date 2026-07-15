@@ -470,7 +470,7 @@ public class RolloverRepositoryTests
         dto.Id.ShouldBe(active.Id);
         dto.QualificationVersionId.ShouldBe(active.QualificationVersionId);
         dto.FundingOfferId.ShouldBe(active.FundingOfferId);
-        dto.FundingOfferName.ShouldBe("FundX");
+        dto.FundingOfferName.ShouldBe("Fund X");
         dto.QualificationNumber.ShouldBe("Q-1");
         dto.AcademicYear.ShouldBe(active.AcademicYear);
     }
