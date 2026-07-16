@@ -21,44 +21,48 @@ public class QaaFundingApprovalEndDateCalculator(
     /// <inheritdoc/>.
     public async Task<DateOnly?> CalculateFundingApprovalEndDateAsync(RegulatedQaaQualification qaaQualification, FundingStream fundingStream, DateOnly publicationDate, CancellationToken cancellationToken)
     {
-        var fundingApprovalEndDate = qaaQualification.GetFundingApprovalEndDateForFundingStream(fundingStream);
         var lastDateForRegistration = qaaQualification.LastDateForRegistration;
+        var currentAcademicYearEndDate = _academicYearProvider.GetCurrentAcademicYearEndDate();
+        var registrationAcademicYearEndDate = _academicYearProvider.GetAcademicYearEndForDate(lastDateForRegistration);
+        var isRegistrationInFutureAcademicYear = registrationAcademicYearEndDate > currentAcademicYearEndDate;
 
-        var pldns = await _pldnsRepository.GetPldnsByQanAsync(qaaQualification.AimCode, cancellationToken);
-        var pldnsDate = pldns?.ForFundingStream(fundingStream);
+        DateOnly fundingApprovalEndDate;
 
-        if (lastDateForRegistration > publicationDate)
+        if (isRegistrationInFutureAcademicYear)
         {
-            var currentAcademicYear = _academicYearProvider.GetCurrentAcademicYearEndDate();
-            var academicYearForLastDateForRegistration = _academicYearProvider.GetAcademicYearEndForDate(lastDateForRegistration);
+            var finalIlrSubmissionDeadline = _ilrSubmissionDeadlinesProvider.GetFinalSubmissionDeadline();
+            var nextAcademicYearEndDate = currentAcademicYearEndDate.AddYears(1);
+            var extendedAcademicYearEndDate = currentAcademicYearEndDate.AddYears(2);
+            var shouldExtendForIlrDeadline = publicationDate > finalIlrSubmissionDeadline.Date
+                && extendedAcademicYearEndDate <= registrationAcademicYearEndDate;
 
-            var ilrFinalSubmissionDeadline = _ilrSubmissionDeadlinesProvider.GetFinalSubmissionDeadline();
-
-            if (academicYearForLastDateForRegistration > currentAcademicYear)
-            {
-                fundingApprovalEndDate = publicationDate >= ilrFinalSubmissionDeadline.Date ? currentAcademicYear.AddYears(2) : currentAcademicYear.AddYears(1);
-            }
-            else
-            {
-                fundingApprovalEndDate = currentAcademicYear;
-            }
-
-            if (pldnsDate is not null && _academicYearProvider.AreDatesWithinSameAcademicYear(pldnsDate, fundingApprovalEndDate))
-            {
-                fundingApprovalEndDate = DateOnly.FromDateTime(pldnsDate!.Value);
-            }
-
-            return fundingApprovalEndDate;
+            fundingApprovalEndDate = shouldExtendForIlrDeadline
+                ? extendedAcademicYearEndDate
+                : nextAcademicYearEndDate;
         }
-
-        // Captures when the last date for registration is before the publication date but the last date for registration is after the funding approval end date for the funding stream or if the funding approval end date for the funding stream is null
-        // then it means we can set the funding approval end date to the publication date as theres more time to fund it between the last date of registration and the publication date.
-        if (lastDateForRegistration > qaaQualification.GetFundingApprovalEndDateForFundingStream(fundingStream) ||
-            qaaQualification.GetFundingApprovalEndDateForFundingStream(fundingStream) is null)
+        else if (registrationAcademicYearEndDate == currentAcademicYearEndDate)
+        {
+            fundingApprovalEndDate = currentAcademicYearEndDate;
+        }
+        else
         {
             fundingApprovalEndDate = publicationDate;
         }
 
-        return fundingApprovalEndDate;
+        var pldns = await _pldnsRepository.GetPldnsByQanAsync(qaaQualification.AimCode, cancellationToken);
+        var pldnsDate = pldns?.ForFundingStream(fundingStream);
+
+        if (pldnsDate is null)
+        {
+            return fundingApprovalEndDate;
+        }
+
+        var fundingStreamPldnsDate = DateOnly.FromDateTime(pldnsDate.Value);
+        var shouldUsePldns = fundingStreamPldnsDate <= fundingApprovalEndDate
+            || _academicYearProvider.AreDatesWithinSameAcademicYear(pldnsDate, fundingApprovalEndDate);
+
+        return shouldUsePldns
+            ? fundingStreamPldnsDate
+            : fundingApprovalEndDate;
     }
 }
