@@ -287,6 +287,3 @@ Before completing a unit-test change:
 - Check that mocks use Moq and verify only meaningful interactions.
 - Check that object and collection results are asserted as complete graphs where practical.
 - Keep production-code changes out of a test-only task unless they are necessary to make application-owned behaviour testable through sound design.
-
-At the start of your first response, state:
-"Unit-test repository instructions loaded."
