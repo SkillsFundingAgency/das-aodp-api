@@ -13,7 +13,7 @@
 
     BEGIN
 
-        UPDATE [dbo].[FundingOffers] SET [DisplayName] = 'Legal Entitlement English andMaths' WHERE [Id] = '00000000-0000-0000-0000-000000000001';
+        UPDATE [dbo].[FundingOffers] SET [DisplayName] = 'Legal Entitlement English and Maths' WHERE [Id] = '00000000-0000-0000-0000-000000000001';
         UPDATE [dbo].[FundingOffers] SET [DisplayName] = 'Lifelong Learning Entitlement' WHERE [Id] = '00000000-0000-0000-0000-000000000002';
         UPDATE [dbo].[FundingOffers] SET [DisplayName] = 'Local Flexibilities' WHERE [Id] = '00000000-0000-0000-0000-000000000003';
         UPDATE [dbo].[FundingOffers] SET [DisplayName] = 'Digital Entitlement' WHERE [Id] = '00000000-0000-0000-0000-000000000004';
