@@ -73,7 +73,6 @@ public partial class QualificationVersions
     public virtual ProcessStatus ProcessStatus { get; set; } = null!;
     public virtual Qualification Qualification { get; set; } = null!;
     public virtual VersionFieldChange VersionFieldChanges { get; set; } = null!;
-    public string? FundingEligibilityConflictType { get; set; }
 
     public QualificationVersions SetLifecycleStatus(ProcessStatusLookup proposedProcessStatus)
     {
