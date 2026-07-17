@@ -11,9 +11,14 @@ public interface IRolloverRepository
     Task UpdateRolloverWorkflowCandidatesAsync(IEnumerable<RolloverWorkflowCandidate> candidates, CancellationToken cancellationToken);
 
     Task<IEnumerable<RolloverCandidateDto>> GetRolloverCandidatesAsync(CancellationToken cancellationToken);
-    Task<RolloverWorkflowRun?> GeRolloverWorkflowRunByIdAsync(Guid id, CancellationToken cancellationToken);
-    Task<IEnumerable<Models.Rollover.RolloverCandidateDto>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, 
+    Task<IEnumerable<RolloverCandidateDto>> GetQualificationVersionsForRolloverQueryBuilderAsync(
+        RolloverQueryBuilderRequest filters,
         CancellationToken cancellationToken);
+
+    Task<IEnumerable<RolloverCandidateDto>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, 
+        CancellationToken cancellationToken);
+    Task<RolloverWorkflowRun?> GeRolloverWorkflowRunByIdAsync(Guid id, CancellationToken cancellationToken);
+
     Task<Guid> CreateRolloverWorkflowRunAsync(RolloverWorkflowRun request,
         CancellationToken cancellationToken);
 
@@ -39,4 +44,18 @@ public interface IRolloverRepository
     Task DeleteAllWorkflowCandidatesAsync(CancellationToken cancellationToken);
 
     Task<Guid?> GetLatestWorkflowRunIdAsync(CancellationToken cancellationToken);
+
+    Task<IEnumerable<RolloverQueryBuilderLevel>> GetAllLevelsForRolloverQueryBuilderAsync(CancellationToken cancellationToken);
+
+    Task<IEnumerable<RolloverQueryBuilderSectorSubjectArea>> GetSectorSubjectAreasForRolloverQueryBuilderAsync(
+        RolloverQueryBuilderSectorSubjectAreaRequest requestFilters, 
+        CancellationToken cancellationToken);
+    
+    Task<IEnumerable<RolloverQueryBuilderType>> GetTypesForRolloverQueryBuilderAsync(
+        RolloverQueryBuilderTypesRequest requestFilters, 
+        CancellationToken cancellationToken);
+
+    Task<IEnumerable<RolloverQueryBuilderAwardingOrganisation>> GetAwardingOrganisationsForRolloverQueryBuilderAsync(
+        RolloverQueryBuilderAwardingOrganisationsRequest filters,
+        CancellationToken cancellationToken);
 }

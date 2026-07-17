@@ -20,3 +20,4 @@ Post-Deployment Script Template
 :r .\MigrationScripts\MVS1_Drop_OutputChangedQualifications_View.sql
 :r .\MigrationScripts\MVS1_AWARD_1047_Rollover_action_types.sql
 :r .\MigrationScripts\MVS2_AWARD_RolloverCandidatesJobDataSeed.sql
+:r .\MigrationScripts\MVS1_OfferTypes_DisplayName.sql

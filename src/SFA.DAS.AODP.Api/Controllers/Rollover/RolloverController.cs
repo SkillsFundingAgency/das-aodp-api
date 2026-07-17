@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application.Commands.Rollover;
 using SFA.DAS.AODP.Application.Queries.Rollover;
+using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Api.Controllers.Rollover;
 
@@ -100,5 +101,47 @@ public class RolloverController : BaseController
     public async Task<IActionResult> SubmitRolloverExtension(SubmitRolloverExtensionCommand submitRolloverExtensinCommand)
     {
         return await SendRequestAsync(submitRolloverExtensinCommand);
+    }
+
+    [HttpPost("querybuilder/awardingorganisations")]
+    [ProducesResponseType(typeof(GetAwardingOrganisationsForRolloverQueryBuilderQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetAwardingOrganisationsForRolloverQueryBuilder(
+        [FromBody] RolloverQueryBuilderAwardingOrganisationsRequest filters)
+    {
+        return await SendRequestAsync(new GetAwardingOrganisationsForRolloverQueryBuilderQuery(filters));
+    }
+
+    [HttpPost("querybuilder/qualificationversions")]
+    [ProducesResponseType(typeof(GetQualificationVersionsForRolloverQueryBuilderQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetQualificationVersionsForRolloverQueryBuilder(
+        [FromBody] RolloverQueryBuilderRequest filters)
+    {
+        return await SendRequestAsync(new GetQualificationVersionsForRolloverQueryBuilderQuery(filters));
+    }
+
+    [HttpGet("querybuilder/levels")]
+    [ProducesResponseType(typeof(GetLevelsForRolloverQueryBuilderQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetLevelsForRolloverQueryBuilder()
+    {
+        return await SendRequestAsync(new GetLevelsForRolloverQueryBuilderQuery());
+    }
+
+    [HttpPost("querybuilder/types")]
+    [ProducesResponseType(typeof(GetTypesForRolloverQueryBuilderQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetTypesForRolloverQueryBuilder([FromBody] RolloverQueryBuilderTypesRequest filters)
+    {
+        return await SendRequestAsync(new GetTypesForRolloverQueryBuilderQuery(filters));
+    }
+
+    [HttpPost("querybuilder/sectorsubjectarea")]
+    [ProducesResponseType(typeof(GetSectorSubjectAreasForRolloverQueryBuilderQueryResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetSectorSubjectAreasForRolloverQueryBuilder([FromBody] RolloverQueryBuilderSectorSubjectAreaRequest filters)
+    {
+        return await SendRequestAsync(new GetSectorSubjectAreasForRolloverQueryBuilderQuery(filters));
     }
 }
