@@ -5,7 +5,7 @@ using Shouldly;
 
 namespace SFA.DAS.AODP.Data.UnitTests.Repositories.QueryExtensions;
 
-public class RolloverQueryBuilderQueryExtensionsTests
+public class RolloverQueryBuilderQueryExtensionsTests : UnitTest
 {
     [Fact]
     public void WithLevelFilter_Should_Return_Only_Matching_Levels()
