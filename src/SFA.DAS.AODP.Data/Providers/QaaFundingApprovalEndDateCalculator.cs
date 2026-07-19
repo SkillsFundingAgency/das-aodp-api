@@ -58,8 +58,7 @@ public class QaaFundingApprovalEndDateCalculator(
         }
 
         var fundingStreamPldnsDate = DateOnly.FromDateTime(pldnsDate.Value);
-        var shouldUsePldns = fundingStreamPldnsDate <= fundingApprovalEndDate
-            || _academicYearProvider.AreDatesWithinSameAcademicYear(pldnsDate, fundingApprovalEndDate);
+        var shouldUsePldns = fundingStreamPldnsDate <= fundingApprovalEndDate;
 
         return shouldUsePldns
             ? fundingStreamPldnsDate

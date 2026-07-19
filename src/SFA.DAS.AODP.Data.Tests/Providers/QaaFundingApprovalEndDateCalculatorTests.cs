@@ -13,7 +13,7 @@ namespace SFA.DAS.AODP.Data.UnitTests.Providers;
 public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
 {
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_LastDateForRegistrationInCurrentAcademicYear_ReturnsEndOfCurrentAcademicYear()
+    public async Task LastDateForRegistrationInCurrentAcademicYear_ReturnsEndOfCurrentAcademicYear()
     {
         // Arrange
         var mockAcademicYearProvider = new Mock<IAcademicYearProvider>();
@@ -49,7 +49,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_PldnsIsInFutureAcademicYear_LastDateForRegistrationAfterPublicationDate_WithinCurrentAcademicYear_ReturnEndOfCurrentAcademicYear()
+    public async Task PldnsIsInFutureAcademicYear_LastDateForRegistrationAfterPublicationDate_WithinCurrentAcademicYear_ReturnEndOfCurrentAcademicYear()
     {
         // Arrange
         var mockAcademicYearProvider = new Mock<IAcademicYearProvider>();
@@ -85,7 +85,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsAfterPublicationDate_AndBeforeIlrDeadline_AndNotInCurrentAcademicYear_ReturnEndOfNextAcademicYear()
+    public async Task LastDateForRegistrationAfterPublicationDate_BeforeIlrDeadline_NotInCurrentAcademicYear_ReturnEndOfNextAcademicYear()
     {
         // Arrange
         var qan = "QAN-001";
@@ -117,12 +117,11 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsAfterPublicationDate_AndOnOrAfterIlrDeadline_NoPldns_UsesAcademicYearOfTheFollowingYear()
+    public async Task LastDateForRegistrationIsAfterPublicationDate_OnOrAfterIlrDeadline_NoPldns_ReturnEndOfNextAcademicYear()
     {
         // Arrange
         var qan = "QAN-002";
         var lastDateForRegistration = new DateOnly(2027, 9, 30);
-        var currentFundingApprovalEndDate = new DateOnly(2026, 7, 31);
         var publicationDate = new DateOnly(2026, 10,23);
 
         var clockProvider = new FakeSystemClockProvider(new DateOnly(2026, 10, 22));
@@ -149,7 +148,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsAfterPublicationDate_AndOnOrAfterIlrDeadline_PldnsSetButInFutureAcademicYear_UsesAcademicYearOfTheFollowingYear()
+    public async Task LastDateForRegistrationIsAfterPublicationDate_OnOrAfterIlrDeadline_PldnsSetButInFutureAcademicYear_UsesAcademicYearOfTheFollowingYear()
     {
         // Arrange
         var mockAcademicYearProvider = new Mock<IAcademicYearProvider>();
@@ -190,7 +189,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsAfterPublicationDate_AndLastDateIsBeforeAcademicYear_ReturnsEndOfCurrentAcademicYear()
+    public async Task LastDateForRegistrationIsAfterPublicationDate_AndLastDateIsBeforeAcademicYear_ReturnsEndOfCurrentAcademicYear()
     {
         // Arrange
         var qan = "QAN-003";
@@ -221,7 +220,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsInCurrentAcademicYear_ReturnsEndOfCurrentAcademicYear()
+    public async Task LastDateForRegistrationIsInCurrentAcademicYear_ReturnsEndOfCurrentAcademicYear()
     {
         // Arrange
         var qan = "QAN-004";
@@ -250,7 +249,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsInCurrentAcademicYear_IgnoresExistingFundingApprovalEndDate()
+    public async Task LastDateForRegistrationIsInCurrentAcademicYear_IgnoresExistingFundingApprovalEndDate()
     {
         // Arrange
         var qan = "QAN-005";
@@ -280,7 +279,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationIsInCurrentAcademicYear_RecalculatesToAcademicYearEnd()
+    public async Task LastDateForRegistrationIsInCurrentAcademicYear_RecalculatesToAcademicYearEnd()
     {
         // Arrange
         var qan = "QAN-006";
@@ -310,7 +309,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenLastDateForRegistrationEqualsPublicationDate_AndIsInCurrentAcademicYear_ReturnsAcademicYearEnd()
+    public async Task LastDateForRegistrationEqualsPublicationDate_AndIsInCurrentAcademicYear_ReturnsAcademicYearEnd()
     {
         // Arrange
         var qan = "QAN-007";
@@ -340,7 +339,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenPldnsHasEarlierDate_ReturnsEarliestPldnsDate()
+    public async Task WhenPldnsHasEarlierDate_ReturnsEarliestPldnsDate()
     {
         // Arrange
         var qan = "QAN-008";
@@ -372,7 +371,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenPldnsComesSoonerThanEndOfAcademicYear_AndLastDateForRegistrationInCurrentAcademicYear_ReturnPldnsDate()
+    public async Task WhenPldnsComesSoonerThanEndOfAcademicYear_AndLastDateForRegistrationInCurrentAcademicYear_ReturnPldnsDate()
     {
         // Arrange
         var qan = "QAN-009";
@@ -404,7 +403,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_WhenPldnsDatesAreAllNull_DoesNotChangeCalculatedFundingApprovalEndDate()
+    public async Task WhenPldnsDatesAreAllNull_DoesNotChangeCalculatedFundingApprovalEndDate()
     {
         // Arrange
         var qan = "QAN-010";
@@ -436,7 +435,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_LastDateForRegistrationInPreviousAcademicYear_ReturnsPublicationDate()
+    public async Task LastDateForRegistrationInPreviousAcademicYear_ReturnsPublicationDate()
     {
         var publicationDate = new DateOnly(2026, 6, 12);
         var qualification = RegulatedQaaQualification.Create(
@@ -465,7 +464,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_PublicationOnIlrDeadline_DoesNotExtendByAnAdditionalAcademicYear()
+    public async Task PublicationOnIlrDeadline_DoesNotExtendByAnAdditionalAcademicYear()
     {
         var publicationDate = new DateOnly(2026, 10, 22);
         var qualification = RegulatedQaaQualification.Create(
@@ -493,7 +492,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_PublicationAfterIlrDeadline_DoesNotExtendPastRegistrationAcademicYear()
+    public async Task PublicationAfterIlrDeadline_DoesNotExtendPastRegistrationAcademicYear()
     {
         var publicationDate = new DateOnly(2026, 10, 23);
         var qualification = RegulatedQaaQualification.Create(
@@ -521,7 +520,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_FutureRegistration_PldnsInEarlierAcademicYear_ReturnsPldns()
+    public async Task FutureRegistration_PldnsInEarlierAcademicYear_ReturnsPldns()
     {
         var publicationDate = new DateOnly(2026, 6, 12);
         var pldnsDate = new DateTime(2026, 5, 31);
@@ -550,7 +549,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_PldnsBeforeCalculatedEndDate_InDifferentAcademicYear_ReturnsPldns()
+    public async Task PldnsBeforeCalculatedEndDate_InDifferentAcademicYear_ReturnsPldns()
     {
         var publicationDate = new DateOnly(2026, 9, 15);
         var pldnsDate = new DateTime(2026, 7, 31);
@@ -579,7 +578,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task CalculateFundingApprovalEndDateAsync_FutureRegistration_PldnsAfterCalculatedEndDate_KeepsCalculatedEndDate()
+    public async Task FutureRegistration_PldnsAfterCalculatedEndDate_KeepsCalculatedEndDate()
     {
         var publicationDate = new DateOnly(2026, 6, 12);
         var pldnsDate = new DateTime(2027, 8, 1);
