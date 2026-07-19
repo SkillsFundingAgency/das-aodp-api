@@ -1,6 +1,7 @@
 ﻿using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Pldns;
+using System.Security.Cryptography;
 
 namespace SFA.DAS.AODP.Data.Providers;
 
@@ -28,6 +29,7 @@ public class QaaFundingApprovalEndDateCalculator(
 
         DateOnly fundingApprovalEndDate;
 
+        // Rule 1: If the OED is in a future academic year (e.g. 26/27 or later) approve to end of the next academic year i.e. current + 1 year (FY1)
         if (isRegistrationInFutureAcademicYear)
         {
             var finalIlrSubmissionDeadline = _ilrSubmissionDeadlinesProvider.GetFinalSubmissionDeadline();
@@ -40,15 +42,18 @@ public class QaaFundingApprovalEndDateCalculator(
                 ? extendedAcademicYearEndDate
                 : nextAcademicYearEndDate;
         }
+        // Rule 2: If the OED is in current academic year (e.g.) 25/26, approve to end of the current academic year (FY0)
         else if (registrationAcademicYearEndDate == currentAcademicYearEndDate)
         {
             fundingApprovalEndDate = currentAcademicYearEndDate;
         }
+        // Rule 3: If the OED is in a previous academic year (FY1), hard stop at date of website publication
         else
         {
             fundingApprovalEndDate = publicationDate;
         }
 
+        // Cross apply the PLDNS rule to ensure that the provisional date we have calculated doesn't exceed the PLDNS date for the funding stream.
         var pldns = await _pldnsRepository.GetPldnsByQanAsync(qaaQualification.AimCode, cancellationToken);
         var pldnsDate = pldns?.ForFundingStream(fundingStream);
 
@@ -57,6 +62,7 @@ public class QaaFundingApprovalEndDateCalculator(
             return fundingApprovalEndDate;
         }
 
+        // If we have found a PLDNS date that is earlier than the funding approval end date, we should use that instead as it acts as a hard stop for funding.
         var fundingStreamPldnsDate = DateOnly.FromDateTime(pldnsDate.Value);
         var shouldUsePldns = fundingStreamPldnsDate <= fundingApprovalEndDate;
 
