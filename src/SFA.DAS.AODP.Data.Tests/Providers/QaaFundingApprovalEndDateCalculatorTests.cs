@@ -148,6 +148,39 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
+    public async Task LastDateForRegistrationIsAfterPublicationDate_OnOrAfterIlrDeadline_ButOnlyExtendTo2027()
+    {
+        // The OED is in a future academic year, but the registration academic year is only one year ahead of the current academic year, so we should only extend to the end of the next academic year (2026/27) even though we are after the ILR deadline. 
+
+        // Arrange
+        var qan = "QAN-002";
+        var lastDateForRegistration = new DateOnly(2027, 6, 30);
+        var publicationDate = new DateOnly(2026, 10, 23);
+
+        var clockProvider = new FakeSystemClockProvider(new DateOnly(2026, 10, 22));
+        var ilrSubmissionDeadlinesProvider = new FakeIlrSubmissionDeadlinesProvider(new IlrSubmissionDeadline("R14", new DateOnly(2026, 10, 22)));
+        var academicYearProvider = new FakeAcademicYearProvider(new DateOnly(2026, 7, 31));
+        var pldnsRepository = CreatePldnsRepositoryReturningNull();
+        var qualification = RegulatedQaaQualification.Create(new DateTime(2026, 01, 02), qan, "title", "ao", new DateOnly(2025, 09, 01), lastDateForRegistration, SectorSubjectArea.AccountingAndFinance);
+
+        var sut = new QaaFundingApprovalEndDateCalculator(
+            clockProvider,
+            ilrSubmissionDeadlinesProvider,
+            academicYearProvider,
+            pldnsRepository.Object);
+
+        // Act
+        var result = await sut.CalculateFundingApprovalEndDateAsync(
+            qualification,
+            FundingStream.Age1619,
+            publicationDate,
+            CancellationToken);
+
+        // Assert
+        result.ShouldBe(new DateOnly(2027, 7, 31));
+    }
+
+    [Fact]
     public async Task LastDateForRegistrationIsAfterPublicationDate_OnOrAfterIlrDeadline_PldnsSetButInFutureAcademicYear_UsesAcademicYearOfTheFollowingYear()
     {
         // Arrange

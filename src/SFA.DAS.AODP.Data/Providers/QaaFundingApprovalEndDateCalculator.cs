@@ -1,7 +1,6 @@
 ﻿using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Pldns;
-using System.Security.Cryptography;
 
 namespace SFA.DAS.AODP.Data.Providers;
 
