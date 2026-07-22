@@ -6,7 +6,7 @@ namespace SFA.DAS.AODP.Data.Entities.Application
     public class Application
     {
 
-        public Guid Id { get; set; }
+        public Guid Id { get; set;}
         public Guid FormVersionId { get; set; }
         public string Name { get; set; }
         public DateTime? SubmittedAt { get; set; }

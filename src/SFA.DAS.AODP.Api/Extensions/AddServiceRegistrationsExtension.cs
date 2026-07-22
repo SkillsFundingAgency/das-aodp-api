@@ -3,7 +3,6 @@ using SFA.DAS.AODP.Application.Services;
 using SFA.DAS.AODP.Data.Extensions;
 using SFA.DAS.AODP.Infrastructure.Clients.Ofqual;
 using SFA.DAS.AODP.Data.Search;
-using SFA.DAS.AODP.Infrastructure.Extensions;
 using SFA.DAS.AODP.Infrastructure.Services;
 using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
 using SFA.DAS.AODP.Models.Settings;
@@ -21,7 +20,7 @@ public static class AddServiceRegistrationsExtension
         var formBuilderSettings = configuration.GetRequiredSection("FormBuilderSettings").Get<FormBuilderSettings>();
         if (formBuilderSettings != null) services.AddSingleton(formBuilderSettings);
 
-        var blobStorageSettings = configuration.GetRequiredSection("OutputFileBlobStorageSettings").Get<OutputFileBlobStorageSettings>();
+        var blobStorageSettings = configuration.GetRequiredSection("BlobStorageSettings").Get<BlobStorageSettings>();
         if (blobStorageSettings != null) services.AddSingleton(blobStorageSettings);
 
         services.Configure<FuzzySearchSettings>(configuration.GetSection("FuzzySearchSettings"));

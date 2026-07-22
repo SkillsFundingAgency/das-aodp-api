@@ -56,4 +56,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ArchivedFilename" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="57b13d7f-cec6-46c1-ac4d-60c07ea758d7" ChangeDateTime="04/30/2026 15:32:25">
+    <Property Name="ElementName" Value="[dbo].[FileRecords].[ContainerName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[FileRecords]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="BlobContainer" />
+  </Operation>
 </Operations>
