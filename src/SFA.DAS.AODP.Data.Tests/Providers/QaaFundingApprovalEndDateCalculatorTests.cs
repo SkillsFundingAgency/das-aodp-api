@@ -220,8 +220,11 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     }
 
     [Fact]
-    public async Task LastDateForRegistrationIsInCurrentAcademicYear_ReturnsEndOfCurrentAcademicYear()
+    public async Task LastDateForRegistrationIsInCurrentAcademicYear_BeforePubDate_ReturnsEndOfCurrentAcademicYear()
     {
+        // OED is before the publication date but both fall within the same academic year, rule 2 applies here,
+        // we extend to the end of the current academic year.
+
         // Arrange
         var qan = "QAN-004";
         var lastDateForRegistration = new DateOnly(2026, 5, 31);
