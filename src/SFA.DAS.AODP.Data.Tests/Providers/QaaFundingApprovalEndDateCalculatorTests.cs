@@ -473,14 +473,14 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
     [Fact]
     public async Task LastDateForRegistrationInPreviousAcademicYear_ReturnsPublicationDate()
     {
-        var publicationDate = new DateOnly(2026, 6, 12);
+        var publicationDate = new DateOnly(2026, 07, 23);
         var qualification = RegulatedQaaQualification.Create(
             new DateTime(2026, 1, 2),
             "QAN-011",
             "title",
             "ao",
             new DateOnly(2024, 9, 1),
-            new DateOnly(2025, 7, 31),
+            new DateOnly(2024, 9, 30),
             SectorSubjectArea.AccountingAndFinance,
             new DateOnly(2027, 7, 31));
 

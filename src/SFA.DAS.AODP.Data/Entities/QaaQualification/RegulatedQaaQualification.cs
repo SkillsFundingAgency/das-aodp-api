@@ -44,19 +44,18 @@ public partial class RegulatedQaaQualification
     /// <summary>
     /// Calculates whether we need to recalculate the funding approval end date based on whether the last date for registration has changed.
     /// </summary>
-    protected bool NeedToRecalculateFundingApprovalEndDate => HasLastDateForRegistrationChanged && HasComparisonOutcomeChanged;
+    protected bool NeedToRecalculateFundingApprovalEndDate => HasLastDateForRegistrationChanged || IsNewQualification;
 
     /// <summary>
-    /// Is the qualification New to QFAST or has the last registration date changed, both of these warrant a funding approval end date recalculation.
+    /// Is the qualification one we have not seen before, i.e. it is new?.
     /// </summary>
-    protected bool HasComparisonOutcomeChanged => LatestImportComparisonOutcome is QaaImportComparisonOutcome.New
-        or QaaImportComparisonOutcome.LastDateForRegistrationChanged;
+    protected bool IsNewQualification => LatestImportComparisonOutcome is QaaImportComparisonOutcome.New;
 
     /// <summary>
     /// Has the last date for registration changed.
     /// </summary>
-    protected bool HasLastDateForRegistrationChanged => LastDateForRegistrationChangeType is QaaLastDateForRegistrationChangeType.BroughtForward
-        or QaaLastDateForRegistrationChangeType.Extended;
+    protected bool HasLastDateForRegistrationChanged => (LastDateForRegistrationChangeType is QaaLastDateForRegistrationChangeType.BroughtForward
+        or QaaLastDateForRegistrationChangeType.Extended) && LatestImportComparisonOutcome is QaaImportComparisonOutcome.LastDateForRegistrationChanged;
 
     /// <summary>
     /// The unique identifier for the latest qualification history record for this qualification, this is used to link to the history records for the qualification, and to determine whether we need to create a new history record or not.
