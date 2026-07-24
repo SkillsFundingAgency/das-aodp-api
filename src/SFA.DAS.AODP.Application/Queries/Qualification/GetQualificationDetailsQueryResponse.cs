@@ -1,12 +1,17 @@
 ﻿using SFA.DAS.AODP.Data.Entities.Qualification;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualifications;
 
+[ExcludeFromCodeCoverage]
 public class GetQualificationDetailsQueryResponse
 {
     public Guid Id { get; set; }
     public Guid QualificationId { get; set; }
     public Guid VersionFieldChangesId { get; set; }
+
+    //The qualification title as imported for this version.  We cannot use 
+    //Qualifictaion.QualificationName as this may have been updated since this version was imported
     public string Name { get; set; } = null!;
     public string AgeGroup { get; set; }
     public string? VersionFieldChanges { get; set; }
@@ -66,10 +71,13 @@ public class GetQualificationDetailsQueryResponse
     public bool? EighteenPlus { get; set; }
     public bool? NineteenPlus { get; set; }
     public string? ImportStatus { get; set; }
+    public bool? EligibleForFunding { get; set; } = false;
+    public string? FundingEligibilityFailedFields { get; set; }
     public virtual LifecycleStage Stage { get; set; } = null!;
     public virtual AwardingOrganisation Organisation { get; set; } = null!;
     public virtual Qualification Qual { get; set; } = null!;
     public virtual ProcessStatus ProcStatus { get; set; } = null!;
+
     public partial class LifecycleStage
     {
         public Guid Id { get; set; }
@@ -233,7 +241,8 @@ public class GetQualificationDetailsQueryResponse
             EighteenPlus = entity.EighteenPlus,
             NineteenPlus = entity.NineteenPlus,
             ImportStatus = entity.ImportStatus,
-
+            EligibleForFunding = entity.EligibleForFunding,
+            FundingEligibilityFailedFields = entity.FundingEligibilityFailedFields,
             Stage = new LifecycleStage
             {
                 Id = entity.LifecycleStage.Id,
@@ -332,7 +341,9 @@ public class GetQualificationDetailsQueryResponse
                     EighteenPlus = version.EighteenPlus,
                     NineteenPlus = version.NineteenPlus,
                     ImportStatus = version.ImportStatus,
-
+                    EligibleForFunding = version.EligibleForFunding,
+                    FundingEligibilityFailedFields = version.FundingEligibilityFailedFields,
+                    IntentionToSeekFundingInEngland = version.IntentionToSeekFundingInEngland,
                     Stage = new LifecycleStage
                     {
                         Id = version.LifecycleStage.Id,
