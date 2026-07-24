@@ -61,6 +61,7 @@ public static class AddServiceRegistrationsExtension
 
         services.AddScoped<ISystemClockService, SystemClockService>();
         services.AddScoped<IGuidProvider, DefaultGuidProvider>();
+        services.AddScoped<IAcademicYearService, AcademicYearService>();
 
         return services;
     }
