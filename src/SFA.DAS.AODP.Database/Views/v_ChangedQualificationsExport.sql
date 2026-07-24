@@ -78,5 +78,4 @@ Left Outer Join regulated.LifecycleStage ls ON qv.LifecycleStageId = ls.Id
 Left Outer Join regulated.ProcessStatus ps ON qv.ProcessStatusId = ps.Id
  
 WHERE ls.Name = 'Changed'
-and (PS.name = 'Decision Required' or PS.Name = 'On Hold')
 GO
