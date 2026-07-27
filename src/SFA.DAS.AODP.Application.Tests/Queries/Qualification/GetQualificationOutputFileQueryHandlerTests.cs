@@ -293,7 +293,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         {
             // Arrange: future end date -> should be Approved
             _fixture.Inject<DateOnly?>(null);
-            var qan = "qan";
             var academicYearEndDate = new DateOnly(2026, 07, 31);
             var snapshotDate = new DateTime(2026, 01, 01, 12, 00, 00);
             var startDate = new DateOnly(2023, 09, 01);
@@ -351,7 +350,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         {
             // Arrange
             _fixture.Inject<DateOnly?>(null);
-            var qan = "qan";
             var academicYearEndDate = new DateOnly(2026, 07, 31);
             var snapshotDate = new DateTime(2026, 01, 01, 12, 00, 00);
             var startDate = new DateOnly(2023, 09, 01);
