@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SFA.DAS.AODP.Data.Entities.Qualification;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SFA.DAS.AODP.Data.Entities.Import;
 
@@ -90,4 +91,49 @@ public partial class Pldns
 
     [Column("ImportDate")]
     public DateTime ImportDate { get; set; }
+
+    public DateTime? ForFundingStream(FundingStream fundingStream)
+    {
+        if (fundingStream == FundingStream.Age1619)
+        {
+            return Pldns16To19;
+        }
+
+        if (fundingStream == FundingStream.AdvancedLearnerLoans)
+        {
+            return Loans;
+        }
+
+        if (fundingStream == FundingStream.LegalEntitlementL2L3)
+        {
+            return LegalEntitlementL2L3;
+        }
+
+        if (fundingStream == FundingStream.Age1416)
+        {
+            return Pldns14To16;
+        }
+
+        if (fundingStream == FundingStream.DigitalEntitlement)
+        {
+            return DigitalEntitlement;
+        }
+
+        if (fundingStream == FundingStream.FreeCoursesForJobs)
+        {
+            return Level3FCoursesForJobs;
+        }
+
+        if (fundingStream == FundingStream.LegalEntitlementEnglishAndMaths)
+        {
+            return LegalEntitlementEngMaths;
+        }
+
+        if (fundingStream == FundingStream.LifelongLearningEntitlement)
+        {
+            return LifelongLearning;
+        }
+
+        return LocalFlex;
+    }
 }

@@ -30,15 +30,15 @@ LatestQualifications AS (
 PivotFundingAvailable AS (
     SELECT
         qf.QualificationVersionId,
-        MAX(CASE WHEN offertype.Name = 'LegalEntitlementEnglishandMaths' THEN 1 END) AS LegalEntitlementEnglishandMaths_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'LifelongLearningEntitlement' THEN 1 END) AS LifelongLearningEntitlement_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'LocalFlexibilities' THEN 1 END) AS LocalFlexibilities_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'DigitalEntitlement' THEN 1 END) AS DigitalEntitlement_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'LegalEntitlementL2L3' THEN 1 END) AS LegalEntitlementL2L3_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'AdvancedLearnerLoans' THEN 1 END) AS AdvancedLearnerLoans_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'Age1619' THEN 1 END) AS Age1619_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'L3FreeCoursesForJobs' THEN 1 END) AS L3FreeCoursesForJobs_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'Age1416' THEN 1 END) AS Age1416_FundingAvailable
+        MAX(CASE WHEN offertype.Name = 'LegalEntitlementEnglishandMaths' THEN 1 ELSE 0 END) AS LegalEntitlementEnglishandMaths_FundingAvailable,
+        MAX(CASE WHEN offertype.Name = 'LifelongLearningEntitlement' THEN 1 ELSE 0 END) AS LifelongLearningEntitlement_FundingAvailable,
+        MAX(CASE WHEN offertype.Name = 'LocalFlexibilities' THEN 1 ELSE 0 END) AS LocalFlexibilities_FundingAvailable,
+        MAX(CASE WHEN offertype.Name = 'DigitalEntitlement' THEN 1 ELSE 0 END) AS DigitalEntitlement_FundingAvailable,
+        MAX(CASE WHEN offertype.Name = 'LegalEntitlementL2L3' THEN 1 ELSE 0 END) AS LegalEntitlementL2L3_FundingAvailable,
+        MAX(CASE WHEN offertype.Name = 'AdvancedLearnerLoans' THEN 1 ELSE 0 END) AS AdvancedLearnerLoans_FundingAvailable,
+        MAX(CASE WHEN offertype.Name = 'Age1619' THEN 1 ELSE 0 END) AS Age1619_FundingAvailable,
+        MAX(CASE WHEN offertype.Name = 'L3FreeCoursesForJobs' THEN 1 ELSE 0 END) AS L3FreeCoursesForJobs_FundingAvailable,
+        MAX(CASE WHEN offertype.Name = 'Age1416' THEN 1 ELSE 0 END) AS Age1416_FundingAvailable
     FROM funded.QualificationFundings qf
 	INNER JOIN LatestQualifications LQ ON qf.QualificationVersionId = LQ.Id
     INNER JOIN dbo.FundingOffers offertype ON offertype.Id = qf.FundingOfferId

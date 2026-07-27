@@ -21,12 +21,12 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories.Application.ApplicationReview
             // Arrange
             var reviewId = Guid.NewGuid();
 
-            var reviews = new List<Entities.Application.ApplicationReview>
+            var reviews = new List<Data.Entities.Application.ApplicationReview>
             {
                 new()
                 {
                     Id = reviewId,
-                    Application = new Entities.Application.Application
+                    Application = new Data.Entities.Application.Application
                     {
                         QualificationNumber = null
                     }
@@ -48,12 +48,12 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories.Application.ApplicationReview
             // Arrange
             var reviewId = Guid.NewGuid();
 
-            var reviews = new List<Entities.Application.ApplicationReview>
+            var reviews = new List<Data.Entities.Application.ApplicationReview>
             {
                 new()
                 {
                     Id = reviewId,
-                    Application = new Entities.Application.Application
+                    Application = new Data.Entities.Application.Application
                     {
                         QualificationNumber = "12345678"
                     }
@@ -79,12 +79,12 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories.Application.ApplicationReview
             var reviewId = Guid.NewGuid();
             var expectedDate = new DateTime(2024, 1, 1);
 
-            var reviews = new List<Entities.Application.ApplicationReview>
+            var reviews = new List<Data.Entities.Application.ApplicationReview>
             {
                 new()
                 {
                     Id = reviewId,
-                    Application = new Entities.Application.Application
+                    Application = new Data.Entities.Application.Application
                     {
                         QualificationNumber = "12345678"
                     }
@@ -124,12 +124,12 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories.Application.ApplicationReview
             var reviewId = Guid.NewGuid();
             var expectedDate = new DateTime(2024, 1, 1);
 
-            var reviews = new List<Entities.Application.ApplicationReview>
+            var reviews = new List<Data.Entities.Application.ApplicationReview>
             {
                 new()
                 {
                     Id = reviewId,
-                    Application = new Entities.Application.Application
+                    Application = new Data.Entities.Application.Application
                     {
                         QualificationNumber = "12345678"
                     }
