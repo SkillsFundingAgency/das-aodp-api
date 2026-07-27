@@ -91,4 +91,38 @@ public class AcademicYearProviderTests : UnitTest
         // Assert
         result.ShouldBe(true);
     }
+
+    [Fact]
+    public void IsDateWithinCurrentAcademicYear_DateTimeIsNull_ReturnFalse()
+    {
+        // Arrange
+        var mockSystemClock = new Mock<ISystemClockProvider>();
+        var sut = new AcademicYearProvider(mockSystemClock.Object);
+
+        // Expectations
+        mockSystemClock.Setup(o => o.Today).Returns(new DateOnly(2025, 08, 1));
+
+        // Act
+        var result = sut.IsWithinCurrentAcademicYear(null);
+
+        // Assert
+        result.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void IsDateWithinCurrentAcademicYear_IsWithinCurrentYear_ReturnTrue()
+    {
+        // Arrange
+        var mockSystemClock = new Mock<ISystemClockProvider>();
+        var sut = new AcademicYearProvider(mockSystemClock.Object);
+
+        // Expectations
+        mockSystemClock.Setup(o => o.Today).Returns(new DateOnly(2025, 08, 10));
+
+        // Act
+        var result = sut.IsWithinCurrentAcademicYear(new DateTime(2026, 02, 01, 12, 00, 00));
+
+        // Assert
+        result.ShouldBeTrue();
+    }
 }

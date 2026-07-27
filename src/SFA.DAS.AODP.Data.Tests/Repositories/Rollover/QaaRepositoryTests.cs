@@ -10,7 +10,6 @@ public class QaaRepositoryTests : UnitTest
 {
     private readonly ApplicationDbContext _dbContext = new(new DbContextOptionsBuilder<ApplicationDbContext>()
         .UseInMemoryDatabase(Guid.NewGuid().ToString())
-        //.UseSqlServer("Data Source=localhost;Integrated Security=True;Persist Security Info=False;Encrypt=True;TrustServerCertificate=True;Command Timeout=0;Initial Catalog=SFA.DAS.AODP.Database")
         .Options);
 
     [Fact]
