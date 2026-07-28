@@ -14,5 +14,6 @@ namespace SFA.DAS.AODP.Models.Qualifications
         public string? AwardingOrganisation { get; set; }
         public string? Status { get; set; }
         public string? AgeGroup { get; set; }
+        public bool? EligibleForFunding { get; set; }
     }
 }

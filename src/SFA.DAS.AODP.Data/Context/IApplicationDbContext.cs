@@ -7,6 +7,7 @@ using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Entities.Import;
 using SFA.DAS.AODP.Data.Entities.Jobs;
 using SFA.DAS.AODP.Data.Entities.Offer;
+using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
 
@@ -67,6 +68,8 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<QualificationOutputFileLog> QualificationOutputFileLog { get; set; }
 
         DbSet<QualificationFundingStatus> QualificationFundingStatus { get; set; }
+        DbSet<RegulatedQaaQualification> RegulatedQaaQualifications { get; set; }
+        DbSet<RegulatedQaaQualificationHistory> RegulatedQaaQualificationHistory { get; set; }
 
         DbSet<RolloverCandidates> RolloverCandidates { get; set; }
         DbSet<RolloverWorkflowRun> RolloverWorkflowRuns { get; set; }

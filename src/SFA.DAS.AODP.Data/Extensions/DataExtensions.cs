@@ -10,6 +10,7 @@ using SFA.DAS.AODP.Data.Repositories.Jobs;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
 using System.Diagnostics.CodeAnalysis;
+using SFA.DAS.AODP.Data.Repositories.QaaQualification;
 using Microsoft.Extensions.Logging;
 
 namespace SFA.DAS.AODP.Data.Extensions
@@ -69,6 +70,9 @@ namespace SFA.DAS.AODP.Data.Extensions
 
             services.AddScoped<IQualificationOutputFileRepository, QualificationOutputFileRepository>();
             services.AddScoped<IQualificationOutputFileLogRepository, QualificationOutputFileLogRepository>();
+
+            services.AddScoped<IQaaQualificationRepository, QaaQualificationRepository>();
+
             return services;
         }
     }

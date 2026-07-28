@@ -25,7 +25,7 @@ BEGIN
     )
     VALUES
     (
-        @ScriptName_MVS1_Drop_OutputChangedQualifications_View, 
+        @ScriptName_MVS1_Drop_OutputChangedQualifications_View,
         GETDATE()
     )
 

@@ -84,6 +84,8 @@ namespace SFA.DAS.AODP.Data.Context
 
         public virtual DbSet<RegulatedQaaQualification> RegulatedQaaQualifications { get; set; }
 
+        public virtual DbSet<RegulatedQaaQualificationHistory> RegulatedQaaQualificationHistory { get; set; }
+
         public virtual DbSet<RolloverCandidates> RolloverCandidates { get; set; }
         public virtual DbSet<RolloverWorkflowRun> RolloverWorkflowRuns { get; set; }
         public virtual DbSet<RolloverWorkflowRunFundingOffer> RolloverWorkflowRunFundingOffers { get; set; }
@@ -121,11 +123,16 @@ namespace SFA.DAS.AODP.Data.Context
             modelBuilder.Entity<QualificationFundingStatus>().ToView("v_QualificationFundingStatus", "regulated")
                 .HasNoKey();
 
-            modelBuilder.Entity<RegulatedQaaQualification>()
+            modelBuilder.Entity<RegulatedQaaQualificationHistory>()
                 .Property(q => q.SectorSubjectArea)
                 .HasConversion(
-                    ssaTier => ssaTier.Name, 
+                    ssaTier => ssaTier.Name,
                     ssaName => SectorSubjectArea.FromName(ssaName));
+
+            modelBuilder.Entity<RegulatedQaaQualificationHistory>()
+                .Property(q => q.LastDateForRegistrationChangeType)
+                .HasConversion<string>()
+                .HasColumnType("nvarchar(50)");
 
             modelBuilder.AddRollover();
 
