@@ -140,7 +140,7 @@ SELECT
     qual.Qan AS QualificationNumber,
     latestversion.Level,
     latestversion.QualificationType,
-    latestversion.Subcategory,
+    fq.Subcategory,
     latestversion.SectorSubjectArea,
     pivotdata.AdvancedLearnerLoans_FundingAvailable,
     pivotdata.AdvancedLearnerLoans_FundingApprovalStartDate,
