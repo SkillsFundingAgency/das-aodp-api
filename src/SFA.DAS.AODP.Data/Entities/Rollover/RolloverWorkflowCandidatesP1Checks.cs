@@ -3,7 +3,8 @@
 public class RolloverWorkflowCandidatesP1Checks
 {
     public Guid WorkflowCandidateId { get; set; }
-    public Guid QualificationVersionId { get; set; }
+    public string SourceType { get; set; } = string.Empty;
+    public Guid SourceQualificationId { get; set; }
     public Guid FundingOfferId { get; set; }
     public string AcademicYear { get; set; } = string.Empty;
     public bool IncludedInP1Export { get; set; }

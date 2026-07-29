@@ -9,3 +9,4 @@
                SELECT * FROM [$(TableName)]					
 --------------------------------------------------------------------------------------
 */
+:r .\MigrationScripts\MVS1_AWARD_855_ConsolidateQaaFundings.sql

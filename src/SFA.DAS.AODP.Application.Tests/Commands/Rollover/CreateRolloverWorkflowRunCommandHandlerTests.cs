@@ -36,7 +36,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
                 .Select(id => new RolloverCandidateDto
                 {
                     Id = id,
-                    QualificationVersionId = Guid.NewGuid(),
+                    SourceType = RolloverSourceTypes.Ofqual,
+                    SourceQualificationId = Guid.NewGuid(),
                     FundingOfferId = Guid.NewGuid(),
                     AcademicYear = command.AcademicYear,
                     RolloverRound = 1,
@@ -158,7 +159,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
                 .Select(id => new RolloverCandidateDto
                 {
                     Id = id,
-                    QualificationVersionId = Guid.NewGuid(),
+                    SourceType = RolloverSourceTypes.Ofqual,
+                    SourceQualificationId = Guid.NewGuid(),
                     FundingOfferId = Guid.NewGuid(),
                     AcademicYear = command.AcademicYear,
                     RolloverRound = 1,
@@ -216,7 +218,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
                 .Select(id => new RolloverCandidateDto
                 {
                     Id = id,
-                    QualificationVersionId = Guid.NewGuid(),
+                    SourceType = RolloverSourceTypes.Ofqual,
+                    SourceQualificationId = Guid.NewGuid(),
                     FundingOfferId = Guid.NewGuid(),
                     AcademicYear = command.AcademicYear,
                     RolloverRound = 1,
@@ -274,7 +277,8 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Rollover
                 .Select(id => new RolloverCandidateDto
                 {
                     Id = id,
-                    QualificationVersionId = Guid.NewGuid(),
+                    SourceType = RolloverSourceTypes.Ofqual,
+                    SourceQualificationId = Guid.NewGuid(),
                     FundingOfferId = Guid.NewGuid(),
                     AcademicYear = command.AcademicYear,
                     RolloverRound = 1,

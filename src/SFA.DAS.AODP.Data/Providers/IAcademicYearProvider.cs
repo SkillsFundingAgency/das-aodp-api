@@ -12,6 +12,11 @@ public interface IAcademicYearProvider
     DateOnly GetCurrentAcademicYearEndDate();
 
     /// <summary>
+    /// Gets the current academic year in YYYY/YY format.
+    /// </summary>
+    string GetCurrentAcademicYear();
+
+    /// <summary>
     /// Gets the academic year-end date for the provided date.
     /// </summary>
     /// <param name="dateOnly"></param>

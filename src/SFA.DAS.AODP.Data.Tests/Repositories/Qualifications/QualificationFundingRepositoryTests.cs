@@ -105,27 +105,6 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories
         }
 
         [Fact]
-        public async Task RemoveAsync_RemovesFundings()
-        {
-            using var context = CreateInMemoryContext();
-
-            var versionId = Guid.NewGuid();
-
-            var fundings = CreateFundings(1, versionId);
-            context.QualificationFundings.Add(fundings[0]);
-
-            await context.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-            var repo = new QualificationFundingsRepository(context);
-
-            // Act
-            await repo.RemoveAsync(new List<QualificationFundings> { fundings[0] });
-
-            // Assert
-            Assert.Empty(context.QualificationFundings);
-        }
-
-        [Fact]
         public async Task GetRolloverQualificationFundingsAsync_ReturnsMatchingKeys()
         {
             using var context = CreateInMemoryContext();

@@ -179,6 +179,8 @@
     <Build Include="Views\v_QualificationFundingStatus.sql" />
     <Build Include="Tables\RegulatedQaaQualification.sql" />
     <Build Include="Tables\RegulatedQaaQualificationHistory.sql" />
+    <Build Include="Tables\QaaQualificationFundings.sql" />
+    <Build Include="Views\AllQualificationFundings.sql" />
     <Build Include="Tables\Rollover\RolloverCandidates.sql" />
     <Build Include="Tables\Rollover\RolloverDecisionRun.sql" />
     <Build Include="Tables\Rollover\RolloverWorkflowCandidate.sql" />
@@ -190,6 +192,7 @@
     <None Include="MigrationScripts\MVS1_Drop_OutputChangedQualifications_View.sql" />
     <Build Include="Views\Output\view_OutputQaaQualifications.sql" />
     <None Include="MigrationScripts\MVS1_AWARD_1047_Rollover_action_types.sql" />
+    <None Include="MigrationScripts\MVS1_AWARD_855_ConsolidateQaaFundings.sql" />
     <None Include="MigrationScripts\MVS1_OfferTypes_DisplayName.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

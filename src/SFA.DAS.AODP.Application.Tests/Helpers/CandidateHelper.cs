@@ -13,19 +13,24 @@ namespace SFA.DAS.AODP.Application.UnitTests.Helpers
             Guid? qualificationId = null)
 
         {
+            var sourceQualificationId = qualificationVersionId ?? Guid.NewGuid();
+            var discussionQualificationId = qualificationId ?? Guid.NewGuid();
+
             var candidate = fixture.Build<RolloverCandidates>()
                 .Do(x =>
                 {
                     typeof(RolloverCandidates)
-                        .GetProperty(nameof(RolloverCandidates.QualificationVersionId))!
-                        .SetValue(x, qualificationVersionId);
+                        .GetProperty(nameof(RolloverCandidates.SourceType))!
+                        .SetValue(x, RolloverSourceTypes.Ofqual);
+
+                    typeof(RolloverCandidates)
+                        .GetProperty(nameof(RolloverCandidates.SourceQualificationId))!
+                        .SetValue(x, sourceQualificationId);
                 })
                 .Create();
 
-            candidate.QualificationVersion.Qualification.Qan = qan;
-            candidate.QualificationVersion.Id = qualificationVersionId ?? Guid.Empty;
-            candidate.QualificationVersion.QualificationId = qualificationId ?? Guid.Empty;
             candidate.FundingOffer.Name = fundingStreamName;
+            candidate.SetSourceContext(qan, discussionQualificationId);
 
             return candidate;
         }

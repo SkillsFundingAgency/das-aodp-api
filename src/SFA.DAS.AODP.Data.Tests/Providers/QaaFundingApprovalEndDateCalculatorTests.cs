@@ -295,7 +295,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
         
         var pldnsRepository = CreatePldnsRepositoryReturningNull();
 
-        var qualification = RegulatedQaaQualification.Create(new DateTime(2026, 01, 02), qan, "title", "ao", new DateOnly(2025, 09, 01), lastDateForRegistration, SectorSubjectArea.AccountingAndFinance, currentFundingApprovalEndDate);
+        var qualification = CreateQualificationWithFundingEndDate(qan, lastDateForRegistration, currentFundingApprovalEndDate);
 
         var sut = new QaaFundingApprovalEndDateCalculator(
             new FakeSystemClockProvider(new DateOnly(2026, 6, 12)),
@@ -325,7 +325,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
         
         var pldnsRepository = CreatePldnsRepositoryReturningNull();
 
-        var qualification = RegulatedQaaQualification.Create(new DateTime(2026, 01, 02), qan, "title", "ao", new DateOnly(2025, 09, 01), lastDateForRegistration, SectorSubjectArea.AccountingAndFinance, currentFundingApprovalEndDate);
+        var qualification = CreateQualificationWithFundingEndDate(qan, lastDateForRegistration, currentFundingApprovalEndDate);
 
         var sut = new QaaFundingApprovalEndDateCalculator(
             new FakeSystemClockProvider(new DateOnly(2026, 6, 12)),
@@ -355,7 +355,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
 
         var pldnsRepository = CreatePldnsRepositoryReturningNull();
 
-        var qualification = RegulatedQaaQualification.Create(new DateTime(2026, 01, 02), qan, "title", "ao", new DateOnly(2025, 09, 01), lastDateForRegistration, SectorSubjectArea.AccountingAndFinance, currentFundingApprovalEndDate);
+        var qualification = CreateQualificationWithFundingEndDate(qan, lastDateForRegistration, currentFundingApprovalEndDate);
 
         var sut = new QaaFundingApprovalEndDateCalculator(
             new FakeSystemClockProvider(new DateOnly(2026, 6, 12)),
@@ -481,8 +481,7 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
             "ao",
             new DateOnly(2024, 9, 1),
             new DateOnly(2024, 9, 30),
-            SectorSubjectArea.AccountingAndFinance,
-            new DateOnly(2027, 7, 31));
+            SectorSubjectArea.AccountingAndFinance);
 
         var sut = new QaaFundingApprovalEndDateCalculator(
             new FakeSystemClockProvider(publicationDate),
@@ -653,6 +652,33 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
         return pldnsRepository;
     }
 
+    private static RegulatedQaaQualification CreateQualificationWithFundingEndDate(
+        string qan,
+        DateOnly lastDateForRegistration,
+        DateOnly currentFundingApprovalEndDate)
+    {
+        var qualification = RegulatedQaaQualification.Create(
+            new DateTime(2026, 01, 02),
+            qan,
+            "title",
+            "ao",
+            new DateOnly(2025, 09, 01),
+            lastDateForRegistration,
+            SectorSubjectArea.AccountingAndFinance);
+
+        typeof(RegulatedQaaQualification)
+            .GetProperty(nameof(RegulatedQaaQualification.Id))!
+            .SetValue(qualification, Guid.NewGuid());
+
+        qualification.SetFundingApprovalEndDateForFundingStream(
+            FundingStream.Age1619,
+            new DateOnly(2025, 09, 01),
+            currentFundingApprovalEndDate,
+            DateTime.UtcNow);
+
+        return qualification;
+    }
+
     private static Mock<IPldnsRepository> CreatePldnsRepositoryReturning(DateTime? loans, DateTime? pldns16To19, DateTime? legalEntitlementL2L3)
     {
         var pldnsRepository = new Mock<IPldnsRepository>(MockBehavior.Strict);
@@ -682,6 +708,11 @@ public class QaaFundingApprovalEndDateCalculatorTests : UnitTest
         public DateOnly GetCurrentAcademicYearEndDate()
         {
             return currentAcademicYearEndDate;
+        }
+
+        public string GetCurrentAcademicYear()
+        {
+            return $"{currentAcademicYearEndDate.Year - 1}/{currentAcademicYearEndDate.Year % 100:00}";
         }
 
         public DateOnly GetAcademicYearEndForDate(DateOnly dateOnly)

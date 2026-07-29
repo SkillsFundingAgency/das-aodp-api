@@ -50,7 +50,8 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                    .Select(rc => RolloverWorkflowCandidate.Create(
                        workflowRunId,
                        rc.Id,
-                       rc.QualificationVersionId,
+                       rc.SourceType,
+                       rc.SourceQualificationId,
                        rc.FundingOfferId,
                        rc.AcademicYear!,
                        rc.RolloverRound,

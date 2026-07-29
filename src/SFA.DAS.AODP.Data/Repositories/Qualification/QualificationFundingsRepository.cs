@@ -32,12 +32,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             await _context.SaveChangesAsync();
         }
 
-        public async Task RemoveAsync(List<QualificationFundings> qualificationFundings)
-        {
-            _context.QualificationFundings.RemoveRange(qualificationFundings);
-            await _context.SaveChangesAsync();
-        }
-
         public async Task CreateAsync(List<QualificationFundings> qualificationFundings)
         {
             foreach (var qualificationFunding in qualificationFundings)
@@ -52,13 +46,28 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             List<QualificationFundingKey> candidates,
             CancellationToken cancellationToken)
         {
-            var keySet = candidates
-                .Select(x => x.QualificationVersionId + "|" +  x.FundingOfferId )
+            var sourceQualificationIds = candidates
+                .Select(x => x.SourceQualificationId)
+                .Distinct()
+                .ToList();
+            var fundingOfferIds = candidates
+                .Select(x => x.FundingOfferId)
+                .Distinct()
                 .ToList();
 
-            return await _context.QualificationFundings
-                .Where(qf => keySet.Contains(qf.QualificationVersionId + "|" + qf.FundingOfferId))
+            var fundings = await _context.QualificationFundings
+                .Where(qf =>
+                    sourceQualificationIds.Contains(qf.QualificationVersionId) &&
+                    fundingOfferIds.Contains(qf.FundingOfferId))
                 .ToListAsync(cancellationToken);
+
+            var keySet = candidates
+                .Select(x => (x.SourceQualificationId, x.FundingOfferId))
+                .ToHashSet();
+
+            return fundings
+                .Where(x => keySet.Contains((x.QualificationVersionId, x.FundingOfferId)))
+                .ToList();
         }
     }
 }
