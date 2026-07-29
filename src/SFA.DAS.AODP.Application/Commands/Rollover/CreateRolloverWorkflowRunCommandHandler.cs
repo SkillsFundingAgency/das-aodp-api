@@ -10,12 +10,10 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
     : IRequestHandler<CreateRolloverWorkflowRunCommand, BaseMediatrResponse<CreateRolloverWorkflowRunCommandResponse>>
     {
         private readonly IRolloverRepository _repository;
-        private readonly IMediator _mediator;
 
-        public CreateRolloverWorkflowRunCommandHandler(IRolloverRepository rolloverRepository, IMediator mediator)
+        public CreateRolloverWorkflowRunCommandHandler(IRolloverRepository rolloverRepository)
         {
             _repository = rolloverRepository;
-            _mediator = mediator;
         }
 
         public async Task<BaseMediatrResponse<CreateRolloverWorkflowRunCommandResponse>> Handle(CreateRolloverWorkflowRunCommand request, CancellationToken cancellationToken)
@@ -29,42 +27,69 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                     throw new InvalidOperationException("At least one rollover candidate must be provided.");
                 }
 
-                var candidates = await _repository.GetRolloverCandidatesByIdsAsync(request.RolloverCandidateIds, cancellationToken);
-                if (candidates.Count() != request.RolloverCandidateIds.Count())
+                var p1CheckRequests = request.RolloverCandidateIds
+                    .Select(id => new RolloverCandidateP1CheckRequest(
+                        id,
+                        request.FundingEndDateEligibilityThreshold,
+                        request.OperationalEndDateEligibilityThreshold,
+                        request.MaximumApprovalFundingEndDate))
+                    .ToList();
+
+                var candidatesWithP1Checks =
+                    await _repository.GetRolloverCandidatesWithP1ChecksAsync(
+                        p1CheckRequests,
+                        cancellationToken);
+
+                if (candidatesWithP1Checks.Count != request.RolloverCandidateIds.Count)
                 {
                     throw new InvalidOperationException("One or more rollover candidate IDs are invalid or inactive.");
                 }
 
                 var now = DateTime.UtcNow;
 
-                var workflowrun = RolloverWorkflowRun.Create(request.AcademicYear,
+                var workflowRun = RolloverWorkflowRun.Create(request.AcademicYear,
                     request.SelectionMethod, 
                     request.FundingEndDateEligibilityThreshold,
                     request.OperationalEndDateEligibilityThreshold, 
                     request.MaximumApprovalFundingEndDate, 
                     request.CreatedByUserName!,
                     now);
-                var workflowRunId = await _repository.CreateRolloverWorkflowRunAsync(workflowrun, cancellationToken);
 
-                var workflowCandidates = candidates
-                   .Select(rc => RolloverWorkflowCandidate.Create(
-                       workflowRunId,
-                       rc.Id,
-                       rc.QualificationVersionId,
-                       rc.FundingOfferId,
-                       rc.AcademicYear!,
-                       rc.RolloverRound,
-                       rc.PreviousFundingEndDate ?? now,
-                       rc.NewFundingEndDate,
-                       now));
-                await _repository.CreateRolloverWorkflowCandidatesAsync(workflowCandidates, cancellationToken);
+                var workflowCandidates = candidatesWithP1Checks
+                   .Select(candidateData => RolloverWorkflowCandidate.Create(
+                       workflowRun.Id,
+                       candidateData.Candidate.Id,
+                       candidateData.Candidate.QualificationVersionId,
+                       candidateData.Candidate.FundingOfferId,
+                       candidateData.Candidate.AcademicYear!,
+                       candidateData.Candidate.RolloverRound,
+                       candidateData.Candidate.PreviousFundingEndDate ?? now,
+                       candidateData.Candidate.NewFundingEndDate,
+                       now))
+                   .ToList();
+
+                var workflowCandidatesByRolloverCandidateId = workflowCandidates
+                    .ToDictionary(x => x.RolloverCandidatesId);
+
+                foreach (var candidateData in candidatesWithP1Checks)
+                {
+                    if (workflowCandidatesByRolloverCandidateId.TryGetValue(
+                            candidateData.Candidate.Id,
+                            out var workflowCandidate))
+                    {
+                        workflowCandidate.ProcessP1Checks(candidateData.P1Checks);
+                    }
+                }
 
                 var workflowFundingOffers = request.FundingOfferIds
-                    .Select(foId => RolloverWorkflowRunFundingOffer.Create(workflowRunId, foId))
+                    .Select(foId => RolloverWorkflowRunFundingOffer.Create(workflowRun.Id, foId))
                     .ToList();
-                await _repository.CreateRolloverWorkflowRunFundingOffersAsync(workflowFundingOffers, cancellationToken);
 
-                await _mediator.Send(new UpdateRolloverWorkflowCandidatesAfterP1ChecksCommand(),cancellationToken);
+                var workflowRunId = await _repository.CreateRolloverWorkflowAsync(
+                    workflowRun,
+                    workflowCandidates,
+                    workflowFundingOffers,
+                    cancellationToken);
 
                 response.Value = new CreateRolloverWorkflowRunCommandResponse
                 {

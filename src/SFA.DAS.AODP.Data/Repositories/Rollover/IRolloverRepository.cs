@@ -6,7 +6,6 @@ public interface IRolloverRepository
 {
     Task<int> GetRolloverWorkflowCandidatesCountAsync(CancellationToken cancellationToken);
     Task<IEnumerable<RolloverWorkflowCandidate>> GetAllRolloverWorkflowCandidatesAsync(CancellationToken cancellationToken);
-    Task<IEnumerable<RolloverWorkflowCandidatesP1Checks>> GetRolloverWorkflowCandidatesP1ChecksAsync(CancellationToken cancellationToken);
 
     Task UpdateRolloverWorkflowCandidatesAsync(IEnumerable<RolloverWorkflowCandidate> candidates, CancellationToken cancellationToken);
 
@@ -17,14 +16,15 @@ public interface IRolloverRepository
 
     Task<IEnumerable<RolloverCandidateDto>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, 
         CancellationToken cancellationToken);
+    Task<IReadOnlyList<RolloverCandidateP1CheckData>> GetRolloverCandidatesWithP1ChecksAsync(
+        IReadOnlyCollection<RolloverCandidateP1CheckRequest> requests,
+        CancellationToken cancellationToken);
     Task<RolloverWorkflowRun?> GeRolloverWorkflowRunByIdAsync(Guid id, CancellationToken cancellationToken);
 
-    Task<Guid> CreateRolloverWorkflowRunAsync(RolloverWorkflowRun request,
-        CancellationToken cancellationToken);
-
-    Task CreateRolloverWorkflowCandidatesAsync(IEnumerable<RolloverWorkflowCandidate> workflowCandidates,
-        CancellationToken cancellationToken);
-    Task CreateRolloverWorkflowRunFundingOffersAsync(IEnumerable<RolloverWorkflowRunFundingOffer> request,
+    Task<Guid> CreateRolloverWorkflowAsync(
+        RolloverWorkflowRun workflowRun,
+        IReadOnlyCollection<RolloverWorkflowCandidate> workflowCandidates,
+        IReadOnlyCollection<RolloverWorkflowRunFundingOffer> workflowFundingOffers,
         CancellationToken cancellationToken);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
@@ -58,6 +58,5 @@ public interface IRolloverRepository
     Task<IEnumerable<RolloverQueryBuilderAwardingOrganisation>> GetAwardingOrganisationsForRolloverQueryBuilderAsync(
         RolloverQueryBuilderAwardingOrganisationsRequest filters,
         CancellationToken cancellationToken);
-
     Task<RolloverStartSummary> GetRolloverStartSummaryAsync(string academicYear, CancellationToken cancellationToken);
 }

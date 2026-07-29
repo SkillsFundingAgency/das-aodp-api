@@ -24,5 +24,9 @@ CREATE NONCLUSTERED INDEX [IX_WorkflowCandidate_Run_PassP1]
     ON [dbo].[RolloverWorkflowCandidate]([RolloverWorkflowRunId] ASC, [PassP1] ASC);
 
 GO
+CREATE NONCLUSTERED INDEX [IX_WorkflowCandidate_RolloverCandidatesId]
+    ON [dbo].[RolloverWorkflowCandidate]([RolloverCandidatesId] ASC);
+
+GO
 CREATE UNIQUE NONCLUSTERED INDEX [UX_WorkflowCandidate_Run_NaturalKey]
     ON [dbo].[RolloverWorkflowCandidate]([RolloverWorkflowRunId] ASC, [QualificationVersionId] ASC, [FundingOfferId] ASC, [AcademicYear] ASC, [RolloverRound] ASC);
