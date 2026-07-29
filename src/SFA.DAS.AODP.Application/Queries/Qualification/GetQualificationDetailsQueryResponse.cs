@@ -73,6 +73,7 @@ public class GetQualificationDetailsQueryResponse
     public string? ImportStatus { get; set; }
     public bool? EligibleForFunding { get; set; } = false;
     public string? FundingEligibilityFailedFields { get; set; }
+    public string? FundingEligibilityConflictType { get; set; }
     public virtual LifecycleStage Stage { get; set; } = null!;
     public virtual AwardingOrganisation Organisation { get; set; } = null!;
     public virtual Qualification Qual { get; set; } = null!;
@@ -243,6 +244,7 @@ public class GetQualificationDetailsQueryResponse
             ImportStatus = entity.ImportStatus,
             EligibleForFunding = entity.EligibleForFunding,
             FundingEligibilityFailedFields = entity.FundingEligibilityFailedFields,
+            FundingEligibilityConflictType = entity.FundingEligibilityConflictType,
             Stage = new LifecycleStage
             {
                 Id = entity.LifecycleStage.Id,
