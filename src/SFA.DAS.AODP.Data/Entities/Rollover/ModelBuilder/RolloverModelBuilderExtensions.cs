@@ -18,8 +18,21 @@ public static class RolloverModelBuilderExtensions
     {
         modelBuilder.Entity<RolloverCandidates>(b =>
         {
+            b.Property(x => x.SourceType)
+                .HasMaxLength(50);
+
             b.Property(x => x.RolloverStatus)
                 .HasConversion<string>();
+
+            b.HasIndex(x => new
+                {
+                    x.SourceType,
+                    x.SourceQualificationId,
+                    x.FundingOfferId,
+                    x.AcademicYear,
+                    x.RolloverRound
+                })
+                .IsUnique();
 
             b.HasOne(x => x.RolloverDecisionRun)
                 .WithMany(r => r.CandidateRows)
@@ -68,6 +81,23 @@ public static class RolloverModelBuilderExtensions
 
         modelBuilder.Entity<RolloverWorkflowCandidate>(b =>
         {
+            b.Property(x => x.SourceType)
+                .HasMaxLength(50);
+
+            b.Property(x => x.InvalidationReason)
+                .HasMaxLength(255);
+
+            b.HasIndex(x => new
+                {
+                    x.RolloverWorkflowRunId,
+                    x.SourceType,
+                    x.SourceQualificationId,
+                    x.FundingOfferId,
+                    x.AcademicYear,
+                    x.RolloverRound
+                })
+                .IsUnique();
+
             b.HasOne(x => x.RolloverWorkflowRun)
                 .WithMany(r => r.Candidates)
                 .HasForeignKey(x => x.RolloverWorkflowRunId)

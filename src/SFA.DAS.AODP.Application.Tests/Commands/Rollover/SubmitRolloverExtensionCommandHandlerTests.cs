@@ -4,9 +4,7 @@ using Moq;
 using SFA.DAS.AODP.Application.Commands.Rollover;
 using SFA.DAS.AODP.Application.Services.FundingExtension;
 using SFA.DAS.AODP.Application.UnitTests.Helpers;
-using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
-using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
 using SFA.DAS.AODP.Models.Rollover;
 
@@ -15,8 +13,10 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
     public class SubmitRolloverExtensionCommandHandlerTests
     {
         private readonly Mock<IRolloverRepository> _rolloverRepository = new();
-        private readonly Mock<IQualificationFundingsRepository> _fundingsRepository = new();
+        private readonly Mock<IRolloverFundingUpdateRepository> _fundingUpdateRepository = new();
         private readonly Mock<ISubmitFundingExtensionService> _applyService = new();
+        private readonly Mock<IFundingChangeCoordinator> _fundingChangeCoordinator = new();
+        private readonly Mock<IRolloverFundingEligibilityRepository> _fundingEligibilityRepository = new();
         private readonly IFixture _fixture = new Fixture().Customize(new AutoMoqCustomization());
 
         private readonly SubmitRolloverExtensionCommandHandler _handler;
@@ -30,11 +30,34 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
 
             _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
+            _fundingChangeCoordinator
+                .Setup(x => x.ExecuteAsync(
+                    It.IsAny<FundingChangeSet>(),
+                    It.IsAny<Func<CancellationToken, Task<bool>>>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns((FundingChangeSet _, Func<CancellationToken, Task<bool>> mutation, CancellationToken ct) =>
+                    mutation(ct));
+
+            _fundingEligibilityRepository
+                .Setup(x => x.GetAsync(
+                    It.IsAny<IReadOnlyCollection<FundingChangeKey>>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync((
+                    IReadOnlyCollection<FundingChangeKey> keys,
+                    CancellationToken _) => keys
+                    .Select(x => new RolloverFundingEligibility(
+                        x,
+                        x.AcademicYear!,
+                        null,
+                        true))
+                    .ToList());
 
             _handler = new SubmitRolloverExtensionCommandHandler(
                 _rolloverRepository.Object,
-                _fundingsRepository.Object,
-                _applyService.Object);
+                _fundingUpdateRepository.Object,
+                _applyService.Object,
+                _fundingChangeCoordinator.Object,
+                _fundingEligibilityRepository.Object);
         }
 
         // ------------------------------------------------------------
@@ -62,20 +85,20 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
                     It.IsAny<List<CandidateKey>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(rolloverCandidates);
 
-            var fundings = new List<QualificationFundings>
+            var fundingUpdates = new List<RolloverFundingUpdate>
             {
-                new () { QualificationVersionId = candidate1.QualificationVersionId , FundingOfferId = candidate1.FundingOfferId },
-                new() { QualificationVersionId = candidate2.QualificationVersionId , FundingOfferId = candidate2.FundingOfferId }
+                BuildFundingUpdate(candidate1),
+                BuildFundingUpdate(candidate2)
             };
 
-            _fundingsRepository
-                .Setup(r => r.GetRolloverQualificationFundingsAsync(
-                    It.IsAny<List<QualificationFundingKey>>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(fundings);
+            _fundingUpdateRepository
+                .Setup(r => r.GetFundingUpdatesAsync(
+                    It.IsAny<List<SourceQualificationFundingKey>>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(fundingUpdates);
 
             _applyService
                 .Setup(s => s.Submit(
-                    rolloverCandidates, command.Items, fundings, It.IsAny<CancellationToken>()))
+                    rolloverCandidates, command.Items, fundingUpdates, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             // Act
@@ -85,7 +108,10 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             Assert.True(result.Success);
             Assert.Equal("Funding extensions applied.", result.Value.ResultMessage);
 
-            _rolloverRepository.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _fundingChangeCoordinator.Verify(r => r.ExecuteAsync(
+                It.IsAny<FundingChangeSet>(),
+                It.IsAny<Func<CancellationToken, Task<bool>>>(),
+                It.IsAny<CancellationToken>()), Times.Once);
         }
 
         [Fact]
@@ -116,7 +142,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
                 s => s.Submit(
                     It.IsAny<List<RolloverCandidates>>(),
                     It.IsAny<List<FundingExtensionItem>>(),
-                    It.IsAny<List<QualificationFundings>>(),
+                    It.IsAny<List<RolloverFundingUpdate>>(),
                     It.IsAny<CancellationToken>()),
                 Times.Never);
         }
@@ -146,19 +172,19 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
                     It.IsAny<List<CandidateKey>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(candidates);
 
-            var fundings = new List<QualificationFundings>
+            var fundingUpdates = new List<RolloverFundingUpdate>
             {
-                new() { QualificationVersionId = candidate.QualificationVersionId, FundingOfferId = candidate.FundingOfferId }
+                BuildFundingUpdate(candidate)
             };
 
-            _fundingsRepository
-                .Setup(r => r.GetRolloverQualificationFundingsAsync(
-                    It.IsAny<List<QualificationFundingKey>>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(fundings);
+            _fundingUpdateRepository
+                .Setup(r => r.GetFundingUpdatesAsync(
+                    It.IsAny<List<SourceQualificationFundingKey>>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(fundingUpdates);
 
             _applyService
                 .Setup(s => s.Submit(
-                    candidates, command.Items, fundings, It.IsAny<CancellationToken>()))
+                    candidates, command.Items, fundingUpdates, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
 
             // Act
@@ -169,6 +195,59 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             Assert.Equal("Failed to apply funding extensions.", result.Value.ResultMessage);
 
             _rolloverRepository.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Handle_CandidateNoLongerEligible_RejectsSubmission()
+        {
+            var item = new FundingExtensionItem
+            {
+                Qan = "111",
+                FundingStreamName = "FS",
+                RolloverStatus = "Extended"
+            };
+            var candidate = CandidateHelper.BuildCandidate(
+                _fixture,
+                item.Qan,
+                item.FundingStreamName);
+            _rolloverRepository
+                .Setup(r => r.LoadRolloverCandidateGraphAsync(
+                    It.IsAny<List<CandidateKey>>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync([candidate]);
+            _fundingEligibilityRepository
+                .Setup(x => x.GetAsync(
+                    It.IsAny<IReadOnlyCollection<FundingChangeKey>>(),
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync([
+                    new RolloverFundingEligibility(
+                        new FundingChangeKey(
+                            candidate.SourceType,
+                            candidate.SourceQualificationId,
+                            candidate.FundingOfferId,
+                            candidate.AcademicYear),
+                        candidate.AcademicYear,
+                        null,
+                        false)
+                ]);
+
+            var result = await _handler.Handle(
+                new SubmitRolloverExtensionCommand { Items = [item] },
+                TestContext.Current.CancellationToken);
+
+            Assert.False(result.Success);
+            Assert.Equal(
+                "One or more rollover candidates are no longer backed by applicable funding.",
+                result.ErrorMessage);
+            _fundingChangeCoordinator.Verify(x => x.ExecuteAsync(
+                It.IsAny<FundingChangeSet>(),
+                It.IsAny<Func<CancellationToken, Task<bool>>>(),
+                It.IsAny<CancellationToken>()), Times.Once);
+            _applyService.Verify(x => x.Submit(
+                It.IsAny<List<RolloverCandidates>>(),
+                It.IsAny<List<FundingExtensionItem>>(),
+                It.IsAny<List<RolloverFundingUpdate>>(),
+                It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]
@@ -249,17 +328,17 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
                     It.IsAny<List<CandidateKey>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(candidates);
 
-            List<QualificationFundingKey>? capturedKeys = null;
+            List<SourceQualificationFundingKey>? capturedKeys = null;
 
-            _fundingsRepository
-                .Setup(r => r.GetRolloverQualificationFundingsAsync(
-                    It.IsAny<List<QualificationFundingKey>>(), It.IsAny<CancellationToken>()))
-                .Callback<List<QualificationFundingKey>, CancellationToken>((keys, _) => capturedKeys = keys)
-                .ReturnsAsync(new List<QualificationFundings>());
+            _fundingUpdateRepository
+                .Setup(r => r.GetFundingUpdatesAsync(
+                    It.IsAny<List<SourceQualificationFundingKey>>(), It.IsAny<CancellationToken>()))
+                .Callback<List<SourceQualificationFundingKey>, CancellationToken>((keys, _) => capturedKeys = keys)
+                .ReturnsAsync([]);
 
             _applyService
                 .Setup(s => s.Submit(
-                    candidates, command.Items, It.IsAny<List<QualificationFundings>>(), It.IsAny<CancellationToken>()))
+                    candidates, command.Items, It.IsAny<List<RolloverFundingUpdate>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
             // Act
@@ -270,7 +349,8 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             Assert.Single(capturedKeys!);
 
             var key = capturedKeys!.First();
-            Assert.Equal(candidate.QualificationVersionId, key.QualificationVersionId);
+            Assert.Equal(candidate.SourceType, key.SourceType);
+            Assert.Equal(candidate.SourceQualificationId, key.SourceQualificationId);
             Assert.Equal(candidate.FundingOfferId, key.FundingOfferId);
         }
 
@@ -299,21 +379,21 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
                     It.IsAny<List<CandidateKey>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(candidates);
 
-            var fundings = new List<QualificationFundings>
+            var fundingUpdates = new List<RolloverFundingUpdate>
             {
-                new() { QualificationVersionId = candidate.QualificationVersionId, FundingOfferId = candidate.FundingOfferId }
+                BuildFundingUpdate(candidate)
             };
 
-            _fundingsRepository
-                .Setup(r => r.GetRolloverQualificationFundingsAsync(
-                    It.IsAny<List<QualificationFundingKey>>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(fundings);
+            _fundingUpdateRepository
+                .Setup(r => r.GetFundingUpdatesAsync(
+                    It.IsAny<List<SourceQualificationFundingKey>>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(fundingUpdates);
 
             _applyService
                 .Setup(s => s.Submit(
                     It.IsAny<List<RolloverCandidates>>(),
                     It.IsAny<List<FundingExtensionItem>>(),
-                    It.IsAny<List<QualificationFundings>>(),
+                    It.IsAny<List<RolloverFundingUpdate>>(),
                     It.IsAny<CancellationToken>()))
                 .ReturnsAsync(true);
 
@@ -325,9 +405,18 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
                 s.Submit(
                     It.Is<List<RolloverCandidates>>(l => l.SequenceEqual(candidates)),
                     It.Is<List<FundingExtensionItem>>(l => l.SequenceEqual(command.Items)),
-                    It.Is<List<QualificationFundings>>(l => l.SequenceEqual(fundings)),
+                    It.Is<List<RolloverFundingUpdate>>(l => l.SequenceEqual(fundingUpdates)),
                     It.IsAny<CancellationToken>()),
                 Times.Once);
         }
+
+        private static RolloverFundingUpdate BuildFundingUpdate(RolloverCandidates candidate) =>
+            new(
+                candidate.SourceType,
+                candidate.SourceQualificationId,
+                candidate.FundingOfferId,
+                candidate.AcademicYear,
+                null,
+                (_, _, _) => { });
     } 
 }

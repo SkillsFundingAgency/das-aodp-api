@@ -12,16 +12,17 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
 {
     public class SubmitFundingExtensionService :ISubmitFundingExtensionService
     {
-        private readonly IRolloverRepository _rolloverRepository;
         private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
         private readonly ISystemClockService _clockService;
         private readonly IGuidProvider _guidProvider;
         private Guid RolloverExtendedActionTypeId = Guid.Parse("00000000-0000-0000-0000-000000000004");
         private Guid RolloverNotExtendedActionTypeId = Guid.Parse("00000000-0000-0000-0000-000000000005");
 
-        public SubmitFundingExtensionService(IRolloverRepository rolloverRepository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository, ISystemClockService clockService, IGuidProvider guidProvider)
+        public SubmitFundingExtensionService(
+            IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository,
+            ISystemClockService clockService,
+            IGuidProvider guidProvider)
         {
-            _rolloverRepository = rolloverRepository;
             _qualificationDiscussionHistoryRepository = qualificationDiscussionHistoryRepository;
             _clockService = clockService;
             _guidProvider = guidProvider;
@@ -30,16 +31,14 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
         public async Task<bool> Submit(
             List<RolloverCandidates> candidates,
             List<FundingExtensionItem> inputItems,
-            List<QualificationFundings> fundings,
+            List<RolloverFundingUpdate> fundingUpdates,
             CancellationToken cancellationToken)
         {
             try
             {
-                ApplyCandidateAndFundingUpdates(candidates, inputItems, fundings);
+                ApplyCandidateAndFundingUpdates(candidates, inputItems, fundingUpdates, _clockService.UtcNow);
 
-                await CreateDiscussionHistoriesAsync(candidates, fundings);
-
-                await _rolloverRepository.DeleteAllWorkflowCandidatesAsync(cancellationToken);
+                await CreateDiscussionHistoriesAsync(candidates, fundingUpdates);
 
                 return true;
             }
@@ -52,18 +51,19 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
         private static void ApplyCandidateAndFundingUpdates(
             List<RolloverCandidates> candidates,
             List<FundingExtensionItem> inputItems,
-            List<QualificationFundings> fundings)
+            List<RolloverFundingUpdate> fundingUpdates,
+            DateTime updatedAt)
         {
             var inputLookup = inputItems.ToDictionary(
-                x => (x.Qan!, x.FundingStreamName!));
+                x => CandidateKey.Create(x.Qan, x.FundingStreamName));
 
-            var fundingLookup = fundings.ToDictionary(
-                x => (x.QualificationVersionId, x.FundingOfferId));
+            var fundingLookup = fundingUpdates.ToDictionary(
+                x => (x.SourceType, x.SourceQualificationId, x.FundingOfferId, x.AcademicYear));
 
             foreach (var c in candidates)
             {
                 if (!inputLookup.TryGetValue(
-                    (c.QualificationVersion.Qualification.Qan, c.FundingOffer.Name),
+                    CandidateKey.Create(c.SourceQualificationReference, c.FundingOffer.Name),
                     out var input))
                 {
                     continue;
@@ -77,11 +77,13 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
                         c.SetExtended(input.ProposedFundingApprovalEndDate);
 
                         if (fundingLookup.TryGetValue(
-                            (c.QualificationVersionId, c.FundingOfferId),
+                            (c.SourceType, c.SourceQualificationId, c.FundingOfferId, c.AcademicYear),
                             out var funding))
                         {
-                            funding.EndDate = DateOnly.FromDateTime(input.ProposedFundingApprovalEndDate);
-                            funding.Comments = input.Comments;
+                            funding.ApplyFundingEndDate(
+                                DateOnly.FromDateTime(input.ProposedFundingApprovalEndDate),
+                                input.Comments,
+                                updatedAt);
                         }
                         break;
 
@@ -98,12 +100,13 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
 
         private async Task CreateDiscussionHistoriesAsync(
             List<RolloverCandidates> candidates,
-            List<QualificationFundings> fundings)
+            List<RolloverFundingUpdate> fundingUpdates)
         {
             var historyEntries = new List<QualificationDiscussionHistory>();
 
             var groups = candidates
-                .GroupBy(c => c.QualificationVersion.QualificationId);
+                .Where(c => c.DiscussionQualificationId.HasValue)
+                .GroupBy(c => c.DiscussionQualificationId!.Value);
 
             foreach (var group in groups)
             {
@@ -121,11 +124,13 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
                 {
                     var lines = extended.Select(c =>
                     {
-                        var f = fundings.FirstOrDefault(x =>
-                            x.QualificationVersionId == c.QualificationVersionId &&
-                            x.FundingOfferId == c.FundingOfferId);
+                        var f = fundingUpdates.FirstOrDefault(x =>
+                            x.SourceType == c.SourceType &&
+                            x.SourceQualificationId == c.SourceQualificationId &&
+                            x.FundingOfferId == c.FundingOfferId &&
+                            x.AcademicYear == c.AcademicYear);
 
-                        var endDate = f?.EndDate.ToFundingEndDateFormat();
+                        var endDate = f?.FundingApprovalEndDate.ToFundingEndDateFormat();
 
                         return $"{c.FundingOffer.Name} extended to {endDate}";
                     });

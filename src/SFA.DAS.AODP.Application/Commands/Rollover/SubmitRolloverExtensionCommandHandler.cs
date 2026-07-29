@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Application.Services.FundingExtension;
-using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
 using SFA.DAS.AODP.Models.Rollover;
 
@@ -10,18 +9,23 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
         : IRequestHandler<SubmitRolloverExtensionCommand, BaseMediatrResponse<SubmitRolloverExtensionCommandResponse>>
     {
         private readonly IRolloverRepository _rolloverRepository;
-        private readonly IQualificationFundingsRepository _qualificationFundingsRepository;
+        private readonly IRolloverFundingUpdateRepository _rolloverFundingUpdateRepository;
         private readonly ISubmitFundingExtensionService _applyFundingExtensionsService;
+        private readonly IFundingChangeCoordinator _fundingChangeCoordinator;
+        private readonly IRolloverFundingEligibilityRepository _fundingEligibilityRepository;
 
         public SubmitRolloverExtensionCommandHandler(
             IRolloverRepository rolloverRepository,
-            IQualificationFundingsRepository qualificationFundingsRepository,
-            ISubmitFundingExtensionService applyFundingExtensionsService
-)
+            IRolloverFundingUpdateRepository rolloverFundingUpdateRepository,
+            ISubmitFundingExtensionService applyFundingExtensionsService,
+            IFundingChangeCoordinator fundingChangeCoordinator,
+            IRolloverFundingEligibilityRepository fundingEligibilityRepository)
         {
             _rolloverRepository = rolloverRepository;
-            _qualificationFundingsRepository = qualificationFundingsRepository;
+            _rolloverFundingUpdateRepository = rolloverFundingUpdateRepository;
             _applyFundingExtensionsService = applyFundingExtensionsService;
+            _fundingChangeCoordinator = fundingChangeCoordinator;
+            _fundingEligibilityRepository = fundingEligibilityRepository;
         }
 
         public async Task<BaseMediatrResponse<SubmitRolloverExtensionCommandResponse>> Handle(
@@ -50,29 +54,62 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                     return response;
                 }
 
-                var fundingKeys = candidates
-                    .Select(x => new QualificationFundingKey(
-                        x.QualificationVersionId,
-                        x.FundingOfferId))
-                    .Distinct()
+                var changeSet = FundingChangeSet.Create(candidates.Select(x =>
+                    new FundingChangeKey(
+                        x.SourceType,
+                        x.SourceQualificationId,
+                        x.FundingOfferId,
+                        x.AcademicYear)));
+
+                var fundingKeys = changeSet.Keys
+                    .Select(x => new SourceQualificationFundingKey(
+                        x.SourceType,
+                        x.SourceQualificationId,
+                        x.FundingOfferId,
+                        x.AcademicYear!))
                     .ToList();
 
-                var fundings = await _qualificationFundingsRepository
-                    .GetRolloverQualificationFundingsAsync(fundingKeys, cancellationToken);
+                var fundingUpdates = await _rolloverFundingUpdateRepository
+                    .GetFundingUpdatesAsync(fundingKeys, cancellationToken);
 
-                var success = await _applyFundingExtensionsService.Submit(candidates, request.Items, fundings, cancellationToken);
+                await _fundingChangeCoordinator.ExecuteAsync(
+                    changeSet,
+                    async ct =>
+                    {
+                        var eligibility = await _fundingEligibilityRepository.GetAsync(
+                            changeSet.Keys,
+                            ct);
 
-                if (!success)
-                {
-                    response.Success = true;
-                    response.Value.ResultMessage = "Failed to apply funding extensions.";
-                    return response;
-                }
+                        if (eligibility.Count != changeSet.Keys.Count ||
+                            eligibility.Any(x => !x.IsEligible))
+                        {
+                            throw new InvalidOperationException(
+                                "One or more rollover candidates are no longer backed by applicable funding.");
+                        }
 
-                await _rolloverRepository.SaveChangesAsync(cancellationToken);
+                        var success = await _applyFundingExtensionsService.Submit(
+                            candidates,
+                            request.Items,
+                            fundingUpdates,
+                            ct);
+
+                        if (!success)
+                        {
+                            throw new FundingExtensionApplicationException(
+                                "Failed to apply funding extensions.");
+                        }
+
+                        return true;
+                    },
+                    cancellationToken);
 
                 response.Value.ResultMessage = "Funding extensions applied.";
                 response.Success = true;
+            }
+            catch (FundingExtensionApplicationException ex)
+            {
+                response.Success = true;
+                response.Value.ResultMessage = ex.Message;
             }
             catch (Exception ex)
             {
@@ -83,5 +120,8 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
 
             return response;
         }
+
+        private sealed class FundingExtensionApplicationException(string message)
+            : Exception(message);
     }
 }

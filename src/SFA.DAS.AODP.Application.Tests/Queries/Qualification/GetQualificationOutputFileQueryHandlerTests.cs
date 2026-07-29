@@ -7,7 +7,9 @@ using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Providers;
 using SFA.DAS.AODP.Data.Repositories.QaaQualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
+using SFA.DAS.AODP.Data.Repositories.Rollover;
 using SFA.DAS.AODP.Infrastructure;
+using SFA.DAS.AODP.Models.Rollover;
 using SFA.DAS.AODP.Models.Settings;
 using System.Text;
 using SFA.DAS.AODP.Testing.Testing;
@@ -22,6 +24,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         private readonly Mock<IQualificationOutputFileLogRepository> _logRepo;
         private readonly Mock<IBlobStorageService> _blob;
         private readonly Mock<IQaaFundingApprovalEndDateCalculator> _fundingApprovalEndDateCalculator;
+        private readonly Mock<IFundingChangeCoordinator> _fundingChangeCoordinator;
         private readonly OutputFileBlobStorageSettings _settings;
         private readonly GetQualificationOutputFileQueryHandler _handler;
 
@@ -51,6 +54,14 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             _blob = _fixture.Freeze<Mock<IBlobStorageService>>();
             _logRepo = _fixture.Freeze<Mock<IQualificationOutputFileLogRepository>>();
             _fundingApprovalEndDateCalculator = _fixture.Freeze<Mock<IQaaFundingApprovalEndDateCalculator>>();
+            _fundingChangeCoordinator = _fixture.Freeze<Mock<IFundingChangeCoordinator>>();
+            _fundingChangeCoordinator
+                .Setup(x => x.ExecuteAsync(
+                    It.IsAny<FundingChangeSet>(),
+                    It.IsAny<Func<CancellationToken, Task<bool>>>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns((FundingChangeSet _, Func<CancellationToken, Task<bool>> mutation, CancellationToken ct) =>
+                    mutation(ct));
 
             _settings = _fixture.Freeze<OutputFileBlobStorageSettings>();
             _settings.ContainerName = ContainerName;
@@ -256,7 +267,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             var result = await _handler.Handle(_testRequest, CancellationToken.None);
 
             // Assert
-            Assert.True(result.Success);
+            Assert.True(result.Success, result.InnerException?.ToString());
             Assert.NotNull(result.Value);
             Assert.StartsWith(datePrefix, result.Value!.FileName);
             Assert.EndsWith("-AOdPOutputFile.csv", result.Value.FileName);
@@ -330,7 +341,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             var result = await _handler.Handle(_testRequest, CancellationToken.None);
 
             // Assert – success and file basics
-            Assert.True(result.Success);
+            Assert.True(result.Success, result.InnerException?.ToString());
             Assert.EndsWith(FileSuffix, result.Value!.FileName);
 
             // Assert – CSV content
@@ -378,7 +389,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             var result = await _handler.Handle(request, CancellationToken.None);
 
             // Assert
-            Assert.True(result.Success);
+            Assert.True(result.Success, result.InnerException?.ToString());
             Assert.StartsWith(publicationDate.ToString("yyyy-MM-dd"), result.Value!.FileName);
             Assert.EndsWith("-AOdPOutputFile.csv", result.Value.FileName);
 

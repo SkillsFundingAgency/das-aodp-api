@@ -14,7 +14,9 @@ public class QaaQualificationRepository(ApplicationDbContext context) : IQaaQual
 
     /// <inheritdoc/>.
     public async Task<IEnumerable<RegulatedQaaQualification>> GetAllAsync(CancellationToken cancellationToken) 
-        => await _context.RegulatedQaaQualifications.ToListAsync(cancellationToken);
+        => await _context.RegulatedQaaQualifications
+            .Include(q => q.Fundings)
+            .ToListAsync(cancellationToken);
 
     /// <inheritdoc/>.
     public async Task SaveChangesAsync(CancellationToken cancellationToken) 

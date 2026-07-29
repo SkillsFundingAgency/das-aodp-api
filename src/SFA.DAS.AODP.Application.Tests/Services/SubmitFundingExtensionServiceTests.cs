@@ -15,7 +15,6 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
 {
     public class SubmitFundingExtensionServiceTests
     {
-        private readonly Mock<IRolloverRepository> _rolloverRepository = new();
         private readonly Mock<IQualificationDiscussionHistoryRepository> _historyRepository = new();
         private readonly Mock<ISystemClockService> _clockService = new();
         private readonly Mock<IGuidProvider> _guidProvider = new();
@@ -33,7 +32,6 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
             _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
             _service = new SubmitFundingExtensionService(
-                _rolloverRepository.Object,
                 _historyRepository.Object,
                 _clockService.Object,
                 _guidProvider.Object);
@@ -76,6 +74,10 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
 
             var candidates = new List<RolloverCandidates> { candidate };
             var fundings = new List<QualificationFundings> { funding };
+            var fundingUpdates = new List<RolloverFundingUpdate>
+            {
+                BuildFundingUpdate(candidate, funding)
+            };
 
             _guidProvider.Setup(o => o.NewGuid()).Returns(historyId);
             _clockService.Setup(o => o.UtcNow).Returns(timestamp);
@@ -95,7 +97,7 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
             };
 
             // Act
-            var result = await _service.Submit(candidates, [item], fundings, CancellationToken.None);
+            var result = await _service.Submit(candidates, [item], fundingUpdates, CancellationToken.None);
 
             // Assert
             Assert.True(result);
@@ -108,7 +110,6 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
                 h.AddDiscussionHistories(expectedQualificationDiscussionHistories),
                 Times.Once);
 
-            _rolloverRepository.Verify(r => r.DeleteAllWorkflowCandidatesAsync(It.IsAny<CancellationToken>()), Times.Once);
         }
 
         // ------------------------------------------------------------
@@ -129,15 +130,19 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
             var candidate = CandidateHelper.BuildCandidate(_fixture, item.Qan, item.FundingStreamName);
             var funding = new QualificationFundings
             {
-                QualificationVersionId = candidate.QualificationVersionId,
+                QualificationVersionId = candidate.SourceQualificationId,
                 FundingOfferId = candidate.FundingOfferId
             };
 
             var candidates = new List<RolloverCandidates> { candidate };
             var fundings = new List<QualificationFundings> { funding };
+            var fundingUpdates = new List<RolloverFundingUpdate>
+            {
+                BuildFundingUpdate(candidate, funding)
+            };
 
             // Act
-            var result = await _service.Submit(candidates, [item], fundings, CancellationToken.None);
+            var result = await _service.Submit(candidates, [item], fundingUpdates, CancellationToken.None);
 
             // Assert
             Assert.True(result);
@@ -173,23 +178,25 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
                 ExclusionReason = "Reason"
             };
 
-            var candidate1 = CandidateHelper.BuildCandidate(_fixture, item1.Qan, item1.FundingStreamName);
-            var candidate2 = CandidateHelper.BuildCandidate(_fixture, item2.Qan, item2.FundingStreamName);
-
-            // Same qualification → grouped together
-            candidate2.QualificationVersion.QualificationId = candidate1.QualificationVersion.QualificationId;
+            var qualificationId = Guid.NewGuid();
+            var candidate1 = CandidateHelper.BuildCandidate(_fixture, item1.Qan, item1.FundingStreamName, qualificationId: qualificationId);
+            var candidate2 = CandidateHelper.BuildCandidate(_fixture, item2.Qan, item2.FundingStreamName, qualificationId: qualificationId);
 
             var funding1 = new QualificationFundings
             {
-                QualificationVersionId = candidate1.QualificationVersionId,
+                QualificationVersionId = candidate1.SourceQualificationId,
                 FundingOfferId = candidate1.FundingOfferId
             };
 
             var candidates = new List<RolloverCandidates> { candidate1, candidate2 };
             var fundings = new List<QualificationFundings> { funding1 };
+            var fundingUpdates = new List<RolloverFundingUpdate>
+            {
+                BuildFundingUpdate(candidate1, funding1)
+            };
 
             // Act
-            var result = await _service.Submit(candidates, [item1, item2], fundings, CancellationToken.None);
+            var result = await _service.Submit(candidates, [item1, item2], fundingUpdates, CancellationToken.None);
 
             // Assert
             Assert.True(result);
@@ -209,7 +216,7 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
             var candidate = CandidateHelper.BuildCandidate(_fixture, "111", "FS");
             var funding = new QualificationFundings
             {
-                QualificationVersionId = candidate.QualificationVersionId,
+                QualificationVersionId = candidate.SourceQualificationId,
                 FundingOfferId = candidate.FundingOfferId
             };
 
@@ -222,7 +229,7 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
             };
 
             // Act
-            var result = await _service.Submit([candidate], [item], [funding], CancellationToken.None);
+            var result = await _service.Submit([candidate], [item], [BuildFundingUpdate(candidate, funding)], CancellationToken.None);
 
             // Assert
             Assert.True(result);
@@ -242,7 +249,7 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
             var candidate = CandidateHelper.BuildCandidate(_fixture, "111", "FS");
             var funding = new QualificationFundings
             {
-                QualificationVersionId = candidate.QualificationVersionId,
+                QualificationVersionId = candidate.SourceQualificationId,
                 FundingOfferId = candidate.FundingOfferId
             };
 
@@ -251,11 +258,26 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
                 .Throws(new Exception("Boom"));
 
             // Act
-            var result = await _service.Submit([candidate], [], [funding], CancellationToken.None);
+            var result = await _service.Submit([candidate], [], [BuildFundingUpdate(candidate, funding)], CancellationToken.None);
 
             // Assert
             Assert.False(result);
         }
+
+        private static RolloverFundingUpdate BuildFundingUpdate(
+            RolloverCandidates candidate,
+            QualificationFundings funding) =>
+            new(
+                candidate.SourceType,
+                candidate.SourceQualificationId,
+                candidate.FundingOfferId,
+                candidate.AcademicYear,
+                funding.EndDate,
+                (endDate, comments, _) =>
+                {
+                    funding.EndDate = endDate;
+                    funding.Comments = comments;
+                });
 
     }
 }
