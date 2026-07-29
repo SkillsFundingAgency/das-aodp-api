@@ -109,12 +109,16 @@ public class RolloverRepositoryTests
             .Options;
 
         var now = DateTime.UtcNow;
-        var e1 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-3), null, now.AddDays(-3));
-        var e2 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-2), null, now.AddDays(-2));
-        var e3 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-1), null, now.AddDays(-1));
+        var workflowRun =
+            RolloverWorkflowRun.Create("2024/25", SelectionMethod.FileUpload, null, null, null, "system", now);
+
+        var e1 = RolloverWorkflowCandidate.Create(workflowRun.Id, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-3), null, now.AddDays(-3));
+        var e2 = RolloverWorkflowCandidate.Create(workflowRun.Id, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-2), null, now.AddDays(-2));
+        var e3 = RolloverWorkflowCandidate.Create(workflowRun.Id, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-1), null, now.AddDays(-1));
 
         await using (var db = new ApplicationDbContext(options))
         {
+            await db.RolloverWorkflowRuns.AddAsync(workflowRun, TestContext.Current.CancellationToken);
             await db.RolloverWorkflowCandidates.AddRangeAsync(new[] { e1, e2, e3 });
             await db.SaveChangesAsync(TestContext.Current.CancellationToken);
         }
