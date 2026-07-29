@@ -164,7 +164,20 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
                 CurrentFundingApprovalEndDate = rwc.CurrentFundingEndDate,
                 ProposedFundingApprovalEndDate = rwc.ProposedFundingEndDate,
 
-                Comments = string.Empty,
+                Pldns = context.Pldns
+                    .Where(p => p.Qan == rwc.RolloverCandidates.QualificationVersion.Qualification.Qan)
+                    .Select(p =>
+                        rwc.RolloverCandidates.FundingOfferId == FundingStream.Age1416.Id ? p.Pldns14To16 :
+                        rwc.RolloverCandidates.FundingOfferId == FundingStream.Age1619.Id ? p.Pldns16To19 :
+                        rwc.RolloverCandidates.FundingOfferId == FundingStream.LocalFlexibilities.Id ? p.LocalFlex :
+                        rwc.RolloverCandidates.FundingOfferId == FundingStream.LegalEntitlementL2L3.Id ? p.LegalEntitlementL2L3 :
+                        rwc.RolloverCandidates.FundingOfferId == FundingStream.LegalEntitlementEnglishAndMaths.Id ? p.LegalEntitlementEngMaths :
+                        rwc.RolloverCandidates.FundingOfferId == FundingStream.DigitalEntitlement.Id ? p.DigitalEntitlement :
+                        rwc.RolloverCandidates.FundingOfferId == FundingStream.AdvancedLearnerLoans.Id ? p.Loans :
+                        rwc.RolloverCandidates.FundingOfferId == FundingStream.LifelongLearningEntitlement.Id ? p.LifelongLearning :
+                        rwc.RolloverCandidates.FundingOfferId == FundingStream.FreeCoursesForJobs.Id ? p.Level3FCoursesForJobs :
+                        null)
+                    .FirstOrDefault(),
             })
             .OrderBy(x => x.QAN)
             .ToListAsync(cancellationToken);
