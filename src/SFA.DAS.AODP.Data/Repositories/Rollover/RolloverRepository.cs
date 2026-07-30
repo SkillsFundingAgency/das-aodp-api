@@ -204,7 +204,7 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
         {
             // ExecuteDeleteAsync executes immediately! and does not use implicit transactions.
             await context.RolloverWorkflowCandidates
-                .Where(x => !EF.Constant(incomingCandidateIds.Contains(x.RolloverCandidatesId)))
+                .Where(x => !EF.Constant(incomingCandidateIds).Contains(x.RolloverCandidatesId))
                 .ExecuteDeleteAsync(cancellationToken);
 
             context.RolloverWorkflowRuns.Add(workflowRun);
