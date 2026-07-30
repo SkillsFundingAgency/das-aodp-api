@@ -199,7 +199,7 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
         try
         {
             await context.RolloverWorkflowCandidates
-                .Where(x => incomingCandidateIds.Contains(x.RolloverCandidatesId))
+                .Where(x => !incomingCandidateIds.Contains(x.RolloverCandidatesId))
                 .ExecuteDeleteAsync(cancellationToken);
 
             context.RolloverWorkflowRuns.Add(workflowRun);
