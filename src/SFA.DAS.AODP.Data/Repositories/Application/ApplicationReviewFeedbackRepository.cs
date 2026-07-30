@@ -21,11 +21,18 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
             ApplicationReviewSearchCriteria criteria
         )
         {
+           var excludedStatuses = new[]
+           {
+                ApplicationStatus.Approved.ToString(),
+                ApplicationStatus.NotApproved.ToString()
+            };
+
             var query = _context
                 .ApplicationReviewFeedbacks
                 .Include(a => a.ApplicationReview)
                 .ThenInclude(a => a.Application)
-                .Where(a => a.Type == criteria.ReviewType.ToString());
+                .Where(a => a.Type == criteria.ReviewType.ToString() &&
+                !excludedStatuses.Contains(a.ApplicationReview.Application.Status));
 
             if (!string.IsNullOrWhiteSpace(criteria.ApplicationSearch))
             {
