@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
@@ -195,11 +196,15 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
             .Select(x => x.RolloverCandidatesId)
             .ToList();
 
+        // Explicit transaction as we are calling ExecuteDeleteAsync for better set based delete operations,
+        // this doesn't implicitly create transactions and runs immediately, therefore an explicit transaction is needed.
+        // This is so we can ensure a proper unit of work around the delete and the subsequent inserts such that if the delete fails then we roll back the entire thing.
         await using var transaction = await context.StartTransactionAsync();
         try
         {
+            // ExecuteDeleteAsync executes immediately! and does not use implicit transactions.
             await context.RolloverWorkflowCandidates
-                .Where(x => !incomingCandidateIds.Contains(x.RolloverCandidatesId))
+                .Where(x => !EF.Constant(incomingCandidateIds.Contains(x.RolloverCandidatesId)))
                 .ExecuteDeleteAsync(cancellationToken);
 
             context.RolloverWorkflowRuns.Add(workflowRun);
