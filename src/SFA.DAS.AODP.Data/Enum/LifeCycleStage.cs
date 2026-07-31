@@ -10,6 +10,6 @@ namespace SFA.DAS.AODP.Data.Enum
     {
         public const string New = "New";
         public const string Changed = "Changed";
-        public const string Completed = "Completed";
+        public const string Completed = "CompletedAt";
     }
 }

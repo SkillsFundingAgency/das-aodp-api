@@ -2,6 +2,7 @@
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using System.Text;
+using SFA.DAS.AODP.Infrastructure.Extensions;
 
 namespace SFA.DAS.AODP.Application.Commands.Qualifications
 {
@@ -48,8 +49,8 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                     foreach (var qf in qualificationFundings)
                     {
                         qualificationDiscussionHistoryNotes.AppendLine($"Offer: {qf.FundingOffer.Name}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate?.ToString("dd-MM-yyyy")}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate?.ToString("dd-MM-yyyy")}");
+                        qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate.ToFundingEndDateFormat()}");
+                        qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate.ToFundingEndDateFormat()}");
                         if (!string.IsNullOrWhiteSpace(qf.Comments)) qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
                         qualificationDiscussionHistoryNotes.AppendLine();
                     }

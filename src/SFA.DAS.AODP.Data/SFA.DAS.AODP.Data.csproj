@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <Folder Include="Entities\Jobs\" />
+    <Folder Include="Entities\QueryExtensions\" />
   </ItemGroup>
 
 </Project>

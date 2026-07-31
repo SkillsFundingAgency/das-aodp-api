@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.IdentityModel.Tokens;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
+using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.ValueConverters;
 using System.Diagnostics.CodeAnalysis;
 

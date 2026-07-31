@@ -7,17 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="coverlet.collector" Version="10.0.1">
-		<PrivateAssets>all</PrivateAssets>
-		<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	</PackageReference>
-	<PackageReference Include="coverlet.msbuild" Version="10.0.1">
-		<PrivateAssets>all</PrivateAssets>
-		<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-	</PackageReference>
-	<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
+    <PackageReference Include="coverlet.collector" Version="10.0.1">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.msbuild" Version="10.0.1">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.8" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.8" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
 	    <PrivateAssets>all</PrivateAssets>
@@ -27,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SFA.DAS.AODP.Application.Tests\SFA.DAS.AODP.Application.UnitTests.csproj" />
     <ProjectReference Include="..\SFA.DAS.AODP.Data\SFA.DAS.AODP.Data.csproj" />
     <ProjectReference Include="..\SFA.DAS.AODP.Models\SFA.DAS.AODP.Models.csproj" />
     <ProjectReference Include="..\SFA.DAS.AODP.Testing\SFA.DAS.AODP.Testing.csproj" />
@@ -34,6 +34,10 @@
   
   <ItemGroup>
     <Using Include="Xunit" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Entities\QueryExtensions\" />
   </ItemGroup>
 
 </Project>

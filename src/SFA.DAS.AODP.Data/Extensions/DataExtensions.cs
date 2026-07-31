@@ -8,8 +8,10 @@ using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 using SFA.DAS.AODP.Data.Repositories.FundingOffer;
 using SFA.DAS.AODP.Data.Repositories.Jobs;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
+using SFA.DAS.AODP.Data.Repositories.Rollover;
 using System.Diagnostics.CodeAnalysis;
 using SFA.DAS.AODP.Data.Repositories.QaaQualification;
+using Microsoft.Extensions.Logging;
 
 namespace SFA.DAS.AODP.Data.Extensions
 {
@@ -63,6 +65,8 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<INewQualificationsRepository, NewQualificationsRepository>();
             services.AddScoped<IJobsRepository, JobsRepository>();
             services.AddScoped<IJobRunsRepository, JobRunsRepository>();
+
+            services.AddScoped<IRolloverRepository, RolloverRepository>();
 
             services.AddScoped<IQualificationOutputFileRepository, QualificationOutputFileRepository>();
             services.AddScoped<IQualificationOutputFileLogRepository, QualificationOutputFileLogRepository>();

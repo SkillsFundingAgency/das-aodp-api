@@ -1,3 +1,4 @@
+using SFA.DAS.AODP.Data.Entities.Qualification;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
