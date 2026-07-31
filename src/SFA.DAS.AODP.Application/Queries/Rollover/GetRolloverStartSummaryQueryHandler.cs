@@ -17,8 +17,6 @@ public class GetRolloverStartSummaryQueryHandler(IRolloverRepository repository,
         {
             var currentAcademicYear = academicYearService.GetCurrentAcademicYear();
             
-            var summary = await repository.GetRolloverStartSummaryAsync(currentAcademicYear, cancellationToken);
-
             var result = await repository.GetRolloverStartSummaryAsync(currentAcademicYear, cancellationToken);
 
             if (result != null) 
