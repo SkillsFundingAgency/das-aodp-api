@@ -6,135 +6,368 @@
                         The latest qualification version must be used
 	-Date of Creation:	19/04/2026
 	-Created By:		Hamzah Shakeel
+
+    Modification History
+    ------------------------------------------------------------------------------------------------
+    Date        Author          Description
+    ----------  --------------  --------------------------------------------------------------
+    31/07/2026  Karen Hanna     Optimised funding aggregation by replacing multiple pivot
+                                CTEs with a single FundingData CTE. Moved funding notes
+                                into a separate FundingNotes CTE and filtered NULL/empty
+                                comments before aggregation to improve query performance.
+
 ####################################################################################################*/
 
-WITH LatestQualificationGroup AS (
+WITH LatestQualificationGroup AS
+(
     SELECT
         ver.Id,
         ver.QualificationId,
         ver.AwardingOrganisationId,
-        ver.Level AS Level,
+        ver.Level,
         ver.Type AS QualificationType,
         ver.SubLevel AS Subcategory,
         ver.Ssa AS SectorSubjectArea,
         ver.InsertedTimestamp,
-        ROW_NUMBER() OVER (PARTITION BY ver.QualificationId ORDER BY ver.Version DESC) AS rn
+        ROW_NUMBER() OVER
+        (
+            PARTITION BY ver.QualificationId
+            ORDER BY ver.Version DESC
+        ) AS rn
     FROM regulated.QualificationVersions ver
-    Where exists (select 1 from funded.QualificationFundings qf where qf.QualificationVersionId = ver.Id)
+    WHERE EXISTS
+    (
+        SELECT 1
+        FROM funded.QualificationFundings qf
+        WHERE qf.QualificationVersionId = ver.Id
+    )
 ),
-LatestQualifications AS (
-    SELECT *
+LatestQualifications AS
+(
+    SELECT
+        Id,
+        QualificationId,
+        AwardingOrganisationId,
+        Level,
+        QualificationType,
+        Subcategory,
+        SectorSubjectArea,
+        InsertedTimestamp
     FROM LatestQualificationGroup
     WHERE rn = 1
 ),
-PivotFundingAvailable AS (
-    SELECT
-        qf.QualificationVersionId,
-        MAX(CASE WHEN offertype.Name = 'LegalEntitlementEnglishandMaths' THEN 1 ELSE 0 END) AS LegalEntitlementEnglishandMaths_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'LifelongLearningEntitlement' THEN 1 ELSE 0 END) AS LifelongLearningEntitlement_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'LocalFlexibilities' THEN 1 ELSE 0 END) AS LocalFlexibilities_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'DigitalEntitlement' THEN 1 ELSE 0 END) AS DigitalEntitlement_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'LegalEntitlementL2L3' THEN 1 ELSE 0 END) AS LegalEntitlementL2L3_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'AdvancedLearnerLoans' THEN 1 ELSE 0 END) AS AdvancedLearnerLoans_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'Age1619' THEN 1 ELSE 0 END) AS Age1619_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'L3FreeCoursesForJobs' THEN 1 ELSE 0 END) AS L3FreeCoursesForJobs_FundingAvailable,
-        MAX(CASE WHEN offertype.Name = 'Age1416' THEN 1 ELSE 0 END) AS Age1416_FundingAvailable
-    FROM funded.QualificationFundings qf
-	INNER JOIN LatestQualifications LQ ON qf.QualificationVersionId = LQ.Id
-    INNER JOIN dbo.FundingOffers offertype ON offertype.Id = qf.FundingOfferId
-    GROUP BY qf.QualificationVersionId
-),
-PivotStartDate AS (
-    SELECT
-        qf.QualificationVersionId,
-        MAX(CASE WHEN offertype.Name = 'LegalEntitlementEnglishandMaths' THEN StartDate END) AS LegalEntitlementEnglishandMaths_FundingApprovalStartDate,
-        MAX(CASE WHEN offertype.Name = 'LifelongLearningEntitlement' THEN StartDate END) AS LifelongLearningEntitlement_FundingApprovalStartDate,
-        MAX(CASE WHEN offertype.Name = 'LocalFlexibilities' THEN StartDate END) AS LocalFlexibilities_FundingApprovalStartDate,
-        MAX(CASE WHEN offertype.Name = 'DigitalEntitlement' THEN StartDate END) AS DigitalEntitlement_FundingApprovalStartDate,
-        MAX(CASE WHEN offertype.Name = 'LegalEntitlementL2L3' THEN StartDate END) AS LegalEntitlementL2L3_FundingApprovalStartDate,
-        MAX(CASE WHEN offertype.Name = 'AdvancedLearnerLoans' THEN StartDate END) AS AdvancedLearnerLoans_FundingApprovalStartDate,
-        MAX(CASE WHEN offertype.Name = 'Age1619' THEN StartDate END) AS Age1619_FundingApprovalStartDate,
-        MAX(CASE WHEN offertype.Name = 'L3FreeCoursesForJobs' THEN StartDate END) AS L3FreeCoursesForJobs_FundingApprovalStartDate,
-        MAX(CASE WHEN offertype.Name = 'Age1416' THEN StartDate END) AS Age1416_FundingApprovalStartDate
-    FROM funded.QualificationFundings qf
-	INNER JOIN LatestQualifications LQ ON qf.QualificationVersionId = LQ.Id
-    INNER JOIN dbo.FundingOffers offertype ON offertype.Id = qf.FundingOfferId
-    GROUP BY qf.QualificationVersionId
-),
-PivotEndDate AS (
-    SELECT
-        qf.QualificationVersionId,
-        MAX(CASE WHEN offertype.Name = 'LegalEntitlementEnglishandMaths' THEN EndDate END) AS LegalEntitlementEnglishandMaths_FundingApprovalEndDate,
-        MAX(CASE WHEN offertype.Name = 'LifelongLearningEntitlement' THEN EndDate END) AS LifelongLearningEntitlement_FundingApprovalEndDate,
-        MAX(CASE WHEN offertype.Name = 'LocalFlexibilities' THEN EndDate END) AS LocalFlexibilities_FundingApprovalEndDate,
-        MAX(CASE WHEN offertype.Name = 'DigitalEntitlement' THEN EndDate END) AS DigitalEntitlement_FundingApprovalEndDate,
-        MAX(CASE WHEN offertype.Name = 'LegalEntitlementL2L3' THEN EndDate END) AS LegalEntitlementL2L3_FundingApprovalEndDate,
-        MAX(CASE WHEN offertype.Name = 'AdvancedLearnerLoans' THEN EndDate END) AS AdvancedLearnerLoans_FundingApprovalEndDate,
-        MAX(CASE WHEN offertype.Name = 'Age1619' THEN EndDate END) AS Age1619_FundingApprovalEndDate,
-        MAX(CASE WHEN offertype.Name = 'L3FreeCoursesForJobs' THEN EndDate END) AS L3FreeCoursesForJobs_FundingApprovalEndDate,
-        MAX(CASE WHEN offertype.Name = 'Age1416' THEN EndDate END) AS Age1416_FundingApprovalEndDate
-    FROM funded.QualificationFundings qf
-	INNER JOIN LatestQualifications LQ ON qf.QualificationVersionId = LQ.Id
-    INNER JOIN dbo.FundingOffers offertype ON offertype.Id = qf.FundingOfferId
-    GROUP BY qf.QualificationVersionId
-),
-PivotOfferNotes AS
+FundingData AS
 (
     SELECT
         qf.QualificationVersionId,
-        MAX(CASE WHEN fo.Name = 'Age1416' THEN qf.Comments END)                  AS Age1416_Notes,
-        MAX(CASE WHEN fo.Name = 'Age1619' THEN qf.Comments END)                  AS Age1619_Notes,
-        MAX(CASE WHEN fo.Name = 'AdvancedLearnerLoans' THEN qf.Comments END)     AS AdvancedLearnerLoans_Notes,
-        MAX(CASE WHEN fo.Name = 'DigitalEntitlement' THEN qf.Comments END)       AS DigitalEntitlement_Notes,
-        MAX(CASE WHEN fo.Name = 'L3FreeCoursesForJobs' THEN qf.Comments END)     AS L3FreeCoursesForJobs_Notes,
-        MAX(CASE WHEN fo.Name = 'LegalEntitlementEnglishandMaths' THEN qf.Comments END) AS LegalEntitlementEnglishandMaths_Notes,
-        MAX(CASE WHEN fo.Name = 'LegalEntitlementL2L3' THEN qf.Comments END)     AS LegalEntitlementL2L3_Notes,
-        MAX(CASE WHEN fo.Name = 'LifelongLearningEntitlement' THEN qf.Comments END) AS LifelongLearningEntitlement_Notes,
-        MAX(CASE WHEN fo.Name = 'LocalFlexibilities' THEN qf.Comments END)       AS LocalFlexibilities_Notes
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'AdvancedLearnerLoans'
+                THEN 1
+                ELSE 0
+            END
+        ) AS AdvancedLearnerLoans_FundingAvailable,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'AdvancedLearnerLoans'
+                THEN qf.StartDate
+            END
+        ) AS AdvancedLearnerLoans_FundingApprovalStartDate,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'AdvancedLearnerLoans'
+                THEN qf.EndDate
+            END
+        ) AS AdvancedLearnerLoans_FundingApprovalEndDate,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'Age1416'
+                THEN 1
+                ELSE 0
+            END
+        ) AS Age1416_FundingAvailable,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'Age1416'
+                THEN qf.StartDate
+            END
+        ) AS Age1416_FundingApprovalStartDate,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'Age1416'
+                THEN qf.EndDate
+            END
+        ) AS Age1416_FundingApprovalEndDate,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'Age1619'
+                THEN 1
+                ELSE 0
+            END
+        ) AS Age1619_FundingAvailable,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'Age1619'
+                THEN qf.StartDate
+            END
+        ) AS Age1619_FundingApprovalStartDate,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'Age1619'
+                THEN qf.EndDate
+            END
+        ) AS Age1619_FundingApprovalEndDate,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'DigitalEntitlement'
+                THEN 1
+                ELSE 0
+            END
+        ) AS DigitalEntitlement_FundingAvailable,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'DigitalEntitlement'
+                THEN qf.StartDate
+            END
+        ) AS DigitalEntitlement_FundingApprovalStartDate,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'DigitalEntitlement'
+                THEN qf.EndDate
+            END
+        ) AS DigitalEntitlement_FundingApprovalEndDate,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'L3FreeCoursesForJobs'
+                THEN 1
+                ELSE 0
+            END
+        ) AS L3FreeCoursesForJobs_FundingAvailable,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'L3FreeCoursesForJobs'
+                THEN qf.StartDate
+            END
+        ) AS L3FreeCoursesForJobs_FundingApprovalStartDate,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'L3FreeCoursesForJobs'
+                THEN qf.EndDate
+            END
+        ) AS L3FreeCoursesForJobs_FundingApprovalEndDate,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LegalEntitlementEnglishandMaths'
+                THEN 1
+                ELSE 0
+            END
+        ) AS LegalEntitlementEnglishandMaths_FundingAvailable,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LegalEntitlementEnglishandMaths'
+                THEN qf.StartDate
+            END
+        ) AS LegalEntitlementEnglishandMaths_FundingApprovalStartDate,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LegalEntitlementEnglishandMaths'
+                THEN qf.EndDate
+            END
+        ) AS LegalEntitlementEnglishandMaths_FundingApprovalEndDate,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LegalEntitlementL2L3'
+                THEN 1
+                ELSE 0
+            END
+        ) AS LegalEntitlementL2L3_FundingAvailable,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LegalEntitlementL2L3'
+                THEN qf.StartDate
+            END
+        ) AS LegalEntitlementL2L3_FundingApprovalStartDate,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LegalEntitlementL2L3'
+                THEN qf.EndDate
+            END
+        ) AS LegalEntitlementL2L3_FundingApprovalEndDate,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LifelongLearningEntitlement'
+                THEN 1
+                ELSE 0
+            END
+        ) AS LifelongLearningEntitlement_FundingAvailable,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LifelongLearningEntitlement'
+                THEN qf.StartDate
+            END
+        ) AS LifelongLearningEntitlement_FundingApprovalStartDate,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LifelongLearningEntitlement'
+                THEN qf.EndDate
+            END
+        ) AS LifelongLearningEntitlement_FundingApprovalEndDate,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LocalFlexibilities'
+                THEN 1
+                ELSE 0
+            END
+        ) AS LocalFlexibilities_FundingAvailable,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LocalFlexibilities'
+                THEN qf.StartDate
+            END
+        ) AS LocalFlexibilities_FundingApprovalStartDate,
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LocalFlexibilities'
+                THEN qf.EndDate
+            END
+        ) AS LocalFlexibilities_FundingApprovalEndDate
+
     FROM funded.QualificationFundings qf
     INNER JOIN dbo.FundingOffers fo
         ON fo.Id = qf.FundingOfferId
-    INNER JOIN LatestQualifications LQ
-        ON qf.QualificationVersionId = LQ.Id
-    GROUP BY qf.QualificationVersionId
+    INNER JOIN LatestQualifications lq
+        ON lq.Id = qf.QualificationVersionId
+    GROUP BY
+        qf.QualificationVersionId
 ),
-CombinedPivotData AS (
+FundingNotes AS
+(
     SELECT
-        fa.QualificationVersionId,
-        fa.AdvancedLearnerLoans_FundingAvailable,
-        fs.AdvancedLearnerLoans_FundingApprovalStartDate,
-        fe.AdvancedLearnerLoans_FundingApprovalEndDate,
-        fa.Age1416_FundingAvailable,
-        fs.Age1416_FundingApprovalStartDate,
-        fe.Age1416_FundingApprovalEndDate,
-        fa.Age1619_FundingAvailable,
-        fs.Age1619_FundingApprovalStartDate,
-        fe.Age1619_FundingApprovalEndDate,
-        fa.DigitalEntitlement_FundingAvailable,
-        fs.DigitalEntitlement_FundingApprovalStartDate,
-        fe.DigitalEntitlement_FundingApprovalEndDate,
-        fa.L3FreeCoursesForJobs_FundingAvailable,
-        fs.L3FreeCoursesForJobs_FundingApprovalStartDate,
-        fe.L3FreeCoursesForJobs_FundingApprovalEndDate,
-        fa.LegalEntitlementEnglishandMaths_FundingAvailable,
-        fs.LegalEntitlementEnglishandMaths_FundingApprovalStartDate,
-        fe.LegalEntitlementEnglishandMaths_FundingApprovalEndDate,
-        fa.LegalEntitlementL2L3_FundingAvailable,
-        fs.LegalEntitlementL2L3_FundingApprovalStartDate,
-        fe.LegalEntitlementL2L3_FundingApprovalEndDate,
-        fa.LifelongLearningEntitlement_FundingAvailable,
-        fs.LifelongLearningEntitlement_FundingApprovalStartDate,
-        fe.LifelongLearningEntitlement_FundingApprovalEndDate,
-        fa.LocalFlexibilities_FundingAvailable,
-        fs.LocalFlexibilities_FundingApprovalStartDate,
-        fe.LocalFlexibilities_FundingApprovalEndDate
-    FROM PivotFundingAvailable fa
-    JOIN PivotStartDate fs ON fa.QualificationVersionId = fs.QualificationVersionId
-    JOIN PivotEndDate fe ON fa.QualificationVersionId = fe.QualificationVersionId
+        qf.QualificationVersionId,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'AdvancedLearnerLoans'
+                THEN CONVERT(nvarchar(4000), qf.Comments)
+            END
+        ) AS AdvancedLearnerLoans_Notes,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'Age1416'
+                THEN CONVERT(nvarchar(4000), qf.Comments)
+            END
+        ) AS Age1416_Notes,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'Age1619'
+                THEN CONVERT(nvarchar(4000), qf.Comments)
+            END
+        ) AS Age1619_Notes,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'DigitalEntitlement'
+                THEN CONVERT(nvarchar(4000), qf.Comments)
+            END
+        ) AS DigitalEntitlement_Notes,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'L3FreeCoursesForJobs'
+                THEN CONVERT(nvarchar(4000), qf.Comments)
+            END
+        ) AS L3FreeCoursesForJobs_Notes,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LegalEntitlementEnglishandMaths'
+                THEN CONVERT(nvarchar(4000), qf.Comments)
+            END
+        ) AS LegalEntitlementEnglishandMaths_Notes,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LegalEntitlementL2L3'
+                THEN CONVERT(nvarchar(4000), qf.Comments)
+            END
+        ) AS LegalEntitlementL2L3_Notes,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LifelongLearningEntitlement'
+                THEN CONVERT(nvarchar(4000), qf.Comments)
+            END
+        ) AS LifelongLearningEntitlement_Notes,
+
+        MAX
+        (
+            CASE
+                WHEN fo.Name = 'LocalFlexibilities'
+                THEN CONVERT(nvarchar(4000), qf.Comments)
+            END
+        ) AS LocalFlexibilities_Notes
+
+    FROM funded.QualificationFundings qf
+    INNER JOIN dbo.FundingOffers fo
+        ON fo.Id = qf.FundingOfferId
+    INNER JOIN LatestQualifications lq
+        ON lq.Id = qf.QualificationVersionId
+
+    WHERE qf.Comments IS NOT NULL
+      AND qf.Comments <> N''
+
+    GROUP BY
+        qf.QualificationVersionId
 )
 SELECT
     'ApprovedCompleted' AS Status,
-    latestversion.InsertedTimeStamp AS DateOfOfqualDataSnapshot,
+    latestversion.InsertedTimestamp AS DateOfOfqualDataSnapshot,
     qual.QualificationName AS Title,
     ao.NameOfqual AS OrganisationName,
     qual.Qan AS QualificationNumber,
@@ -142,47 +375,67 @@ SELECT
     latestversion.QualificationType,
     fq.Subcategory,
     latestversion.SectorSubjectArea,
-    pivotdata.AdvancedLearnerLoans_FundingAvailable,
-    pivotdata.AdvancedLearnerLoans_FundingApprovalStartDate,
-    pivotdata.AdvancedLearnerLoans_FundingApprovalEndDate,
-    onp.AdvancedLearnerLoans_Notes,
-    pivotdata.Age1416_FundingAvailable,
-    pivotdata.Age1416_FundingApprovalStartDate,
-    pivotdata.Age1416_FundingApprovalEndDate,
-    onp.Age1416_Notes,
-    pivotdata.Age1619_FundingAvailable,
-    pivotdata.Age1619_FundingApprovalStartDate,
-    pivotdata.Age1619_FundingApprovalEndDate,
-    onp.Age1619_Notes,
-    pivotdata.DigitalEntitlement_FundingAvailable,
-    pivotdata.DigitalEntitlement_FundingApprovalStartDate,
-    pivotdata.DigitalEntitlement_FundingApprovalEndDate,
-    onp.DigitalEntitlement_Notes,
-    pivotdata.L3FreeCoursesForJobs_FundingAvailable,
-    pivotdata.L3FreeCoursesForJobs_FundingApprovalStartDate,
-    pivotdata.L3FreeCoursesForJobs_FundingApprovalEndDate,
-    onp.L3FreeCoursesForJobs_Notes,
-    pivotdata.LegalEntitlementEnglishandMaths_FundingAvailable,
-    pivotdata.LegalEntitlementEnglishandMaths_FundingApprovalStartDate,
-    pivotdata.LegalEntitlementEnglishandMaths_FundingApprovalEndDate,
-    onp.LegalEntitlementEnglishandMaths_Notes,
-    pivotdata.LegalEntitlementL2L3_FundingAvailable,
-    pivotdata.LegalEntitlementL2L3_FundingApprovalStartDate,
-    pivotdata.LegalEntitlementL2L3_FundingApprovalEndDate,
-    onp.LegalEntitlementL2L3_Notes,
-    pivotdata.LifelongLearningEntitlement_FundingAvailable,
-    pivotdata.LifelongLearningEntitlement_FundingApprovalStartDate,
-    pivotdata.LifelongLearningEntitlement_FundingApprovalEndDate,
-    onp.LifelongLearningEntitlement_Notes,
-    pivotdata.LocalFlexibilities_FundingAvailable,
-    pivotdata.LocalFlexibilities_FundingApprovalStartDate,
-    pivotdata.LocalFlexibilities_FundingApprovalEndDate,
-    onp.LocalFlexibilities_Notes,
+
+    funding.AdvancedLearnerLoans_FundingAvailable,
+    funding.AdvancedLearnerLoans_FundingApprovalStartDate,
+    funding.AdvancedLearnerLoans_FundingApprovalEndDate,
+    notes.AdvancedLearnerLoans_Notes,
+
+    funding.Age1416_FundingAvailable,
+    funding.Age1416_FundingApprovalStartDate,
+    funding.Age1416_FundingApprovalEndDate,
+    notes.Age1416_Notes,
+
+    funding.Age1619_FundingAvailable,
+    funding.Age1619_FundingApprovalStartDate,
+    funding.Age1619_FundingApprovalEndDate,
+    notes.Age1619_Notes,
+
+    funding.DigitalEntitlement_FundingAvailable,
+    funding.DigitalEntitlement_FundingApprovalStartDate,
+    funding.DigitalEntitlement_FundingApprovalEndDate,
+    notes.DigitalEntitlement_Notes,
+
+    funding.L3FreeCoursesForJobs_FundingAvailable,
+    funding.L3FreeCoursesForJobs_FundingApprovalStartDate,
+    funding.L3FreeCoursesForJobs_FundingApprovalEndDate,
+    notes.L3FreeCoursesForJobs_Notes,
+
+    funding.LegalEntitlementEnglishandMaths_FundingAvailable,
+    funding.LegalEntitlementEnglishandMaths_FundingApprovalStartDate,
+    funding.LegalEntitlementEnglishandMaths_FundingApprovalEndDate,
+    notes.LegalEntitlementEnglishandMaths_Notes,
+
+    funding.LegalEntitlementL2L3_FundingAvailable,
+    funding.LegalEntitlementL2L3_FundingApprovalStartDate,
+    funding.LegalEntitlementL2L3_FundingApprovalEndDate,
+    notes.LegalEntitlementL2L3_Notes,
+
+    funding.LifelongLearningEntitlement_FundingAvailable,
+    funding.LifelongLearningEntitlement_FundingApprovalStartDate,
+    funding.LifelongLearningEntitlement_FundingApprovalEndDate,
+    notes.LifelongLearningEntitlement_Notes,
+
+    funding.LocalFlexibilities_FundingAvailable,
+    funding.LocalFlexibilities_FundingApprovalStartDate,
+    funding.LocalFlexibilities_FundingApprovalEndDate,
+    notes.LocalFlexibilities_Notes,
+
     fq.AwardingOrganisationUrl
 FROM LatestQualifications latestversion
-INNER JOIN dbo.Qualification qual ON qual.Id = latestversion.QualificationId
-INNER JOIN dbo.AwardingOrganisation ao ON ao.Id = latestversion.AwardingOrganisationId
-LEFT JOIN CombinedPivotData pivotdata ON pivotdata.QualificationVersionId = latestversion.Id
-LEFT JOIN PivotOfferNotes AS onp ON onp.QualificationVersionId = latestversion.Id
-LEFT JOIN funded.Qualifications fq ON fq.QualificationId = qual.Id
+
+INNER JOIN dbo.Qualification qual
+    ON qual.Id = latestversion.QualificationId
+
+INNER JOIN dbo.AwardingOrganisation ao
+    ON ao.Id = latestversion.AwardingOrganisationId
+
+LEFT JOIN FundingData funding
+    ON funding.QualificationVersionId = latestversion.Id
+
+LEFT JOIN FundingNotes notes
+    ON notes.QualificationVersionId = latestversion.Id
+
+LEFT JOIN funded.Qualifications fq
+    ON fq.QualificationId = qual.Id;
 GO
