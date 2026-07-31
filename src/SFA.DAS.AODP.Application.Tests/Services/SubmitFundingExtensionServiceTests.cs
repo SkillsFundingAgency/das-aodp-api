@@ -4,6 +4,7 @@ using Moq;
 using SFA.DAS.AODP.Application.Commands.Rollover;
 using SFA.DAS.AODP.Application.Services.FundingExtension;
 using SFA.DAS.AODP.Application.UnitTests.Helpers;
+using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
@@ -19,6 +20,7 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
         private readonly Mock<IQualificationDiscussionHistoryRepository> _historyRepository = new();
         private readonly Mock<ISystemClockService> _clockService = new();
         private readonly Mock<IGuidProvider> _guidProvider = new();
+        private readonly Mock<IApplicationDbContext> _dbContext = new();
         private readonly IFixture _fixture = new Fixture().Customize(new AutoMoqCustomization());
 
         private readonly SubmitFundingExtensionService _service;
@@ -36,7 +38,8 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
                 _rolloverRepository.Object,
                 _historyRepository.Object,
                 _clockService.Object,
-                _guidProvider.Object);
+                _guidProvider.Object,
+                _dbContext.Object);
         }
 
         // ------------------------------------------------------------
