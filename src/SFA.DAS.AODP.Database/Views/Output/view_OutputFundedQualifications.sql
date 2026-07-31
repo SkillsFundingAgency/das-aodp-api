@@ -285,7 +285,7 @@ FundingNotes AS
         (
             CASE
                 WHEN fo.Name = 'AdvancedLearnerLoans'
-                THEN CONVERT(nvarchar(4000), qf.Comments)
+                THEN CONVERT(nvarchar(500), qf.Comments)
             END
         ) AS AdvancedLearnerLoans_Notes,
 
@@ -293,7 +293,7 @@ FundingNotes AS
         (
             CASE
                 WHEN fo.Name = 'Age1416'
-                THEN CONVERT(nvarchar(4000), qf.Comments)
+                THEN CONVERT(nvarchar(500), qf.Comments)
             END
         ) AS Age1416_Notes,
 
@@ -301,7 +301,7 @@ FundingNotes AS
         (
             CASE
                 WHEN fo.Name = 'Age1619'
-                THEN CONVERT(nvarchar(4000), qf.Comments)
+                THEN CONVERT(nvarchar(500), qf.Comments)
             END
         ) AS Age1619_Notes,
 
@@ -309,7 +309,7 @@ FundingNotes AS
         (
             CASE
                 WHEN fo.Name = 'DigitalEntitlement'
-                THEN CONVERT(nvarchar(4000), qf.Comments)
+                THEN CONVERT(nvarchar(500), qf.Comments)
             END
         ) AS DigitalEntitlement_Notes,
 
@@ -317,7 +317,7 @@ FundingNotes AS
         (
             CASE
                 WHEN fo.Name = 'L3FreeCoursesForJobs'
-                THEN CONVERT(nvarchar(4000), qf.Comments)
+                THEN CONVERT(nvarchar(500), qf.Comments)
             END
         ) AS L3FreeCoursesForJobs_Notes,
 
@@ -325,7 +325,7 @@ FundingNotes AS
         (
             CASE
                 WHEN fo.Name = 'LegalEntitlementEnglishandMaths'
-                THEN CONVERT(nvarchar(4000), qf.Comments)
+                THEN CONVERT(nvarchar(500), qf.Comments)
             END
         ) AS LegalEntitlementEnglishandMaths_Notes,
 
@@ -333,7 +333,7 @@ FundingNotes AS
         (
             CASE
                 WHEN fo.Name = 'LegalEntitlementL2L3'
-                THEN CONVERT(nvarchar(4000), qf.Comments)
+                THEN CONVERT(nvarchar(500), qf.Comments)
             END
         ) AS LegalEntitlementL2L3_Notes,
 
@@ -341,7 +341,7 @@ FundingNotes AS
         (
             CASE
                 WHEN fo.Name = 'LifelongLearningEntitlement'
-                THEN CONVERT(nvarchar(4000), qf.Comments)
+                THEN CONVERT(nvarchar(500), qf.Comments)
             END
         ) AS LifelongLearningEntitlement_Notes,
 
@@ -349,7 +349,7 @@ FundingNotes AS
         (
             CASE
                 WHEN fo.Name = 'LocalFlexibilities'
-                THEN CONVERT(nvarchar(4000), qf.Comments)
+                THEN CONVERT(nvarchar(500), qf.Comments)
             END
         ) AS LocalFlexibilities_Notes
 
