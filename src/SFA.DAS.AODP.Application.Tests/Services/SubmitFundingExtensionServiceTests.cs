@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoMoq;
+using Microsoft.EntityFrameworkCore.Storage;
 using Moq;
 using SFA.DAS.AODP.Application.Commands.Rollover;
 using SFA.DAS.AODP.Application.Services.FundingExtension;
@@ -40,6 +41,14 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
                 _clockService.Object,
                 _guidProvider.Object,
                 _dbContext.Object);
+
+            var transactionMock = new Mock<IDbContextTransaction>();
+
+            transactionMock.Setup(t => t.Rollback());
+            transactionMock.Setup(t => t.CommitAsync());
+
+            var transaction = transactionMock.Object;
+            _dbContext.Setup(o => o.StartTransactionAsync()).ReturnsAsync(transaction);
         }
 
         // ------------------------------------------------------------

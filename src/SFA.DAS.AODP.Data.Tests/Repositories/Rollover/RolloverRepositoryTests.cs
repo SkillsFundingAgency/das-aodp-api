@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoMoq;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Offer;
@@ -22,12 +23,17 @@ public class RolloverRepositoryTests
 
     private static ApplicationDbContext CreateDb(string name)
     {
+        var connection = new SqliteConnection("DataSource=:memory:");
+        connection.Open();
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase($"{name}_{Guid.NewGuid()}")
-            .EnableSensitiveDataLogging()
+            .UseSqlite(connection)
             .Options;
 
-        return new ApplicationDbContext(options);
+        var context = new ApplicationDbContext(options);
+        context.Database.EnsureCreated();
+        context.Database.ExecuteSqlRaw("PRAGMA foreign_keys = OFF;");
+
+        return context;
     }
 
 
