@@ -361,11 +361,7 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
 
     public async Task DeleteAllWorkflowCandidatesAsync(CancellationToken cancellationToken)
     {
-        var items = await context.RolloverWorkflowCandidates
-            .ToListAsync(cancellationToken);
-
-        context.RolloverWorkflowCandidates.RemoveRange(items);
-        await context.SaveChangesAsync(cancellationToken);
+        await context.RolloverWorkflowCandidates.ExecuteDeleteAsync(cancellationToken);
     }
 
     public async Task<Guid?> GetLatestWorkflowRunIdAsync(CancellationToken cancellationToken)

@@ -1,5 +1,6 @@
 ﻿using SFA.DAS.AODP.Application.Commands.Rollover;
 using SFA.DAS.AODP.Application.Constants;
+using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
@@ -16,15 +17,17 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
         private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
         private readonly ISystemClockService _clockService;
         private readonly IGuidProvider _guidProvider;
+        private readonly IApplicationDbContext _dbContext;
         private Guid RolloverExtendedActionTypeId = Guid.Parse("00000000-0000-0000-0000-000000000004");
         private Guid RolloverNotExtendedActionTypeId = Guid.Parse("00000000-0000-0000-0000-000000000005");
 
-        public SubmitFundingExtensionService(IRolloverRepository rolloverRepository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository, ISystemClockService clockService, IGuidProvider guidProvider)
+        public SubmitFundingExtensionService(IRolloverRepository rolloverRepository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository, ISystemClockService clockService, IGuidProvider guidProvider, IApplicationDbContext dbContext)
         {
             _rolloverRepository = rolloverRepository;
             _qualificationDiscussionHistoryRepository = qualificationDiscussionHistoryRepository;
             _clockService = clockService;
             _guidProvider = guidProvider;
+            _dbContext = dbContext;
         }
 
         public async Task<bool> Submit(
@@ -33,6 +36,8 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
             List<QualificationFundings> fundings,
             CancellationToken cancellationToken)
         {
+            await using var transaction = await _dbContext.StartTransactionAsync();
+
             try
             {
                 ApplyCandidateAndFundingUpdates(candidates, inputItems, fundings);
@@ -41,10 +46,13 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
 
                 await _rolloverRepository.DeleteAllWorkflowCandidatesAsync(cancellationToken);
 
+                await transaction.CommitAsync(cancellationToken);
+
                 return true;
             }
             catch
             {
+                await transaction.RollbackAsync(cancellationToken);
                 return false;
             }
         }
