@@ -1,273 +1,275 @@
-﻿using AutoFixture;
+using AutoFixture;
 using AutoFixture.AutoMoq;
-using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.AODP.Application.Commands.Rollover;
 using SFA.DAS.AODP.Application.Services.FundingExtension;
+using SFA.DAS.AODP.Application.UnitTests;
 using SFA.DAS.AODP.Application.UnitTests.Helpers;
-using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
-using SFA.DAS.AODP.Data.Repositories.Qualification;
-using SFA.DAS.AODP.Data.Repositories.Rollover;
+using SFA.DAS.AODP.Data.Repositories.FundingExtension;
 using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
 using SFA.DAS.AODP.Models.Rollover;
+using Shouldly;
 
-namespace SFA.DAS.AODP.Application.Tests.Services.Rollover
+namespace SFA.DAS.AODP.Application.Tests.Services.Rollover;
+
+public class SubmitFundingExtensionServiceTests : UnitTest
 {
-    public class SubmitFundingExtensionServiceTests
+    private readonly Mock<IFundingExtensionPersistenceRepository> _persistenceRepository = new();
+    private readonly Mock<ISystemClockService> _clockService = new();
+    private readonly Mock<IGuidProvider> _guidProvider = new();
+    private readonly Mock<ILogger<SubmitFundingExtensionService>> _logger = new();
+    private readonly IFixture _fixture = new Fixture().Customize(new AutoMoqCustomization());
+    private readonly SubmitFundingExtensionService _service;
+
+    public SubmitFundingExtensionServiceTests()
     {
-        private readonly Mock<IRolloverRepository> _rolloverRepository = new();
-        private readonly Mock<IQualificationDiscussionHistoryRepository> _historyRepository = new();
-        private readonly Mock<ISystemClockService> _clockService = new();
-        private readonly Mock<IGuidProvider> _guidProvider = new();
-        private readonly Mock<IApplicationDbContext> _dbContext = new();
-        private readonly IFixture _fixture = new Fixture().Customize(new AutoMoqCustomization());
+        _fixture.Behaviors
+            .OfType<ThrowingRecursionBehavior>()
+            .ToList()
+            .ForEach(behavior => _fixture.Behaviors.Remove(behavior));
 
-        private readonly SubmitFundingExtensionService _service;
+        _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-        public SubmitFundingExtensionServiceTests()
+        _service = new SubmitFundingExtensionService(
+            _persistenceRepository.Object,
+            _clockService.Object,
+            _guidProvider.Object,
+            _logger.Object);
+    }
+
+    [Fact]
+    public async Task Submit_WhenCandidateIsExtended_PersistsCandidateFundingAndHistory()
+    {
+        // Arrange
+        var item = new FundingExtensionItem
         {
-            _fixture.Behaviors
-                .OfType<ThrowingRecursionBehavior>()
-                .ToList()
-                .ForEach(b => _fixture.Behaviors.Remove(b));
+            Qan = "111",
+            FundingStreamName = "FS",
+            RolloverStatus = "Extended",
+            ProposedFundingApprovalEndDate = new DateTime(2027, 10, 6),
+            Comments = "Test comment"
+        };
 
-            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-
-            _service = new SubmitFundingExtensionService(
-                _rolloverRepository.Object,
-                _historyRepository.Object,
-                _clockService.Object,
-                _guidProvider.Object,
-                _dbContext.Object);
-
-            var transactionMock = new Mock<IDbContextTransaction>();
-
-            transactionMock.Setup(t => t.Rollback());
-            transactionMock.Setup(t => t.CommitAsync());
-
-            var transaction = transactionMock.Object;
-            _dbContext.Setup(o => o.StartTransactionAsync()).ReturnsAsync(transaction);
-        }
-
-        // ------------------------------------------------------------
-        // SUCCESS — EXTENDED STATUS UPDATES FUNDING + CANDIDATE
-        // ------------------------------------------------------------
-        [Fact]
-        public async Task Submit_Extended_UpdatesCandidateAndFunding_AndCreatesHistory()
+        var historyId = Guid.NewGuid();
+        var qualificationId = Guid.NewGuid();
+        var qualificationVersionId = Guid.NewGuid();
+        var timestamp = new DateTime(2026, 10, 1, 12, 0, 0);
+        var candidate = CandidateHelper.BuildCandidate(
+            _fixture,
+            item.Qan,
+            item.FundingStreamName,
+            qualificationVersionId,
+            qualificationId);
+        var funding = new QualificationFundings
         {
-            // Arrange
-            var item = new FundingExtensionItem
+            QualificationVersionId = qualificationVersionId,
+            QualificationVersion = new QualificationVersions
             {
-                Qan = "111",
-                FundingStreamName = "FS",
-                RolloverStatus = "Extended",
-                ProposedFundingApprovalEndDate = new DateTime(2027, 10, 06, 00,00, 00),
-                Comments = "Test comment"
-            };
+                Id = qualificationVersionId,
+                QualificationId = qualificationId
+            },
+            FundingOfferId = candidate.FundingOfferId
+        };
 
-            var historyId = Guid.NewGuid();
-            var qualificationId = Guid.NewGuid();
-            var qualificationVersionId = Guid.NewGuid();
-            var timestamp = new DateTime(2026, 10, 01, 12, 00, 00);
+        IReadOnlyCollection<RolloverCandidates>? persistedCandidates = null;
+        IReadOnlyCollection<QualificationFundings>? persistedFundings = null;
+        IReadOnlyCollection<QualificationDiscussionHistory>? persistedHistories = null;
 
-            var candidate = CandidateHelper.BuildCandidate(_fixture, item.Qan, item.FundingStreamName, qualificationVersionId, qualificationId);
-
-            var funding = new QualificationFundings
-            {
-                EndDate = new DateOnly(2027, 10, 06),
-                QualificationVersionId = qualificationVersionId,
-                QualificationVersion = new QualificationVersions
+        _guidProvider.Setup(provider => provider.NewGuid()).Returns(historyId);
+        _clockService.Setup(service => service.UtcNow).Returns(timestamp);
+        _persistenceRepository
+            .Setup(repository => repository.PersistAsync(
+                It.IsAny<IReadOnlyCollection<RolloverCandidates>>(),
+                It.IsAny<IReadOnlyCollection<QualificationFundings>>(),
+                It.IsAny<IReadOnlyCollection<QualificationDiscussionHistory>>(),
+                CancellationToken))
+            .Callback<IReadOnlyCollection<RolloverCandidates>, IReadOnlyCollection<QualificationFundings>,
+                IReadOnlyCollection<QualificationDiscussionHistory>, CancellationToken>(
+                (candidates, fundings, histories, _) =>
                 {
-                    Id = qualificationVersionId,
-                    QualificationId = qualificationId
-                },
-                FundingOfferId = candidate.FundingOfferId
-            };
+                    persistedCandidates = candidates;
+                    persistedFundings = fundings;
+                    persistedHistories = histories;
+                })
+            .Returns(Task.CompletedTask);
 
-            var candidates = new List<RolloverCandidates> { candidate };
-            var fundings = new List<QualificationFundings> { funding };
+        // Act
+        var result = await _service.Submit([candidate], [item], [funding], CancellationToken);
 
-            _guidProvider.Setup(o => o.NewGuid()).Returns(historyId);
-            _clockService.Setup(o => o.UtcNow).Returns(timestamp);
+        // Assert
+        result.ShouldBeTrue();
+        persistedCandidates.ShouldBe([candidate]);
+        persistedFundings.ShouldBe([funding]);
+        persistedHistories.ShouldNotBeNull();
+        persistedHistories.Single().ShouldBeEquivalentTo(new QualificationDiscussionHistory
+        {
+            Id = historyId,
+            QualificationId = qualificationId,
+            UserDisplayName = "Rollover System",
+            Title = "Rollover Funding Decision",
+            Timestamp = timestamp,
+            Notes = "FS extended to 06-10-2027",
+            ActionTypeId = Guid.Parse("00000000-0000-0000-0000-000000000004")
+        });
+        candidate.RolloverStatus.ShouldBe(RolloverStatus.Extended);
+        funding.EndDate.ShouldBe(new DateOnly(2027, 10, 6));
+        funding.Comments.ShouldBe(item.Comments);
+    }
 
-            var expectedQualificationDiscussionHistories = new List<QualificationDiscussionHistory>
-            {
-                new QualificationDiscussionHistory
+    [Fact]
+    public async Task Submit_WhenCandidateIsExcluded_PersistsCandidateAndHistoryWithoutFunding()
+    {
+        // Arrange
+        var item = new FundingExtensionItem
+        {
+            Qan = "111",
+            FundingStreamName = "FS",
+            RolloverStatus = "Excluded",
+            ExclusionReason = "Bad data"
+        };
+        var candidate = CandidateHelper.BuildCandidate(_fixture, item.Qan, item.FundingStreamName);
+        IReadOnlyCollection<QualificationFundings>? persistedFundings = null;
+        IReadOnlyCollection<QualificationDiscussionHistory>? persistedHistories = null;
+
+        _persistenceRepository
+            .Setup(repository => repository.PersistAsync(
+                It.Is<IReadOnlyCollection<RolloverCandidates>>(values => values.Count == 1),
+                It.IsAny<IReadOnlyCollection<QualificationFundings>>(),
+                It.IsAny<IReadOnlyCollection<QualificationDiscussionHistory>>(),
+                CancellationToken))
+            .Callback<IReadOnlyCollection<RolloverCandidates>, IReadOnlyCollection<QualificationFundings>,
+                IReadOnlyCollection<QualificationDiscussionHistory>, CancellationToken>(
+                (_, fundings, histories, _) =>
                 {
-                    Id = historyId,
-                    QualificationId = qualificationId,
-                    UserDisplayName = "Rollover System",
-                    Title = "Rollover Funding Decision",
-                    Timestamp = timestamp,
-                    Notes = "FS extended to 06-10-2027",
-                    ActionTypeId = Guid.Parse("00000000-0000-0000-0000-000000000004")
-                }
-            };
+                    persistedFundings = fundings;
+                    persistedHistories = histories;
+                })
+            .Returns(Task.CompletedTask);
 
-            // Act
-            var result = await _service.Submit(candidates, [item], fundings, CancellationToken.None);
+        // Act
+        var result = await _service.Submit([candidate], [item], [], CancellationToken);
 
-            // Assert
-            Assert.True(result);
+        // Assert
+        result.ShouldBeTrue();
+        candidate.RolloverStatus.ShouldBe(RolloverStatus.Excluded);
+        candidate.ExclusionReason.ShouldBe("Bad data");
+        persistedFundings.ShouldBeEmpty();
+        persistedHistories.ShouldNotBeNull();
+        persistedHistories.Count.ShouldBe(1);
+        persistedHistories.Single().Notes.ShouldBe("FS was not extended due to Bad data");
+    }
 
-            Assert.Equal(RolloverStatus.Extended, candidate.RolloverStatus);
-            Assert.Equal(item.ProposedFundingApprovalEndDate.Date, funding.EndDate?.ToDateTime(TimeOnly.MinValue).Date);
-            Assert.Equal(item.Comments, funding.Comments);
-
-            _historyRepository.Verify(h =>
-                h.AddDiscussionHistories(expectedQualificationDiscussionHistories),
-                Times.Once);
-
-            _rolloverRepository.Verify(r => r.DeleteAllWorkflowCandidatesAsync(It.IsAny<CancellationToken>()), Times.Once);
-        }
-
-        // ------------------------------------------------------------
-        // SUCCESS — EXCLUDED STATUS UPDATES CANDIDATE + HISTORY
-        // ------------------------------------------------------------
-        [Fact]
-        public async Task Submit_Excluded_SetsExcluded_AndCreatesHistory()
+    [Fact]
+    public async Task Submit_WhenStatusesAreMixed_CreatesTwoHistoryEntries()
+    {
+        // Arrange
+        var extendedItem = new FundingExtensionItem
         {
-            // Arrange
-            var item = new FundingExtensionItem
-            {
-                Qan = "111",
-                FundingStreamName = "FS",
-                RolloverStatus = "Excluded",
-                ExclusionReason = "Bad data"
-            };
-
-            var candidate = CandidateHelper.BuildCandidate(_fixture, item.Qan, item.FundingStreamName);
-            var funding = new QualificationFundings
-            {
-                QualificationVersionId = candidate.QualificationVersionId,
-                FundingOfferId = candidate.FundingOfferId
-            };
-
-            var candidates = new List<RolloverCandidates> { candidate };
-            var fundings = new List<QualificationFundings> { funding };
-
-            // Act
-            var result = await _service.Submit(candidates, [item], fundings, CancellationToken.None);
-
-            // Assert
-            Assert.True(result);
-
-            Assert.Equal(RolloverStatus.Excluded, candidate.RolloverStatus);
-            Assert.Equal("Bad data", candidate.ExclusionReason);
-
-            _historyRepository.Verify(h =>
-                h.AddDiscussionHistories(It.Is<List<QualificationDiscussionHistory>>(l => l.Count == 1)),
-                Times.Once);
-        }
-
-        // ------------------------------------------------------------
-        // MIXED — EXTENDED + EXCLUDED → TWO HISTORY ENTRIES
-        // ------------------------------------------------------------
-        [Fact]
-        public async Task Submit_MixedStatuses_CreatesTwoHistoryEntries()
+            Qan = "111",
+            FundingStreamName = "FS1",
+            RolloverStatus = "Extended",
+            ProposedFundingApprovalEndDate = new DateTime(2027, 10, 6)
+        };
+        var excludedItem = new FundingExtensionItem
         {
-            // Arrange
-            var item1 = new FundingExtensionItem
-            {
-                Qan = "111",
-                FundingStreamName = "FS1",
-                RolloverStatus = "Extended",
-                ProposedFundingApprovalEndDate = DateTime.UtcNow.AddYears(1)
-            };
-
-            var item2 = new FundingExtensionItem
-            {
-                Qan = "222",
-                FundingStreamName = "FS2",
-                RolloverStatus = "Excluded",
-                ExclusionReason = "Reason"
-            };
-
-            var candidate1 = CandidateHelper.BuildCandidate(_fixture, item1.Qan, item1.FundingStreamName);
-            var candidate2 = CandidateHelper.BuildCandidate(_fixture, item2.Qan, item2.FundingStreamName);
-
-            // Same qualification → grouped together
-            candidate2.QualificationVersion.QualificationId = candidate1.QualificationVersion.QualificationId;
-
-            var funding1 = new QualificationFundings
-            {
-                QualificationVersionId = candidate1.QualificationVersionId,
-                FundingOfferId = candidate1.FundingOfferId
-            };
-
-            var candidates = new List<RolloverCandidates> { candidate1, candidate2 };
-            var fundings = new List<QualificationFundings> { funding1 };
-
-            // Act
-            var result = await _service.Submit(candidates, [item1, item2], fundings, CancellationToken.None);
-
-            // Assert
-            Assert.True(result);
-
-            _historyRepository.Verify(h =>
-                h.AddDiscussionHistories(It.Is<List<QualificationDiscussionHistory>>(l => l.Count == 2)),
-                Times.Once);
-        }
-
-        // ------------------------------------------------------------
-        // NO MATCHING INPUT → NO UPDATES, NO HISTORY
-        // ------------------------------------------------------------
-        [Fact]
-        public async Task Submit_NoMatchingInput_DoesNothing_ReturnsTrue()
+            Qan = "222",
+            FundingStreamName = "FS2",
+            RolloverStatus = "Excluded",
+            ExclusionReason = "Reason"
+        };
+        var extendedCandidate = CandidateHelper.BuildCandidate(
+            _fixture,
+            extendedItem.Qan,
+            extendedItem.FundingStreamName);
+        var excludedCandidate = CandidateHelper.BuildCandidate(
+            _fixture,
+            excludedItem.Qan,
+            excludedItem.FundingStreamName);
+        excludedCandidate.QualificationVersion.QualificationId =
+            extendedCandidate.QualificationVersion.QualificationId;
+        var funding = new QualificationFundings
         {
-            // Arrange
-            var candidate = CandidateHelper.BuildCandidate(_fixture, "111", "FS");
-            var funding = new QualificationFundings
-            {
-                QualificationVersionId = candidate.QualificationVersionId,
-                FundingOfferId = candidate.FundingOfferId
-            };
+            QualificationVersionId = extendedCandidate.QualificationVersionId,
+            FundingOfferId = extendedCandidate.FundingOfferId
+        };
 
-            // Input does not match candidate
-            var item = new FundingExtensionItem
-            {
-                Qan = "XXX",
-                FundingStreamName = "YYY",
-                RolloverStatus = "Extended"
-            };
+        _persistenceRepository
+            .Setup(repository => repository.PersistAsync(
+                It.Is<IReadOnlyCollection<RolloverCandidates>>(values => values.Count == 2),
+                It.Is<IReadOnlyCollection<QualificationFundings>>(values => values.Count == 1),
+                It.Is<IReadOnlyCollection<QualificationDiscussionHistory>>(values => values.Count == 2),
+                CancellationToken))
+            .Returns(Task.CompletedTask);
 
-            // Act
-            var result = await _service.Submit([candidate], [item], [funding], CancellationToken.None);
+        // Act
+        var result = await _service.Submit(
+            [extendedCandidate, excludedCandidate],
+            [extendedItem, excludedItem],
+            [funding],
+            CancellationToken);
 
-            // Assert
-            Assert.True(result);
+        // Assert
+        result.ShouldBeTrue();
+        _persistenceRepository.VerifyAll();
+    }
 
-            Assert.Equal(RolloverStatus.None, candidate.RolloverStatus);
-
-            _historyRepository.Verify(h => h.AddDiscussionHistories(It.IsAny<List<QualificationDiscussionHistory>>()), Times.Once);
-        }
-
-        // ------------------------------------------------------------
-        // EXCEPTION → RETURNS FALSE
-        // ------------------------------------------------------------
-        [Fact]
-        public async Task Submit_ExceptionThrown_ReturnsFalse()
+    [Fact]
+    public async Task Submit_WhenInputDoesNotMatch_PersistsEmptyChangesToCompleteWorkflow()
+    {
+        // Arrange
+        var candidate = CandidateHelper.BuildCandidate(_fixture, "111", "FS");
+        var item = new FundingExtensionItem
         {
-            // Arrange
-            var candidate = CandidateHelper.BuildCandidate(_fixture, "111", "FS");
-            var funding = new QualificationFundings
-            {
-                QualificationVersionId = candidate.QualificationVersionId,
-                FundingOfferId = candidate.FundingOfferId
-            };
+            Qan = "XXX",
+            FundingStreamName = "YYY",
+            RolloverStatus = "Extended"
+        };
 
-            _historyRepository
-                .Setup(h => h.AddDiscussionHistories(It.IsAny<List<QualificationDiscussionHistory>>()))
-                .Throws(new Exception("Boom"));
+        _persistenceRepository
+            .Setup(repository => repository.PersistAsync(
+                It.Is<IReadOnlyCollection<RolloverCandidates>>(values => values.Count == 0),
+                It.Is<IReadOnlyCollection<QualificationFundings>>(values => values.Count == 0),
+                It.Is<IReadOnlyCollection<QualificationDiscussionHistory>>(values => values.Count == 0),
+                CancellationToken))
+            .Returns(Task.CompletedTask);
 
-            // Act
-            var result = await _service.Submit([candidate], [], [funding], CancellationToken.None);
+        // Act
+        var result = await _service.Submit([candidate], [item], [], CancellationToken);
 
-            // Assert
-            Assert.False(result);
-        }
+        // Assert
+        result.ShouldBeTrue();
+        candidate.RolloverStatus.ShouldBe(RolloverStatus.None);
+        _persistenceRepository.VerifyAll();
+    }
 
+    [Fact]
+    public async Task Submit_WhenPersistenceThrows_ReturnsFalse()
+    {
+        // Arrange
+        _persistenceRepository
+            .Setup(repository => repository.PersistAsync(
+                It.IsAny<IReadOnlyCollection<RolloverCandidates>>(),
+                It.IsAny<IReadOnlyCollection<QualificationFundings>>(),
+                It.IsAny<IReadOnlyCollection<QualificationDiscussionHistory>>(),
+                CancellationToken))
+            .ThrowsAsync(new InvalidOperationException("Boom"));
+
+        // Act
+        var result = await _service.Submit([], [], [], CancellationToken);
+
+        // Assert
+        result.ShouldBeFalse();
+        _logger.Verify(
+            logger => logger.Log(
+                LogLevel.Error,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((state, _) =>
+                    state.ToString()!.Contains("Funding-extension processing failed")),
+                It.IsAny<Exception>(),
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
     }
 }
