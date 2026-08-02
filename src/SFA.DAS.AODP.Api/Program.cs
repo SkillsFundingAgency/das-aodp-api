@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Mvc.Authorization;
+﻿using Microsoft.AspNetCore.Mvc.Authorization;
 using SFA.DAS.AODP.Api.Extensions;
 using SFA.DAS.AODP.Application.Commands.FormBuilder.Forms;
 using SFA.DAS.AODP.Application.Queries.Qualifications;
@@ -32,12 +31,6 @@ public static class Program
             .AddHealthChecks();
 
         builder.Services.AddAuthentication(configuration);
-
-        builder.Services.Configure<FormOptions>(options =>
-        {
-            // Rollover submissions can contain 10,000 candidates with several fields each.
-            options.ValueCountLimit = 100_000;
-        });
 
         builder.Services.AddControllers(options =>
         {
