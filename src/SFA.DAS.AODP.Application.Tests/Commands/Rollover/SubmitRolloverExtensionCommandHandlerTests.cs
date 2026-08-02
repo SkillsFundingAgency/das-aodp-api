@@ -15,7 +15,6 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
         private readonly Mock<IRolloverRepository> _rolloverRepository = new();
         private readonly Mock<IRolloverFundingUpdateRepository> _fundingUpdateRepository = new();
         private readonly Mock<ISubmitFundingExtensionService> _applyService = new();
-        private readonly Mock<IFundingChangeCoordinator> _fundingChangeCoordinator = new();
         private readonly Mock<IRolloverFundingEligibilityRepository> _fundingEligibilityRepository = new();
         private readonly IFixture _fixture = new Fixture().Customize(new AutoMoqCustomization());
 
@@ -29,14 +28,6 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
                 .ForEach(b => _fixture.Behaviors.Remove(b));
 
             _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-
-            _fundingChangeCoordinator
-                .Setup(x => x.ExecuteAsync(
-                    It.IsAny<FundingChangeSet>(),
-                    It.IsAny<Func<CancellationToken, Task<bool>>>(),
-                    It.IsAny<CancellationToken>()))
-                .Returns((FundingChangeSet _, Func<CancellationToken, Task<bool>> mutation, CancellationToken ct) =>
-                    mutation(ct));
 
             _fundingEligibilityRepository
                 .Setup(x => x.GetAsync(
@@ -56,7 +47,6 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
                 _rolloverRepository.Object,
                 _fundingUpdateRepository.Object,
                 _applyService.Object,
-                _fundingChangeCoordinator.Object,
                 _fundingEligibilityRepository.Object);
         }
 
@@ -108,9 +98,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             Assert.True(result.Success);
             Assert.Equal("Funding extensions applied.", result.Value.ResultMessage);
 
-            _fundingChangeCoordinator.Verify(r => r.ExecuteAsync(
-                It.IsAny<FundingChangeSet>(),
-                It.IsAny<Func<CancellationToken, Task<bool>>>(),
+            _rolloverRepository.Verify(r => r.SaveChangesAsync(
                 It.IsAny<CancellationToken>()), Times.Once);
         }
 
@@ -239,10 +227,8 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             Assert.Equal(
                 "One or more rollover candidates are no longer backed by applicable funding.",
                 result.ErrorMessage);
-            _fundingChangeCoordinator.Verify(x => x.ExecuteAsync(
-                It.IsAny<FundingChangeSet>(),
-                It.IsAny<Func<CancellationToken, Task<bool>>>(),
-                It.IsAny<CancellationToken>()), Times.Once);
+            _rolloverRepository.Verify(x => x.SaveChangesAsync(
+                It.IsAny<CancellationToken>()), Times.Never);
             _applyService.Verify(x => x.Submit(
                 It.IsAny<List<RolloverCandidates>>(),
                 It.IsAny<List<FundingExtensionItem>>(),

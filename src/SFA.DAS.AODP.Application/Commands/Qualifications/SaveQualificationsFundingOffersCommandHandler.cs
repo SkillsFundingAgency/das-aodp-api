@@ -1,11 +1,8 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Data.Entities.Qualification;
-using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Repositories.FundingOffer;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
-using SFA.DAS.AODP.Data.Repositories.Rollover;
 using SFA.DAS.AODP.Infrastructure.Extensions;
-using SFA.DAS.AODP.Models.Rollover;
 using System.Text;
 
 namespace SFA.DAS.AODP.Application.Commands.Qualifications
@@ -16,22 +13,16 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
         private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
         private readonly IFundingOfferRepository _fundingOfferRepository;
         private readonly IQualificationsRepository _qualificationsRepository;
-        private readonly IFundingChangeCoordinator _fundingChangeCoordinator;
-
-
-
         public SaveQualificationsFundingOffersCommandHandler(
             IQualificationFundingsRepository repository,
             IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository,
             IFundingOfferRepository fundingOfferRepository,
-            IQualificationsRepository qualificationsRepository,
-            IFundingChangeCoordinator fundingChangeCoordinator)
+            IQualificationsRepository qualificationsRepository)
         {
             _qualificationFundingsrepository = repository;
             _qualificationDiscussionHistoryRepository = qualificationDiscussionHistoryRepository;
             _fundingOfferRepository = fundingOfferRepository;
             _qualificationsRepository = qualificationsRepository;
-            _fundingChangeCoordinator = fundingChangeCoordinator;
         }
 
         public async Task<BaseMediatrResponse<EmptyResponse>> Handle(SaveQualificationsFundingOffersCommand request, CancellationToken cancellationToken)
@@ -49,34 +40,19 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                 foreach (var offerId in request.SelectedOfferIds)
                 {
                     var offer = qualificationfundedOffers.FirstOrDefault(a => a.FundingOfferId == offerId);
-                    if (offer == null) create.Add(new()
+                    if (offer == null)
                     {
-                        QualificationVersionId = request.QualificationVersionId,
-                        FundingOfferId = offerId,
-                        StartDate = operationalStartDate
-                    });
+                        create.Add(QualificationFundings.Create(
+                            request.QualificationVersionId,
+                            offerId,
+                            operationalStartDate,
+                            null));
+                    }
                 }
 
-                var changedFundingKeys = create
-                    .Select(x => x.FundingOfferId)
-                    .Distinct()
-                    .Select(fundingOfferId => new FundingChangeKey(
-                        RolloverSourceTypes.Ofqual,
-                        request.QualificationVersionId,
-                        fundingOfferId))
-                    .ToList();
-
-                if (changedFundingKeys.Count > 0)
+                if (create.Count > 0)
                 {
-                    await _fundingChangeCoordinator.ExecuteAsync(
-                        FundingChangeSet.Create(changedFundingKeys),
-                        async _ =>
-                        {
-                            await _qualificationFundingsrepository.CreateAsync(create);
-
-                            return true;
-                        },
-                        cancellationToken);
+                    await _qualificationFundingsrepository.CreateAsync(create);
                 }
 
                 if (request.UpdateDiscussionHistory == true)

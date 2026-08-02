@@ -68,11 +68,10 @@ public class RolloverFundingUpdateRepository : IRolloverFundingUpdateRepository
                     funding.FundingOfferId,
                     key.AcademicYear,
                     funding.EndDate,
-                    (endDate, comments, _) =>
-                    {
-                        funding.EndDate = endDate;
-                        funding.Comments = comments;
-                    }))
+                    (endDate, comments, _) => funding.UpdateFunding(
+                        funding.StartDate,
+                        endDate,
+                        comments)))
             .ToList();
     }
 

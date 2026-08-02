@@ -6,10 +6,7 @@ using SFA.DAS.AODP.Models.Settings;
 using System.Globalization;
 using System.Text;
 using SFA.DAS.AODP.Data.Repositories.QaaQualification;
-using SFA.DAS.AODP.Data.Repositories.Rollover;
-using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Providers;
-using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualifications;
 
@@ -21,7 +18,6 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
     private readonly OutputFileBlobStorageSettings _storageSettings;
     private readonly IQaaQualificationRepository _qaaQualificationRepository;
     private readonly IQaaFundingApprovalEndDateCalculator _qaaFundingApprovalEndDateCalculator;
-    private readonly IFundingChangeCoordinator _fundingChangeCoordinator;
 
     public const string NoQualificationsFound = "No qualifications found for the output file.";
     public const string UnexpectedErrorGeneratingFile = "An unexpected error occurred while generating the output file.";
@@ -31,8 +27,7 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
         IBlobStorageService blobStorageService,
         OutputFileBlobStorageSettings blobStorageSettings,
         IQaaQualificationRepository qaaQualificationRepository,
-        IQaaFundingApprovalEndDateCalculator qaaFundingApprovalEndDateCalculator,
-        IFundingChangeCoordinator fundingChangeCoordinator)
+        IQaaFundingApprovalEndDateCalculator qaaFundingApprovalEndDateCalculator)
     {
         _outputFileRepository = outputFileRepository;
         _outputFileLogRepository = outputFileLogRepository;
@@ -40,7 +35,6 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
         _storageSettings = blobStorageSettings;
         _qaaQualificationRepository = qaaQualificationRepository;
         _qaaFundingApprovalEndDateCalculator = qaaFundingApprovalEndDateCalculator;
-        _fundingChangeCoordinator = fundingChangeCoordinator;
     }
 
     public async Task<BaseMediatrResponse<GetQualificationOutputFileResponse>> Handle(
@@ -60,38 +54,15 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
 
             if (qaaQualificationsToRecalculate.Count > 0)
             {
-                var academicYear = GetAcademicYear(request.PublicationDate);
-                var qaaFundingStreams = new[]
+                foreach (var qaaQualification in qaaQualificationsToRecalculate)
                 {
-                    FundingStream.Age1619,
-                    FundingStream.AdvancedLearnerLoans,
-                    FundingStream.LegalEntitlementL2L3
-                };
-                var changeSet = FundingChangeSet.Create(
-                    from qualification in qaaQualificationsToRecalculate
-                    from fundingStream in qaaFundingStreams
-                    select new FundingChangeKey(
-                        RolloverSourceTypes.Qaa,
-                        qualification.Id,
-                        fundingStream.Id,
-                        academicYear));
+                    await qaaQualification.SetFundingApprovalEndDateAsync(
+                        request.PublicationDate,
+                        _qaaFundingApprovalEndDateCalculator,
+                        cancellationToken);
+                }
 
-                await _fundingChangeCoordinator.ExecuteAsync(
-                    changeSet,
-                    async ct =>
-                    {
-                        foreach (var qaaQualification in qaaQualificationsToRecalculate)
-                        {
-                            await qaaQualification.SetFundingApprovalEndDateAsync(
-                                request.PublicationDate,
-                                _qaaFundingApprovalEndDateCalculator,
-                                ct);
-                        }
-
-                        await _qaaQualificationRepository.SaveChangesAsync(ct);
-                        return true;
-                    },
-                    cancellationToken);
+                await _qaaQualificationRepository.SaveChangesAsync(cancellationToken);
             }
 
             var qualifications = await _outputFileRepository.GetQualificationOutputFile();
@@ -166,15 +137,6 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
             response.InnerException = ex;
             return response;
         }
-    }
-
-    private static string GetAcademicYear(DateTime publicationDate)
-    {
-        var startYear = publicationDate.Month >= 8
-            ? publicationDate.Year
-            : publicationDate.Year - 1;
-
-        return $"{startYear}/{(startYear + 1) % 100:00}";
     }
 
     private static DateTime? GetMaxFundingEndDate(QualificationOutputFile q)

@@ -1,11 +1,15 @@
+using SFA.DAS.AODP.Data.Entities.Funding;
 using SFA.DAS.AODP.Data.Entities.Offer;
+using SFA.DAS.AODP.Data.Entities.Rollover;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SFA.DAS.AODP.Data.Entities.QaaQualification;
 
 [Table("QaaQualificationFundings", Schema = "funded")]
-public class QaaQualificationFunding
+public class QaaQualificationFunding : IFundingDomainEventSource
 {
+    private readonly List<FundingDomainEvent> _fundingDomainEvents = [];
+
     public Guid Id { get; private set; }
 
     public Guid QaaQualificationId { get; private set; }
@@ -28,6 +32,9 @@ public class QaaQualificationFunding
 
     public virtual FundingOffer FundingOffer { get; private set; } = null!;
 
+    [NotMapped]
+    public IReadOnlyCollection<FundingDomainEvent> FundingDomainEvents => _fundingDomainEvents;
+
     public static QaaQualificationFunding Create(
         Guid qaaQualificationId,
         Guid fundingOfferId,
@@ -47,7 +54,7 @@ public class QaaQualificationFunding
             throw new ArgumentException("Funding offer id must be provided.", nameof(fundingOfferId));
         }
 
-        return new QaaQualificationFunding
+        var funding = new QaaQualificationFunding
         {
             Id = Guid.NewGuid(),
             QaaQualificationId = qaaQualificationId,
@@ -59,6 +66,8 @@ public class QaaQualificationFunding
             CreatedAt = createdAt,
             UpdatedAt = createdAt
         };
+        funding.RecordChanged();
+        return funding;
     }
 
     public void Update(
@@ -73,5 +82,24 @@ public class QaaQualificationFunding
         FundingStatus = fundingStatus;
         Comments = comments;
         UpdatedAt = updatedAt;
+        RecordChanged();
+    }
+
+    public void Archive(DateOnly endDate, DateTime updatedAt, string? comments = null)
+    {
+        EndDate = endDate;
+        Comments = comments;
+        UpdatedAt = updatedAt;
+        RecordChanged();
+    }
+
+    public void ClearFundingDomainEvents() => _fundingDomainEvents.Clear();
+
+    private void RecordChanged()
+    {
+        _fundingDomainEvents.Add(new FundingChangedDomainEvent(
+            RolloverSourceTypes.Qaa,
+            QaaQualificationId,
+            FundingOfferId));
     }
 }

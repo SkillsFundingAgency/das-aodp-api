@@ -20,6 +20,7 @@ namespace SFA.DAS.AODP.Data.Extensions
     {
         public static IServiceCollection ConfigureDatabase(this IServiceCollection services, IConfigurationRoot configuration)
         {
+            services.AddScoped<IFundingDomainEventDispatcher, FundingDomainEventDispatcher>();
             services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options =>
             {
                var  connectionString = configuration["AodpApi:DatabaseConnectionString"];
@@ -71,7 +72,6 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IRolloverFundingUpdateRepository, RolloverFundingUpdateRepository>();
             services.AddScoped<IRolloverFundingEligibilityRepository, RolloverFundingEligibilityRepository>();
             services.AddScoped<IRolloverCandidateReconciler, RolloverCandidateReconciler>();
-            services.AddScoped<IFundingChangeCoordinator, FundingChangeCoordinator>();
 
             services.AddScoped<IQualificationOutputFileRepository, QualificationOutputFileRepository>();
             services.AddScoped<IQualificationOutputFileLogRepository, QualificationOutputFileLogRepository>();

@@ -11,20 +11,17 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
         private readonly IRolloverRepository _rolloverRepository;
         private readonly IRolloverFundingUpdateRepository _rolloverFundingUpdateRepository;
         private readonly ISubmitFundingExtensionService _applyFundingExtensionsService;
-        private readonly IFundingChangeCoordinator _fundingChangeCoordinator;
         private readonly IRolloverFundingEligibilityRepository _fundingEligibilityRepository;
 
         public SubmitRolloverExtensionCommandHandler(
             IRolloverRepository rolloverRepository,
             IRolloverFundingUpdateRepository rolloverFundingUpdateRepository,
             ISubmitFundingExtensionService applyFundingExtensionsService,
-            IFundingChangeCoordinator fundingChangeCoordinator,
             IRolloverFundingEligibilityRepository fundingEligibilityRepository)
         {
             _rolloverRepository = rolloverRepository;
             _rolloverFundingUpdateRepository = rolloverFundingUpdateRepository;
             _applyFundingExtensionsService = applyFundingExtensionsService;
-            _fundingChangeCoordinator = fundingChangeCoordinator;
             _fundingEligibilityRepository = fundingEligibilityRepository;
         }
 
@@ -72,36 +69,30 @@ namespace SFA.DAS.AODP.Application.Commands.Rollover
                 var fundingUpdates = await _rolloverFundingUpdateRepository
                     .GetFundingUpdatesAsync(fundingKeys, cancellationToken);
 
-                await _fundingChangeCoordinator.ExecuteAsync(
-                    changeSet,
-                    async ct =>
-                    {
-                        var eligibility = await _fundingEligibilityRepository.GetAsync(
-                            changeSet.Keys,
-                            ct);
-
-                        if (eligibility.Count != changeSet.Keys.Count ||
-                            eligibility.Any(x => !x.IsEligible))
-                        {
-                            throw new InvalidOperationException(
-                                "One or more rollover candidates are no longer backed by applicable funding.");
-                        }
-
-                        var success = await _applyFundingExtensionsService.Submit(
-                            candidates,
-                            request.Items,
-                            fundingUpdates,
-                            ct);
-
-                        if (!success)
-                        {
-                            throw new FundingExtensionApplicationException(
-                                "Failed to apply funding extensions.");
-                        }
-
-                        return true;
-                    },
+                var eligibility = await _fundingEligibilityRepository.GetAsync(
+                    changeSet.Keys,
                     cancellationToken);
+
+                if (eligibility.Count != changeSet.Keys.Count ||
+                    eligibility.Any(x => !x.IsEligible))
+                {
+                    throw new InvalidOperationException(
+                        "One or more rollover candidates are no longer backed by applicable funding.");
+                }
+
+                var success = await _applyFundingExtensionsService.Submit(
+                    candidates,
+                    request.Items,
+                    fundingUpdates,
+                    cancellationToken);
+
+                if (!success)
+                {
+                    throw new FundingExtensionApplicationException(
+                        "Failed to apply funding extensions.");
+                }
+
+                await _rolloverRepository.SaveChangesAsync(cancellationToken);
 
                 response.Value.ResultMessage = "Funding extensions applied.";
                 response.Success = true;

@@ -132,6 +132,12 @@ public class RolloverCandidates
         UpdatedAt = updatedAt;
     }
 
+    public void MoveSourceQualification(Guid sourceQualificationId, DateTime updatedAt)
+    {
+        SourceQualificationId = sourceQualificationId;
+        UpdatedAt = updatedAt;
+    }
+
     public void SetSourceContext(string sourceQualificationReference, Guid? discussionQualificationId)
     {
         SourceQualificationReference = sourceQualificationReference;

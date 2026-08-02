@@ -1,11 +1,8 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Data.Entities.Qualification;
-using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
-using SFA.DAS.AODP.Data.Repositories.Rollover;
 using SFA.DAS.AODP.Infrastructure.Extensions;
-using SFA.DAS.AODP.Models.Rollover;
 using System.Text;
 
 namespace SFA.DAS.AODP.Application.Commands.Qualifications
@@ -14,16 +11,12 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
     {
         private readonly IQualificationFundingsRepository _qualificationFundingsrepository;
         private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
-        private readonly IFundingChangeCoordinator _fundingChangeCoordinator;
-
         public SaveQualificationsFundingOffersDetailsCommandHandler(
             IQualificationFundingsRepository repository,
-            IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository,
-            IFundingChangeCoordinator fundingChangeCoordinator)
+            IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository)
         {
             _qualificationFundingsrepository = repository;
             _qualificationDiscussionHistoryRepository = qualificationDiscussionHistoryRepository;
-            _fundingChangeCoordinator = fundingChangeCoordinator;
         }
 
         public async Task<BaseMediatrResponse<EmptyResponse>> Handle(SaveQualificationsFundingOffersDetailsCommand request, CancellationToken cancellationToken)
@@ -49,27 +42,15 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
 
                 if (changedDetails.Count > 0)
                 {
-                    var changeSet = FundingChangeSet.Create(changedDetails.Select(x =>
-                        new FundingChangeKey(
-                            RolloverSourceTypes.Ofqual,
-                            request.QualificationVersionId,
-                            x.Detail.FundingOfferId)));
+                    foreach (var changedDetail in changedDetails)
+                    {
+                        changedDetail.Funding.UpdateFunding(
+                            changedDetail.Detail.StartDate,
+                            changedDetail.Detail.EndDate,
+                            changedDetail.Detail.Comments);
+                    }
 
-                    await _fundingChangeCoordinator.ExecuteAsync(
-                        changeSet,
-                        async _ =>
-                        {
-                            foreach (var changedDetail in changedDetails)
-                            {
-                                changedDetail.Funding.StartDate = changedDetail.Detail.StartDate;
-                                changedDetail.Funding.EndDate = changedDetail.Detail.EndDate;
-                                changedDetail.Funding.Comments = changedDetail.Detail.Comments;
-                            }
-
-                            await _qualificationFundingsrepository.UpdateAsync(fundedOffers);
-                            return true;
-                        },
-                        cancellationToken);
+                    await _qualificationFundingsrepository.UpdateAsync(fundedOffers);
                 }
 
                 if (request.UpdateDiscussionHistory == true)

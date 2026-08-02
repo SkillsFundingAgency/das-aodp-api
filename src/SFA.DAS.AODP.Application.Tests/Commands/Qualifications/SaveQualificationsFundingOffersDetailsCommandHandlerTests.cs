@@ -5,8 +5,6 @@ using SFA.DAS.AODP.Application.Commands.Qualifications;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Exceptions;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
-using SFA.DAS.AODP.Data.Repositories.Rollover;
-using SFA.DAS.AODP.Models.Rollover;
 using SFA.DAS.AODP.Testing.Helpers;
 
 namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
@@ -16,7 +14,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         private readonly IFixture _fixture;
         private readonly Mock<IQualificationFundingsRepository> _qualificationFundingsRepositoryMock;
         private readonly Mock<IQualificationDiscussionHistoryRepository> _qualificationDiscussionHistoryRepositoryMock;
-        private readonly Mock<IFundingChangeCoordinator> _fundingChangeCoordinatorMock;
         private readonly SaveQualificationsFundingOffersDetailsCommandHandler _handler;
 
         public SaveQualificationsFundingOffersDetailsCommandHandlerTests()
@@ -29,19 +26,9 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 
             _qualificationFundingsRepositoryMock = _fixture.Freeze<Mock<IQualificationFundingsRepository>>();
             _qualificationDiscussionHistoryRepositoryMock = _fixture.Freeze<Mock<IQualificationDiscussionHistoryRepository>>();
-            _fundingChangeCoordinatorMock = _fixture.Freeze<Mock<IFundingChangeCoordinator>>();
-            _fundingChangeCoordinatorMock
-                .Setup(x => x.ExecuteAsync(
-                    It.IsAny<FundingChangeSet>(),
-                    It.IsAny<Func<CancellationToken, Task<bool>>>(),
-                    It.IsAny<CancellationToken>()))
-                .Returns((FundingChangeSet _, Func<CancellationToken, Task<bool>> mutation, CancellationToken ct) =>
-                    mutation(ct));
-
             _handler = new SaveQualificationsFundingOffersDetailsCommandHandler(
                 _qualificationFundingsRepositoryMock.Object,
-                _qualificationDiscussionHistoryRepositoryMock.Object,
-                _fundingChangeCoordinatorMock.Object);
+                _qualificationDiscussionHistoryRepositoryMock.Object);
         }
 
         [Fact]

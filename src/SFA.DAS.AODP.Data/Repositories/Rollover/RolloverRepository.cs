@@ -446,7 +446,7 @@ public class RolloverRepository : IRolloverRepository
 
     public async Task<RolloverStartSummary> GetRolloverStartSummaryAsync(string academicYear, CancellationToken cancellationToken) 
     {
-        var candidates = await context.RolloverCandidates
+        var candidates = await _context.RolloverCandidates
             .Where(x => x.AcademicYear == academicYear)
             .ToListAsync(cancellationToken);
 
