@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SFA.DAS.AODP.Application.Commands.Rollover;
 using SFA.DAS.AODP.Application.Queries.Rollover;
 using SFA.DAS.AODP.Models.Rollover;
+using System.Text.Json;
 
 namespace SFA.DAS.AODP.Api.Controllers.Rollover;
 
@@ -85,26 +86,31 @@ public class RolloverController : BaseController
     [HttpPost("validaterolloverextension")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(ValidateRolloverExtensionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> ValidateRolloverExtension(
-        [FromForm] ValidateRolloverExtensionCommand validateRolloverExtensionCommand)
+        [FromForm] IFormFile payload,
+        CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        return await SendRequestAsync(validateRolloverExtensionCommand);
+        var command = await ReadCommand<ValidateRolloverExtensionCommand>(payload, cancellationToken);
+        return command is null
+            ? BadRequest("The JSON payload is missing or invalid.")
+            : await SendRequestAsync(command);
     }
 
     [HttpPost("submitrolloverextension")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(SubmitRolloverExtensionCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> SubmitRolloverExtension(
-        [FromForm] SubmitRolloverExtensionCommand submitRolloverExtensinCommand)
+        [FromForm] IFormFile payload,
+        CancellationToken cancellationToken)
     {
-        return await SendRequestAsync(submitRolloverExtensinCommand);
+        var command = await ReadCommand<SubmitRolloverExtensionCommand>(payload, cancellationToken);
+        return command is null
+            ? BadRequest("The JSON payload is missing or invalid.")
+            : await SendRequestAsync(command);
     }
 
     [HttpPost("querybuilder/awardingorganisations")]
@@ -147,6 +153,31 @@ public class RolloverController : BaseController
     public async Task<IActionResult> GetSectorSubjectAreasForRolloverQueryBuilder([FromBody] RolloverQueryBuilderSectorSubjectAreaRequest filters)
     {
         return await SendRequestAsync(new GetSectorSubjectAreasForRolloverQueryBuilderQuery(filters));
+    }
+
+    private static async Task<TCommand?> ReadCommand<TCommand>(
+        IFormFile payload,
+        CancellationToken cancellationToken)
+    {
+        if (payload is null ||
+            payload.Length == 0 ||
+            !payload.ContentType.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
+        {
+            return default;
+        }
+
+        try
+        {
+            await using var stream = payload.OpenReadStream();
+            return await JsonSerializer.DeserializeAsync<TCommand>(stream, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            }, cancellationToken);
+        }
+        catch (JsonException)
+        {
+            return default;
+        }
     }
 
     [HttpGet("startsummary")]
