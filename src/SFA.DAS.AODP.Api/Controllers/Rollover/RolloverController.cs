@@ -89,7 +89,7 @@ public class RolloverController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> ValidateRolloverExtension(
-        [FromForm] IFormFile payload,
+        IFormFile payload,
         CancellationToken cancellationToken)
     {
         var command = await ReadCommand<ValidateRolloverExtensionCommand>(payload, cancellationToken);
@@ -104,7 +104,7 @@ public class RolloverController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> SubmitRolloverExtension(
-        [FromForm] IFormFile payload,
+        IFormFile payload,
         CancellationToken cancellationToken)
     {
         var command = await ReadCommand<SubmitRolloverExtensionCommand>(payload, cancellationToken);
