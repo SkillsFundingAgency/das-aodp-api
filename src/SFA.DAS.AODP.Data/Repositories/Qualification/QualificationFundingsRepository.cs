@@ -52,13 +52,27 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             List<QualificationFundingKey> candidates,
             CancellationToken cancellationToken)
         {
+            if (candidates.Count == 0)
+            {
+                return [];
+            }
+
             var keySet = candidates
-                .Select(x => x.QualificationVersionId + "|" +  x.FundingOfferId )
+                .Select(x => (x.QualificationVersionId, x.FundingOfferId))
+                .ToHashSet();
+
+            var qualificationVersionIds = keySet
+                .Select(x => x.QualificationVersionId)
                 .ToList();
 
-            return await _context.QualificationFundings
-                .Where(qf => keySet.Contains(qf.QualificationVersionId + "|" + qf.FundingOfferId))
+            var possibleFundings = await _context.QualificationFundings
+                .AsNoTracking()
+                .Where(qf => qualificationVersionIds.Contains(qf.QualificationVersionId))
                 .ToListAsync(cancellationToken);
+
+            return possibleFundings
+                .Where(qf => keySet.Contains((qf.QualificationVersionId, qf.FundingOfferId)))
+                .ToList();
         }
     }
 }

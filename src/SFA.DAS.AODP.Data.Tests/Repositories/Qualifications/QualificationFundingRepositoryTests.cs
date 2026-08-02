@@ -8,6 +8,7 @@ using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Models.Rollover;
 using SFA.DAS.AODP.Testing.Helpers;
+using Shouldly;
 using static SFA.DAS.AODP.Application.Queries.Qualification.GetQualificationVersionsForQualificationByReferenceQueryResponse;
 using QualificationVersions = SFA.DAS.AODP.Data.Entities.Qualification.QualificationVersions;
 
@@ -152,6 +153,22 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories
             Assert.Contains(result, x => x.Id == fundingList[0].Id);
             Assert.Contains(result, x => x.Id == fundingList[1].Id);
             Assert.DoesNotContain(result, x => x.Id == fundingList[2].Id);
+        }
+
+        [Fact]
+        public async Task GetRolloverQualificationFundingsAsync_WhenKeysAreEmpty_ReturnsEmptyCollection()
+        {
+            // Arrange
+            using var context = CreateInMemoryContext();
+            var repo = new QualificationFundingsRepository(context);
+
+            // Act
+            var result = await repo.GetRolloverQualificationFundingsAsync(
+                [],
+                TestContext.Current.CancellationToken);
+
+            // Assert
+            result.ShouldBeEmpty();
         }
 
         private List<QualificationFundings> CreateFundings(int count, Guid versionId)
