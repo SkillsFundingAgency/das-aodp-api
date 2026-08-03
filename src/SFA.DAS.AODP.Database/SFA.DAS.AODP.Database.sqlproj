@@ -180,6 +180,7 @@
     <Build Include="Tables\RegulatedQaaQualification.sql" />
     <Build Include="Tables\RegulatedQaaQualificationHistory.sql" />
     <Build Include="Tables\Rollover\RolloverCandidates.sql" />
+    <Build Include="Tables\Rollover\FundingExtensionStaging.sql" />
     <Build Include="Tables\Rollover\RolloverDecisionRun.sql" />
     <Build Include="Tables\Rollover\RolloverWorkflowCandidate.sql" />
     <Build Include="Tables\Rollover\RolloverWorkflowRun.sql" />
