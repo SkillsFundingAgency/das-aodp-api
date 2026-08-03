@@ -140,7 +140,7 @@ SELECT
     qual.Qan AS QualificationNumber,
     latestversion.Level,
     latestversion.QualificationType,
-    latestversion.Subcategory,
+    fq.Subcategory,
     latestversion.SectorSubjectArea,
     pivotdata.AdvancedLearnerLoans_FundingAvailable,
     pivotdata.AdvancedLearnerLoans_FundingApprovalStartDate,
@@ -184,5 +184,5 @@ INNER JOIN dbo.Qualification qual ON qual.Id = latestversion.QualificationId
 INNER JOIN dbo.AwardingOrganisation ao ON ao.Id = latestversion.AwardingOrganisationId
 LEFT JOIN CombinedPivotData pivotdata ON pivotdata.QualificationVersionId = latestversion.Id
 LEFT JOIN PivotOfferNotes AS onp ON onp.QualificationVersionId = latestversion.Id
-LEFT JOIN funded.Qualifications fq ON fq.Id = latestversion.QualificationId
+LEFT JOIN funded.Qualifications fq ON fq.QualificationId = qual.Id
 GO

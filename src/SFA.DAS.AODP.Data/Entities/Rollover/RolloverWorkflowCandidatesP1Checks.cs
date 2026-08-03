@@ -28,9 +28,11 @@ public class RolloverWorkflowCandidatesP1Checks
     public DateTime? LegalEntitlementL2L3 { get; set; }
     public DateTime? LegalEntitlementEnglishandMaths { get; set; }
     public DateTime? DigitalEntitlement { get; set; }
+    public DateTime? ESFL3L4 { get; set; }
     public DateTime? AdvancedLearnerLoans { get; set; }
     public DateTime? LifelongLearningEntitlement { get; set; }
     public DateTime? L3FreeCoursesForJobs { get; set; }
+    public DateTime? CoF { get; set; }
 
     public DateTime? GetPldnsDate()
     {
@@ -47,9 +49,11 @@ public class RolloverWorkflowCandidatesP1Checks
             nameof(LegalEntitlementL2L3) => LegalEntitlementL2L3,
             nameof(LegalEntitlementEnglishandMaths) => LegalEntitlementEnglishandMaths,
             nameof(DigitalEntitlement) => DigitalEntitlement,
+            nameof(ESFL3L4) => ESFL3L4,
             nameof(AdvancedLearnerLoans) => AdvancedLearnerLoans,
             nameof(LifelongLearningEntitlement) => LifelongLearningEntitlement,
             nameof(L3FreeCoursesForJobs) => L3FreeCoursesForJobs,
+            nameof(CoF) => CoF,
             _ => null
         };
     }

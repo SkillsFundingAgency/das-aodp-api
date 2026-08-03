@@ -417,4 +417,63 @@ public class RolloverControllerTests : UnitTest
         var status = Assert.IsType<StatusCodeResult>(result);
         Assert.Equal(StatusCodes.Status500InternalServerError, status.StatusCode);
     }
+
+    [Fact]
+    public async Task GetRolloverStartSummary_ReturnsOk_WhenMediatorReturnsSuccess()
+    {
+        var payload = new GetRolloverStartSummaryQueryResponse
+        {
+            TotalCandidatesCount = 10
+        };
+
+        var response = new BaseMediatrResponse<GetRolloverStartSummaryQueryResponse>
+        {
+            Success = true,
+            Value = payload
+        };
+
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetRolloverStartSummaryQuery>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(response);
+
+        var result = await _controller.GetRolloverStartSummary();
+
+        var ok = Assert.IsType<OkObjectResult>(result);
+        var value = Assert.IsType<GetRolloverStartSummaryQueryResponse>(ok.Value);
+        Assert.Equal(10, value.TotalCandidatesCount);
+    }
+
+    [Fact]
+    public async Task GetRolloverStartSummary_ReturnsNotFound_WhenMediatorReturnsNotFoundException()
+    {
+        var response = new BaseMediatrResponse<GetRolloverStartSummaryQueryResponse>
+        {
+            Success = false,
+            InnerException = new NotFoundException(Guid.NewGuid())
+        };
+
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetRolloverStartSummaryQuery>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(response);
+
+        var result = await _controller.GetRolloverStartSummary();
+
+        Assert.IsType<NotFoundResult>(result);
+    }
+
+    [Fact]
+    public async Task GetRolloverStartSummary_Returns500_WhenMediatorReturnsFailure()
+    {
+        var response = new BaseMediatrResponse<GetRolloverStartSummaryQueryResponse>
+        {
+            Success = false,
+            ErrorMessage = "error"
+        };
+
+        _mediatorMock.Setup(m => m.Send(It.IsAny<GetRolloverStartSummaryQuery>(), It.IsAny<CancellationToken>()))
+                     .ReturnsAsync(response);
+
+        var result = await _controller.GetRolloverStartSummary();
+
+        var status = Assert.IsType<StatusCodeResult>(result);
+        Assert.Equal(500, status.StatusCode);
+    }
 }

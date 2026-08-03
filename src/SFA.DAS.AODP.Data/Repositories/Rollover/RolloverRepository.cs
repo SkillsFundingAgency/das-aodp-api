@@ -403,4 +403,19 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
 
         return query;
     }
+
+    public async Task<RolloverStartSummary> GetRolloverStartSummaryAsync(string academicYear, CancellationToken cancellationToken) 
+    {
+        var candidates = await context.RolloverCandidates
+            .Where(x => x.AcademicYear == academicYear)
+            .ToListAsync(cancellationToken);
+
+        return new RolloverStartSummary
+        {
+            TotalCandidatesCount = candidates.Count,
+            CandidatesEligibleCount = candidates.Count(x => x.RolloverStatus == RolloverStatus.Extended),
+            CandidatesIneligibleCount = candidates.Count(x => x.RolloverStatus == RolloverStatus.Excluded),
+            CandidatesRemainingCount = candidates.Count(x => x.RolloverStatus == RolloverStatus.NeedsReview)
+        };
+    }
 }

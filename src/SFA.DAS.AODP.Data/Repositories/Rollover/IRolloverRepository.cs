@@ -58,4 +58,6 @@ public interface IRolloverRepository
     Task<IEnumerable<RolloverQueryBuilderAwardingOrganisation>> GetAwardingOrganisationsForRolloverQueryBuilderAsync(
         RolloverQueryBuilderAwardingOrganisationsRequest filters,
         CancellationToken cancellationToken);
+
+    Task<RolloverStartSummary> GetRolloverStartSummaryAsync(string academicYear, CancellationToken cancellationToken);
 }

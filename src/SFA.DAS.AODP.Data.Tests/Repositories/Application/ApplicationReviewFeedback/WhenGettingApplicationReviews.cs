@@ -803,7 +803,70 @@ public class WhenGettingApplicationReviews
     }
 
 
+    [Fact]
+    public async Task Then_Excluded_Application_Statuses_Are_Not_Returned()
+    {
+        // Arrange
+        var approved = new Entities.Application.ApplicationReviewFeedback
+        {
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    Id = Guid.NewGuid(),
+                    UpdatedAt = DateTime.UtcNow,
+                    Status = ApplicationStatus.Approved.ToString()
+                }
+            },
+            Type = UserType.Qfau.ToString()
+        };
 
+        var notApproved = new Entities.Application.ApplicationReviewFeedback
+        {
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    Id = Guid.NewGuid(),
+                    UpdatedAt = DateTime.UtcNow,
+                    Status = ApplicationStatus.NotApproved.ToString()
+                }
+            },
+            Type = UserType.Qfau.ToString()
+        };
+
+        var inReview = new Entities.Application.ApplicationReviewFeedback
+        {
+            ApplicationReview = new()
+            {
+                Application = new()
+                {
+                    Id = Guid.NewGuid(),
+                    UpdatedAt = DateTime.UtcNow.AddMinutes(-1),
+                    Status = ApplicationStatus.InReview.ToString()
+                }
+            },
+            Type = UserType.Qfau.ToString()
+        };
+
+        _context.SetupGet(c => c.ApplicationReviewFeedbacks)
+            .ReturnsDbSet([approved, notApproved, inReview]);
+
+        var criteria = new ApplicationReviewSearchCriteria
+        {
+            ReviewType = UserType.Qfau
+        };
+
+        // Act
+        var result = await _sut.GetApplicationReviews(criteria);
+
+        // Assert
+        Assert.Single(result.Item1);
+        Assert.Contains(inReview, result.Item1);
+        Assert.DoesNotContain(approved, result.Item1);
+        Assert.DoesNotContain(notApproved, result.Item1);
+        Assert.Equal(1, result.Item2);
+    }
 
 
 }
