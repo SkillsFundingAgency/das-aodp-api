@@ -24,9 +24,11 @@ public class FundingExtensionPersistenceRepository(
         var totalStarted = Stopwatch.GetTimestamp();
         var transactionStarted = Stopwatch.GetTimestamp();
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+
         logger.LogInformation(
             "Started funding-extension persistence transaction in {ElapsedMilliseconds} ms",
             Stopwatch.GetElapsedTime(transactionStarted).TotalMilliseconds);
+        
         var currentStage = "CandidateBulkUpdate";
 
         try
@@ -49,6 +51,7 @@ public class FundingExtensionPersistenceRepository(
                     candidates.ToList(),
                     candidateConfig,
                     cancellationToken: cancellationToken);
+                
                 logger.LogInformation(
                     "Bulk updated {CandidateCount} rollover candidates in {ElapsedMilliseconds} ms using batch size {BatchSize}",
                     candidates.Count,
@@ -74,6 +77,7 @@ public class FundingExtensionPersistenceRepository(
                     fundings.ToList(),
                     fundingConfig,
                     cancellationToken: cancellationToken);
+                
                 logger.LogInformation(
                     "Bulk updated {FundingCount} qualification fundings in {ElapsedMilliseconds} ms using batch size {BatchSize}",
                     fundings.Count,
@@ -89,6 +93,7 @@ public class FundingExtensionPersistenceRepository(
                     histories.ToList(),
                     new BulkConfig { BatchSize = BatchSize },
                     cancellationToken: cancellationToken);
+                
                 logger.LogInformation(
                     "Bulk inserted {HistoryCount} discussion-history records in {ElapsedMilliseconds} ms using batch size {BatchSize}",
                     histories.Count,
@@ -99,6 +104,7 @@ public class FundingExtensionPersistenceRepository(
             currentStage = "WorkflowCandidateDelete";
             var workflowDeleteStarted = Stopwatch.GetTimestamp();
             await context.RolloverWorkflowCandidates.ExecuteDeleteAsync(cancellationToken);
+            
             logger.LogInformation(
                 "Deleted rollover workflow candidates in {ElapsedMilliseconds} ms",
                 Stopwatch.GetElapsedTime(workflowDeleteStarted).TotalMilliseconds);
@@ -106,6 +112,7 @@ public class FundingExtensionPersistenceRepository(
             currentStage = "TransactionCommit";
             var commitStarted = Stopwatch.GetTimestamp();
             await transaction.CommitAsync(cancellationToken);
+            
             logger.LogInformation(
                 "Committed funding-extension persistence transaction in {ElapsedMilliseconds} ms; total persistence time was {TotalElapsedMilliseconds} ms",
                 Stopwatch.GetElapsedTime(commitStarted).TotalMilliseconds,
@@ -118,6 +125,7 @@ public class FundingExtensionPersistenceRepository(
                 "Funding-extension persistence failed during {PersistenceStage} after {ElapsedMilliseconds} ms",
                 currentStage,
                 Stopwatch.GetElapsedTime(totalStarted).TotalMilliseconds);
+            
             await transaction.RollbackAsync(cancellationToken);
             throw;
         }
