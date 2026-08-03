@@ -44,7 +44,8 @@ public class FundingExtensionPersistenceRepository(
                         nameof(RolloverCandidates.RolloverStatus),
                         nameof(RolloverCandidates.ExclusionReason),
                         nameof(RolloverCandidates.NewFundingEndDate)
-                    ]
+                    ],
+                    UseTempDB = true
                 };
 
                 await context.BulkUpdateAsync(
@@ -70,7 +71,8 @@ public class FundingExtensionPersistenceRepository(
                     [
                         nameof(QualificationFundings.EndDate),
                         nameof(QualificationFundings.Comments)
-                    ]
+                    ],
+                    UseTempDB = true
                 };
 
                 await context.BulkUpdateAsync(
@@ -91,7 +93,7 @@ public class FundingExtensionPersistenceRepository(
                 var historyInsertStarted = Stopwatch.GetTimestamp();
                 await context.BulkInsertAsync(
                     histories.ToList(),
-                    new BulkConfig { BatchSize = BatchSize },
+                    new BulkConfig { BatchSize = BatchSize, UseTempDB = true },
                     cancellationToken: cancellationToken);
                 
                 logger.LogInformation(
