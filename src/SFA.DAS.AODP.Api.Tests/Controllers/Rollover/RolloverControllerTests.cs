@@ -11,6 +11,9 @@ using SFA.DAS.AODP.Application.Commands.Rollover;
 using SFA.DAS.AODP.Application.Exceptions;
 using SFA.DAS.AODP.Application.Queries.Rollover;
 using SFA.DAS.AODP.Models.Rollover;
+using Shouldly;
+using System.Text;
+using System.Text.Json;
 
 namespace SFA.DAS.AODP.Api.UnitTests.Controllers.Rollover;
 
@@ -305,7 +308,7 @@ public class RolloverControllerTests : UnitTest
         _mediatorMock.Setup(m => m.Send(It.IsAny<ValidateRolloverExtensionCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mediatorResponse);
 
-        var result = await _controller.ValidateRolloverExtension(command);
+        var result = await _controller.ValidateRolloverExtension(CreateJsonFile(command), CancellationToken);
 
         var ok = Assert.IsType<OkObjectResult>(result);
         var payload = Assert.IsType<ValidateRolloverExtensionCommandResponse>(ok.Value);
@@ -338,7 +341,7 @@ public class RolloverControllerTests : UnitTest
         _mediatorMock.Setup(m => m.Send(It.IsAny<ValidateRolloverExtensionCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mediatorResponse);
 
-        var result = await _controller.ValidateRolloverExtension(command);
+        var result = await _controller.ValidateRolloverExtension(CreateJsonFile(command), CancellationToken);
 
         var ok = Assert.IsType<OkObjectResult>(result);
         var payload = Assert.IsType<ValidateRolloverExtensionCommandResponse>(ok.Value);
@@ -363,7 +366,7 @@ public class RolloverControllerTests : UnitTest
         _mediatorMock.Setup(m => m.Send(It.IsAny<ValidateRolloverExtensionCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mediatorResponse);
 
-        var result = await _controller.ValidateRolloverExtension(command);
+        var result = await _controller.ValidateRolloverExtension(CreateJsonFile(command), CancellationToken);
 
         var status = Assert.IsType<StatusCodeResult>(result);
         Assert.Equal(StatusCodes.Status500InternalServerError, status.StatusCode);
@@ -389,7 +392,7 @@ public class RolloverControllerTests : UnitTest
             .Setup(m => m.Send(It.IsAny<SubmitRolloverExtensionCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mediatorResponse);
 
-        var result = await _controller.SubmitRolloverExtension(command);
+        var result = await _controller.SubmitRolloverExtension(CreateJsonFile(command), CancellationToken);
 
         var ok = Assert.IsType<OkObjectResult>(result);
         var payload = Assert.IsType<SubmitRolloverExtensionCommandResponse>(ok.Value);
@@ -412,10 +415,46 @@ public class RolloverControllerTests : UnitTest
             .Setup(m => m.Send(It.IsAny<SubmitRolloverExtensionCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mediatorResponse);
 
-        var result = await _controller.SubmitRolloverExtension(command);
+        var result = await _controller.SubmitRolloverExtension(CreateJsonFile(command), CancellationToken);
 
         var status = Assert.IsType<StatusCodeResult>(result);
         Assert.Equal(StatusCodes.Status500InternalServerError, status.StatusCode);
+    }
+
+    [Fact]
+    public async Task ValidateRolloverExtension_WhenJsonIsInvalid_ReturnsBadRequest()
+    {
+        // Arrange
+        var payload = CreateRawFile("{ invalid json");
+
+        // Act
+        var result = await _controller.ValidateRolloverExtension(payload, CancellationToken);
+
+        // Assert
+        result.ShouldBeOfType<BadRequestObjectResult>();
+        _mediatorMock.Verify(
+            mediator => mediator.Send(
+                It.IsAny<ValidateRolloverExtensionCommand>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task SubmitRolloverExtension_WhenJsonFileIsEmpty_ReturnsBadRequest()
+    {
+        // Arrange
+        var payload = CreateRawFile(string.Empty);
+
+        // Act
+        var result = await _controller.SubmitRolloverExtension(payload, CancellationToken);
+
+        // Assert
+        result.ShouldBeOfType<BadRequestObjectResult>();
+        _mediatorMock.Verify(
+            mediator => mediator.Send(
+                It.IsAny<SubmitRolloverExtensionCommand>(),
+                It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 
     [Fact]
@@ -475,5 +514,20 @@ public class RolloverControllerTests : UnitTest
 
         var status = Assert.IsType<StatusCodeResult>(result);
         Assert.Equal(500, status.StatusCode);
+    }
+
+    private static IFormFile CreateJsonFile<T>(T value)
+    {
+        return CreateRawFile(JsonSerializer.Serialize(value));
+    }
+
+    private static IFormFile CreateRawFile(string value)
+    {
+        var stream = new MemoryStream(Encoding.UTF8.GetBytes(value));
+        return new FormFile(stream, 0, stream.Length, "payload", "payload.json")
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = "application/json"
+        };
     }
 }

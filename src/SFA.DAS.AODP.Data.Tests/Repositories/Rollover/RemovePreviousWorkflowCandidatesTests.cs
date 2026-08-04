@@ -1,3 +1,4 @@
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
@@ -9,11 +10,16 @@ public class RemovePreviousWorkflowCandidatesTests
 {
     private static ApplicationDbContext CreateDb(string name)
     {
+        var connection = new SqliteConnection("DataSource=:memory:");
+        connection.Open();
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(name + "_" + Guid.NewGuid())
+            .UseSqlite(connection)
             .Options;
 
-        return new ApplicationDbContext(options);
+        var context = new ApplicationDbContext(options);
+        context.Database.EnsureCreated();
+        context.Database.ExecuteSqlRaw("PRAGMA foreign_keys = OFF;");
+        return context;
     }
 
     [Fact]

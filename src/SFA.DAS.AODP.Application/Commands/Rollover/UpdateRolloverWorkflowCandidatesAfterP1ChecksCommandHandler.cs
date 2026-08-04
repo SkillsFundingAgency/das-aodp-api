@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
 
 namespace SFA.DAS.AODP.Application.Commands.Rollover;
@@ -17,18 +18,30 @@ public class UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandler : IRequ
         var response = new BaseMediatrResponse<EmptyResponse>();
         try
         {
-            var p1ValidationCheckData = await _rolloverRepository.GetRolloverWorkflowCandidatesP1ChecksAsync(cancellationToken);
-
             var candidates = await _rolloverRepository.GetAllRolloverWorkflowCandidatesAsync(cancellationToken);
 
-            var candidatesById = candidates.ToDictionary(x => x.Id);
+            var p1CheckRequests = candidates
+                .Select(candidate => new RolloverCandidateP1CheckRequest(
+                    candidate.RolloverCandidatesId,
+                    candidate.RolloverWorkflowRun.FundingEndDateEligibilityThreshold,
+                    candidate.RolloverWorkflowRun.OperationalEndDateEligibilityThreshold,
+                    candidate.RolloverWorkflowRun.MaximumApprovalFundingEndDate))
+                .ToList();
+
+            var candidatesWithP1Checks =
+                await _rolloverRepository.GetRolloverCandidatesWithP1ChecksAsync(
+                    p1CheckRequests,
+                    cancellationToken);
+
+            var checksByRolloverCandidateId = candidatesWithP1Checks
+                .ToDictionary(x => x.Candidate.Id, x => x.P1Checks);
             var hasUpdates = false;
 
-            foreach (var check in p1ValidationCheckData)
+            foreach (var candidate in candidates)
             {
-                if (!candidatesById.TryGetValue(
-                        check.WorkflowCandidateId,
-                        out var candidate))
+                if (!checksByRolloverCandidateId.TryGetValue(
+                        candidate.RolloverCandidatesId,
+                        out var check))
                 {
                     continue;
                 }

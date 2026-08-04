@@ -78,6 +78,7 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<RolloverWorkflowRunFilterValue> RolloverWorkflowRunFilterValues { get; set; }
         DbSet<RolloverWorkflowCandidate> RolloverWorkflowCandidates { get; set; }
         DbSet<RolloverDecisionRun> RolloverDecisionRuns { get; set; }
+        DbSet<FundingExtensionStaging> FundingExtensionStaging { get; set; }
 
         DbSet<RolloverWorkflowCandidatesP1Checks> RolloverWorkflowCandidatesP1Checks { get; set; }
 

@@ -27,6 +27,12 @@ public static class RolloverModelBuilderExtensions
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
+        modelBuilder.Entity<FundingExtensionStaging>(b =>
+        {
+            b.HasKey(x => new { x.OperationId, x.RolloverCandidateId });
+            b.Property(x => x.RolloverStatus).HasConversion<string>();
+        });
+
         modelBuilder.Entity<RolloverWorkflowRun>(b =>
         {
             b.Property(x => x.SelectionMethod)
