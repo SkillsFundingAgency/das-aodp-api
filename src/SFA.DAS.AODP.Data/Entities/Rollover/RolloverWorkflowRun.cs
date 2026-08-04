@@ -52,6 +52,7 @@ public class RolloverWorkflowRun
 
         return new RolloverWorkflowRun
         {
+            Id = Guid.NewGuid(),
             AcademicYear = academicYear,
             SelectionMethod = selectionMethod,
             FundingEndDateEligibilityThreshold = fundingEndDateEligibilityThreshold,

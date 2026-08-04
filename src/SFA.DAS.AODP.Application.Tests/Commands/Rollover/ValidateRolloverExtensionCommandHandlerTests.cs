@@ -1,4 +1,5 @@
 ﻿using Moq;
+using Microsoft.Extensions.Logging;
 using SFA.DAS.AODP.Application.Commands.Rollover;
 using SFA.DAS.AODP.Application.Services.Export;
 using SFA.DAS.AODP.Application.Services.FundingExtension;
@@ -14,6 +15,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
         private readonly Mock<IRolloverFundingExtensionValidator> _validator = new();
         private readonly Mock<IFundingExtensionCandidatesCsvBuilder> _csvBuilder = new();
         private readonly Mock<IFundingExtensionProjectionService> _projectionService = new();
+        private readonly Mock<ILogger<ValidateRolloverExtensionCommandHandler>> _logger = new();
 
         private readonly ValidateRolloverExtensionCommandHandler _handler;
         private readonly DateTime _defaultEndDate = DateTime.UtcNow.AddDays(20);
@@ -24,7 +26,8 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
                 _rolloverRepository.Object,
                 _validator.Object,
                 _csvBuilder.Object,
-                _projectionService.Object);
+                _projectionService.Object,
+                _logger.Object);
         }
 
         // ------------------------------------------------------------

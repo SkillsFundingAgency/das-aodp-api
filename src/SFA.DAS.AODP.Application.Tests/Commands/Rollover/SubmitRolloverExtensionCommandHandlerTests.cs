@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoMoq;
+using Microsoft.Extensions.Logging;
 using Moq;
 using SFA.DAS.AODP.Application.Commands.Rollover;
 using SFA.DAS.AODP.Application.Services.FundingExtension;
@@ -17,6 +18,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
         private readonly Mock<IRolloverRepository> _rolloverRepository = new();
         private readonly Mock<IQualificationFundingsRepository> _fundingsRepository = new();
         private readonly Mock<ISubmitFundingExtensionService> _applyService = new();
+        private readonly Mock<ILogger<SubmitRolloverExtensionCommandHandler>> _logger = new();
         private readonly IFixture _fixture = new Fixture().Customize(new AutoMoqCustomization());
 
         private readonly SubmitRolloverExtensionCommandHandler _handler;
@@ -34,14 +36,15 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             _handler = new SubmitRolloverExtensionCommandHandler(
                 _rolloverRepository.Object,
                 _fundingsRepository.Object,
-                _applyService.Object);
+                _applyService.Object,
+                _logger.Object);
         }
 
         // ------------------------------------------------------------
-        // SUCCESS — APPLY EXTENSIONS → SAVE CHANGES
+        // SUCCESS — APPLY EXTENSIONS
         // ------------------------------------------------------------
         [Fact]
-        public async Task Handle_Success_AppliesExtensionsAndSavesChanges()
+        public async Task Handle_Success_AppliesExtensionsWithoutTrackedSaveChanges()
         {
             // Arrange
             var item1 = new FundingExtensionItem() { Qan = "111", FundingStreamName = "16-18", RolloverStatus = "Extended", ProposedFundingApprovalEndDate = DateTime.UtcNow.AddYears(1) };
@@ -85,7 +88,7 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Rollover
             Assert.True(result.Success);
             Assert.Equal("Funding extensions applied.", result.Value.ResultMessage);
 
-            _rolloverRepository.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+            _rolloverRepository.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
         }
 
         [Fact]

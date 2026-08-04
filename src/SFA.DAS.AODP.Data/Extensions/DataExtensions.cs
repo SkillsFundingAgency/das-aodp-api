@@ -12,6 +12,7 @@ using SFA.DAS.AODP.Data.Repositories.Rollover;
 using System.Diagnostics.CodeAnalysis;
 using SFA.DAS.AODP.Data.Repositories.QaaQualification;
 using Microsoft.Extensions.Logging;
+using SFA.DAS.AODP.Data.Repositories.FundingExtension;
 
 namespace SFA.DAS.AODP.Data.Extensions
 {
@@ -20,7 +21,7 @@ namespace SFA.DAS.AODP.Data.Extensions
     {
         public static IServiceCollection ConfigureDatabase(this IServiceCollection services, IConfigurationRoot configuration)
         {
-            services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options =>
+            services.AddDbContext<ApplicationDbContext>(options =>
             {
                var  connectionString = configuration["AodpApi:DatabaseConnectionString"];
 
@@ -34,6 +35,8 @@ namespace SFA.DAS.AODP.Data.Extensions
                 }
                 options.UseSqlServer(connectionString);
             });
+            services.AddScoped<IApplicationDbContext>(provider =>
+                provider.GetRequiredService<ApplicationDbContext>());
             services.AddScoped<IFormVersionRepository, FormVersionRepository>();
             services.AddScoped<ISectionRepository, SectionRepository>();
             services.AddScoped<IPageRepository, PageRepository>();
@@ -67,6 +70,7 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IJobRunsRepository, JobRunsRepository>();
 
             services.AddScoped<IRolloverRepository, RolloverRepository>();
+            services.AddScoped<IFundingExtensionPersistenceRepository, FundingExtensionPersistenceRepository>();
 
             services.AddScoped<IQualificationOutputFileRepository, QualificationOutputFileRepository>();
             services.AddScoped<IQualificationOutputFileLogRepository, QualificationOutputFileLogRepository>();

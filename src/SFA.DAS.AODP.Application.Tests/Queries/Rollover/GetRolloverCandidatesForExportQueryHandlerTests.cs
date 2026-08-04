@@ -55,7 +55,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
             Assert.True(result.Success);
             Assert.NotNull(result.Value);
             Assert.Equal(csvBytes, result.Value.FileContent);
-            Assert.Equal($"RolloverCandidates_SystemDraft_{DateOnly.FromDateTime(DateTime.Today).ToFilenameDateFormat()}.csv", result.Value.FileName);
+            Assert.Equal($"RolloverCandidates_SystemDraft_{DateOnly.FromDateTime(DateTime.UtcNow.Date).ToFilenameDateFormat()}.csv", result.Value.FileName);
             Assert.Equal("text/csv", result.Value.ContentType);
             Assert.Null(result.ErrorMessage);
         }
