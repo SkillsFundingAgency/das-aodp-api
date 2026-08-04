@@ -85,7 +85,6 @@ BEGIN
 			INNER JOIN regulated.QualificationVersions QV ON QV.QualificationId = Q.Id
 			INNER JOIN regulated.ProcessStatus PS ON PS.Id = QV.ProcessStatusId
 			WHERE Q.Id = @QualificationId
-			ORDER BY QV.Version ASC
 
 	FETCH NEXT FROM cur_qual INTO @QualificationId
 END

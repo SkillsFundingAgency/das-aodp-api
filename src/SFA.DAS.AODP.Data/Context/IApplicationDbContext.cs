@@ -9,6 +9,7 @@ using SFA.DAS.AODP.Data.Entities.Jobs;
 using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Entities.Rollover;
 
 namespace SFA.DAS.AODP.Data.Context
 {
@@ -69,6 +70,18 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<QualificationFundingStatus> QualificationFundingStatus { get; set; }
         DbSet<RegulatedQaaQualification> RegulatedQaaQualifications { get; set; }
         DbSet<RegulatedQaaQualificationHistory> RegulatedQaaQualificationHistory { get; set; }
+
+        DbSet<RolloverCandidates> RolloverCandidates { get; set; }
+        DbSet<RolloverWorkflowRun> RolloverWorkflowRuns { get; set; }
+        DbSet<RolloverWorkflowRunFundingOffer> RolloverWorkflowRunFundingOffers { get; set; }
+        DbSet<RolloverWorkflowRunFilter> RolloverWorkflowRunFilters { get; set; }
+        DbSet<RolloverWorkflowRunFilterValue> RolloverWorkflowRunFilterValues { get; set; }
+        DbSet<RolloverWorkflowCandidate> RolloverWorkflowCandidates { get; set; }
+        DbSet<RolloverDecisionRun> RolloverDecisionRuns { get; set; }
+        DbSet<FundingExtensionStaging> FundingExtensionStaging { get; set; }
+
+        DbSet<RolloverWorkflowCandidatesP1Checks> RolloverWorkflowCandidatesP1Checks { get; set; }
+
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
         Task<IDbContextTransaction> StartTransactionAsync();
     }
