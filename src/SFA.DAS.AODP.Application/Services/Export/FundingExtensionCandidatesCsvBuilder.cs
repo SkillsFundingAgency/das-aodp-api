@@ -26,7 +26,6 @@ namespace SFA.DAS.AODP.Application.Services.Export
                 "QualificationLevel",
                 "QualificationType",
                 "SSA",
-                "OperationalEndDate",
                 "OfferedInEngland",
                 "FundedInEngland",
                 "GLH",
@@ -113,7 +112,6 @@ namespace SFA.DAS.AODP.Application.Services.Export
             WriteField(writer, r.QualificationLevel); writer.Write(',');
             WriteField(writer, r.QualificationType); writer.Write(',');
             WriteField(writer, r.SSA); writer.Write(',');
-            WriteField(writer, r.OperationalEndDate); writer.Write(',');
             WriteField(writer, r.OfferedInEngland); writer.Write(',');
             WriteField(writer, r.FundedInEngland); writer.Write(',');
             WriteField(writer, r.GLH); writer.Write(',');
