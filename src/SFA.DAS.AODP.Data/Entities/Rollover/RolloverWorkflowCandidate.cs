@@ -1,5 +1,4 @@
 ﻿using SFA.DAS.AODP.Data.Entities.Offer;
-using SFA.DAS.AODP.Data.Entities.Qualification;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SFA.DAS.AODP.Data.Entities.Rollover;
@@ -11,7 +10,9 @@ public class RolloverWorkflowCandidate
 
     public Guid RolloverWorkflowRunId { get; private set; }
 
-    public Guid QualificationVersionId { get; private set; }
+    public string SourceType { get; private set; } = null!;
+
+    public Guid SourceQualificationId { get; private set; }
     
     public Guid FundingOfferId { get; private set; }
     
@@ -37,18 +38,21 @@ public class RolloverWorkflowCandidate
     
     public DateTime UpdatedAt { get; private set; }
 
+    public DateTime? InvalidatedAt { get; private set; }
+
+    public string? InvalidationReason { get; private set; }
+
     public virtual RolloverWorkflowRun RolloverWorkflowRun { get; private set; } = null!;
 
     public virtual RolloverCandidates RolloverCandidates { get; set; } = null!;
-
-    public virtual QualificationVersions QualificationVersion { get; set; } = null!;
 
     public virtual FundingOffer FundingOffer { get; set; } = null!;
 
     public static RolloverWorkflowCandidate Create(
         Guid workflowRunId,
         Guid rolloverCandidateRecordId,
-        Guid qualificationVersionId,
+        string sourceType,
+        Guid sourceQualificationId,
         Guid fundingOfferId,
         string academicYear,
         int rolloverRound,
@@ -56,6 +60,11 @@ public class RolloverWorkflowCandidate
         DateTime? proposedFundingEndDate,
         DateTime createdAt)
     {
+        if (string.IsNullOrWhiteSpace(sourceType))
+        {
+            throw new ArgumentNullException(nameof(sourceType));
+        }
+
         if (string.IsNullOrWhiteSpace(academicYear))
         {
             throw new ArgumentNullException(nameof(academicYear));
@@ -65,7 +74,8 @@ public class RolloverWorkflowCandidate
         {
             RolloverWorkflowRunId = workflowRunId,
             RolloverCandidatesId = rolloverCandidateRecordId,
-            QualificationVersionId = qualificationVersionId,
+            SourceType = sourceType,
+            SourceQualificationId = sourceQualificationId,
             FundingOfferId = fundingOfferId,
             AcademicYear = academicYear,
             RolloverRound = rolloverRound,
@@ -176,5 +186,17 @@ public class RolloverWorkflowCandidate
         PassP1 = pass;
         P1FailureReason = pass ? null : failureReason;
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Invalidate(string reason, DateTime invalidatedAt)
+    {
+        if (InvalidatedAt.HasValue)
+        {
+            return;
+        }
+
+        InvalidatedAt = invalidatedAt;
+        InvalidationReason = reason;
+        UpdatedAt = invalidatedAt;
     }
 }

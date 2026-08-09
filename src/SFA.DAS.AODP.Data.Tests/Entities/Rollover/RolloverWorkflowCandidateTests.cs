@@ -18,6 +18,7 @@ public class RolloverWorkflowCandidateTests
         var result = RolloverWorkflowCandidate.Create(
             workflowRunId,
             rolloverCandidateRecordId,
+            RolloverSourceTypes.Qaa,
             qualificationVersionId,
             fundingOfferId,
             academicYear,
@@ -29,7 +30,8 @@ public class RolloverWorkflowCandidateTests
         // Assert
         Assert.Equal(workflowRunId, result.RolloverWorkflowRunId);
         Assert.Equal(rolloverCandidateRecordId, result.RolloverCandidatesId);
-        Assert.Equal(qualificationVersionId, result.QualificationVersionId);
+        Assert.Equal(RolloverSourceTypes.Ofqual, result.SourceType);
+        Assert.Equal(qualificationVersionId, result.SourceQualificationId);
         Assert.Equal(fundingOfferId, result.FundingOfferId);
         Assert.Equal(academicYear, result.AcademicYear);
         Assert.Equal(currentFundingEndDate, result.CurrentFundingEndDate);
@@ -53,6 +55,7 @@ public class RolloverWorkflowCandidateTests
             RolloverWorkflowCandidate.Create(
                 Guid.NewGuid(),
                 Guid.NewGuid(),
+                RolloverSourceTypes.Ofqual,
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 null!,
@@ -133,6 +136,7 @@ public class RolloverWorkflowCandidateTests
         var candidate = RolloverWorkflowCandidate.Create(
             Guid.NewGuid(),
             Guid.NewGuid(),
+            RolloverSourceTypes.Ofqual,
             Guid.NewGuid(),
             Guid.NewGuid(),
             "2025/26",
@@ -240,6 +244,7 @@ public class RolloverWorkflowCandidateTests
         return RolloverWorkflowCandidate.Create(
             Guid.NewGuid(),
             Guid.NewGuid(),
+            RolloverSourceTypes.Ofqual,
             Guid.NewGuid(),
             Guid.NewGuid(),
             "2025/26",

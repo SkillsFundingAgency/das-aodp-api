@@ -13,10 +13,11 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
         private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
         private readonly IFundingOfferRepository _fundingOfferRepository;
         private readonly IQualificationsRepository _qualificationsRepository;
-
-
-
-        public SaveQualificationsFundingOffersCommandHandler(IQualificationFundingsRepository repository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository, IFundingOfferRepository fundingOfferRepository, IQualificationsRepository qualificationsRepository)
+        public SaveQualificationsFundingOffersCommandHandler(
+            IQualificationFundingsRepository repository,
+            IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository,
+            IFundingOfferRepository fundingOfferRepository,
+            IQualificationsRepository qualificationsRepository)
         {
             _qualificationFundingsrepository = repository;
             _qualificationDiscussionHistoryRepository = qualificationDiscussionHistoryRepository;
@@ -35,52 +36,29 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                 var operationalStartDate = await _qualificationsRepository.GetQualificationVersionOperationalStartDateById(request.QualificationVersionId, cancellationToken);
 
                 List<QualificationFundings> create = new();
-                List<QualificationFundings> remove = new();
 
                 foreach (var offerId in request.SelectedOfferIds)
                 {
                     var offer = qualificationfundedOffers.FirstOrDefault(a => a.FundingOfferId == offerId);
-                    if (offer == null) create.Add(new()
+                    if (offer == null)
                     {
-                        QualificationVersionId = request.QualificationVersionId,
-                        FundingOfferId = offerId,
-                        StartDate = operationalStartDate
-                    });
-                }
-
-                foreach (var offer in qualificationfundedOffers)
-                {
-                    if (!request.SelectedOfferIds.Contains(offer.FundingOfferId))
-                    {
-                        remove.Add(offer);
+                        create.Add(QualificationFundings.Create(
+                            request.QualificationVersionId,
+                            offerId,
+                            operationalStartDate,
+                            null));
                     }
                 }
 
-                if (remove.Count > 0) await _qualificationFundingsrepository.RemoveAsync(remove);
-                if (create.Count > 0) await _qualificationFundingsrepository.CreateAsync(create);
+                if (create.Count > 0)
+                {
+                    await _qualificationFundingsrepository.CreateAsync(create);
+                }
 
                 if (request.UpdateDiscussionHistory == true)
                 {
                     StringBuilder qualificationDiscussionHistoryNotes = new();
                     qualificationDiscussionHistoryNotes.AppendLine("Feedback from DfE:");
-                    if (remove.Count > 0)
-                    {
-                        qualificationDiscussionHistoryNotes.AppendLine("The following offers have been removed:");
-                        qualificationDiscussionHistoryNotes.AppendLine();
-
-                        foreach (var qf in remove)
-                        {
-                            var fundingOffer = fundingOffers.FirstOrDefault(a => a.Id == qf.FundingOfferId);
-                            if (fundingOffer != null)
-                            {
-                                qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
-                                qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate.ToFundingEndDateFormat()}");
-                                qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate.ToFundingEndDateFormat()}");
-                                if (!string.IsNullOrWhiteSpace(qf.Comments)) qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
-                                qualificationDiscussionHistoryNotes.AppendLine();
-                            }
-                        }
-                    }
                     if (create.Count > 0)
                     {
                         qualificationDiscussionHistoryNotes.AppendLine("The following offers have been selected:");
@@ -100,7 +78,7 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                         }
                     }
 
-                if (remove.Count == 0 && create.Count == 0)
+                if (create.Count == 0)
                 {
                     qualificationDiscussionHistoryNotes.AppendLine("Funding has been approved but no offers have been selected");
                 }

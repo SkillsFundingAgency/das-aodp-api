@@ -139,13 +139,14 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Rollover
                 candidates.Add(
                     RolloverWorkflowCandidate.Create(
                     workflowRunId,
-                    Guid.NewGuid(),          // rolloverCandidateRecordId
-                    Guid.NewGuid(),          // qualificationVersionId
-                    Guid.NewGuid(),          // fundingOfferId
-                    "2024",                  // academicYear
-                    1,                       // rolloverRound
-                    now,                     // currentFundingEndDate
-                    now.AddYears(1),         // proposedFundingEndDate
+                    Guid.NewGuid(),             // rolloverCandidateRecordId
+                    RolloverSourceTypes.Ofqual, // sourceType
+                    Guid.NewGuid(),             // sourceQualificatiionId
+                    Guid.NewGuid(),             // fundingOfferId
+                    "2024",                     // academicYear
+                    1,                          // rolloverRound
+                    now,                        // currentFundingEndDate
+                    now.AddYears(1),            // proposedFundingEndDate
                     now                      // createdAt
                 ));
 

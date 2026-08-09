@@ -13,15 +13,28 @@ using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Entities.Rollover.ModelBuilder;
 using SFA.DAS.AODP.Data.EntityConfiguration;
+using SFA.DAS.AODP.Data.Entities.Funding;
+using SFA.DAS.AODP.Data.Repositories.Rollover;
 
 namespace SFA.DAS.AODP.Data.Context
 {
     [ExcludeFromCodeCoverage]
     public class ApplicationDbContext : DbContext, IApplicationDbContext
     {
+        private readonly IFundingDomainEventDispatcher? _fundingDomainEventDispatcher;
+        private bool _dispatchingFundingDomainEvents;
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
+            : this(options, null)
         { }
+
+        public ApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options,
+            IFundingDomainEventDispatcher? fundingDomainEventDispatcher)
+            : base(options)
+        {
+            _fundingDomainEventDispatcher = fundingDomainEventDispatcher;
+        }
 
         public virtual DbSet<ApprovedQualificationsImport> ApprovedQualificationsImports { get; set; }
 
@@ -86,6 +99,10 @@ namespace SFA.DAS.AODP.Data.Context
 
         public virtual DbSet<RegulatedQaaQualificationHistory> RegulatedQaaQualificationHistory { get; set; }
 
+        public virtual DbSet<QaaQualificationFunding> QaaQualificationFundings { get; set; }
+
+        public virtual DbSet<AllQualificationFunding> AllQualificationFundings { get; set; }
+
         public virtual DbSet<RolloverCandidates> RolloverCandidates { get; set; }
         public virtual DbSet<RolloverWorkflowRun> RolloverWorkflowRuns { get; set; }
         public virtual DbSet<RolloverWorkflowRunFundingOffer> RolloverWorkflowRunFundingOffers { get; set; }
@@ -142,9 +159,55 @@ namespace SFA.DAS.AODP.Data.Context
             base.OnModelCreating(modelBuilder);
         }
 
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            return base.SaveChangesAsync(cancellationToken);
+            if (_dispatchingFundingDomainEvents || _fundingDomainEventDispatcher is null)
+            {
+                return await base.SaveChangesAsync(cancellationToken);
+            }
+
+            var domainEvents = FundingDomainEventCollector.Collect(ChangeTracker);
+            if (domainEvents.Count == 0)
+            {
+                return await base.SaveChangesAsync(cancellationToken);
+            }
+
+            var ownsTransaction = Database.IsRelational() && Database.CurrentTransaction is null;
+            await using var transaction = ownsTransaction
+                ? await Database.BeginTransactionAsync(cancellationToken)
+                : null;
+
+            try
+            {
+                var affectedRows = await base.SaveChangesAsync(cancellationToken);
+                _dispatchingFundingDomainEvents = true;
+                await _fundingDomainEventDispatcher.DispatchAsync(
+                    this,
+                    domainEvents,
+                    cancellationToken);
+                affectedRows += await base.SaveChangesAsync(cancellationToken);
+
+                if (transaction is not null)
+                {
+                    await transaction.CommitAsync(cancellationToken);
+                }
+
+                FundingDomainEventCollector.Clear(ChangeTracker);
+                return affectedRows;
+            }
+            catch
+            {
+                if (transaction is not null)
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                }
+
+                throw;
+            }
+            finally
+            {
+                _dispatchingFundingDomainEvents = false;
+            }
         }
 
         public async Task<IDbContextTransaction> StartTransactionAsync()

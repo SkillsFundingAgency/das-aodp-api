@@ -21,7 +21,13 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
 
     public const string NoQualificationsFound = "No qualifications found for the output file.";
     public const string UnexpectedErrorGeneratingFile = "An unexpected error occurred while generating the output file.";
-    public GetQualificationOutputFileQueryHandler(IQualificationOutputFileRepository outputFileRepository, IQualificationOutputFileLogRepository outputFileLogRepository, IBlobStorageService blobStorageService, OutputFileBlobStorageSettings blobStorageSettings, IQaaQualificationRepository qaaQualificationRepository, IQaaFundingApprovalEndDateCalculator qaaFundingApprovalEndDateCalculator)
+    public GetQualificationOutputFileQueryHandler(
+        IQualificationOutputFileRepository outputFileRepository,
+        IQualificationOutputFileLogRepository outputFileLogRepository,
+        IBlobStorageService blobStorageService,
+        OutputFileBlobStorageSettings blobStorageSettings,
+        IQaaQualificationRepository qaaQualificationRepository,
+        IQaaFundingApprovalEndDateCalculator qaaFundingApprovalEndDateCalculator)
     {
         _outputFileRepository = outputFileRepository;
         _outputFileLogRepository = outputFileLogRepository;
@@ -42,11 +48,18 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
             var qaaQualifications = await _qaaQualificationRepository.GetAllAsync(cancellationToken);
 
             var regulatedQaaQualifications = qaaQualifications.ToList();
-            if (regulatedQaaQualifications.Count > 0)
+            var qaaQualificationsToRecalculate = regulatedQaaQualifications
+                .Where(x => x.RequiresFundingRecalculation)
+                .ToList();
+
+            if (qaaQualificationsToRecalculate.Count > 0)
             {
-                foreach (var qaaQualification in regulatedQaaQualifications)
+                foreach (var qaaQualification in qaaQualificationsToRecalculate)
                 {
-                    await qaaQualification.SetFundingApprovalEndDateAsync(request.PublicationDate, _qaaFundingApprovalEndDateCalculator, cancellationToken);
+                    await qaaQualification.SetFundingApprovalEndDateAsync(
+                        request.PublicationDate,
+                        _qaaFundingApprovalEndDateCalculator,
+                        cancellationToken);
                 }
 
                 await _qaaQualificationRepository.SaveChangesAsync(cancellationToken);
@@ -125,6 +138,7 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
             return response;
         }
     }
+
     private static DateTime? GetMaxFundingEndDate(QualificationOutputFile q)
     {
         DateTime? max = null;

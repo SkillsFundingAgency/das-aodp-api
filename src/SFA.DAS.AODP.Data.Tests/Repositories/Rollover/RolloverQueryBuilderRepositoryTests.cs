@@ -1,6 +1,8 @@
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Offer;
+using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
@@ -12,6 +14,56 @@ namespace SFA.DAS.AODP.Data.UnitTests.Repositories.Rollover;
 
 public class RolloverQueryBuilderRepositoryTests : UnitTest
 {
+    [Fact]
+    public async Task GetSectorSubjectAreasForRolloverQueryBuilderAsync_TranslatesQaaProjectionToSql()
+    {
+        await using var connection = new SqliteConnection("Filename=:memory:");
+        await connection.OpenAsync(CancellationToken);
+
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlite(connection)
+            .Options;
+        await using var context = new ApplicationDbContext(options);
+        await context.Database.EnsureCreatedAsync(CancellationToken);
+
+        var qaaQualification = RegulatedQaaQualification.Create(
+            new DateTime(2026, 1, 1),
+            "Z1234567",
+            "Access to HE Diploma",
+            "QAA Awarding Body",
+            new DateOnly(2025, 8, 1),
+            new DateOnly(2026, 7, 31),
+            SectorSubjectArea.Science);
+        var qaaQualificationId = Guid.NewGuid();
+        typeof(RegulatedQaaQualification)
+            .GetProperty(nameof(RegulatedQaaQualification.Id))!
+            .SetValue(qaaQualification, qaaQualificationId);
+        var fundingOffer = new FundingOffer
+        {
+            Id = Guid.NewGuid(),
+            Name = "Age1619",
+            DisplayName = "Age 16-19"
+        };
+        var candidate = RolloverCandidates.CreateInitialRound(
+            RolloverSourceTypes.Qaa,
+            qaaQualificationId,
+            fundingOffer.Id,
+            "2025/26",
+            new DateTime(2026, 1, 1));
+        candidate.FundingOffer = fundingOffer;
+
+        context.RegulatedQaaQualifications.Add(qaaQualification);
+        context.RolloverCandidates.Add(candidate);
+        await context.SaveChangesAsync(CancellationToken);
+
+        var sut = new RolloverRepository(context);
+        var result = await sut.GetSectorSubjectAreasForRolloverQueryBuilderAsync(
+            new RolloverQueryBuilderSectorSubjectAreaRequest([], []),
+            CancellationToken);
+
+        result.Single().Name.ShouldBe(SectorSubjectArea.Science.Name);
+    }
+
     [Fact]
     public async Task GetAllLevelsForRolloverQueryBuilderAsync_WhenCandidatesContainDuplicateLevels_ReturnsDistinctLevels()
     {
@@ -117,6 +169,7 @@ public class RolloverQueryBuilderRepositoryTests : UnitTest
         result.ShouldBeEquivalentTo(new RolloverQueryBuilderAwardingOrganisation
         {
             Id = seeded.FirstOrganisation.Id,
+            FilterId = seeded.FirstOrganisation.RecognitionNumber,
             Ukprn = seeded.FirstOrganisation.Ukprn,
             RecognitionNumber = seeded.FirstOrganisation.RecognitionNumber,
             NameLegal = seeded.FirstOrganisation.NameLegal,
@@ -149,9 +202,10 @@ public class RolloverQueryBuilderRepositoryTests : UnitTest
         result.ShouldBeEquivalentTo(new RolloverCandidateDto
         {
             Id = seeded.FirstCandidate.Id,
-            QualificationVersionId = seeded.FirstCandidate.QualificationVersionId,
-            QualificationNumber = seeded.FirstCandidate.QualificationVersion.Qualification.Qan,
-            QualificationName = seeded.FirstCandidate.QualificationVersion.Qualification.QualificationName,
+            SourceType = RolloverSourceTypes.Ofqual,
+            SourceQualificationId = seeded.FirstCandidate.SourceQualificationId,
+            QualificationNumber = seeded.FirstVersion.Qualification.Qan,
+            QualificationName = seeded.FirstVersion.Qualification.QualificationName,
             FundingOfferId = seeded.FirstCandidate.FundingOfferId,
             FundingOfferName = seeded.FirstCandidate.FundingOffer.DisplayName,
             AcademicYear = seeded.FirstCandidate.AcademicYear,
@@ -200,13 +254,14 @@ public class RolloverQueryBuilderRepositoryTests : UnitTest
             "Third qualification",
             "Third offer");
 
-        context.RolloverCandidates.AddRange(firstCandidate, secondCandidate, thirdCandidate);
+        context.QualificationVersions.AddRange(firstCandidate.Version, secondCandidate.Version, thirdCandidate.Version);
+        context.RolloverCandidates.AddRange(firstCandidate.Candidate, secondCandidate.Candidate, thirdCandidate.Candidate);
         await context.SaveChangesAsync(CancellationToken);
 
-        return new SeededCandidates(firstCandidate, firstOrganisation);
+        return new SeededCandidates(firstCandidate.Candidate, firstCandidate.Version, firstOrganisation);
     }
 
-    private static RolloverCandidates CreateCandidate(
+    private static CandidateSeed CreateCandidate(
         QualificationLevel level,
         QualificationType type,
         SectorSubjectArea sectorSubjectArea,
@@ -219,12 +274,13 @@ public class RolloverQueryBuilderRepositoryTests : UnitTest
         var fundingOfferId = Guid.NewGuid();
         var qualificationId = Guid.NewGuid();
         var candidate = RolloverCandidates.CreateInitialRound(
+            RolloverSourceTypes.Ofqual,
             qualificationVersionId,
             fundingOfferId,
             "2026/27",
             new DateTime(2026, 7, 1));
 
-        candidate.QualificationVersion = new QualificationVersions
+        var qualificationVersion = new QualificationVersions
         {
             Id = qualificationVersionId,
             Level = level.Name,
@@ -250,7 +306,7 @@ public class RolloverQueryBuilderRepositoryTests : UnitTest
             DisplayName = offerName
         };
 
-        return candidate;
+        return new CandidateSeed(candidate, qualificationVersion);
     }
 
     private static AwardingOrganisation CreateOrganisation(string recognitionNumber, string name, int ukprn)
@@ -266,5 +322,10 @@ public class RolloverQueryBuilderRepositoryTests : UnitTest
             Acronym = name[..1]
         };
 
-    private sealed record SeededCandidates(RolloverCandidates FirstCandidate, AwardingOrganisation FirstOrganisation);
+    private sealed record CandidateSeed(RolloverCandidates Candidate, QualificationVersions Version);
+
+    private sealed record SeededCandidates(
+        RolloverCandidates FirstCandidate,
+        QualificationVersions FirstVersion,
+        AwardingOrganisation FirstOrganisation);
 }

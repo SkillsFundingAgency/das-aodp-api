@@ -11,7 +11,9 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
     {
         private readonly IQualificationFundingsRepository _qualificationFundingsrepository;
         private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
-        public SaveQualificationsFundingOffersDetailsCommandHandler(IQualificationFundingsRepository repository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository)
+        public SaveQualificationsFundingOffersDetailsCommandHandler(
+            IQualificationFundingsRepository repository,
+            IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository)
         {
             _qualificationFundingsrepository = repository;
             _qualificationDiscussionHistoryRepository = qualificationDiscussionHistoryRepository;
@@ -25,16 +27,31 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
             {
                 var fundedOffers = await _qualificationFundingsrepository.GetByIdAsync(request.QualificationVersionId);
 
-                foreach (var detail in request.Details)
+                var changedDetails = request.Details
+                    .Select(detail => new
+                    {
+                        Detail = detail,
+                        Funding = fundedOffers.FirstOrDefault(a => a.FundingOfferId == detail.FundingOfferId)
+                            ?? throw new RecordNotFoundException(detail.FundingOfferId)
+                    })
+                    .Where(x =>
+                        x.Funding.StartDate != x.Detail.StartDate ||
+                        x.Funding.EndDate != x.Detail.EndDate ||
+                        x.Funding.Comments != x.Detail.Comments)
+                    .ToList();
+
+                if (changedDetails.Count > 0)
                 {
-                    var offer = fundedOffers.FirstOrDefault(a => a.FundingOfferId == detail.FundingOfferId) ?? throw new RecordNotFoundException(detail.FundingOfferId);
+                    foreach (var changedDetail in changedDetails)
+                    {
+                        changedDetail.Funding.UpdateFunding(
+                            changedDetail.Detail.StartDate,
+                            changedDetail.Detail.EndDate,
+                            changedDetail.Detail.Comments);
+                    }
 
-                    offer.StartDate = detail.StartDate;
-                    offer.EndDate = detail.EndDate;
-                    offer.Comments = detail.Comments;
+                    await _qualificationFundingsrepository.UpdateAsync(fundedOffers);
                 }
-
-                await _qualificationFundingsrepository.UpdateAsync(fundedOffers);
 
                 if (request.UpdateDiscussionHistory == true)
                 {

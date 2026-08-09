@@ -8,7 +8,8 @@ public class FundingExtensionStaging
 {
     public Guid OperationId { get; set; }
     public Guid RolloverCandidateId { get; set; }
-    public Guid? QualificationFundingId { get; set; }
+    public string? SourceType { get; set; }
+    public Guid? SourceFundingRecordId { get; set; }
     public RolloverStatus RolloverStatus { get; set; }
     public string? ExclusionReason { get; set; }
     public DateTime? NewFundingEndDate { get; set; }
@@ -16,3 +17,4 @@ public class FundingExtensionStaging
     public string? FundingComments { get; set; }
     public DateTime CreatedAt { get; set; }
 }
+
