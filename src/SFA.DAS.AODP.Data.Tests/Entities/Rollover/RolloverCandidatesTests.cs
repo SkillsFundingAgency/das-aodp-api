@@ -17,7 +17,7 @@ public class RolloverCandidatesTests
         var result = RolloverCandidates.CreateInitialRound(RolloverSourceTypes.Qaa, qualificationGuid, fundingOfferId, academicYear, createdAt);
         
         // Assert
-        Assert.Equal(RolloverSourceTypes.Ofqual, result.SourceType);
+        Assert.Equal(RolloverSourceTypes.Qaa, result.SourceType);
         Assert.Equal(qualificationGuid, result.SourceQualificationId);
         Assert.Equal(fundingOfferId, result.FundingOfferId);
         Assert.Equal(academicYear, result.AcademicYear);

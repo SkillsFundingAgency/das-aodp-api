@@ -30,7 +30,7 @@ public class RolloverWorkflowCandidateTests
         // Assert
         Assert.Equal(workflowRunId, result.RolloverWorkflowRunId);
         Assert.Equal(rolloverCandidateRecordId, result.RolloverCandidatesId);
-        Assert.Equal(RolloverSourceTypes.Ofqual, result.SourceType);
+        Assert.Equal(RolloverSourceTypes.Qaa, result.SourceType);
         Assert.Equal(qualificationVersionId, result.SourceQualificationId);
         Assert.Equal(fundingOfferId, result.FundingOfferId);
         Assert.Equal(academicYear, result.AcademicYear);

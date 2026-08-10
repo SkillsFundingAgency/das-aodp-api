@@ -1,11 +1,10 @@
-﻿using System.Diagnostics;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.ValueObjects;
 using SFA.DAS.AODP.Models.Rollover;
-
+ 
 namespace SFA.DAS.AODP.Data.Repositories.Rollover;
 
 public class RolloverRepository : IRolloverRepository
@@ -19,20 +18,25 @@ public class RolloverRepository : IRolloverRepository
 
     public async Task<int> GetRolloverWorkflowCandidatesCountAsync(CancellationToken cancellationToken)
     {
-        var dbSet = _context.RolloverWorkflowCandidates;
+        // Scoped to the latest run so this always agrees with GetAllRolloverWorkflowCandidatesAsync,
+        // which the same screen uses to show the actual candidates behind this count.
+        var latestRunId = await GetLatestWorkflowRunIdAsync(cancellationToken) ?? Guid.Empty;
 
-        var totalRecords = await dbSet
+        var totalRecords = await _context.RolloverWorkflowCandidates
             .AsNoTracking()
-            .CountAsync(x => !x.InvalidatedAt.HasValue, cancellationToken);
+            .CountAsync(x => x.RolloverWorkflowRunId == latestRunId && !x.InvalidatedAt.HasValue, cancellationToken);
 
         return totalRecords;
     }
 
     public async Task<IEnumerable<RolloverWorkflowCandidate>> GetAllRolloverWorkflowCandidatesAsync(CancellationToken cancellationToken)
     {
+        // Scoped to the latest run
+        var latestRunId = await GetLatestWorkflowRunIdAsync(cancellationToken) ?? Guid.Empty;
+
         return await _context.RolloverWorkflowCandidates
             .Include(x => x.RolloverWorkflowRun)
-            .Where(x => !x.InvalidatedAt.HasValue)
+            .Where(x => x.RolloverWorkflowRunId == latestRunId && !x.InvalidatedAt.HasValue)
             .ToListAsync(cancellationToken);
     }
 
@@ -214,14 +218,11 @@ public class RolloverRepository : IRolloverRepository
             .ToList();
     }
 
-
-
-
     public async Task<Guid> CreateRolloverWorkflowAsync(
-     RolloverWorkflowRun workflowRun,
-     IReadOnlyCollection<RolloverWorkflowCandidate> workflowCandidates,
-     IReadOnlyCollection<RolloverWorkflowRunFundingOffer> workflowFundingOffers,
-     CancellationToken cancellationToken)
+        RolloverWorkflowRun workflowRun,
+        IReadOnlyCollection<RolloverWorkflowCandidate> workflowCandidates,
+        IReadOnlyCollection<RolloverWorkflowRunFundingOffer> workflowFundingOffers,
+        CancellationToken cancellationToken)
     {
         var incomingCandidateIds = workflowCandidates
             .Select(x => x.RolloverCandidatesId)
@@ -560,7 +561,7 @@ public class RolloverRepository : IRolloverRepository
 
         return query;
     }
-    public async Task<RolloverStartSummary> GetRolloverStartSummaryAsync(string academicYear, CancellationToken cancellationToken) 
+    public async Task<RolloverStartSummary> GetRolloverStartSummaryAsync(string academicYear, CancellationToken cancellationToken)
     {
         var candidates = await _context.RolloverCandidates
             .Where(x => x.AcademicYear == academicYear)

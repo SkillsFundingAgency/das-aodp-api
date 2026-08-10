@@ -40,6 +40,10 @@ public class RolloverRepositoryTests
         return context;
     }
 
+    // ------------------------------------------------------------
+    // UNAFFECTED - underlying method behaviour did not change in this merge
+    // ------------------------------------------------------------
+
     [Fact]
     public async Task GetAllRolloverWorkflowCandidatesAsync_ReturnsEmptyResult_When_NoRecords()
     {
@@ -101,7 +105,7 @@ public class RolloverRepositoryTests
 
         await using var db = CreateDb(nameof(GetRolloverWorkflowCandidatesByRunId_FiltersByRunId_And_IncludedInP1Export));
 
-        // Minimal qualification + version + funding offer so projection works
+        // Ofqual side - this is the row expected to come back (IncludedInP1Export = true)
         var qualification = new Qualification { Id = Guid.NewGuid(), Qan = "QAN-123" };
         var organisation = new AwardingOrganisation { Id = Guid.NewGuid(), NameOfqual = "Org" };
         var qualVersion = new QualificationVersions
@@ -119,33 +123,47 @@ public class RolloverRepositoryTests
         };
         var fundingOffer = new FundingOffer { Id = Guid.NewGuid(), Name = "Funding A", DisplayName = "Funding A" };
 
-        var candidate = RolloverCandidates.CreateInitialRound(
+        var ofqualCandidate = RolloverCandidates.CreateInitialRound(
             RolloverSourceTypes.Ofqual, qualVersion.Id, fundingOffer.Id, "2024/25", now);
-        candidate.FundingOffer = fundingOffer;
+        ofqualCandidate.FundingOffer = fundingOffer;
 
         var included = RolloverWorkflowCandidate.Create(
-            runId, candidate.Id, RolloverSourceTypes.Ofqual, qualVersion.Id, fundingOffer.Id,
+            runId, ofqualCandidate.Id, RolloverSourceTypes.Ofqual, qualVersion.Id, fundingOffer.Id,
             "2024/25", 1, now, null, now);
-        included.RolloverCandidates = candidate;
+        included.RolloverCandidates = ofqualCandidate;
+
+        // QAA side - this is the row expected to be filtered out (IncludedInP1Export = false).
+        // Using a different source type (rather than just a different RolloverRound) also
+        // proves the filter and mapping both work correctly across source types, not just
+        // that duplicate-key rows are avoided.
+        var qaaQualification = RegulatedQaaQualification.Create(
+            now, "QAA-999", "QAA Excluded Qualification", "QAA Body",
+            DateOnly.FromDateTime(now.AddYears(-1)), DateOnly.FromDateTime(now.AddYears(5)),
+            SectorSubjectArea.Science);
+
+        var qaaCandidate = RolloverCandidates.CreateInitialRound(
+            RolloverSourceTypes.Qaa, qaaQualification.Id, fundingOffer.Id, "2024/25", now);
+        qaaCandidate.FundingOffer = fundingOffer;
 
         var excluded = RolloverWorkflowCandidate.Create(
-            runId, candidate.Id, RolloverSourceTypes.Ofqual, qualVersion.Id, fundingOffer.Id,
+            runId, qaaCandidate.Id, RolloverSourceTypes.Qaa, qaaQualification.Id, fundingOffer.Id,
             "2024/25", 1, now, null, now);
         typeof(RolloverWorkflowCandidate)
             .GetProperty("IncludedInP1Export")!
             .SetValue(excluded, false);
-        excluded.RolloverCandidates = candidate;
+        excluded.RolloverCandidates = qaaCandidate;
 
         var differentRun = RolloverWorkflowCandidate.Create(
-            otherRunId, candidate.Id, RolloverSourceTypes.Ofqual, qualVersion.Id, fundingOffer.Id,
+            otherRunId, ofqualCandidate.Id, RolloverSourceTypes.Ofqual, qualVersion.Id, fundingOffer.Id,
             "2024/25", 1, now, null, now);
-        differentRun.RolloverCandidates = candidate;
+        differentRun.RolloverCandidates = ofqualCandidate;
 
         await db.Qualification.AddAsync(qualification, TestContext.Current.CancellationToken);
         await db.QualificationVersions.AddAsync(qualVersion, TestContext.Current.CancellationToken);
         await db.AwardingOrganisation.AddAsync(organisation, TestContext.Current.CancellationToken);
+        await db.RegulatedQaaQualifications.AddAsync(qaaQualification, TestContext.Current.CancellationToken);
         await db.FundingOffers.AddAsync(fundingOffer, TestContext.Current.CancellationToken);
-        await db.RolloverCandidates.AddAsync(candidate, TestContext.Current.CancellationToken);
+        await db.RolloverCandidates.AddRangeAsync(ofqualCandidate, qaaCandidate);
         await db.RolloverWorkflowCandidates.AddRangeAsync(included, excluded, differentRun);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
@@ -282,7 +300,7 @@ public class RolloverRepositoryTests
         var candidateA = RolloverCandidates.CreateInitialRound(RolloverSourceTypes.Ofqual, versionA.Id, funding.Id, "2024/25", now);
         candidateA.FundingOffer = funding;
 
-        var candidateB = RolloverCandidates.CreateInitialRound(RolloverSourceTypes.Qaa, versionB.Id, funding.Id, "2024/25", now);
+        var candidateB = RolloverCandidates.CreateInitialRound(RolloverSourceTypes.Ofqual, versionB.Id, funding.Id, "2024/25", now);
         candidateB.FundingOffer = funding;
 
         var wcB = RolloverWorkflowCandidate.Create(runId, candidateB.Id, RolloverSourceTypes.Ofqual, versionB.Id, funding.Id, "2024/25", 1, now, null, now);
@@ -328,7 +346,7 @@ public class RolloverRepositoryTests
         await using var db = CreateDb(nameof(UpdateRolloverWorkflowCandidatesAsync_UpdatesAndSaves_When_ListProvided));
 
         var now = DateTime.UtcNow;
-        var entity = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), RolloverSourceTypes.Ofqual, Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now, null, now);
+        var entity = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), RolloverSourceTypes.Qaa, Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now, null, now);
         await db.RolloverWorkflowCandidates.AddAsync(entity, TestContext.Current.CancellationToken);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
@@ -485,6 +503,20 @@ public class RolloverRepositoryTests
         await db.RolloverCandidates.AddAsync(candidate, TestContext.Current.CancellationToken);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
+        // LoadRolloverCandidateGraphAsync only returns a candidate if it is linked to a
+        // non-invalidated RolloverWorkflowCandidate row belonging to the latest
+        // RolloverWorkflowRun - a bare RolloverCandidates row on its own is not enough.
+        var now = DateTime.UtcNow;
+        var workflowRun = RolloverWorkflowRun.Create(
+            "2024/25", SelectionMethod.QueryBuilder, now, now, now.AddYears(1), "test.user", now);
+        await db.RolloverWorkflowRuns.AddAsync(workflowRun, TestContext.Current.CancellationToken);
+
+        var workflowCandidate = RolloverWorkflowCandidate.Create(
+            workflowRun.Id, candidate.Id, RolloverSourceTypes.Ofqual, version.Id, funding.Id,
+            "2024/25", 1, now, null, now);
+        await db.RolloverWorkflowCandidates.AddAsync(workflowCandidate, TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
         var sut = new RolloverRepository(db);
 
         var keys = new List<CandidateKey> { new CandidateKey("Q-GRAPH", "FundG") };
@@ -509,8 +541,8 @@ public class RolloverRepositoryTests
         await using var db = CreateDb(nameof(DeleteAllWorkflowCandidatesAsync_RemovesAllRecords));
 
         var now = DateTime.UtcNow;
-        var e1 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), RolloverSourceTypes.Ofqual, Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now, null, now);
-        var e2 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), RolloverSourceTypes.Qaa, Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now, null, now);
+        var e1 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), RolloverSourceTypes.Qaa, Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now, null, now);
+        var e2 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), RolloverSourceTypes.Ofqual, Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now, null, now);
 
         await db.RolloverWorkflowCandidates.AddRangeAsync(e1, e2);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
@@ -544,8 +576,8 @@ public class RolloverRepositoryTests
     {
         // Arrange
         await using var db = CreateDb(nameof(GetLatestWorkflowRunIdAsync_ReturnsLatestId));
-        var older = RolloverWorkflowRun.Create("2023/24", SFA.DAS.AODP.Data.Entities.Rollover.Enums.SelectionMethod.FileUpload, DateTime.UtcNow.AddDays(-2), null, null, "u", DateTime.UtcNow.AddDays(-2));
-        var newer = RolloverWorkflowRun.Create("2024/25", SFA.DAS.AODP.Data.Entities.Rollover.Enums.SelectionMethod.FileUpload, DateTime.UtcNow, null, null, "u2", DateTime.UtcNow);
+        var older = RolloverWorkflowRun.Create("2023/24", SelectionMethod.FileUpload, DateTime.UtcNow.AddDays(-2), null, null, "u", DateTime.UtcNow.AddDays(-2));
+        var newer = RolloverWorkflowRun.Create("2024/25", SelectionMethod.FileUpload, DateTime.UtcNow, null, null, "u2", DateTime.UtcNow);
 
         db.RolloverWorkflowRuns.Add(older);
         db.RolloverWorkflowRuns.Add(newer);
@@ -559,7 +591,6 @@ public class RolloverRepositoryTests
         // Assert
         result.ShouldBe(newer.Id);
     }
-
 
     [Fact]
     public async Task GetRolloverCandidatesAsync_ReturnsMixedSources_WhenSourceQualificationIdsOverlap()
@@ -849,296 +880,207 @@ public class RolloverRepositoryTests
         Guid OfqualQualificationId,
         Guid WorkflowRunId);
 
-    // ------------------------------------------------------------
-    // NEEDS ATTENTION - commented out, do not re-enable without reading the reason below first.
-    // Kept together here (rather than deleted) so nothing is silently lost.
-    // ------------------------------------------------------------
+    [Fact]
+    public async Task GetRolloverWorkflowCandidatesCountAsync_ReturnsRecordCount()
+    {
+        await using var db = CreateDb(nameof(GetRolloverWorkflowCandidatesCountAsync_ReturnsRecordCount));
 
-    // REASON: GetAllRolloverWorkflowCandidatesAsync now also filters out invalidated candidates and eager-loads RolloverWorkflowRun (needed by UpdateRolloverWorkflowCandidatesAfterP1ChecksCommandHandler). This test's setup does not create a RolloverWorkflowRun or exercise the InvalidatedAt filter, so it needs rewriting, not just re-enabling.
-    //     [Fact]
-    //     public async Task GetAllRolloverWorkflowCandidatesAsync_ReturnsPagedOrderedMappedData()
-    //     {
-    //         // Arrange 
-    //         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-    //             .UseInMemoryDatabase("Rollover_Paged_" + Guid.NewGuid())
-    //             .Options;
-    //
-    //         var now = DateTime.UtcNow;
-    //         var e1 = Data.Entities.Rollover.RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-2), null, now.AddDays(-2));
-    //         var e2 = Data.Entities.Rollover.RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-1), null, now.AddDays(-1));
-    //         var e3 = Data.Entities.Rollover.RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now, null, now);
-    //
-    //         await using (var db = new ApplicationDbContext(options))
-    //         {
-    //             await db.RolloverWorkflowCandidates.AddRangeAsync(new[] { e1, e2, e3 });
-    //             await db.SaveChangesAsync(TestContext.Current.CancellationToken);
-    //         }
-    //
-    //         await using (var db = new ApplicationDbContext(options))
-    //         {
-    //             var sut = new RolloverRepository(db);
-    //
-    //             // Act 
-    //             var result = await sut.GetRolloverWorkflowCandidatesCountAsync(TestContext.Current.CancellationToken);
-    //
-    //             // Assert
-    //             Assert.Equal(3, result);
-    //
-    //         }
-    //     }
+        var now = DateTime.UtcNow;
+        var run = RolloverWorkflowRun.Create("2024/25", SelectionMethod.QueryBuilder, now, now, now.AddYears(1), "test.user", now);
+        await db.RolloverWorkflowRuns.AddAsync(run, TestContext.Current.CancellationToken);
 
-    // REASON: Same reason as GetAllRolloverWorkflowCandidatesAsync_ReturnsPagedOrderedMappedData above - method now filters on InvalidatedAt and requires a RolloverWorkflowRun to be set up for the Include to be meaningful.
-    //     [Fact]
-    //     public async Task GetAllRolloverWorkflowCandidatesAsync_ReturnsAllRecords()
-    //     {
-    //         // Arrange
-    //         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-    //             .UseInMemoryDatabase("Rollover_AllRecords_" + Guid.NewGuid())
-    //             .Options;
-    //
-    //         var now = DateTime.UtcNow;
-    //         var e1 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-3), null, now.AddDays(-3));
-    //         var e2 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-2), null, now.AddDays(-2));
-    //         var e3 = RolloverWorkflowCandidate.Create(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-1), null, now.AddDays(-1));
-    //
-    //         await using (var db = new ApplicationDbContext(options))
-    //         {
-    //             await db.RolloverWorkflowCandidates.AddRangeAsync(new[] { e1, e2, e3 });
-    //             await db.SaveChangesAsync(TestContext.Current.CancellationToken);
-    //         }
-    //
-    //         await using (var db = new ApplicationDbContext(options))
-    //         {
-    //             var sut = new RolloverRepository(db);
-    //
-    //             // Act
-    //             var result = (await sut.GetAllRolloverWorkflowCandidatesAsync(TestContext.Current.CancellationToken)).ToList();
-    //
-    //             // Assert
-    //             Assert.NotNull(result);
-    //             Assert.Equal(3, result.Count);
-    //             Assert.Contains(result, r => r.CreatedAt == e1.CreatedAt);
-    //             Assert.Contains(result, r => r.CreatedAt == e2.CreatedAt);
-    //             Assert.Contains(result, r => r.CreatedAt == e3.CreatedAt);
-    //         }
-    //     }
+        var e1 = RolloverWorkflowCandidate.Create(run.Id, Guid.NewGuid(), RolloverSourceTypes.Ofqual, Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-2), null, now.AddDays(-2));
+        var e2 = RolloverWorkflowCandidate.Create(run.Id, Guid.NewGuid(), RolloverSourceTypes.Qaa, Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-1), null, now.AddDays(-1));
+        var e3 = RolloverWorkflowCandidate.Create(run.Id, Guid.NewGuid(), RolloverSourceTypes.Ofqual, Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now, null, now);
 
-    // REASON: RolloverCandidateDto no longer has QualificationVersionId - it now exposes SourceType and SourceQualificationId. This test's assertions almost certainly reference the old property name and will not compile as-is.
-    //     [Fact]
-    //     public async Task GetRolloverCandidatesAsync_ReturnsOnlyActive_With_ProperProjection()
-    //     {
-    //         // Arrange
-    //         await using var db = CreateDb(nameof(GetRolloverCandidatesAsync_ReturnsOnlyActive_With_ProperProjection));
-    //
-    //         var qualification = new Qualification { Id = Guid.NewGuid(), Qan = "Q-1" };
-    //         var qualVersion = new QualificationVersions { Id = Guid.NewGuid(), QualificationId = qualification.Id, Qualification = qualification, EqfLevel = "Efq", Level = "Level", Ssa = "ssa", Status = "Status", SubLevel = "Sublevel", Type = "Type" };
-    //         var funding = new FundingOffer { Id = Guid.NewGuid(), Name = "FundX", DisplayName = "Fund X"};
-    //
-    //         var active = RolloverCandidates.CreateInitialRound(qualVersion.Id, funding.Id, "2024/25", DateTime.UtcNow);
-    //         // CreateInitialRound sets IsActive = true so no setter needed
-    //
-    //         active.QualificationVersion = qualVersion;
-    //         active.FundingOffer = funding;
-    //
-    //         var inactive = RolloverCandidates.CreateInitialRound(qualVersion.Id, funding.Id, "2024/25", DateTime.UtcNow);
-    //         // create an inactive record by adding then setting IsActive via EF Core change tracker (avoids private setter reflection)
-    //         inactive.QualificationVersion = qualVersion;
-    //         inactive.FundingOffer = funding;
-    //
-    //         await db.Qualification.AddAsync(qualification, TestContext.Current.CancellationToken);
-    //         await db.QualificationVersions.AddAsync(qualVersion, TestContext.Current.CancellationToken);
-    //         await db.FundingOffers.AddAsync(funding, TestContext.Current.CancellationToken);
-    //         await db.RolloverCandidates.AddRangeAsync(new[] { active, inactive }, TestContext.Current.CancellationToken);
-    //
-    //         // set inactive flag using EF property API
-    //         db.Entry(inactive).Property("IsActive").CurrentValue = false;
-    //
-    //         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
-    //
-    //         var sut = new RolloverRepository(db);
-    //
-    //         // Act
-    //         var result = (await sut.GetRolloverCandidatesAsync(TestContext.Current.CancellationToken)).ToList();
-    //
-    //         // Assert
-    //         result.Count.ShouldBe(1);
-    //         var dto = result.Single();
-    //         dto.Id.ShouldBe(active.Id);
-    //         dto.QualificationVersionId.ShouldBe(active.QualificationVersionId);
-    //         dto.FundingOfferId.ShouldBe(active.FundingOfferId);
-    //         dto.FundingOfferName.ShouldBe("Fund X");
-    //         dto.QualificationNumber.ShouldBe("Q-1");
-    //         dto.AcademicYear.ShouldBe(active.AcademicYear);
-    //     }
+        await db.RolloverWorkflowCandidates.AddRangeAsync(new[] { e1, e2, e3 });
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-    // REASON: Same RolloverCandidateDto field rename issue as GetRolloverCandidatesAsync_ReturnsOnlyActive_With_ProperProjection above.
-    //     [Fact]
-    //     public async Task GetRolloverCandidatesByIdsAsync_ReturnsOnlyActiveAndProjectedFields()
-    //     {
-    //         // Arrange
-    //         await using var db = CreateDb(nameof(GetRolloverCandidatesByIdsAsync_ReturnsOnlyActiveAndProjectedFields));
-    //
-    //         var now = DateTime.UtcNow;
-    //         var active = RolloverCandidates.CreateInitialRound(Guid.NewGuid(), Guid.NewGuid(), "2024/25", now);
-    //         var inactive = RolloverCandidates.CreateInitialRound(Guid.NewGuid(), Guid.NewGuid(), "2024/25", now);
-    //
-    //         // set some date fields and rollover round via EF property API
-    //         var prevDate = now.AddMonths(-6);
-    //         var newDate = now.AddYears(1);
-    //
-    //         db.RolloverCandidates.Add(active);
-    //         db.RolloverCandidates.Add(inactive);
-    //
-    //         // mark inactive record IsActive = false
-    //         db.Entry(inactive).Property("IsActive").CurrentValue = false;
-    //
-    //         // set previous and new funding end dates on active
-    //         db.Entry(active).Property("PreviousFundingEndDate").CurrentValue = prevDate;
-    //         db.Entry(active).Property("NewFundingEndDate").CurrentValue = newDate;
-    //         db.Entry(active).Property("RolloverRound").CurrentValue = 2;
-    //
-    //         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
-    //
-    //         var sut = new RolloverRepository(db);
-    //
-    //         // Act
-    //         var result = (await sut.GetRolloverCandidatesByIdsAsync(new[] { active.Id, inactive.Id }, TestContext.Current.CancellationToken)).ToList();
-    //
-    //         // Assert
-    //         result.Count.ShouldBe(1);
-    //         var dto = result.Single();
-    //         dto.Id.ShouldBe(active.Id);
-    //         dto.QualificationVersionId.ShouldBe(active.QualificationVersionId);
-    //         dto.FundingOfferId.ShouldBe(active.FundingOfferId);
-    //         dto.RolloverRound.ShouldBe(2);
-    //         dto.AcademicYear.ShouldBe(active.AcademicYear);
-    //         dto.PreviousFundingEndDate.ShouldBe(prevDate);
-    //         dto.NewFundingEndDate.ShouldBe(newDate);
-    //     }
+        var sut = new RolloverRepository(db);
 
-    // REASON: GetRolloverCandidatesWithP1ChecksAsync was fully rewritten to be polymorphic across Ofqual and QAA funding sources. This single-type test is superseded by the three tests in RolloverRepositoryPolymorphicTests.cs (Ofqual, QAA, and mixed-batch scenarios) - safe to delete once that file is confirmed working, keeping here only as a reference for now.
-    //     [Fact]
-    //     public async Task GetRolloverCandidatesWithP1ChecksAsync_WhenCandidateIsValid_ReturnsCandidateAndCheckData()
-    //     {
-    //         // Arrange
-    //         await using var db = CreateDb(
-    //             nameof(GetRolloverCandidatesWithP1ChecksAsync_WhenCandidateIsValid_ReturnsCandidateAndCheckData));
-    //
-    //         var qualification = new Qualification
-    //         {
-    //             Id = Guid.NewGuid(),
-    //             Qan = "P1000001"
-    //         };
-    //         var qualificationVersion = new QualificationVersions
-    //         {
-    //             Id = Guid.NewGuid(),
-    //             QualificationId = qualification.Id,
-    //             Qualification = qualification,
-    //             Status = "Live",
-    //             Type = "Certificate",
-    //             Ssa = "Science",
-    //             Level = "Level 3",
-    //             SubLevel = "3",
-    //             EqfLevel = "4",
-    //             OfferedInEngland = true,
-    //             IntentionToSeekFundingInEngland = true,
-    //             OperationalStartDate = new DateTime(2024, 8, 1),
-    //             OperationalEndDate = new DateTime(2027, 7, 31)
-    //         };
-    //         var fundingOffer = new FundingOffer
-    //         {
-    //             Id = Guid.NewGuid(),
-    //             Name = "AdultSkills",
-    //             DisplayName = "Adult skills"
-    //         };
-    //         var rolloverCandidate = RolloverCandidates.CreateInitialRound(
-    //             qualificationVersion.Id,
-    //             fundingOffer.Id,
-    //             "2025/26",
-    //             new DateTime(2025, 1, 1));
-    //         rolloverCandidate.QualificationVersion = qualificationVersion;
-    //         rolloverCandidate.FundingOffer = fundingOffer;
-    //
-    //         var qualificationFunding = new QualificationFundings
-    //         {
-    //             Id = Guid.NewGuid(),
-    //             QualificationVersionId = qualificationVersion.Id,
-    //             FundingOfferId = fundingOffer.Id,
-    //             EndDate = new DateOnly(2026, 7, 31)
-    //         };
-    //         var pldns = new Data.Entities.Import.Pldns
-    //         {
-    //             Qan = qualification.Qan,
-    //             Pldns14To16 = new DateTime(2026, 6, 30),
-    //             ImportDate = new DateTime(2025, 1, 1)
-    //         };
-    //
-    //         db.RolloverCandidates.Add(rolloverCandidate);
-    //         db.QualificationFundings.Add(qualificationFunding);
-    //         db.Pldns.Add(pldns);
-    //         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
-    //
-    //         var fundingThreshold = new DateTime(2025, 7, 31);
-    //         var operationalThreshold = new DateTime(2025, 8, 1);
-    //         var maximumApprovalEndDate = new DateTime(2027, 7, 31);
-    //         var sut = new RolloverRepository(db);
-    //
-    //         // Act
-    //         var result = await sut.GetRolloverCandidatesWithP1ChecksAsync(
-    //             [new RolloverCandidateP1CheckRequest(
-    //                 rolloverCandidate.Id,
-    //                 fundingThreshold,
-    //                 operationalThreshold,
-    //                 maximumApprovalEndDate)],
-    //             TestContext.Current.CancellationToken);
-    //
-    //         // Assert
-    //         var actual = result.ShouldHaveSingleItem();
-    //         actual.Candidate.Id.ShouldBe(rolloverCandidate.Id);
-    //         actual.Candidate.QualificationVersionId.ShouldBe(qualificationVersion.Id);
-    //         actual.Candidate.FundingOfferId.ShouldBe(fundingOffer.Id);
-    //         actual.P1Checks.RolloverCandidatesId.ShouldBe(rolloverCandidate.Id);
-    //         actual.P1Checks.FundingStream.ShouldBe(fundingOffer.Name);
-    //         actual.P1Checks.LatestFundingApprovalEndDate.ShouldBe(
-    //             new DateTime(2026, 7, 31));
-    //         actual.P1Checks.FundingEndDateThreshold.ShouldBe(fundingThreshold);
-    //         actual.P1Checks.OperationalEndDateThreshold.ShouldBe(operationalThreshold);
-    //         actual.P1Checks.MaximumApprovalEndDate.ShouldBe(maximumApprovalEndDate);
-    //         actual.P1Checks.Age1416.ShouldBe(pldns.Pldns14To16);
-    //     }
+        // Act
+        var result = await sut.GetRolloverWorkflowCandidatesCountAsync(TestContext.Current.CancellationToken);
 
-    // REASON: Uses WithAllSourceQualifications now (from the feature branch) - check whether its assertions still reference old single-type fields; likely needs only a light field-name fix but has not been verified.
-    //     [Fact]
-    //     public async Task GetRolloverCandidatesStatusAsync_ReturnsProjectedItems()
-    //     {
-    //         // Arrange
-    //         await using var db = CreateDb(nameof(GetRolloverCandidatesStatusAsync_ReturnsProjectedItems));
-    //
-    //         var qualification = new Qualification { Id = Guid.NewGuid(), Qan = "Q-STAT" };
-    //         var version = new QualificationVersions { Id = Guid.NewGuid(), QualificationId = qualification.Id, Qualification = qualification, Status = "Approved", Type = "Standard", Ssa = "001", Level = "3", SubLevel = "A", EqfLevel = "EQF3" };
-    //         var funding = new FundingOffer { Id = Guid.NewGuid(), Name = "FundStat", DisplayName = "Fund Stat" };
-    //
-    //         var candidate = RolloverCandidates.CreateInitialRound(version.Id, funding.Id, "2024/25", DateTime.UtcNow);
-    //         candidate.QualificationVersion = version;
-    //         candidate.FundingOffer = funding;
-    //
-    //         // set status via EF shadow property if necessary
-    //         db.Qualification.Add(qualification);
-    //         db.QualificationVersions.Add(version);
-    //         db.FundingOffers.Add(funding);
-    //         db.RolloverCandidates.Add(candidate);
-    //         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
-    //
-    //         var sut = new RolloverRepository(db);
-    //
-    //         // Act
-    //         var result = await sut.GetRolloverCandidatesStatusAsync(TestContext.Current.CancellationToken);
-    //
-    //         // Assert
-    //         result.ShouldNotBeNull();
-    //         var item = result.SingleOrDefault(x => x.Qan == "Q-STAT" && x.FundingStreamName == "FundStat");
-    //         item.ShouldNotBeNull();
-    //         item!.RolloverStatus.ShouldBe(candidate.RolloverStatus);
-    //     }
+        // Assert
+        Assert.Equal(3, result);
+    }
 
+    [Fact]
+    public async Task GetAllRolloverWorkflowCandidatesAsync_ReturnsAllRecords()
+    {
+        await using var db = CreateDb(nameof(GetAllRolloverWorkflowCandidatesAsync_ReturnsAllRecords));
+
+        var now = DateTime.UtcNow;
+
+        var run = RolloverWorkflowRun.Create("2024/25", SelectionMethod.QueryBuilder, now, now, now.AddYears(1), "test.user", now);
+        await db.RolloverWorkflowRuns.AddAsync(run, TestContext.Current.CancellationToken);
+
+        var e1 = RolloverWorkflowCandidate.Create(run.Id, Guid.NewGuid(), RolloverSourceTypes.Qaa, Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-3), null, now.AddDays(-3));
+        var e2 = RolloverWorkflowCandidate.Create(run.Id, Guid.NewGuid(), RolloverSourceTypes.Ofqual, Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-2), null, now.AddDays(-2));
+        var e3 = RolloverWorkflowCandidate.Create(run.Id, Guid.NewGuid(), RolloverSourceTypes.Qaa, Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now.AddDays(-1), null, now.AddDays(-1));
+
+        await db.RolloverWorkflowCandidates.AddRangeAsync(new[] { e1, e2, e3 });
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var sut = new RolloverRepository(db);
+
+        var result = (await sut.GetAllRolloverWorkflowCandidatesAsync(TestContext.Current.CancellationToken)).ToList();
+
+        Assert.NotNull(result);
+        Assert.Equal(3, result.Count);
+        Assert.Contains(result, r => r.CreatedAt == e1.CreatedAt);
+        Assert.Contains(result, r => r.CreatedAt == e2.CreatedAt);
+        Assert.Contains(result, r => r.CreatedAt == e3.CreatedAt);
+    }
+
+
+
+    [Fact]
+    public async Task GetAllRolloverWorkflowCandidatesAsync_ExcludesInvalidatedCandidates()
+    {
+        await using var db = CreateDb(nameof(GetAllRolloverWorkflowCandidatesAsync_ExcludesInvalidatedCandidates));
+
+        var now = DateTime.UtcNow;
+
+        var run = RolloverWorkflowRun.Create("2024/25", SelectionMethod.QueryBuilder, now, now, now.AddYears(1), "test.user", now);
+        await db.RolloverWorkflowRuns.AddAsync(run, TestContext.Current.CancellationToken);
+
+        var active = RolloverWorkflowCandidate.Create(run.Id, Guid.NewGuid(), RolloverSourceTypes.Qaa, Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now, null, now);
+        var invalidated = RolloverWorkflowCandidate.Create(run.Id, Guid.NewGuid(), RolloverSourceTypes.Ofqual,  Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now, null, now);
+        invalidated.Invalidate("test invalidation", now);
+
+        await db.RolloverWorkflowCandidates.AddRangeAsync(new[] { active, invalidated });
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var sut = new RolloverRepository(db);
+
+        var result = (await sut.GetAllRolloverWorkflowCandidatesAsync(TestContext.Current.CancellationToken)).ToList();
+
+        var row = Assert.Single(result);
+        Assert.Equal(active.Id, row.Id);
+    }
+
+    [Fact]
+    public async Task GetRolloverCandidatesAsync_ReturnsOnlyActive_With_ProperProjection()
+    {
+        // Arrange
+        await using var db = CreateDb(nameof(GetRolloverCandidatesAsync_ReturnsOnlyActive_With_ProperProjection));
+
+        var qualification = new Qualification { Id = Guid.NewGuid(), Qan = "Q-1" };
+        var organisation = new AwardingOrganisation { Id = Guid.NewGuid(), NameOfqual = "Org" };
+        var qualVersion = new QualificationVersions { Id = Guid.NewGuid(), QualificationId = qualification.Id, Qualification = qualification, Organisation = organisation, EqfLevel = "Efq", Level = "Level", Ssa = "ssa", Status = "Status", SubLevel = "Sublevel", Type = "Type" };
+        var funding = new FundingOffer { Id = Guid.NewGuid(), Name = "FundX", DisplayName = "Fund X" };
+
+        var active = RolloverCandidates.CreateInitialRound(RolloverSourceTypes.Ofqual, qualVersion.Id, funding.Id, "2024/25", DateTime.UtcNow);
+        // CreateInitialRound sets IsActive = true so no setter needed
+        active.FundingOffer = funding;
+
+        var inactive = RolloverCandidates.CreateInitialRound(RolloverSourceTypes.Qaa, qualVersion.Id, funding.Id, "2024/25", DateTime.UtcNow);
+        inactive.FundingOffer = funding;
+
+        await db.Qualification.AddAsync(qualification, TestContext.Current.CancellationToken);
+        await db.QualificationVersions.AddAsync(qualVersion, TestContext.Current.CancellationToken);
+        await db.AwardingOrganisation.AddAsync(organisation, TestContext.Current.CancellationToken);
+        await db.FundingOffers.AddAsync(funding, TestContext.Current.CancellationToken);
+        await db.RolloverCandidates.AddRangeAsync(new[] { active, inactive }, TestContext.Current.CancellationToken);
+
+        // set inactive flag using EF property API
+        db.Entry(inactive).Property("IsActive").CurrentValue = false;
+
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var sut = new RolloverRepository(db);
+
+        // Act
+        var result = (await sut.GetRolloverCandidatesAsync(TestContext.Current.CancellationToken)).ToList();
+
+        // Assert
+        result.Count.ShouldBe(1);
+        var dto = result.Single();
+        dto.Id.ShouldBe(active.Id);
+        dto.SourceType.ShouldBe(RolloverSourceTypes.Ofqual);
+        dto.SourceQualificationId.ShouldBe(active.SourceQualificationId);
+        dto.FundingOfferId.ShouldBe(active.FundingOfferId);
+        dto.FundingOfferName.ShouldBe("FundX");
+        dto.QualificationNumber.ShouldBe("Q-1");
+        dto.AcademicYear.ShouldBe(active.AcademicYear);
+    }
+
+    [Fact]
+    public async Task GetRolloverCandidatesByIdsAsync_ReturnsOnlyActiveAndProjectedFields()
+    {
+        // Arrange
+        await using var db = CreateDb(nameof(GetRolloverCandidatesByIdsAsync_ReturnsOnlyActiveAndProjectedFields));
+
+        var now = DateTime.UtcNow;
+        var active = RolloverCandidates.CreateInitialRound(RolloverSourceTypes.Ofqual, Guid.NewGuid(), Guid.NewGuid(), "2024/25", now);
+        var inactive = RolloverCandidates.CreateInitialRound(RolloverSourceTypes.Ofqual, Guid.NewGuid(), Guid.NewGuid(), "2024/25", now);
+
+        // set some date fields and rollover round via EF property API
+        var prevDate = now.AddMonths(-6);
+        var newDate = now.AddYears(1);
+
+        db.RolloverCandidates.Add(active);
+        db.RolloverCandidates.Add(inactive);
+
+        // mark inactive record IsActive = false
+        db.Entry(inactive).Property("IsActive").CurrentValue = false;
+
+        // set previous and new funding end dates on active
+        db.Entry(active).Property("PreviousFundingEndDate").CurrentValue = prevDate;
+        db.Entry(active).Property("NewFundingEndDate").CurrentValue = newDate;
+        db.Entry(active).Property("RolloverRound").CurrentValue = 2;
+
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var sut = new RolloverRepository(db);
+
+        // Act
+        var result = (await sut.GetRolloverCandidatesByIdsAsync(new[] { active.Id, inactive.Id }, TestContext.Current.CancellationToken)).ToList();
+
+        // Assert
+        result.Count.ShouldBe(1);
+        var dto = result.Single();
+        dto.Id.ShouldBe(active.Id);
+        dto.SourceType.ShouldBe(active.SourceType);
+        dto.SourceQualificationId.ShouldBe(active.SourceQualificationId);
+        dto.FundingOfferId.ShouldBe(active.FundingOfferId);
+        dto.RolloverRound.ShouldBe(2);
+        dto.AcademicYear.ShouldBe(active.AcademicYear);
+        dto.PreviousFundingEndDate.ShouldBe(prevDate);
+        dto.NewFundingEndDate.ShouldBe(newDate);
+    }
+
+    [Fact]
+    public async Task GetRolloverCandidatesStatusAsync_ReturnsProjectedItems()
+    {
+        // Arrange
+        await using var db = CreateDb(nameof(GetRolloverCandidatesStatusAsync_ReturnsProjectedItems));
+
+        var qualification = new Qualification { Id = Guid.NewGuid(), Qan = "Q-STAT" };
+        var organisation = new AwardingOrganisation { Id = Guid.NewGuid(), NameOfqual = "OrgStat" };
+        var version = new QualificationVersions { Id = Guid.NewGuid(), QualificationId = qualification.Id, Qualification = qualification, Organisation = organisation, Status = "Approved", Type = "Standard", Ssa = "001", Level = "3", SubLevel = "A", EqfLevel = "EQF3" };
+        var funding = new FundingOffer { Id = Guid.NewGuid(), Name = "FundStat", DisplayName = "Fund Stat" };
+
+        var candidate = RolloverCandidates.CreateInitialRound(RolloverSourceTypes.Ofqual, version.Id, funding.Id, "2024/25", DateTime.UtcNow);
+        candidate.FundingOffer = funding;
+
+        await db.Qualification.AddAsync(qualification, TestContext.Current.CancellationToken);
+        await db.QualificationVersions.AddAsync(version, TestContext.Current.CancellationToken);
+        await db.AwardingOrganisation.AddAsync(organisation, TestContext.Current.CancellationToken);
+        await db.FundingOffers.AddAsync(funding, TestContext.Current.CancellationToken);
+        await db.RolloverCandidates.AddAsync(candidate, TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var sut = new RolloverRepository(db);
+
+        // Act
+        var result = await sut.GetRolloverCandidatesStatusAsync(TestContext.Current.CancellationToken);
+
+        // Assert
+        result.ShouldNotBeNull();
+        var item = result.SingleOrDefault(x => x.Qan == "Q-STAT" && x.FundingStreamName == "FundStat");
+        item.ShouldNotBeNull();
+        item!.RolloverStatus.ShouldBe(candidate.RolloverStatus);
+    }
 }
