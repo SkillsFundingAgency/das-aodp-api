@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Models.Rollover;
 
@@ -20,6 +21,7 @@ public class FundingExtensionPersistenceRepository(
         IReadOnlyCollection<RolloverCandidates> candidates,
         IReadOnlyCollection<RolloverFundingUpdate> fundingUpdates,
         IReadOnlyCollection<QualificationDiscussionHistory> histories,
+        IReadOnlyCollection<QaaQualificationDiscussionHistory> qaaHistories,
         CancellationToken cancellationToken)
     {
         var operationId = Guid.NewGuid();
@@ -170,9 +172,22 @@ public class FundingExtensionPersistenceRepository(
                     cancellationToken: cancellationToken);
             }
 
+            if (qaaHistories.Count > 0)
+            {
+                await context.BulkInsertAsync(
+                    qaaHistories.ToList(),
+                    new BulkConfig
+                    {
+                        BatchSize = BatchSize,
+                        SetOutputIdentity = false
+                    },
+                    cancellationToken: cancellationToken);
+            }
+
             logger.LogInformation(
-                "Inserted {HistoryCount} discussion-history rows in {ElapsedMilliseconds} ms",
+                "Inserted {HistoryCount} discussion-history rows ({QaaHistoryCount} QAA) in {ElapsedMilliseconds} ms",
                 histories.Count,
+                qaaHistories.Count,
                 Stopwatch.GetElapsedTime(historyStarted).TotalMilliseconds);
 
             currentStage = "CompleteWorkflow";

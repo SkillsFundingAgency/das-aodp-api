@@ -36,8 +36,6 @@ namespace SFA.DAS.AODP.Data.Extensions
                 }
                 options.UseSqlServer(connectionString);
             });
-            services.AddScoped<IApplicationDbContext>(provider =>
-                provider.GetRequiredService<ApplicationDbContext>());
             services.AddScoped<IFormVersionRepository, FormVersionRepository>();
             services.AddScoped<ISectionRepository, SectionRepository>();
             services.AddScoped<IPageRepository, PageRepository>();
@@ -82,6 +80,7 @@ namespace SFA.DAS.AODP.Data.Extensions
 
             services.AddScoped<IQaaQualificationRepository, QaaQualificationRepository>();
             services.AddScoped<IQaaQualificationFundingsRepository, QaaQualificationFundingsRepository>();
+            services.AddScoped<IQaaQualificationDiscussionHistoryRepository, QaaQualificationDiscussionHistoryRepository>();
 
             return services;
         }

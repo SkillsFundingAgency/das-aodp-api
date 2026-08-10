@@ -3,6 +3,7 @@ using SFA.DAS.AODP.Application.Constants;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Repositories.FundingExtension;
 using SFA.DAS.AODP.Infrastructure.Extensions;
@@ -60,9 +61,11 @@ public class SubmitFundingExtensionService : ISubmitFundingExtensionService
 
             var historyStarted = Stopwatch.GetTimestamp();
             var historyEntries = CreateDiscussionHistories(updatedCandidates, fundingUpdates);
+            var qaaHistoryEntries = CreateQaaDiscussionHistories(updatedCandidates, fundingUpdates);
             _logger.LogInformation(
-                "Created {HistoryCount} rollover discussion-history records in {ElapsedMilliseconds} ms",
+                "Created {HistoryCount} rollover discussion-history records ({QaaHistoryCount} QAA) in {ElapsedMilliseconds} ms",
                 historyEntries.Count,
+                qaaHistoryEntries.Count,
                 Stopwatch.GetElapsedTime(historyStarted).TotalMilliseconds);
 
             var persistenceStarted = Stopwatch.GetTimestamp();
@@ -70,6 +73,7 @@ public class SubmitFundingExtensionService : ISubmitFundingExtensionService
                 updatedCandidates,
                 fundingUpdates,
                 historyEntries,
+                qaaHistoryEntries,
                 cancellationToken);
             _logger.LogInformation(
                 "Persisted funding-extension changes in {ElapsedMilliseconds} ms",
@@ -218,6 +222,81 @@ public class SubmitFundingExtensionService : ISubmitFundingExtensionService
             UserDisplayName = "Rollover System",
             ActionTypeId = actionTypeId,
             QualificationId = qualificationId,
+            Notes = note,
+            Timestamp = _clockService.UtcNow
+        };
+    }
+
+    private List<QaaQualificationDiscussionHistory> CreateQaaDiscussionHistories(
+        IReadOnlyCollection<RolloverCandidates> candidates,
+        IReadOnlyCollection<RolloverFundingUpdate> fundingUpdates)
+    {
+        var historyEntries = new List<QaaQualificationDiscussionHistory>();
+
+        var groups = candidates
+            .Where(c => c.SourceType == RolloverSourceTypes.Qaa)
+            .GroupBy(c => c.SourceQualificationId);
+
+        foreach (var group in groups)
+        {
+            var qaaQualificationId = group.Key;
+
+            var extended = group
+                .Where(c => c.RolloverStatus == RolloverStatus.Extended)
+                .ToList();
+
+            var excluded = group
+                .Where(c => c.RolloverStatus == RolloverStatus.Excluded)
+                .ToList();
+
+            if (extended.Count > 0)
+            {
+                var lines = extended.Select(c =>
+                {
+                    var f = fundingUpdates.FirstOrDefault(x =>
+                        x.SourceType == c.SourceType &&
+                        x.SourceQualificationId == c.SourceQualificationId &&
+                        x.FundingOfferId == c.FundingOfferId &&
+                        x.AcademicYear == c.AcademicYear);
+
+                    var endDate = f?.FundingApprovalEndDate.ToFundingEndDateFormat();
+
+                    return $"{c.FundingOffer.Name} extended to {endDate}";
+                });
+
+                historyEntries.Add(CreateQaaDiscussionHistoryEntry(
+                    string.Join("\n", lines),
+                    RolloverExtendedActionTypeId,
+                    qaaQualificationId));
+            }
+
+            if (excluded.Count > 0)
+            {
+                var lines = excluded.Select(c =>
+                    $"{c.FundingOffer.Name} was not extended due to {c.ExclusionReason}");
+
+                historyEntries.Add(CreateQaaDiscussionHistoryEntry(
+                    string.Join("\n", lines),
+                    RolloverNotExtendedActionTypeId,
+                    qaaQualificationId));
+            }
+        }
+
+        return historyEntries;
+    }
+
+    private QaaQualificationDiscussionHistory CreateQaaDiscussionHistoryEntry(
+        string note,
+        Guid actionTypeId,
+        Guid qaaQualificationId)
+    {
+        return new QaaQualificationDiscussionHistory
+        {
+            Id = _guidProvider.NewGuid(),
+            Title = "Rollover Funding Decision",
+            UserDisplayName = "Rollover System",
+            ActionTypeId = actionTypeId,
+            QaaQualificationId = qaaQualificationId,
             Notes = note,
             Timestamp = _clockService.UtcNow
         };

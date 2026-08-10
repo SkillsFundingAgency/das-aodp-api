@@ -65,29 +65,10 @@ public class RolloverRepository : IRolloverRepository
                 FundingOfferId = x.FundingOfferId,
                 FundingOfferName = x.FundingStreamName,
                 QualificationNumber = x.QualificationReference,
+                QualificationName = x.QualificationTitle,
                 AcademicYear = x.AcademicYear
             })
             .OrderBy(x => x.QualificationNumber)
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<IEnumerable<RolloverCandidateDto>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, CancellationToken cancellationToken)
-    {
-        return await _context.RolloverCandidates
-            .AsNoTracking()
-            .Where(rc =>
-                rolloverCandidateIds.Contains(rc.Id) && rc.IsActive)
-            .Select(rc => new RolloverCandidateDto
-            {
-                Id = rc.Id,
-                SourceType = rc.SourceType,
-                SourceQualificationId = rc.SourceQualificationId,
-                FundingOfferId = rc.FundingOfferId,
-                RolloverRound = rc.RolloverRound,
-                AcademicYear = rc.AcademicYear,
-                PreviousFundingEndDate = rc.PreviousFundingEndDate,
-                NewFundingEndDate = rc.NewFundingEndDate
-            })
             .ToListAsync(cancellationToken);
     }
 
@@ -177,6 +158,9 @@ public class RolloverRepository : IRolloverRepository
                         SourceType = candidate.SourceType,
                         SourceQualificationId = candidate.SourceQualificationId,
                         FundingOfferId = candidate.FundingOfferId,
+                        FundingOfferName = candidate.FundingStreamName,
+                        QualificationNumber = candidate.QualificationReference,
+                        QualificationName = candidate.QualificationTitle,
                         AcademicYear = candidate.AcademicYear,
                         RolloverRound = candidate.RolloverRound,
                         PreviousFundingEndDate = candidate.PreviousFundingEndDate,

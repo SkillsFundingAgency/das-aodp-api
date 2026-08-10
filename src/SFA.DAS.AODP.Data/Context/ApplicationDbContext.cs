@@ -99,6 +99,8 @@ namespace SFA.DAS.AODP.Data.Context
 
         public virtual DbSet<RegulatedQaaQualificationHistory> RegulatedQaaQualificationHistory { get; set; }
 
+        public virtual DbSet<QaaQualificationDiscussionHistory> QaaQualificationDiscussionHistory { get; set; }
+
         public virtual DbSet<QaaQualificationFunding> QaaQualificationFundings { get; set; }
 
         public virtual DbSet<AllQualificationFunding> AllQualificationFundings { get; set; }

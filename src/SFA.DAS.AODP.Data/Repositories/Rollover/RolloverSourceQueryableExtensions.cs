@@ -171,7 +171,7 @@ internal static class RolloverSourceQueryableExtensions
                         AwardingOrganisation = qaa.AwardingBody,
                         QualificationLevel = qaa.Level,
                         QualificationType = qaa.Type,
-                        SSA = string.Empty,
+                        SSA = qaa.SectorSubjectAreaName,
                         OperationalEndDate = null,
                         OfferedInEngland = true,
                         FundedInEngland = true,

@@ -71,6 +71,7 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<RegulatedQaaQualification> RegulatedQaaQualifications { get; set; }
         DbSet<RegulatedQaaQualificationHistory> RegulatedQaaQualificationHistory { get; set; }
         DbSet<QaaQualificationFunding> QaaQualificationFundings { get; set; }
+        DbSet<QaaQualificationDiscussionHistory> QaaQualificationDiscussionHistory { get; set; }
         DbSet<AllQualificationFunding> AllQualificationFundings { get; set; }
 
         DbSet<RolloverCandidates> RolloverCandidates { get; set; }

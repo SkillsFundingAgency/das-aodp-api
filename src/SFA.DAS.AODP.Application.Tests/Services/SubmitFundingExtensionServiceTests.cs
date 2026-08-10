@@ -7,6 +7,7 @@ using SFA.DAS.AODP.Application.Services.FundingExtension;
 using SFA.DAS.AODP.Application.UnitTests;
 using SFA.DAS.AODP.Application.UnitTests.Helpers;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Repositories.FundingExtension;
 using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
@@ -104,10 +105,11 @@ public class SubmitFundingExtensionServiceTests : UnitTest
                 It.IsAny<IReadOnlyCollection<RolloverCandidates>>(),
                 It.IsAny<IReadOnlyCollection<RolloverFundingUpdate>>(),
                 It.IsAny<IReadOnlyCollection<QualificationDiscussionHistory>>(),
+                It.IsAny<IReadOnlyCollection<QaaQualificationDiscussionHistory>>(),
                 CancellationToken))
             .Callback<IReadOnlyCollection<RolloverCandidates>, IReadOnlyCollection<RolloverFundingUpdate>,
-                IReadOnlyCollection<QualificationDiscussionHistory>, CancellationToken>(
-                (candidates, fundingUpdates, histories, _) =>
+                IReadOnlyCollection<QualificationDiscussionHistory>, IReadOnlyCollection<QaaQualificationDiscussionHistory>, CancellationToken>(
+                (candidates, fundingUpdates, histories, _, _) =>
                 {
                     persistedCandidates = candidates;
                     persistedFundingUpdates = fundingUpdates;
@@ -185,6 +187,7 @@ public class SubmitFundingExtensionServiceTests : UnitTest
                 It.IsAny<IReadOnlyCollection<RolloverCandidates>>(),
                 It.IsAny<IReadOnlyCollection<RolloverFundingUpdate>>(),
                 It.IsAny<IReadOnlyCollection<QualificationDiscussionHistory>>(),
+                It.IsAny<IReadOnlyCollection<QaaQualificationDiscussionHistory>>(),
                 CancellationToken))
             .Returns(Task.CompletedTask);
 
@@ -232,10 +235,11 @@ public class SubmitFundingExtensionServiceTests : UnitTest
                 It.IsAny<IReadOnlyCollection<RolloverCandidates>>(),
                 It.IsAny<IReadOnlyCollection<RolloverFundingUpdate>>(),
                 It.IsAny<IReadOnlyCollection<QualificationDiscussionHistory>>(),
+                It.IsAny<IReadOnlyCollection<QaaQualificationDiscussionHistory>>(),
                 CancellationToken))
             .Callback<IReadOnlyCollection<RolloverCandidates>, IReadOnlyCollection<RolloverFundingUpdate>,
-                IReadOnlyCollection<QualificationDiscussionHistory>, CancellationToken>(
-                (_, _, histories, _) => persistedHistories = histories)
+                IReadOnlyCollection<QualificationDiscussionHistory>, IReadOnlyCollection<QaaQualificationDiscussionHistory>, CancellationToken>(
+                (_, _, histories, _, _) => persistedHistories = histories)
             .Returns(Task.CompletedTask);
 
         // Act
@@ -280,6 +284,7 @@ public class SubmitFundingExtensionServiceTests : UnitTest
             It.IsAny<IReadOnlyCollection<RolloverCandidates>>(),
             It.IsAny<IReadOnlyCollection<RolloverFundingUpdate>>(),
             It.IsAny<IReadOnlyCollection<QualificationDiscussionHistory>>(),
+            It.IsAny<IReadOnlyCollection<QaaQualificationDiscussionHistory>>(),
             It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -310,6 +315,7 @@ public class SubmitFundingExtensionServiceTests : UnitTest
                 It.IsAny<IReadOnlyCollection<RolloverCandidates>>(),
                 It.IsAny<IReadOnlyCollection<RolloverFundingUpdate>>(),
                 It.IsAny<IReadOnlyCollection<QualificationDiscussionHistory>>(),
+                It.IsAny<IReadOnlyCollection<QaaQualificationDiscussionHistory>>(),
                 CancellationToken))
             .ThrowsAsync(new InvalidOperationException("Persistence failed."));
 
@@ -350,10 +356,11 @@ public class SubmitFundingExtensionServiceTests : UnitTest
                 It.IsAny<IReadOnlyCollection<RolloverCandidates>>(),
                 It.IsAny<IReadOnlyCollection<RolloverFundingUpdate>>(),
                 It.IsAny<IReadOnlyCollection<QualificationDiscussionHistory>>(),
+                It.IsAny<IReadOnlyCollection<QaaQualificationDiscussionHistory>>(),
                 CancellationToken))
             .Callback<IReadOnlyCollection<RolloverCandidates>, IReadOnlyCollection<RolloverFundingUpdate>,
-                IReadOnlyCollection<QualificationDiscussionHistory>, CancellationToken>(
-                (_, _, histories, _) => persistedHistories = histories)
+                IReadOnlyCollection<QualificationDiscussionHistory>, IReadOnlyCollection<QaaQualificationDiscussionHistory>, CancellationToken>(
+                (_, _, histories, _, _) => persistedHistories = histories)
             .Returns(Task.CompletedTask);
 
         // Act

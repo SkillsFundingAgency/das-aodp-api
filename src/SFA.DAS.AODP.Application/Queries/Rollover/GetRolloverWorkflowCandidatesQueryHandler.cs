@@ -37,7 +37,9 @@ namespace SFA.DAS.AODP.Application.Queries.Rollover
                         IncludedInP1Export = x.IncludedInP1Export,
                         IncludedInFinalUpload = x.IncludedInFinalUpload,
                         CurrentFundingEndDate = x.CurrentFundingEndDate,
-                        ProposedFundingEndDate = x.ProposedFundingEndDate
+                        ProposedFundingEndDate = x.ProposedFundingEndDate,
+                        CreatedAt = x.CreatedAt,
+                        UpdatedAt = x.UpdatedAt
                     }).ToList();
 
                     var workflowRunId = workflowCandidates
@@ -59,9 +61,9 @@ namespace SFA.DAS.AODP.Application.Queries.Rollover
                     {
                         RolloverWorkflowCandidates = workflowCandidates,
                         WorkflowRunId = workflowRunId,
-                        FundingEndDateEligibilityThreshold = workflowRunResult.OperationalEndDateEligibilityThreshold,
+                        FundingEndDateEligibilityThreshold = workflowRunResult.FundingEndDateEligibilityThreshold,
                         OperationalEndDateEligibilityThreshold = workflowRunResult.OperationalEndDateEligibilityThreshold,
-                        MaximumApprovalFundingEndDate = workflowRunResult.OperationalEndDateEligibilityThreshold
+                        MaximumApprovalFundingEndDate = workflowRunResult.MaximumApprovalFundingEndDate
                     };
 
                     response.Success = true;

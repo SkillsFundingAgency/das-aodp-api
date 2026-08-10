@@ -1007,51 +1007,6 @@ public class RolloverRepositoryTests
     }
 
     [Fact]
-    public async Task GetRolloverCandidatesByIdsAsync_ReturnsOnlyActiveAndProjectedFields()
-    {
-        // Arrange
-        await using var db = CreateDb(nameof(GetRolloverCandidatesByIdsAsync_ReturnsOnlyActiveAndProjectedFields));
-
-        var now = DateTime.UtcNow;
-        var active = RolloverCandidates.CreateInitialRound(RolloverSourceTypes.Ofqual, Guid.NewGuid(), Guid.NewGuid(), "2024/25", now);
-        var inactive = RolloverCandidates.CreateInitialRound(RolloverSourceTypes.Ofqual, Guid.NewGuid(), Guid.NewGuid(), "2024/25", now);
-
-        // set some date fields and rollover round via EF property API
-        var prevDate = now.AddMonths(-6);
-        var newDate = now.AddYears(1);
-
-        db.RolloverCandidates.Add(active);
-        db.RolloverCandidates.Add(inactive);
-
-        // mark inactive record IsActive = false
-        db.Entry(inactive).Property("IsActive").CurrentValue = false;
-
-        // set previous and new funding end dates on active
-        db.Entry(active).Property("PreviousFundingEndDate").CurrentValue = prevDate;
-        db.Entry(active).Property("NewFundingEndDate").CurrentValue = newDate;
-        db.Entry(active).Property("RolloverRound").CurrentValue = 2;
-
-        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        var sut = new RolloverRepository(db);
-
-        // Act
-        var result = (await sut.GetRolloverCandidatesByIdsAsync(new[] { active.Id, inactive.Id }, TestContext.Current.CancellationToken)).ToList();
-
-        // Assert
-        result.Count.ShouldBe(1);
-        var dto = result.Single();
-        dto.Id.ShouldBe(active.Id);
-        dto.SourceType.ShouldBe(active.SourceType);
-        dto.SourceQualificationId.ShouldBe(active.SourceQualificationId);
-        dto.FundingOfferId.ShouldBe(active.FundingOfferId);
-        dto.RolloverRound.ShouldBe(2);
-        dto.AcademicYear.ShouldBe(active.AcademicYear);
-        dto.PreviousFundingEndDate.ShouldBe(prevDate);
-        dto.NewFundingEndDate.ShouldBe(newDate);
-    }
-
-    [Fact]
     public async Task GetRolloverCandidatesStatusAsync_ReturnsProjectedItems()
     {
         // Arrange
