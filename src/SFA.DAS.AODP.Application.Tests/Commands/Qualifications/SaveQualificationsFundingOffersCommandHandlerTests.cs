@@ -39,7 +39,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         [Fact]
         public async Task Handle_ReturnsSuccessResponse_WhenDataIsProcessed()
         {
-            // Arrange
             var command = _fixture.Create<SaveQualificationsFundingOffersCommand>();
             var existingFundings = _fixture.CreateMany<QualificationFundings>(2).ToList();
             var fundingOffers = _fixture.CreateMany<FundingOffer>(2).ToList();
@@ -49,15 +48,16 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             _fundingOfferRepositoryMock.Setup(repo => repo.GetFundingOffersAsync())
                 .ReturnsAsync(fundingOffers);
 
-            // Act
             var result = await _handler.Handle(command, CancellationToken.None);
 
-            // Assert
             Assert.True(result.Success);
+
             _qualificationFundingsRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<List<QualificationFundings>>()), Times.Once);
-            _qualificationFundingsRepositoryMock.Verify(repo => repo.RemoveAsync(It.IsAny<List<QualificationFundings>>()), Times.Once);
+            _qualificationFundingsRepositoryMock.Verify(repo => repo.RemoveAsync(It.IsAny<List<QualificationFundings>>()), Times.Never);
+
             _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<QualificationDiscussionHistory>()), Times.Once);
         }
+
 
         [Fact]
         public async Task Handle_ReturnsSuccessResponse_WhenNoChangesAreNeeded()
@@ -106,10 +106,11 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         }
 
         [Fact]
-        public async Task Handle_CreatesDiscussionHistoryNotes_WhenOffersAreRemoved()
+        public async Task Handle_DoesNotRemoveExistingOffers()
         {
-            // Arrange
             var command = _fixture.Create<SaveQualificationsFundingOffersCommand>();
+
+            // Existing offers that should be retained
             var existingFundings = _fixture.CreateMany<QualificationFundings>(2).ToList();
             var fundingOffers = _fixture.CreateMany<FundingOffer>(2).ToList();
 
@@ -118,16 +119,21 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             _fundingOfferRepositoryMock.Setup(repo => repo.GetFundingOffersAsync())
                 .ReturnsAsync(fundingOffers);
 
-            command.SelectedOfferIds.Clear(); // No offers selected, so all existing offers should be removed
+            // No new offers selected
+            command.SelectedOfferIds.Clear();
 
-            // Act
             var result = await _handler.Handle(command, CancellationToken.None);
 
-            // Assert
             Assert.True(result.Success);
+
+            // Ensure nothing is removed
+            _qualificationFundingsRepositoryMock.Verify(repo => repo.RemoveAsync(It.IsAny<List<QualificationFundings>>()), Times.Never);
+
+            // Ensure discussion history does NOT mention removals
             _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.Is<QualificationDiscussionHistory>(qdh =>
-                qdh.Notes.Contains("The following offers have been removed"))), Times.Once);
+                !qdh.Notes.Contains("removed"))), Times.Once);
         }
+
 
         [Fact]
         public async Task Handle_CreatesDiscussionHistoryNotes_WhenOffersAreSelected()
