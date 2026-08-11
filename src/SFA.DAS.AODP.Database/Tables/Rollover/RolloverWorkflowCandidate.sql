@@ -2,7 +2,7 @@
     [Id]                     UNIQUEIDENTIFIER NOT NULL,
     [RolloverWorkflowRunId]  UNIQUEIDENTIFIER NOT NULL,
     [RolloverCandidatesId]   UNIQUEIDENTIFIER NOT NULL,
-    [SourceType]             NVARCHAR (50)    NOT NULL,
+    [SourceType]             NVARCHAR (50)    NOT NULL DEFAULT 'Ofqual',
     [SourceQualificationId]  UNIQUEIDENTIFIER NOT NULL,
     [FundingOfferId]         UNIQUEIDENTIFIER NOT NULL,
     [AcademicYear]           NVARCHAR (255)   NOT NULL,

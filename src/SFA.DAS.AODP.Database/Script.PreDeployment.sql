@@ -10,5 +10,3 @@
 --------------------------------------------------------------------------------------
 */
 :r .\MigrationScripts\MVS1_AWARD_855_ConsolidateQaaFundings.sql
-:r .\MigrationScripts\MVS2_AWARD_855_RolloverCandidatesPolymorphicSourceBackfill.sql
-:r .\MigrationScripts\MVS2_AWARD_1240_FundingExtensionStagingPolymorphicBackfill.sql

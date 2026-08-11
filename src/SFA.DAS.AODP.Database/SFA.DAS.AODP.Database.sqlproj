@@ -197,8 +197,6 @@
     <None Include="MigrationScripts\MVS1_OfferTypes_DisplayName.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="MigrationScripts\MVS2_AWARD_855_RolloverCandidatesPolymorphicSourceBackfill.sql" />
-    <None Include="MigrationScripts\MVS2_AWARD_1240_FundingExtensionStagingPolymorphicBackfill.sql" />
     <Build Include="Tables\QaaQualificationDiscussionHistory.sql" />
   </ItemGroup>
   <ItemGroup>
