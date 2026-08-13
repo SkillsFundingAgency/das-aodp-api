@@ -14,6 +14,7 @@ public record QualificationLevel
     public static readonly QualificationLevel Level5 = new(5, "Level 5");
     public static readonly QualificationLevel Level6 = new(6, "Level 6");
     public static readonly QualificationLevel Level7 = new(7, "Level 7");
+    public static readonly QualificationLevel Level8 = new(8, "Level 8");
     public static readonly QualificationLevel Unspecified = new(99, "Unspecified");
 
     public int Id { get; }
@@ -27,7 +28,7 @@ public record QualificationLevel
 
     public static readonly IReadOnlyCollection<QualificationLevel> All = new List<QualificationLevel>
     {
-        EntryLevel, Level1, Level1Or2, Level2, Level3, Level4, Level5, Level6, Level7
+        EntryLevel, Level1, Level1Or2, Level2, Level3, Level4, Level5, Level6, Level7, Level8
     }.OrderBy(o => o.Name).ToList();
 
     public static QualificationLevel FromId(int id) => All.FirstOrDefault(x => x.Id == id) ?? Unspecified;

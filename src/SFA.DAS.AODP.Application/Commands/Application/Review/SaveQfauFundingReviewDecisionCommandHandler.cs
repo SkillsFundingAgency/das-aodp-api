@@ -149,7 +149,6 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
             });
             if (updateOffers.Success == false) throw new Exception(updateOffers.ErrorMessage, updateOffers.InnerException);
 
-
             var updateOfferDetails = await _mediator.Send(new SaveQualificationsFundingOffersDetailsCommand()
             {
                 UpdateDiscussionHistory = false,
@@ -167,27 +166,9 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
             if (updateOfferDetails.Success == false) throw new Exception(updateOfferDetails.ErrorMessage, updateOfferDetails.InnerException);
 
             var applicationOfferIds = review.ApplicationReview.ApplicationReviewFundings?.Select(a => a.FundingOfferId) ?? [];
-            List<QualificationFundings> removedOffers = qualificationfundedOffers.Where(q => !applicationOfferIds.Contains(q.FundingOfferId)).ToList();
 
             StringBuilder qualificationDiscussionHistoryNotes = new();
-            if (removedOffers.Count > 0)
-            {
-                qualificationDiscussionHistoryNotes.AppendLine("The following offers have been removed:");
-                qualificationDiscussionHistoryNotes.AppendLine();
-
-                foreach (var qf in removedOffers)
-                {
-                    var fundingOffer = qf.FundingOffer;
-                    if (fundingOffer != null)
-                    {
-                        qualificationDiscussionHistoryNotes.AppendLine($"Offer: {fundingOffer.Name}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate.ToFundingEndDateFormat()}");
-                        qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate.ToFundingEndDateFormat()}");
-                        if (!string.IsNullOrWhiteSpace(qf.Comments)) qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
-                        qualificationDiscussionHistoryNotes.AppendLine();
-                    }
-                }
-            }
+            
             if (review.ApplicationReview.ApplicationReviewFundings?.Count > 0)
             {
                 qualificationDiscussionHistoryNotes.AppendLine("The following offers have been approved:");
@@ -206,7 +187,6 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Review
                     }
                 }
             }
-
 
             await _qualificationDiscussionHistoryRepository.CreateAsync(new QualificationDiscussionHistory
             {
