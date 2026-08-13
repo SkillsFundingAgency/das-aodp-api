@@ -884,6 +884,8 @@ public class RolloverRepositoryTests
         var qualification = new Qualification { Id = Guid.NewGuid(), Qan = "Q123" };
         var organisation = new AwardingOrganisation { Id = Guid.NewGuid(), NameOfqual = "Org" };
 
+        var expectedOperationalEndDate = new DateTime(2026, 7, 31);
+
         var version = new QualificationVersions
         {
             Id = Guid.NewGuid(),
@@ -896,7 +898,8 @@ public class RolloverRepositoryTests
             Ssa = "SSA",
             Level = "1",
             SubLevel = "A",
-            EqfLevel = "E1"
+            EqfLevel = "E1",
+            OperationalEndDate = expectedOperationalEndDate
         };
 
         // MUST use the exact FundingStream ID your repository compares against
@@ -951,5 +954,6 @@ public class RolloverRepositoryTests
         var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, TestContext.Current.CancellationToken)).Single();
 
         Assert.Equal(expectedDate, result.Pldns);
+        Assert.Equal(expectedOperationalEndDate, result.OperationalEndDate);
     }
 }

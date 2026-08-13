@@ -21,3 +21,4 @@ Post-Deployment Script Template
 :r .\MigrationScripts\MVS1_AWARD_1047_Rollover_action_types.sql
 :r .\MigrationScripts\MVS2_AWARD_RolloverCandidatesJobDataSeed.sql
 :r .\MigrationScripts\MVS1_OfferTypes_DisplayName.sql
+:r .\MigrationScripts\MVS1_Pldns_Qan_NVarchar_Fix.sql

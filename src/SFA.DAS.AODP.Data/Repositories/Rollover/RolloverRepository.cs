@@ -2,11 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
-using PldnsEntity = SFA.DAS.AODP.Data.Entities.Import.Pldns;
 using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Repositories.QueryExtensions;
 using SFA.DAS.AODP.Data.ValueObjects;
 using SFA.DAS.AODP.Models.Rollover;
+using PldnsEntity = SFA.DAS.AODP.Data.Entities.Import.Pldns;
 
 namespace SFA.DAS.AODP.Data.Repositories.Rollover;
 
@@ -277,6 +277,8 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
             })
             .ToListAsync(cancellationToken);
 
+        // Batch-fetch PLDNS rows for every QAN in one query instead of a correlated
+        // subquery per candidate row - avoids re-scanning Pldns once per row.
         var qans = candidates.Select(x => x.Qan).Distinct().ToList();
 
         var pldnsByQan = (await context.Pldns
@@ -341,6 +343,7 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
 
         return null;
     }
+
     public async Task<RolloverWorkflowRun?> GeRolloverWorkflowRunByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await context.RolloverWorkflowRuns
