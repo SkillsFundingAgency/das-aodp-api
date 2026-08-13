@@ -6,6 +6,7 @@ using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Repositories.QueryExtensions;
 using SFA.DAS.AODP.Data.ValueObjects;
 using SFA.DAS.AODP.Models.Rollover;
+using PldnsEntity = SFA.DAS.AODP.Data.Entities.Import.Pldns;
 
 namespace SFA.DAS.AODP.Data.Repositories.Rollover;
 
@@ -232,13 +233,13 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
         Guid workflowRunId,
         CancellationToken cancellationToken)
     {
-        return await context.RolloverWorkflowCandidates
+        var candidates = await context.RolloverWorkflowCandidates
             .AsNoTracking()
             .Where(rwc => rwc.RolloverWorkflowRunId == workflowRunId
                        && rwc.IncludedInP1Export)
-            .Select(rwc => new RolloverCandidateForExport
+            .Select(rwc => new
             {
-                QAN = rwc.RolloverCandidates.QualificationVersion.Qualification.Qan,
+                Qan = rwc.RolloverCandidates.QualificationVersion.Qualification.Qan,
                 QualificationTitle = rwc.RolloverCandidates.QualificationVersion.Qualification.QualificationName ?? string.Empty,
                 AwardingOrganisation = rwc.RolloverCandidates.QualificationVersion.Organisation.NameOfqual ?? string.Empty,
                 QualificationLevel = rwc.RolloverCandidates.QualificationVersion.Level,
@@ -257,6 +258,7 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
                 Age18Plus = rwc.RolloverCandidates.QualificationVersion.EighteenPlus ?? false,
                 Age19Plus = rwc.RolloverCandidates.QualificationVersion.NineteenPlus ?? false,
 
+                FundingOfferId = rwc.RolloverCandidates.FundingOfferId,
                 FundingStreamName = rwc.RolloverCandidates.FundingOffer.Name,
                 FundingApprovalStartDate =
                     context.QualificationFundings
@@ -272,12 +274,76 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
 
                 CurrentFundingApprovalEndDate = rwc.CurrentFundingEndDate,
                 ProposedFundingApprovalEndDate = rwc.ProposedFundingEndDate,
+            })
+            .ToListAsync(cancellationToken);
 
-                Comments = string.Empty,
+        // Batch-fetch PLDNS rows for every QAN in one query instead of a correlated
+        // subquery per candidate row - avoids re-scanning Pldns once per row.
+        var qans = candidates.Select(x => x.Qan).Distinct().ToList();
+
+        var pldnsByQan = (await context.Pldns
+                .AsNoTracking()
+                .Where(p => qans.Contains(p.Qan))
+                .ToListAsync(cancellationToken))
+            .GroupBy(p => p.Qan)
+            .ToDictionary(g => g.Key, g => g.First());
+
+        return candidates
+            .Select(c =>
+            {
+                pldnsByQan.TryGetValue(c.Qan, out var pldns);
+
+                return new RolloverCandidateForExport
+                {
+                    QAN = c.Qan,
+                    QualificationTitle = c.QualificationTitle,
+                    AwardingOrganisation = c.AwardingOrganisation,
+                    QualificationLevel = c.QualificationLevel,
+                    QualificationType = c.QualificationType,
+                    SSA = c.SSA,
+                    OperationalEndDate = c.OperationalEndDate,
+                    OfferedInEngland = c.OfferedInEngland,
+                    FundedInEngland = c.FundedInEngland,
+                    GLH = c.GLH,
+                    TQT = c.TQT,
+                    Pre16 = c.Pre16,
+                    Age16To18 = c.Age16To18,
+                    Age18Plus = c.Age18Plus,
+                    Age19Plus = c.Age19Plus,
+                    FundingStreamName = c.FundingStreamName,
+                    FundingApprovalStartDate = c.FundingApprovalStartDate,
+                    ProposedOutcome = c.ProposedOutcome,
+                    RolloverStatus = c.RolloverStatus,
+                    ExclusionReason = c.ExclusionReason,
+                    CurrentFundingApprovalEndDate = c.CurrentFundingApprovalEndDate,
+                    ProposedFundingApprovalEndDate = c.ProposedFundingApprovalEndDate,
+                    Pldns = GetPldnsDateForFundingStream(pldns, c.FundingOfferId)
+                };
             })
             .OrderBy(x => x.QAN)
-            .ToListAsync(cancellationToken);
+            .ToList();
     }
+
+    private static DateTime? GetPldnsDateForFundingStream(PldnsEntity? pldns, Guid fundingOfferId)
+    {
+        if (pldns == null)
+        {
+            return null;
+        }
+
+        if (fundingOfferId == FundingStream.Age1416.Id) return pldns.Pldns14To16;
+        if (fundingOfferId == FundingStream.Age1619.Id) return pldns.Pldns16To19;
+        if (fundingOfferId == FundingStream.LocalFlexibilities.Id) return pldns.LocalFlex;
+        if (fundingOfferId == FundingStream.LegalEntitlementL2L3.Id) return pldns.LegalEntitlementL2L3;
+        if (fundingOfferId == FundingStream.LegalEntitlementEnglishAndMaths.Id) return pldns.LegalEntitlementEngMaths;
+        if (fundingOfferId == FundingStream.DigitalEntitlement.Id) return pldns.DigitalEntitlement;
+        if (fundingOfferId == FundingStream.AdvancedLearnerLoans.Id) return pldns.Loans;
+        if (fundingOfferId == FundingStream.LifelongLearningEntitlement.Id) return pldns.LifelongLearning;
+        if (fundingOfferId == FundingStream.FreeCoursesForJobs.Id) return pldns.Level3FCoursesForJobs;
+
+        return null;
+    }
+
     public async Task<RolloverWorkflowRun?> GeRolloverWorkflowRunByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await context.RolloverWorkflowRuns

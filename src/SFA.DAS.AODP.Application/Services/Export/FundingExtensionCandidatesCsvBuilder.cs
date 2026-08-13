@@ -26,7 +26,6 @@ namespace SFA.DAS.AODP.Application.Services.Export
                 "QualificationLevel",
                 "QualificationType",
                 "SSA",
-                "OperationalEndDate",
                 "OfferedInEngland",
                 "FundedInEngland",
                 "GLH",
@@ -40,6 +39,8 @@ namespace SFA.DAS.AODP.Application.Services.Export
                 "ProposedOutcome",
                 "RolloverStatus",
                 "ExclusionReason",
+                "OperationalEndDate",
+                "PLDNS",
                 "CurrentFundingApprovalEndDate",
                 "ProposedFundingApprovalEndDate",
                 "Comments"
@@ -111,7 +112,6 @@ namespace SFA.DAS.AODP.Application.Services.Export
             WriteField(writer, r.QualificationLevel); writer.Write(',');
             WriteField(writer, r.QualificationType); writer.Write(',');
             WriteField(writer, r.SSA); writer.Write(',');
-            WriteField(writer, r.OperationalEndDate); writer.Write(',');
             WriteField(writer, r.OfferedInEngland); writer.Write(',');
             WriteField(writer, r.FundedInEngland); writer.Write(',');
             WriteField(writer, r.GLH); writer.Write(',');
@@ -125,6 +125,8 @@ namespace SFA.DAS.AODP.Application.Services.Export
             WriteField(writer, r.ProposedOutcome); writer.Write(',');
             WriteField(writer, r.RolloverStatus); writer.Write(',');
             WriteField(writer, r.ExclusionReason); writer.Write(',');
+            WriteField(writer, r.OperationalEndDate); writer.Write(',');
+            WriteField(writer, r.Pldns); writer.Write(',');
             WriteField(writer, r.CurrentFundingApprovalEndDate); writer.Write(',');
             WriteField(writer, r.ProposedFundingApprovalEndDate); writer.Write(',');
             WriteField(writer, r.Comments);

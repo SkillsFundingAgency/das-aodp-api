@@ -214,6 +214,7 @@
     <None Include="SFA.DAS.AODP.Database.publish.xml" />
     <None Include="MigrationScripts\MVS2_AWARD_904_JobsDataSeed.sql" />
     <None Include="MigrationScripts\MVS2_AWARD_RolloverCandidatesJobDataSeed.sql" />
+    <None Include="MigrationScripts\MVS1_Pldns_Qan_NVarchar_Fix.sql" />
     <None Include="dab-options.json" />
   </ItemGroup>
 </Project>

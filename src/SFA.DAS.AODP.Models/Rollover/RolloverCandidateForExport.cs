@@ -27,6 +27,7 @@ namespace SFA.DAS.AODP.Models.Rollover
         public RolloverStatus RolloverStatus { get; set; } = RolloverStatus.None;
         public string? ExclusionReason { get; set; }
         public DateTime CurrentFundingApprovalEndDate { get; set; }
+        public DateTime? Pldns { get; set; }
         public DateTime? ProposedFundingApprovalEndDate { get; set; }
         public string? Comments { get; set; }
     }

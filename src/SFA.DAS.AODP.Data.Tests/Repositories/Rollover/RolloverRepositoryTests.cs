@@ -3,6 +3,7 @@ using AutoFixture.AutoMoq;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
+using SFA.DAS.AODP.Data.Entities.Import;
 using SFA.DAS.AODP.Data.Entities.Offer;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Rollover;
@@ -744,4 +745,215 @@ public class RolloverRepositoryTests
         result.ShouldBe(newer.Id);
     }
 
+    [Fact]
+    public async Task GetRolloverWorkflowCandidatesByRunId_ReturnsNullPldns_When_NoPldnsRow()
+    {
+        await using var db = CreateDb(nameof(GetRolloverWorkflowCandidatesByRunId_ReturnsNullPldns_When_NoPldnsRow));
+
+        var runId = Guid.NewGuid();
+        var now = DateTime.UtcNow;
+
+        var qualification = new Qualification { Id = Guid.NewGuid(), Qan = "Q123" };
+        var organisation = new AwardingOrganisation { Id = Guid.NewGuid(), NameOfqual = "Org" };
+
+        var version = new QualificationVersions
+        {
+            Id = Guid.NewGuid(),
+            QualificationId = qualification.Id,
+            Qualification = qualification,
+            Organisation = organisation,
+            AwardingOrganisationId = organisation.Id,
+            Status = "Active",
+            Type = "TypeA",
+            Ssa = "SSA",
+            Level = "1",
+            SubLevel = "A",
+            EqfLevel = "E1"
+        };
+
+        var funding = new FundingOffer { Id = Guid.NewGuid(), Name = "Age1416", DisplayName="14 to 16"};
+
+        var candidate = RolloverCandidates.CreateInitialRound(version.Id, funding.Id, "2024/25", now);
+        candidate.QualificationVersion = version;
+        candidate.FundingOffer = funding;
+
+        var wc = RolloverWorkflowCandidate.Create(runId, candidate.Id, version.Id, funding.Id, "2024/25", 1, now, null, now);
+        wc.RolloverCandidates = candidate;
+
+        db.Qualification.Add(qualification);
+        db.QualificationVersions.Add(version);
+        db.AwardingOrganisation.Add(organisation);
+        db.FundingOffers.Add(funding);
+        db.RolloverCandidates.Add(candidate);
+        db.RolloverWorkflowCandidates.Add(wc);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var sut = new RolloverRepository(db);
+
+        var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, TestContext.Current.CancellationToken)).Single();
+
+        Assert.Null(result.Pldns);
+    }
+
+    [Fact]
+    public async Task GetRolloverWorkflowCandidatesByRunId_ReturnsNullPldns_When_FundingStreamDoesNotMatch()
+    {
+        await using var db = CreateDb(nameof(GetRolloverWorkflowCandidatesByRunId_ReturnsNullPldns_When_FundingStreamDoesNotMatch));
+
+        var runId = Guid.NewGuid();
+        var now = DateTime.UtcNow;
+
+        var qualification = new Qualification { Id = Guid.NewGuid(), Qan = "Q123" };
+        var organisation = new AwardingOrganisation { Id = Guid.NewGuid(), NameOfqual = "Org" };
+
+        var version = new QualificationVersions
+        {
+            Id = Guid.NewGuid(),
+            QualificationId = qualification.Id,
+            Qualification = qualification,
+            Organisation = organisation,
+            AwardingOrganisationId = organisation.Id,
+            Status = "Active",
+            Type = "TypeA",
+            Ssa = "SSA",
+            Level = "1",
+            SubLevel = "A",
+            EqfLevel = "E1"
+        };
+
+        var funding = new FundingOffer
+        {
+            Id = FundingStream.LocalFlexibilities.Id, 
+            Name = "LocalFlex",
+            DisplayName = "Local Flex"
+        };
+
+        var candidate = RolloverCandidates.CreateInitialRound(
+            version.Id,
+            funding.Id,
+            "2024/25",
+            now);
+
+        candidate.QualificationVersion = version;
+        candidate.FundingOffer = funding;
+
+        var wc = RolloverWorkflowCandidate.Create(
+            runId,
+            candidate.Id,
+            version.Id,
+            funding.Id,
+            "2024/25",
+            1,
+            now,
+            null,
+            now);
+
+        wc.RolloverCandidates = candidate;
+
+        db.Qualification.Add(qualification);
+        db.QualificationVersions.Add(version);
+        db.AwardingOrganisation.Add(organisation);
+        db.FundingOffers.Add(funding);
+        db.RolloverCandidates.Add(candidate);
+        db.RolloverWorkflowCandidates.Add(wc);
+
+        // PLDNS row exists but FundingStream does NOT match
+        db.Pldns.Add(new Pldns
+        {
+            Qan = "Q123",
+            Pldns14To16 = new DateTime(2025, 01, 01)
+        });
+
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var sut = new RolloverRepository(db);
+
+        var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, TestContext.Current.CancellationToken)).Single();
+
+        Assert.Null(result.Pldns);
+    }
+
+    [Fact]
+    public async Task GetRolloverWorkflowCandidatesByRunId_ReturnsCorrectPldns_When_FundingStreamMatches()
+    {
+        await using var db = CreateDb(nameof(GetRolloverWorkflowCandidatesByRunId_ReturnsCorrectPldns_When_FundingStreamMatches));
+
+        var runId = Guid.NewGuid();
+        var now = DateTime.UtcNow;
+
+        var qualification = new Qualification { Id = Guid.NewGuid(), Qan = "Q123" };
+        var organisation = new AwardingOrganisation { Id = Guid.NewGuid(), NameOfqual = "Org" };
+
+        var expectedOperationalEndDate = new DateTime(2026, 7, 31);
+
+        var version = new QualificationVersions
+        {
+            Id = Guid.NewGuid(),
+            QualificationId = qualification.Id,
+            Qualification = qualification,
+            Organisation = organisation,
+            AwardingOrganisationId = organisation.Id,
+            Status = "Active",
+            Type = "TypeA",
+            Ssa = "SSA",
+            Level = "1",
+            SubLevel = "A",
+            EqfLevel = "E1",
+            OperationalEndDate = expectedOperationalEndDate
+        };
+
+        // MUST use the exact FundingStream ID your repository compares against
+        var funding = new FundingOffer
+        {
+            Id = FundingStream.Age1416.Id,
+            Name = "Age1416",
+            DisplayName = "Age 14–16"
+        };
+
+        var candidate = RolloverCandidates.CreateInitialRound(
+            version.Id,
+            FundingStream.Age1416.Id,   // MUST match repository
+            "2024/25",
+            now);
+
+        candidate.QualificationVersion = version;
+        candidate.FundingOffer = funding;
+
+        var wc = RolloverWorkflowCandidate.Create(
+            runId,
+            candidate.Id,
+            version.Id,
+            FundingStream.Age1416.Id,   // MUST match repository
+            "2024/25",
+            1,
+            now,
+            null,
+            now);
+
+        wc.RolloverCandidates = candidate;
+
+        db.Qualification.Add(qualification);
+        db.QualificationVersions.Add(version);
+        db.AwardingOrganisation.Add(organisation);
+        db.FundingOffers.Add(funding);
+        db.RolloverCandidates.Add(candidate);
+        db.RolloverWorkflowCandidates.Add(wc);
+
+        var expectedDate = new DateTime(2025, 01, 01);
+
+        db.Pldns.Add(new Pldns
+        {
+            Qan = "Q123",
+            Pldns14To16 = expectedDate
+        });
+
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var sut = new RolloverRepository(db);
+
+        var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, TestContext.Current.CancellationToken)).Single();
+
+        Assert.Equal(expectedDate, result.Pldns);
+        Assert.Equal(expectedOperationalEndDate, result.OperationalEndDate);
+    }
 }
