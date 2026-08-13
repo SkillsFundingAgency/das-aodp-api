@@ -786,11 +786,11 @@ public class RolloverRepositoryTests
         db.FundingOffers.Add(funding);
         db.RolloverCandidates.Add(candidate);
         db.RolloverWorkflowCandidates.Add(wc);
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = new RolloverRepository(db);
 
-        var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, default)).Single();
+        var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, TestContext.Current.CancellationToken)).Single();
 
         Assert.Null(result.Pldns);
     }
@@ -864,11 +864,11 @@ public class RolloverRepositoryTests
             Pldns14To16 = new DateTime(2025, 01, 01)
         });
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = new RolloverRepository(db);
 
-        var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, default)).Single();
+        var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, TestContext.Current.CancellationToken)).Single();
 
         Assert.Null(result.Pldns);
     }
@@ -944,11 +944,11 @@ public class RolloverRepositoryTests
             Pldns14To16 = expectedDate
         });
 
-        await db.SaveChangesAsync();
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = new RolloverRepository(db);
 
-        var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, default)).Single();
+        var result = (await sut.GetRolloverWorkflowCandidatesByRunId(runId, TestContext.Current.CancellationToken)).Single();
 
         Assert.Equal(expectedDate, result.Pldns);
     }
