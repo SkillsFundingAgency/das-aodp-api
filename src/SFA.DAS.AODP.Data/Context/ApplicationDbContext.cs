@@ -105,6 +105,8 @@ namespace SFA.DAS.AODP.Data.Context
 
         public virtual DbSet<AllQualificationFunding> AllQualificationFundings { get; set; }
 
+        public virtual DbSet<QaaQualificationDownloadLog> QaaQualificationDownloadLog { get; set; }
+
         public virtual DbSet<RolloverCandidates> RolloverCandidates { get; set; }
         public virtual DbSet<RolloverWorkflowRun> RolloverWorkflowRuns { get; set; }
         public virtual DbSet<RolloverWorkflowRunFundingOffer> RolloverWorkflowRunFundingOffers { get; set; }
