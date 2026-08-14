@@ -115,6 +115,11 @@ public partial class RegulatedQaaQualification
     public DateOnly? DiscontinuedDate { get; private set; }
 
     /// <summary>
+    /// The last date by which certifications must be claimed for learners registered on this qualification, as supplied by the Qaa API. This is distinct from <see cref="DiscontinuedDate"/> - it can fall years after a qualification is discontinued, since learners already registered are still permitted to complete and claim their award up to this date.
+    /// </summary>
+    public DateOnly? LastDateForCertifications { get; private set; }
+
+    /// <summary>
     /// A value object representation for the sector subject area.
     /// </summary>
     [NotMapped]
@@ -142,7 +147,8 @@ public partial class RegulatedQaaQualification
         string awardingBody,
         DateOnly startDateForRegistration,
         DateOnly lastDateForRegistration,
-        SectorSubjectArea sectorSubjectArea)
+        SectorSubjectArea sectorSubjectArea,
+        DateOnly? lastDateForCertifications = null)
     {
         return new RegulatedQaaQualification
         {
@@ -156,6 +162,7 @@ public partial class RegulatedQaaQualification
             Status = "Approved",
             StartDate = startDateForRegistration,
             LastDateForRegistration = lastDateForRegistration,
+            LastDateForCertifications = lastDateForCertifications,
             SectorSubjectAreaName = sectorSubjectArea.Name
         };
     }
