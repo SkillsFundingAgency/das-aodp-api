@@ -9,4 +9,6 @@
                SELECT * FROM [$(TableName)]					
 --------------------------------------------------------------------------------------
 */
+
+:r .\MigrationScripts\MVS1_Pldns_Qan_NVarchar_Fix.sql
 :r .\MigrationScripts\MVS1_AWARD_855_ConsolidateQaaFundings.sql

@@ -27,8 +27,7 @@ public class RolloverWorkflowCandidatesP1ChecksTests
             ESFL3L4 = new DateTime(2024, 7, 1),
             AdvancedLearnerLoans = new DateTime(2024, 8, 1),
             LifelongLearningEntitlement = new DateTime(2024, 9, 1),
-            L3FreeCoursesForJobs = new DateTime(2024, 10, 1),
-            CoF = new DateTime(2024, 11, 1)
+            L3FreeCoursesForJobs = new DateTime(2024, 10, 1)
         };
 
         // Act
@@ -50,7 +49,6 @@ public class RolloverWorkflowCandidatesP1ChecksTests
         yield return [nameof(RolloverWorkflowCandidatesP1Checks.AdvancedLearnerLoans), new DateTime(2024, 8, 1)];
         yield return [nameof(RolloverWorkflowCandidatesP1Checks.LifelongLearningEntitlement), new DateTime(2024, 9, 1)];
         yield return [nameof(RolloverWorkflowCandidatesP1Checks.L3FreeCoursesForJobs), new DateTime(2024, 10, 1)];
-        yield return [nameof(RolloverWorkflowCandidatesP1Checks.CoF), new DateTime(2024, 11, 1)];
     }
 
     [Fact]
