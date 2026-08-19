@@ -34,6 +34,16 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
 
         public async Task DeleteAsync(Entities.Application.Application application)
         {
+            var applicationReviewIds = await _context.ApplicationReviews
+                .Where(r => r.ApplicationId == application.Id)
+                .Select(r => r.Id)
+                .ToListAsync();
+
+            await _context.ApplicationReviewFeedbacks.Where(f => applicationReviewIds.Contains(f.ApplicationReviewId)).ExecuteDeleteAsync();
+            await _context.ApplicationReviewFundings.Where(f => applicationReviewIds.Contains(f.ApplicationReviewId)).ExecuteDeleteAsync();
+            await _context.ApplicationReviews.Where(r => r.ApplicationId == application.Id).ExecuteDeleteAsync();
+            await _context.Messages.Where(m => m.ApplicationId == application.Id).ExecuteDeleteAsync();
+
             await _context.ApplicationQuestionAnswers.Where(t => t.ApplicationPage.ApplicationId == application.Id).ExecuteDeleteAsync();
             await _context.ApplicationPages.Where(t => t.ApplicationId == application.Id).ExecuteDeleteAsync();
 
