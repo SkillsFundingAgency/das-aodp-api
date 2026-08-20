@@ -184,5 +184,58 @@ namespace SFA.DAS.AODP.Application.UnitTests.Services
             // Should not throw and should contain empty fields
             Assert.Contains("1,", csv);
         }
+
+        [Fact]
+        public void Build_ShouldWriteHeaderRow_ContainingOperationalEndDateAndPldnsColumns()
+        {
+            var row = new RolloverCandidateForExport { QAN = "1", QualificationTitle = "Header Test" };
+
+            var csv = Encoding.UTF8.GetString(_sut.Build([row]));
+            var headers = GetLine(csv, 0).Split(',');
+
+            Assert.Contains("OperationalEndDate", headers);
+            Assert.Contains("PLDNS", headers);
+        }
+
+        [Fact]
+        public void Build_ShouldWriteOperationalEndDateAndPldns_InCorrectColumns()
+        {
+            var row = new RolloverCandidateForExport
+            {
+                QAN = "1",
+                QualificationTitle = "Date Columns Test",
+                OperationalEndDate = new DateTime(2025, 12, 25),
+                Pldns = new DateTime(2026, 3, 10)
+            };
+
+            var csv = Encoding.UTF8.GetString(_sut.Build([row]));
+            var headers = GetLine(csv, 0).Split(',');
+            var values = GetLine(csv, 1).Split(',');
+
+            Assert.Equal("2025/12/25", values[Array.IndexOf(headers, "OperationalEndDate")]);
+            Assert.Equal("2026/03/10", values[Array.IndexOf(headers, "PLDNS")]);
+        }
+
+        [Fact]
+        public void Build_ShouldWriteEmptyFields_WhenOperationalEndDateAndPldnsAreNull()
+        {
+            var row = new RolloverCandidateForExport
+            {
+                QAN = "1",
+                QualificationTitle = "Null Dates Test",
+                OperationalEndDate = null,
+                Pldns = null
+            };
+
+            var csv = Encoding.UTF8.GetString(_sut.Build([row]));
+            var headers = GetLine(csv, 0).Split(',');
+            var values = GetLine(csv, 1).Split(',');
+
+            Assert.Equal(string.Empty, values[Array.IndexOf(headers, "OperationalEndDate")]);
+            Assert.Equal(string.Empty, values[Array.IndexOf(headers, "PLDNS")]);
+        }
+
+        private static string GetLine(string csv, int index) =>
+            csv.Replace("\r\n", "\n").TrimEnd('\n').Split('\n')[index];
     }
 }

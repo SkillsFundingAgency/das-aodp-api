@@ -53,12 +53,6 @@ public partial class Pldns
     [Column("NotesDigitalEntitlement")]
     public string? DigitalEntitlementNote { get; set; }
 
-    [Column("ESF-L3-L4")]
-    public DateTime? EsfL3L4 { get; set; }
-
-    [Column("NotesESF-L3-L4")]
-    public string? EsfL3L4Note { get; set; }
-
     [Column("Loans")]
     public DateTime? Loans { get; set; }
 
@@ -77,11 +71,24 @@ public partial class Pldns
     [Column("NotesLevel 3FreeCoursesForJobs")]
     public string? Level3FCoursesForJobsNote { get; set; }
 
+    #region Columns not used by QFAST
+
+    /** 
+     * ESF-L3-L4 and CoF are not used by QFAST, but are included in the PLDNS table for completeness.
+     * */
+
+    [Column("ESF-L3-L4")]
+    public DateTime? EsfL3L4 { get; set; }
+
+    [Column("NotesESF-L3-L4")]
+    public string? EsfL3L4Note { get; set; }
+
     [Column("CoF")]
     public DateTime? Cof { get; set; }
 
     [Column("NotesCoF")]
     public string? CofNote { get; set; }
+    #endregion
 
     [Column("StartDate")]
     public DateTime? StartDate { get; set; }
