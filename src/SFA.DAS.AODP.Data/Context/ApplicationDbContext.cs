@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using SFA.DAS.AODP.Data.Entities;
@@ -133,13 +134,6 @@ namespace SFA.DAS.AODP.Data.Context
             modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
                 .HasKey(v => v.QualificationReference);
 
-            modelBuilder.Entity<Message>().Property(m => m.Type).HasConversion<string>();
-            modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
-                .HasKey(v => v.QualificationReference);
-
-            modelBuilder.Entity<ChangedQualification>().ToView("v_QualificationChangedReviewRequired", "regulated")
-                .HasKey(v => v.QualificationReference);
-
             modelBuilder.Entity<QualificationFundingStatus>().ToView("v_QualificationFundingStatus", "regulated")
                 .HasNoKey();
 
@@ -158,38 +152,43 @@ namespace SFA.DAS.AODP.Data.Context
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(View_AvailableQuestionsForRoutingEntityConfiguration).Assembly);
 
-            // SQLite has no native DATE type and stores DateOnly as text. Under some query
-            // shapes (correlated subqueries in particular) its EF Core provider can round-trip
-            // that text with a spurious time component attached, which the strict DateOnly
-            // parser then rejects. Real SQL Server has a genuine DATE type and never hits this,
-            // so this conversion is scoped to SQLite only and has zero effect in production.
             if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
             {
-                var dateOnlyConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateOnly, string>(
-                    d => d.ToString("yyyy-MM-dd"),
-                    s => DateOnly.Parse(s));
-
-                var nullableDateOnlyConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateOnly?, string?>(
-                    d => d.HasValue ? d.Value.ToString("yyyy-MM-dd") : null,
-                    s => s == null ? null : DateOnly.Parse(s));
-
-                foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-                {
-                    foreach (var property in entityType.GetProperties())
-                    {
-                        if (property.ClrType == typeof(DateOnly))
-                        {
-                            property.SetValueConverter(dateOnlyConverter);
-                        }
-                        else if (property.ClrType == typeof(DateOnly?))
-                        {
-                            property.SetValueConverter(nullableDateOnlyConverter);
-                        }
-                    }
-                }
+                ConfigureSqliteDateOnlyConverters(modelBuilder);
             }
 
             base.OnModelCreating(modelBuilder);
+        }
+
+        // SQLite has no native DATE type and stores DateOnly as text. Under some query
+        // shapes (correlated subqueries in particular) its EF Core provider can round-trip
+        // that text with a spurious time component attached, which the strict DateOnly
+        // parser then rejects. Real SQL Server has a genuine DATE type and never hits this,
+        // so this conversion is scoped to SQLite only and has zero effect in production.
+        private static void ConfigureSqliteDateOnlyConverters(ModelBuilder modelBuilder)
+        {
+            var dateOnlyConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateOnly, string>(
+                d => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                s => DateOnly.Parse(s, CultureInfo.InvariantCulture));
+
+            var nullableDateOnlyConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateOnly?, string?>(
+                d => d.HasValue ? d.Value.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) : null,
+                s => s == null ? null : DateOnly.Parse(s, CultureInfo.InvariantCulture));
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties())
+                {
+                    if (property.ClrType == typeof(DateOnly))
+                    {
+                        property.SetValueConverter(dateOnlyConverter);
+                    }
+                    else if (property.ClrType == typeof(DateOnly?))
+                    {
+                        property.SetValueConverter(nullableDateOnlyConverter);
+                    }
+                }
+            }
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

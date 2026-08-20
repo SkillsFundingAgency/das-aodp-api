@@ -48,7 +48,7 @@ internal class RolloverCandidateSourceProjection
 
     public DateTime? NewFundingEndDate { get; set; }
 
-    public string? AcademicYear { get; set; }
+    public string AcademicYear { get; set; } = null!;
 
     public RolloverStatus RolloverStatus { get; set; }
 

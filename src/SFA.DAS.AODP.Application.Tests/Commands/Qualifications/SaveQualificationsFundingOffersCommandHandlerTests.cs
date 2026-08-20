@@ -130,7 +130,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
                 repo => repo.CreateAsync(It.IsAny<List<QualificationFundings>>()),
                 Times.Never);
             _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.Is<QualificationDiscussionHistory>(qdh =>
-                qdh.Notes.Contains("no offers have been selected"))), Times.Once);
+                qdh.Notes != null && qdh.Notes.Contains("no offers have been selected"))), Times.Once);
         }
 
 

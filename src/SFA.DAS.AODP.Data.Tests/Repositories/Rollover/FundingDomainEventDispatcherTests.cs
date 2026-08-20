@@ -66,7 +66,7 @@ public class FundingDomainEventDispatcherTests : UnitTest
         candidate.PreviousFundingEndDate.ShouldBe(new DateTime(2026, 7, 31));
         candidate.IsActive.ShouldBeTrue();
         workflow.InvalidatedAt.ShouldBe(Now);
-        workflow.InvalidationReason.ShouldContain("newer qualification version");
+        workflow.InvalidationReason.ShouldNotBeNull().ShouldContain("newer qualification version");
     }
 
     [Fact]
