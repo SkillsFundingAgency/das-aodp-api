@@ -1,30 +1,43 @@
-﻿using System.Diagnostics;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
-using SFA.DAS.AODP.Data.Repositories.QueryExtensions;
 using SFA.DAS.AODP.Data.ValueObjects;
 using SFA.DAS.AODP.Models.Rollover;
 using PldnsEntity = SFA.DAS.AODP.Data.Entities.Import.Pldns;
 
 namespace SFA.DAS.AODP.Data.Repositories.Rollover;
 
-public class RolloverRepository(IApplicationDbContext context) : IRolloverRepository
+public class RolloverRepository : IRolloverRepository
 {
+    private readonly IApplicationDbContext _context;
+
+    public RolloverRepository(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
     public async Task<int> GetRolloverWorkflowCandidatesCountAsync(CancellationToken cancellationToken)
     {
-        var dbSet = context.RolloverWorkflowCandidates;
+        // Scoped to the latest run so this always agrees with GetAllRolloverWorkflowCandidatesAsync,
+        // which the same screen uses to show the actual candidates behind this count.
+        var latestRunId = await GetLatestWorkflowRunIdAsync(cancellationToken) ?? Guid.Empty;
 
-        var totalRecords = await dbSet.AsNoTracking().CountAsync(cancellationToken);
+        var totalRecords = await _context.RolloverWorkflowCandidates
+            .AsNoTracking()
+            .CountAsync(x => x.RolloverWorkflowRunId == latestRunId && !x.InvalidatedAt.HasValue, cancellationToken);
 
         return totalRecords;
     }
 
     public async Task<IEnumerable<RolloverWorkflowCandidate>> GetAllRolloverWorkflowCandidatesAsync(CancellationToken cancellationToken)
     {
-        return await context.RolloverWorkflowCandidates
+        // Scoped to the latest run
+        var latestRunId = await GetLatestWorkflowRunIdAsync(cancellationToken) ?? Guid.Empty;
+
+        return await _context.RolloverWorkflowCandidates
             .Include(x => x.RolloverWorkflowRun)
+            .Where(x => x.RolloverWorkflowRunId == latestRunId && !x.InvalidatedAt.HasValue)
             .ToListAsync(cancellationToken);
     }
 
@@ -34,45 +47,29 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
         if (!list.Any())
             return;
 
-        context.RolloverWorkflowCandidates.UpdateRange(list);
+        _context.RolloverWorkflowCandidates.UpdateRange(list);
 
-        await context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<RolloverCandidateDto>> GetRolloverCandidatesAsync(CancellationToken cancellationToken)
     {
-        return await context.RolloverCandidates
+        return await _context.RolloverCandidates
             .AsNoTracking()
             .Where(x => x.IsActive)
-            .Select(rc => new RolloverCandidateDto
+            .WithAllSourceQualifications(_context)
+            .Select(x => new RolloverCandidateDto
             {
-                Id = rc.Id,
-                QualificationVersionId = rc.QualificationVersionId,
-                FundingOfferId = rc.FundingOfferId,
-                FundingOfferName = rc.FundingOffer != null ? rc.FundingOffer.DisplayName : null,
-                QualificationNumber = rc.QualificationVersion != null && rc.QualificationVersion.Qualification != null ?
-                    rc.QualificationVersion.Qualification.Qan : null,
-                AcademicYear = rc.AcademicYear
+                Id = x.CandidateId,
+                SourceType = x.SourceType,
+                SourceQualificationId = x.SourceQualificationId,
+                FundingOfferId = x.FundingOfferId,
+                FundingOfferName = x.FundingStreamName,
+                QualificationNumber = x.QualificationReference,
+                QualificationName = x.QualificationTitle,
+                AcademicYear = x.AcademicYear
             })
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<IEnumerable<RolloverCandidateDto>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, CancellationToken cancellationToken)
-    {
-        return await context.RolloverCandidates
-            .AsNoTracking()
-            .Where(rc =>
-                rolloverCandidateIds.Contains(rc.Id) && rc.IsActive)
-            .Select(rc => new RolloverCandidateDto
-            {
-                Id = rc.Id,
-                QualificationVersionId = rc.QualificationVersionId,
-                FundingOfferId = rc.FundingOfferId,
-                RolloverRound = rc.RolloverRound,
-                AcademicYear = rc.AcademicYear,
-                PreviousFundingEndDate = rc.PreviousFundingEndDate,
-                NewFundingEndDate = rc.NewFundingEndDate
-            })
+            .OrderBy(x => x.QualificationNumber)
             .ToListAsync(cancellationToken);
     }
 
@@ -85,47 +82,60 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
             .ToList();
         var requestsByCandidateId = requests.ToDictionary(x => x.RolloverCandidateId);
 
-        var candidateData = await context.RolloverCandidates
-            .AsNoTracking()
+        var candidateData = await _context.RolloverCandidates
             .Where(rc => rolloverCandidateIds.Contains(rc.Id) && rc.IsActive)
-            .Select(rc => new
-            {
-                RolloverCandidatesId = rc.Id,
-                rc.QualificationVersionId,
-                rc.FundingOfferId,
-                FundingStream = rc.FundingOffer.Name,
-                rc.AcademicYear,
-                rc.RolloverRound,
-                rc.PreviousFundingEndDate,
-                rc.NewFundingEndDate,
-                rc.QualificationVersion.OperationalStartDate,
-                rc.QualificationVersion.OperationalEndDate,
-                rc.QualificationVersion.OfferedInEngland,
-                rc.QualificationVersion.IntentionToSeekFundingInEngland,
-                Qan = rc.QualificationVersion.Qualification.Qan,
-                HasFunding = context.QualificationFundings.Any(qf =>
-                    qf.QualificationVersionId == rc.QualificationVersionId &&
-                    qf.FundingOfferId == rc.FundingOfferId),
-                LatestFundingApprovalEndDate = context.QualificationFundings
-                    .Where(qf =>
-                        qf.QualificationVersionId == rc.QualificationVersionId &&
-                        qf.FundingOfferId == rc.FundingOfferId)
-                    .Max(qf => qf.EndDate)
-            })
+            .WithAllSourceQualifications(_context)
             .ToListAsync(cancellationToken);
 
-        var qans = candidateData
-            .Select(x => x.Qan)
+        var ofqualQualificationIds = candidateData
+            .Where(x => x.SourceType == RolloverSourceTypes.Ofqual)
+            .Select(x => x.SourceQualificationId)
+            .Distinct()
+            .ToList();
+        var qaaQualificationIds = candidateData
+            .Where(x => x.SourceType == RolloverSourceTypes.Qaa)
+            .Select(x => x.SourceQualificationId)
+            .Distinct()
+            .ToList();
+        var fundingOfferIds = candidateData
+            .Select(x => x.FundingOfferId)
             .Distinct()
             .ToList();
 
-        var defundedQans = await context.DefundingLists
+        var ofqualFundings = await _context.QualificationFundings
+            .AsNoTracking()
+            .Where(qf =>
+                ofqualQualificationIds.Contains(qf.QualificationVersionId) &&
+                fundingOfferIds.Contains(qf.FundingOfferId))
+            .Select(qf => new { QualificationId = qf.QualificationVersionId, qf.FundingOfferId, qf.EndDate })
+            .ToListAsync(cancellationToken);
+
+        var qaaFundings = await _context.QaaQualificationFundings
+            .AsNoTracking()
+            .Where(qf =>
+                qaaQualificationIds.Contains(qf.QaaQualificationId) &&
+                fundingOfferIds.Contains(qf.FundingOfferId))
+            .Select(qf => new { QualificationId = qf.QaaQualificationId, qf.FundingOfferId, qf.EndDate })
+            .ToListAsync(cancellationToken);
+
+        var latestFundingEndDateByKey = ofqualFundings
+            .Select(x => (Key: (SourceType: RolloverSourceTypes.Ofqual, x.QualificationId, x.FundingOfferId), x.EndDate))
+            .Concat(qaaFundings.Select(x => (Key: (SourceType: RolloverSourceTypes.Qaa, x.QualificationId, x.FundingOfferId), x.EndDate)))
+            .GroupBy(x => x.Key)
+            .ToDictionary(g => g.Key, g => g.Max(x => x.EndDate));
+
+        var qans = candidateData
+            .Select(x => x.QualificationReference)
+            .Distinct()
+            .ToList();
+
+        var defundedQans = await _context.DefundingLists
             .AsNoTracking()
             .Where(x => qans.Contains(x.Qan))
             .Select(x => x.Qan)
             .ToHashSetAsync(cancellationToken);
 
-        var pldnsByQan = (await context.Pldns
+        var pldnsByQan = (await _context.Pldns
                 .AsNoTracking()
                 .Where(x => qans.Contains(x.Qan))
                 .ToListAsync(cancellationToken))
@@ -137,15 +147,21 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
         return candidateData
             .Select(candidate =>
             {
-                pldnsByQan.TryGetValue(candidate.Qan, out var pldns);
-                var request = requestsByCandidateId[candidate.RolloverCandidatesId];
+                pldnsByQan.TryGetValue(candidate.QualificationReference, out var pldns);
+                var request = requestsByCandidateId[candidate.CandidateId];
+                var fundingKey = (candidate.SourceType, candidate.SourceQualificationId, candidate.FundingOfferId);
+                var hasFunding = latestFundingEndDateByKey.TryGetValue(fundingKey, out var latestFundingApprovalEndDate);
 
                 return new RolloverCandidateP1CheckData(
                     new RolloverCandidateDto
                     {
-                        Id = candidate.RolloverCandidatesId,
-                        QualificationVersionId = candidate.QualificationVersionId,
+                        Id = candidate.CandidateId,
+                        SourceType = candidate.SourceType,
+                        SourceQualificationId = candidate.SourceQualificationId,
                         FundingOfferId = candidate.FundingOfferId,
+                        FundingOfferName = candidate.FundingStreamName,
+                        QualificationNumber = candidate.QualificationReference,
+                        QualificationName = candidate.QualificationTitle,
                         AcademicYear = candidate.AcademicYear,
                         RolloverRound = candidate.RolloverRound,
                         PreviousFundingEndDate = candidate.PreviousFundingEndDate,
@@ -153,24 +169,24 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
                     },
                     new RolloverWorkflowCandidatesP1Checks
                     {
-                        RolloverCandidatesId = candidate.RolloverCandidatesId,
-                        QualificationVersionId = candidate.QualificationVersionId,
+                        RolloverCandidatesId = candidate.CandidateId,
+                        SourceType = candidate.SourceType,
+                        SourceQualificationId = candidate.SourceQualificationId,
                         FundingOfferId = candidate.FundingOfferId,
-                        FundingStream = candidate.HasFunding ? candidate.FundingStream : null,
+                        FundingStream = hasFunding ? candidate.FundingStreamName : null,
                         AcademicYear = candidate.AcademicYear,
                         RolloverRound = candidate.RolloverRound,
                         FundingEndDateThreshold = request.FundingEndDateEligibilityThreshold,
                         OperationalEndDateThreshold =
                             request.OperationalEndDateEligibilityThreshold,
                         MaximumApprovalEndDate = request.MaximumApprovalFundingEndDate,
-                        LatestFundingApprovalEndDate = candidate.LatestFundingApprovalEndDate?
+                        LatestFundingApprovalEndDate = latestFundingApprovalEndDate?
                             .ToDateTime(TimeOnly.MinValue),
                         OperationalStartDate = candidate.OperationalStartDate,
                         OperationalEndDate = candidate.OperationalEndDate,
                         OfferedInEngland = candidate.OfferedInEngland,
-                        IntentionToSeekFundingInEngland =
-                            candidate.IntentionToSeekFundingInEngland ?? false,
-                        IsOnDefundingList = defundedQans.Contains(candidate.Qan),
+                        IntentionToSeekFundingInEngland = candidate.IntentionToSeekFundingInEngland,
+                        IsOnDefundingList = defundedQans.Contains(candidate.QualificationReference),
                         Age1416 = pldns?.Pldns14To16,
                         Age1619 = pldns?.Pldns16To19,
                         LocalFlexibilities = pldns?.LocalFlex,
@@ -200,19 +216,19 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
         // Explicit transaction as we are calling ExecuteDeleteAsync for better set based delete operations,
         // this doesn't implicitly create transactions and runs immediately, therefore an explicit transaction is needed.
         // This is so we can ensure a proper unit of work around the delete and the subsequent inserts such that if the delete fails then we roll back the entire thing.
-        await using var transaction = await context.StartTransactionAsync();
+        await using var transaction = await _context.StartTransactionAsync();
         try
         {
             // ExecuteDeleteAsync executes immediately! and does not use implicit transactions.
-            await context.RolloverWorkflowCandidates
+            await _context.RolloverWorkflowCandidates
                 .Where(x => EF.Constant(incomingCandidateIds).Contains(x.RolloverCandidatesId))
                 .ExecuteDeleteAsync(cancellationToken);
 
-            context.RolloverWorkflowRuns.Add(workflowRun);
-            context.RolloverWorkflowCandidates.AddRange(workflowCandidates);
-            context.RolloverWorkflowRunFundingOffers.AddRange(workflowFundingOffers);
+            _context.RolloverWorkflowRuns.Add(workflowRun);
+            _context.RolloverWorkflowCandidates.AddRange(workflowCandidates);
+            _context.RolloverWorkflowRunFundingOffers.AddRange(workflowFundingOffers);
 
-            await context.SaveChangesAsync(cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
 
             return workflowRun.Id;
@@ -226,62 +242,26 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
 
     public Task SaveChangesAsync(CancellationToken cancellationToken)
     {
-        return context.SaveChangesAsync(cancellationToken);
+        return _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyList<RolloverCandidateForExport>> GetRolloverWorkflowCandidatesByRunId(
         Guid workflowRunId,
         CancellationToken cancellationToken)
     {
-        var candidates = await context.RolloverWorkflowCandidates
+        var candidates = await _context.RolloverWorkflowCandidates
             .AsNoTracking()
             .Where(rwc => rwc.RolloverWorkflowRunId == workflowRunId
-                       && rwc.IncludedInP1Export)
-            .Select(rwc => new
-            {
-                Qan = rwc.RolloverCandidates.QualificationVersion.Qualification.Qan,
-                QualificationTitle = rwc.RolloverCandidates.QualificationVersion.Qualification.QualificationName ?? string.Empty,
-                AwardingOrganisation = rwc.RolloverCandidates.QualificationVersion.Organisation.NameOfqual ?? string.Empty,
-                QualificationLevel = rwc.RolloverCandidates.QualificationVersion.Level,
-                QualificationType = rwc.RolloverCandidates.QualificationVersion.Type,
-                SSA = rwc.RolloverCandidates.QualificationVersion.Ssa,
-                OperationalEndDate = rwc.RolloverCandidates.QualificationVersion.OperationalEndDate,
-
-                OfferedInEngland = rwc.RolloverCandidates.QualificationVersion.OfferedInEngland,
-                FundedInEngland = rwc.RolloverCandidates.QualificationVersion.IntentionToSeekFundingInEngland ?? false,
-
-                GLH = rwc.RolloverCandidates.QualificationVersion.Glh,
-                TQT = rwc.RolloverCandidates.QualificationVersion.Tqt,
-
-                Pre16 = rwc.RolloverCandidates.QualificationVersion.PreSixteen ?? false,
-                Age16To18 = rwc.RolloverCandidates.QualificationVersion.SixteenToEighteen ?? false,
-                Age18Plus = rwc.RolloverCandidates.QualificationVersion.EighteenPlus ?? false,
-                Age19Plus = rwc.RolloverCandidates.QualificationVersion.NineteenPlus ?? false,
-
-                FundingOfferId = rwc.RolloverCandidates.FundingOfferId,
-                FundingStreamName = rwc.RolloverCandidates.FundingOffer.Name,
-                FundingApprovalStartDate =
-                    context.QualificationFundings
-                        .Where(qf =>
-                            qf.QualificationVersionId == rwc.RolloverCandidates.QualificationVersionId &&
-                            qf.FundingOfferId == rwc.RolloverCandidates.FundingOfferId)
-                        .Select(qf => qf.StartDate)
-                        .FirstOrDefault(),
-
-                ProposedOutcome = rwc.PassP1 ? RolloverStatus.Extended.ToString() : RolloverStatus.Excluded.ToString(),
-                RolloverStatus = rwc.PassP1 ? RolloverStatus.Extended : RolloverStatus.Excluded,
-                ExclusionReason = rwc.PassP1 ? rwc.RolloverCandidates.ExclusionReason : rwc.P1FailureReason,
-
-                CurrentFundingApprovalEndDate = rwc.CurrentFundingEndDate,
-                ProposedFundingApprovalEndDate = rwc.ProposedFundingEndDate,
-            })
+                       && rwc.IncludedInP1Export
+                       && !rwc.InvalidatedAt.HasValue)
+            .WithAllSourceQualifications(_context)
             .ToListAsync(cancellationToken);
 
         // Batch-fetch PLDNS rows for every QAN in one query instead of a correlated
         // subquery per candidate row - avoids re-scanning Pldns once per row.
-        var qans = candidates.Select(x => x.Qan).Distinct().ToList();
+        var qans = candidates.Select(x => x.QualificationReference).Distinct().ToList();
 
-        var pldnsByQan = (await context.Pldns
+        var pldnsByQan = (await _context.Pldns
                 .AsNoTracking()
                 .Where(p => qans.Contains(p.Qan))
                 .ToListAsync(cancellationToken))
@@ -289,35 +269,36 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
             .ToDictionary(g => g.Key, g => g.First());
 
         return candidates
-            .Select(c =>
+            .Select(x =>
             {
-                pldnsByQan.TryGetValue(c.Qan, out var pldns);
+                pldnsByQan.TryGetValue(x.QualificationReference, out var pldns);
 
                 return new RolloverCandidateForExport
                 {
-                    QAN = c.Qan,
-                    QualificationTitle = c.QualificationTitle,
-                    AwardingOrganisation = c.AwardingOrganisation,
-                    QualificationLevel = c.QualificationLevel,
-                    QualificationType = c.QualificationType,
-                    SSA = c.SSA,
-                    OperationalEndDate = c.OperationalEndDate,
-                    OfferedInEngland = c.OfferedInEngland,
-                    FundedInEngland = c.FundedInEngland,
-                    GLH = c.GLH,
-                    TQT = c.TQT,
-                    Pre16 = c.Pre16,
-                    Age16To18 = c.Age16To18,
-                    Age18Plus = c.Age18Plus,
-                    Age19Plus = c.Age19Plus,
-                    FundingStreamName = c.FundingStreamName,
-                    FundingApprovalStartDate = c.FundingApprovalStartDate,
-                    ProposedOutcome = c.ProposedOutcome,
-                    RolloverStatus = c.RolloverStatus,
-                    ExclusionReason = c.ExclusionReason,
-                    CurrentFundingApprovalEndDate = c.CurrentFundingApprovalEndDate,
-                    ProposedFundingApprovalEndDate = c.ProposedFundingApprovalEndDate,
-                    Pldns = GetPldnsDateForFundingStream(pldns, c.FundingOfferId)
+                    QAN = x.QualificationReference,
+                    QualificationTitle = x.QualificationTitle,
+                    AwardingOrganisation = x.AwardingOrganisation,
+                    QualificationLevel = x.QualificationLevel,
+                    QualificationType = x.QualificationType,
+                    SSA = x.SSA,
+                    OperationalEndDate = x.OperationalEndDate,
+                    OfferedInEngland = x.OfferedInEngland,
+                    FundedInEngland = x.FundedInEngland,
+                    GLH = x.GLH,
+                    TQT = x.TQT,
+                    Pre16 = x.Pre16,
+                    Age16To18 = x.Age16To18,
+                    Age18Plus = x.Age18Plus,
+                    Age19Plus = x.Age19Plus,
+                    FundingStreamName = x.FundingStreamName,
+                    FundingApprovalStartDate = x.FundingApprovalStartDate,
+                    ProposedOutcome = x.PassP1 ? RolloverStatus.Extended.ToString() : RolloverStatus.Excluded.ToString(),
+                    RolloverStatus = x.PassP1 ? RolloverStatus.Extended : RolloverStatus.Excluded,
+                    ExclusionReason = x.PassP1 ? x.ExclusionReason : x.P1FailureReason,
+                    CurrentFundingApprovalEndDate = x.CurrentFundingEndDate,
+                    ProposedFundingApprovalEndDate = x.ProposedFundingEndDate,
+                    Comments = string.Empty,
+                    Pldns = GetPldnsDateForFundingStream(pldns, x.FundingOfferId)
                 };
             })
             .OrderBy(x => x.QAN)
@@ -346,7 +327,7 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
 
     public async Task<RolloverWorkflowRun?> GeRolloverWorkflowRunByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await context.RolloverWorkflowRuns
+        return await _context.RolloverWorkflowRuns
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }
@@ -364,43 +345,41 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
         if (latestRunId == Guid.Empty)
             throw new InvalidOperationException("No workflow runs exist");
 
-        var matchingCandidatesInDB = await context.RolloverCandidates
+        var candidatesInDb = await _context.RolloverCandidates
             .AsNoTracking()
-            .Where(rc =>
-                flattened.Contains(
-                    rc.QualificationVersion.Qualification.Qan + "|" +
-                    rc.FundingOffer.Name))
-            .Select(rc => new CandidateKey(
-                rc.QualificationVersion.Qualification.Qan,
-                rc.FundingOffer.Name))
-            .ToHashSetAsync(cancellationToken);
+            .Where(x => x.IsActive)
+            .WithAllSourceQualifications(_context)
+            .Where(x => flattened.Contains(x.QualificationReference + "|" + x.FundingStreamName))
+            .Select(x => new CandidateKey(x.QualificationReference, x.FundingStreamName))
+            .ToListAsync(cancellationToken);
 
-        var matchingWorkflowCandidatesInDB = await context.RolloverWorkflowCandidates
+        var matchingWorkflowCandidatesInDb = await _context.RolloverWorkflowCandidates
             .AsNoTracking()
-            .Where(rwc => rwc.RolloverWorkflowRunId == latestRunId)
             .Where(rwc =>
-                flattened.Contains(
-                    rwc.QualificationVersion.Qualification.Qan + "|" +
-                    rwc.FundingOffer.Name))
-            .Select(rwc => new CandidateKey(
-                rwc.QualificationVersion.Qualification.Qan,
-                rwc.FundingOffer.Name))
-            .ToHashSetAsync(cancellationToken);
+                rwc.RolloverWorkflowRunId == latestRunId &&
+                !rwc.InvalidatedAt.HasValue)
+            .WithAllSourceQualifications(_context)
+            .Where(x => flattened.Contains(x.QualificationReference + "|" + x.FundingStreamName))
+            .Select(x => new CandidateKey(x.QualificationReference, x.FundingStreamName))
+            .ToListAsync(cancellationToken);
 
         return new FundingExtensionCandidateValidationContext(
             incomingCandidates,
-            matchingCandidatesInDB,
-            matchingWorkflowCandidatesInDB
+            candidatesInDb.ToHashSet(),
+            matchingWorkflowCandidatesInDb.ToHashSet()
         );
     }
 
     public async Task<List<RolloverCandidateStatusItem>> GetRolloverCandidatesStatusAsync(CancellationToken cancellationToken)
     {
-        return await context.RolloverCandidates
+        return await _context.RolloverCandidates
+            .AsNoTracking()
+            .Where(x => x.IsActive)
+            .WithAllSourceQualifications(_context)
             .Select(x => new RolloverCandidateStatusItem
             {
-                Qan = x.QualificationVersion.Qualification.Qan,
-                FundingStreamName = x.FundingOffer.Name,
+                Qan = x.QualificationReference,
+                FundingStreamName = x.FundingStreamName,
                 RolloverStatus = x.RolloverStatus
             })
             .ToListAsync(cancellationToken);
@@ -413,26 +392,52 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
         var keySet = keys
             .Select(x => x.Qan + "|" + x.FundingStream)
             .ToHashSet();
+        var latestRunId = await GetLatestWorkflowRunIdAsync(cancellationToken);
 
-        return await context.RolloverCandidates
-            .Include(x => x.QualificationVersion)
-                .ThenInclude(v => v.Qualification)
-            .Include(x => x.FundingOffer)
+        var sourceContext = await _context.RolloverCandidates
             .Where(x =>
-                keySet.Contains(
-                    x.QualificationVersion.Qualification.Qan + "|" +
-                    x.FundingOffer.Name))
+                x.IsActive &&
+                _context.RolloverWorkflowCandidates.Any(workflowCandidate =>
+                    workflowCandidate.RolloverCandidatesId == x.Id &&
+                    workflowCandidate.RolloverWorkflowRunId == latestRunId &&
+                    !workflowCandidate.InvalidatedAt.HasValue))
+            .WithAllSourceQualifications(_context)
+            .Where(x => keySet.Contains(x.QualificationReference + "|" + x.FundingStreamName))
+            .Select(x => new
+            {
+                x.CandidateId,
+                x.QualificationReference,
+                x.DiscussionQualificationId
+            })
             .ToListAsync(cancellationToken);
+
+        var sourceContextByCandidateId = sourceContext
+            .ToDictionary(x => x.CandidateId, x => (x.QualificationReference, x.DiscussionQualificationId));
+
+        var ids = sourceContextByCandidateId.Keys.ToList();
+
+        var candidates = await _context.RolloverCandidates
+            .Include(x => x.FundingOffer)
+            .Where(x => ids.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+
+        foreach (var candidate in candidates)
+        {
+            var context = sourceContextByCandidateId[candidate.Id];
+            candidate.SetSourceContext(context.QualificationReference, context.DiscussionQualificationId);
+        }
+
+        return candidates;
     }
 
     public async Task DeleteAllWorkflowCandidatesAsync(CancellationToken cancellationToken)
     {
-        await context.RolloverWorkflowCandidates.ExecuteDeleteAsync(cancellationToken);
+        await _context.RolloverWorkflowCandidates.ExecuteDeleteAsync(cancellationToken);
     }
 
     public async Task<Guid?> GetLatestWorkflowRunIdAsync(CancellationToken cancellationToken)
     {
-        return await context.RolloverWorkflowRuns
+        return await _context.RolloverWorkflowRuns
             .AsNoTracking()
             .OrderByDescending(x => x.CreatedAt)
             .Select(x => x.Id)
@@ -444,59 +449,74 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
         CancellationToken cancellationToken)
     {
         return await ApplyRolloverQueryBuilderFilters(filters)
-            .Select(rc => new RolloverCandidateDto
+            .Select(x => new RolloverCandidateDto
             {
-                Id = rc.Id,
-                QualificationVersionId = rc.QualificationVersionId,
-                FundingOfferId = rc.FundingOfferId,
-                FundingOfferName = rc.FundingOffer.DisplayName,
-                RolloverRound = rc.RolloverRound,
-                AcademicYear = rc.AcademicYear,
-                PreviousFundingEndDate = rc.PreviousFundingEndDate,
-                NewFundingEndDate = rc.NewFundingEndDate,
-                QualificationNumber = rc.QualificationVersion.Qualification.Qan,
-                QualificationName = rc.QualificationVersion.Qualification.QualificationName
+                Id = x.CandidateId,
+                SourceType = x.SourceType,
+                SourceQualificationId = x.SourceQualificationId,
+                FundingOfferId = x.FundingOfferId,
+                FundingOfferName = x.FundingStreamName,
+                RolloverRound = x.RolloverRound,
+                AcademicYear = x.AcademicYear,
+                PreviousFundingEndDate = x.PreviousFundingEndDate,
+                NewFundingEndDate = x.NewFundingEndDate,
+                QualificationNumber = x.QualificationReference,
+                QualificationName = x.QualificationTitle
             })
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<RolloverQueryBuilderLevel>> GetAllLevelsForRolloverQueryBuilderAsync(CancellationToken cancellationToken)
-    {
-        return await context.RolloverCandidates
-            .AsNoTracking()
-            .Include(o => o.QualificationVersion)
-            .Select(o => new RolloverQueryBuilderLevel
-            {
-                Id = QualificationLevel.FromName(o.QualificationVersion.Level).Id,
-                Name = QualificationLevel.FromName(o.QualificationVersion.Level).Name
-            })
-            .Distinct()
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<IEnumerable<RolloverQueryBuilderType>> GetTypesForRolloverQueryBuilderAsync(RolloverQueryBuilderTypesRequest requestFilters,
+    public async Task<IEnumerable<RolloverQueryBuilderLevel>> GetAllLevelsForRolloverQueryBuilderAsync(
         CancellationToken cancellationToken)
     {
-        var result = ApplyRolloverQueryBuilderFilters(requestFilters);
-
-        return await result
-            .Select(o => new RolloverQueryBuilderType { Id = QualificationType.FromName(o.QualificationVersion.Type).Id, Name = o.QualificationVersion.Type })
+        var names = await ActiveSourceCandidates()
+            .Where(x => x.QualificationLevel != null)
+            .Select(x => x.QualificationLevel!)
             .Distinct()
             .ToListAsync(cancellationToken);
+
+        return names
+            .Select(QualificationLevel.FromName)
+            .Where(x => x != QualificationLevel.Unspecified)
+            .Select(x => new RolloverQueryBuilderLevel { Id = x.Id, Name = x.Name })
+            .OrderBy(x => x.Name)
+            .ToList();
     }
 
-    public async Task<IEnumerable<RolloverQueryBuilderSectorSubjectArea>> GetSectorSubjectAreasForRolloverQueryBuilderAsync(RolloverQueryBuilderSectorSubjectAreaRequest requestFilters, CancellationToken cancellationToken)
+    public async Task<IEnumerable<RolloverQueryBuilderType>> GetTypesForRolloverQueryBuilderAsync(
+        RolloverQueryBuilderTypesRequest requestFilters,
+        CancellationToken cancellationToken)
     {
-        var result = ApplyRolloverQueryBuilderFilters(requestFilters);
-
-        return await result
-            .Select(o => new RolloverQueryBuilderSectorSubjectArea
-            {
-                Id = SectorSubjectArea.FromName(o.QualificationVersion.Ssa).Code,
-                Name = SectorSubjectArea.FromName(o.QualificationVersion.Ssa).Name
-            })
+        var names = await ApplyRolloverQueryBuilderFilters(requestFilters)
+            .Where(x => x.QualificationType != null)
+            .Select(x => x.QualificationType!)
             .Distinct()
             .ToListAsync(cancellationToken);
+
+        return names
+            .Select(QualificationType.FromName)
+            .Where(x => x != QualificationType.Unknown)
+            .Select(x => new RolloverQueryBuilderType { Id = x.Id, Name = x.Name })
+            .OrderBy(x => x.Name)
+            .ToList();
+    }
+
+    public async Task<IEnumerable<RolloverQueryBuilderSectorSubjectArea>> GetSectorSubjectAreasForRolloverQueryBuilderAsync(
+        RolloverQueryBuilderSectorSubjectAreaRequest requestFilters,
+        CancellationToken cancellationToken)
+    {
+        var names = await ApplyRolloverQueryBuilderFilters(requestFilters)
+            .Where(x => x.SectorSubjectArea != null)
+            .Select(x => x.SectorSubjectArea!)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        return names
+            .Select(SectorSubjectArea.FromName)
+            .Where(x => x != SectorSubjectArea.NotSpecified)
+            .Select(x => new RolloverQueryBuilderSectorSubjectArea { Id = x.Code, Name = x.Name })
+            .OrderBy(x => x.Name)
+            .ToList();
     }
 
     public async Task<IEnumerable<RolloverQueryBuilderAwardingOrganisation>> GetAwardingOrganisationsForRolloverQueryBuilderAsync(
@@ -504,66 +524,72 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
         CancellationToken cancellationToken)
     {
         return await ApplyRolloverQueryBuilderFilters(filters)
-            .Select(qv => qv.QualificationVersion.Organisation)
-            .Distinct()
-            .Select(organisation => new RolloverQueryBuilderAwardingOrganisation
+            .Where(x => x.AwardingOrganisationFilterId != null)
+            .Select(x => new RolloverQueryBuilderAwardingOrganisation
             {
-                Id = organisation.Id,
-                Ukprn = organisation.Ukprn,
-                RecognitionNumber = organisation.RecognitionNumber,
-                NameLegal = organisation.NameLegal,
-                NameOfqual = organisation.NameOfqual,
-                NameGovUk = organisation.NameGovUk,
-                Name_Dsi = organisation.Name_Dsi,
-                Acronym = organisation.Acronym
+                Id = x.AwardingOrganisationId,
+                FilterId = x.AwardingOrganisationFilterId,
+                Ukprn = x.AwardingOrganisationUkprn,
+                RecognitionNumber = x.AwardingOrganisationRecognitionNumber,
+                NameLegal = x.AwardingOrganisationNameLegal,
+                NameOfqual = x.AwardingOrganisation,
+                NameGovUk = x.AwardingOrganisationNameGovUk,
+                Name_Dsi = x.AwardingOrganisationNameDsi,
+                Acronym = x.AwardingOrganisationAcronym
             })
+            .Distinct()
+            .OrderBy(x => x.NameOfqual ?? x.NameLegal)
             .ToListAsync(cancellationToken);
     }
 
-    private IQueryable<RolloverCandidates> ApplyRolloverQueryBuilderFilters(
+    private IQueryable<RolloverCandidateSourceProjection> ActiveSourceCandidates()
+    {
+        return _context.RolloverCandidates
+            .AsNoTracking()
+            .Where(x => x.IsActive)
+            .WithAllSourceQualifications(_context);
+    }
+
+    private IQueryable<RolloverCandidateSourceProjection> ApplyRolloverQueryBuilderFilters(
         IQueryBuilderFilterRequest filters)
     {
-        var query = context.RolloverCandidates
-            .AsNoTracking()
-            .Include(o => o.QualificationVersion)
-            .ThenInclude(o => o.Organisation)
-            .Select(o => o);
+        var query = ActiveSourceCandidates();
 
-        if (filters is RolloverQueryBuilderTypesRequest { LevelIds.Count: > 0 } typeFilters)
-        {
-            query = query.WithLevelFilter(typeFilters.LevelIds);
-        }
+        if (filters is RolloverQueryBuilderTypesRequest typeFilters)
+            query = ApplyLevelFilter(query, typeFilters.LevelIds);
 
         if (filters is RolloverQueryBuilderSectorSubjectAreaRequest sectorFilters)
         {
-            query = query
-                .WithLevelFilter(sectorFilters.LevelIds)
-                .WithTypeFilter(sectorFilters.TypeIds);
+            query = ApplyLevelFilter(query, sectorFilters.LevelIds);
+            query = ApplyTypeFilter(query, sectorFilters.TypeIds);
         }
 
-        if (filters is RolloverQueryBuilderAwardingOrganisationsRequest awardingOrgFilters)
+        if (filters is RolloverQueryBuilderAwardingOrganisationsRequest organisationFilters)
         {
-            query = query
-                .WithLevelFilter(awardingOrgFilters.LevelIds)
-                .WithTypeFilter(awardingOrgFilters.TypeIds)
-                .WithSectorSubjectAreaFilter(awardingOrgFilters.SectorSubjectAreaIds);
+            query = ApplyLevelFilter(query, organisationFilters.LevelIds);
+            query = ApplyTypeFilter(query, organisationFilters.TypeIds);
+            query = ApplySectorSubjectAreaFilter(query, organisationFilters.SectorSubjectAreaIds);
         }
 
-        if (filters is RolloverQueryBuilderRequest allRolloverFilters)
+        if (filters is RolloverQueryBuilderRequest allFilters)
         {
-            query = query.WithAllFilters(
-                allRolloverFilters.LevelIds,
-                allRolloverFilters.TypeIds,
-                allRolloverFilters.SectorSubjectAreaIds,
-                allRolloverFilters.AwardingOrganisationIds
-            );
+            query = ApplyLevelFilter(query, allFilters.LevelIds);
+            query = ApplyTypeFilter(query, allFilters.TypeIds);
+            query = ApplySectorSubjectAreaFilter(query, allFilters.SectorSubjectAreaIds);
+
+            if (allFilters.AwardingOrganisationIds.Count > 0)
+            {
+                query = query.Where(x =>
+                    x.AwardingOrganisationFilterId != null &&
+                    allFilters.AwardingOrganisationIds.Contains(x.AwardingOrganisationFilterId));
+            }
         }
 
         return query;
     }
-    public async Task<RolloverStartSummary> GetRolloverStartSummaryAsync(string academicYear, CancellationToken cancellationToken) 
+    public async Task<RolloverStartSummary> GetRolloverStartSummaryAsync(string academicYear, CancellationToken cancellationToken)
     {
-        var candidates = await context.RolloverCandidates
+        var candidates = await _context.RolloverCandidates
             .Where(x => x.AcademicYear == academicYear)
             .ToListAsync(cancellationToken);
 
@@ -574,5 +600,38 @@ public class RolloverRepository(IApplicationDbContext context) : IRolloverReposi
             CandidatesIneligibleCount = candidates.Count(x => x.RolloverStatus == RolloverStatus.Excluded),
             CandidatesRemainingCount = candidates.Count(x => x.RolloverStatus == RolloverStatus.NeedsReview)
         };
+    }
+
+    private static IQueryable<RolloverCandidateSourceProjection> ApplyLevelFilter(
+        IQueryable<RolloverCandidateSourceProjection> query,
+        IReadOnlyCollection<int> levelIds)
+    {
+        if (levelIds.Count == 0)
+            return query;
+
+        var names = levelIds.Select(x => QualificationLevel.FromId(x).Name).ToList();
+        return query.Where(x => x.QualificationLevel != null && names.Contains(x.QualificationLevel));
+    }
+
+    private static IQueryable<RolloverCandidateSourceProjection> ApplyTypeFilter(
+        IQueryable<RolloverCandidateSourceProjection> query,
+        IReadOnlyCollection<int> typeIds)
+    {
+        if (typeIds.Count == 0)
+            return query;
+
+        var names = typeIds.Select(x => QualificationType.FromId(x).Name).ToList();
+        return query.Where(x => x.QualificationType != null && names.Contains(x.QualificationType));
+    }
+
+    private static IQueryable<RolloverCandidateSourceProjection> ApplySectorSubjectAreaFilter(
+        IQueryable<RolloverCandidateSourceProjection> query,
+        IReadOnlyCollection<string> sectorSubjectAreaIds)
+    {
+        if (sectorSubjectAreaIds.Count == 0)
+            return query;
+
+        var names = sectorSubjectAreaIds.Select(x => SectorSubjectArea.FromFullCode(x).Name).ToList();
+        return query.Where(x => x.SectorSubjectArea != null && names.Contains(x.SectorSubjectArea));
     }
 }

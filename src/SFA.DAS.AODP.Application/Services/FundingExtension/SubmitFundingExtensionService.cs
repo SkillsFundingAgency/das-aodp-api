@@ -3,6 +3,7 @@ using SFA.DAS.AODP.Application.Constants;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
 using SFA.DAS.AODP.Data.Repositories.FundingExtension;
 using SFA.DAS.AODP.Infrastructure.Extensions;
@@ -39,48 +40,40 @@ public class SubmitFundingExtensionService : ISubmitFundingExtensionService
     public async Task<bool> Submit(
         List<RolloverCandidates> candidates,
         List<FundingExtensionItem> inputItems,
-        List<QualificationFundings> fundings,
+        List<RolloverFundingUpdate> fundingUpdates,
         CancellationToken cancellationToken)
     {
         var totalStarted = Stopwatch.GetTimestamp();
 
         try
         {
-            var lookupStarted = Stopwatch.GetTimestamp();
-            var inputLookup = inputItems.ToDictionary(
-                x => (x.Qan!, x.FundingStreamName!));
-
-            var fundingLookup = fundings.ToDictionary(
-                x => (x.QualificationVersionId, x.FundingOfferId));
-            _logger.LogInformation(
-                "Built funding-extension input and funding lookups for {InputCount} inputs and {FundingCount} fundings in {ElapsedMilliseconds} ms",
-                inputItems.Count,
-                fundings.Count,
-                Stopwatch.GetElapsedTime(lookupStarted).TotalMilliseconds);
-
             var updateStarted = Stopwatch.GetTimestamp();
-            var (updatedCandidates, updatedFundings) = ApplyCandidateAndFundingUpdates(
+            var updatedCandidates = ApplyCandidateAndFundingUpdates(
                 candidates,
-                inputLookup,
-                fundingLookup);
+                inputItems,
+                fundingUpdates,
+                _clockService.UtcNow);
             _logger.LogInformation(
-                "Prepared {CandidateUpdateCount} candidate updates and {FundingUpdateCount} funding updates in {ElapsedMilliseconds} ms",
+                "Prepared {CandidateUpdateCount} candidate updates against {FundingUpdateCount} funding updates in {ElapsedMilliseconds} ms",
                 updatedCandidates.Count,
-                updatedFundings.Count,
+                fundingUpdates.Count,
                 Stopwatch.GetElapsedTime(updateStarted).TotalMilliseconds);
 
             var historyStarted = Stopwatch.GetTimestamp();
-            var historyEntries = CreateDiscussionHistories(updatedCandidates, fundingLookup);
+            var historyEntries = CreateDiscussionHistories(updatedCandidates, fundingUpdates);
+            var qaaHistoryEntries = CreateQaaDiscussionHistories(updatedCandidates, fundingUpdates);
             _logger.LogInformation(
-                "Created {HistoryCount} rollover discussion-history records in {ElapsedMilliseconds} ms",
+                "Created {HistoryCount} rollover discussion-history records ({QaaHistoryCount} QAA) in {ElapsedMilliseconds} ms",
                 historyEntries.Count,
+                qaaHistoryEntries.Count,
                 Stopwatch.GetElapsedTime(historyStarted).TotalMilliseconds);
 
             var persistenceStarted = Stopwatch.GetTimestamp();
             await _persistenceRepository.PersistAsync(
                 updatedCandidates,
-                updatedFundings,
+                fundingUpdates,
                 historyEntries,
+                qaaHistoryEntries,
                 cancellationToken);
             _logger.LogInformation(
                 "Persisted funding-extension changes in {ElapsedMilliseconds} ms",
@@ -103,20 +96,25 @@ public class SubmitFundingExtensionService : ISubmitFundingExtensionService
         }
     }
 
-    private static (List<RolloverCandidates> Candidates, List<QualificationFundings> Fundings)
-        ApplyCandidateAndFundingUpdates(
-            List<RolloverCandidates> candidates,
-            IReadOnlyDictionary<(string Qan, string FundingStreamName), FundingExtensionItem> inputLookup,
-            IReadOnlyDictionary<(Guid QualificationVersionId, Guid FundingOfferId), QualificationFundings> fundingLookup)
+    private static List<RolloverCandidates> ApplyCandidateAndFundingUpdates(
+        List<RolloverCandidates> candidates,
+        List<FundingExtensionItem> inputItems,
+        List<RolloverFundingUpdate> fundingUpdates,
+        DateTime updatedAt)
     {
-        var updatedCandidates = new List<RolloverCandidates>();
-        var updatedFundings = new List<QualificationFundings>();
+        var inputLookup = inputItems.ToDictionary(
+            x => CandidateKey.Create(x.Qan, x.FundingStreamName));
 
-        foreach (var candidate in candidates)
+        var fundingLookup = fundingUpdates.ToDictionary(
+            x => (x.SourceType, x.SourceQualificationId, x.FundingOfferId, x.AcademicYear));
+
+        var updatedCandidates = new List<RolloverCandidates>();
+
+        foreach (var c in candidates)
         {
             if (!inputLookup.TryGetValue(
-                    (candidate.QualificationVersion.Qualification.Qan, candidate.FundingOffer.Name),
-                    out var input))
+                CandidateKey.Create(c.SourceQualificationReference, c.FundingOffer.Name),
+                out var input))
             {
                 continue;
             }
@@ -126,21 +124,21 @@ public class SubmitFundingExtensionService : ISubmitFundingExtensionService
             switch (status)
             {
                 case RolloverStatus.Extended:
-                    candidate.SetExtended(input.ProposedFundingApprovalEndDate);
+                    c.SetExtended(input.ProposedFundingApprovalEndDate);
 
                     if (fundingLookup.TryGetValue(
-                            (candidate.QualificationVersionId, candidate.FundingOfferId),
-                            out var funding))
+                        (c.SourceType, c.SourceQualificationId, c.FundingOfferId, c.AcademicYear),
+                        out var funding))
                     {
-                        funding.EndDate = DateOnly.FromDateTime(input.ProposedFundingApprovalEndDate);
-                        funding.Comments = input.Comments;
-                        updatedFundings.Add(funding);
+                        funding.ApplyFundingEndDate(
+                            DateOnly.FromDateTime(input.ProposedFundingApprovalEndDate),
+                            input.Comments,
+                            updatedAt);
                     }
-
                     break;
 
                 case RolloverStatus.Excluded:
-                    candidate.SetExcluded(input.ExclusionReason!);
+                    c.SetExcluded(input.ExclusionReason!);
                     break;
 
                 default:
@@ -148,20 +146,26 @@ public class SubmitFundingExtensionService : ISubmitFundingExtensionService
                         $"Unexpected rollover status: {input.RolloverStatus}");
             }
 
-            updatedCandidates.Add(candidate);
+            updatedCandidates.Add(c);
         }
 
-        return (updatedCandidates, updatedFundings);
+        return updatedCandidates;
     }
 
     private List<QualificationDiscussionHistory> CreateDiscussionHistories(
         IReadOnlyCollection<RolloverCandidates> candidates,
-        IReadOnlyDictionary<(Guid QualificationVersionId, Guid FundingOfferId), QualificationFundings> fundingLookup)
+        IReadOnlyCollection<RolloverFundingUpdate> fundingUpdates)
     {
         var historyEntries = new List<QualificationDiscussionHistory>();
 
-        foreach (var group in candidates.GroupBy(c => c.QualificationVersion.QualificationId))
+        var groups = candidates
+            .Where(c => c.DiscussionQualificationId.HasValue)
+            .GroupBy(c => c.DiscussionQualificationId!.Value);
+
+        foreach (var group in groups)
         {
+            var qualificationId = group.Key;
+
             var extended = group
                 .Where(c => c.RolloverStatus == RolloverStatus.Extended)
                 .ToList();
@@ -172,31 +176,34 @@ public class SubmitFundingExtensionService : ISubmitFundingExtensionService
 
             if (extended.Count > 0)
             {
-                var lines = extended.Select(candidate =>
+                var lines = extended.Select(c =>
                 {
-                    fundingLookup.TryGetValue(
-                        (candidate.QualificationVersionId, candidate.FundingOfferId),
-                        out var funding);
+                    var f = fundingUpdates.FirstOrDefault(x =>
+                        x.SourceType == c.SourceType &&
+                        x.SourceQualificationId == c.SourceQualificationId &&
+                        x.FundingOfferId == c.FundingOfferId &&
+                        x.AcademicYear == c.AcademicYear);
 
-                    var endDate = funding?.EndDate.ToFundingEndDateFormat();
-                    return $"{candidate.FundingOffer.Name} extended to {endDate}";
+                    var endDate = f?.FundingApprovalEndDate.ToFundingEndDateFormat();
+
+                    return $"{c.FundingOffer.Name} extended to {endDate}";
                 });
 
                 historyEntries.Add(CreateDiscussionHistoryEntry(
                     string.Join("\n", lines),
                     RolloverExtendedActionTypeId,
-                    group.Key));
+                    qualificationId));
             }
 
             if (excluded.Count > 0)
             {
-                var lines = excluded.Select(candidate =>
-                    $"{candidate.FundingOffer.Name} was not extended due to {candidate.ExclusionReason}");
+                var lines = excluded.Select(c =>
+                    $"{c.FundingOffer.Name} was not extended due to {c.ExclusionReason}");
 
                 historyEntries.Add(CreateDiscussionHistoryEntry(
                     string.Join("\n", lines),
                     RolloverNotExtendedActionTypeId,
-                    group.Key));
+                    qualificationId));
             }
         }
 
@@ -215,6 +222,81 @@ public class SubmitFundingExtensionService : ISubmitFundingExtensionService
             UserDisplayName = "Rollover System",
             ActionTypeId = actionTypeId,
             QualificationId = qualificationId,
+            Notes = note,
+            Timestamp = _clockService.UtcNow
+        };
+    }
+
+    private List<QaaQualificationDiscussionHistory> CreateQaaDiscussionHistories(
+        IReadOnlyCollection<RolloverCandidates> candidates,
+        IReadOnlyCollection<RolloverFundingUpdate> fundingUpdates)
+    {
+        var historyEntries = new List<QaaQualificationDiscussionHistory>();
+
+        var groups = candidates
+            .Where(c => c.SourceType == RolloverSourceTypes.Qaa)
+            .GroupBy(c => c.SourceQualificationId);
+
+        foreach (var group in groups)
+        {
+            var qaaQualificationId = group.Key;
+
+            var extended = group
+                .Where(c => c.RolloverStatus == RolloverStatus.Extended)
+                .ToList();
+
+            var excluded = group
+                .Where(c => c.RolloverStatus == RolloverStatus.Excluded)
+                .ToList();
+
+            if (extended.Count > 0)
+            {
+                var lines = extended.Select(c =>
+                {
+                    var f = fundingUpdates.FirstOrDefault(x =>
+                        x.SourceType == c.SourceType &&
+                        x.SourceQualificationId == c.SourceQualificationId &&
+                        x.FundingOfferId == c.FundingOfferId &&
+                        x.AcademicYear == c.AcademicYear);
+
+                    var endDate = f?.FundingApprovalEndDate.ToFundingEndDateFormat();
+
+                    return $"{c.FundingOffer.Name} extended to {endDate}";
+                });
+
+                historyEntries.Add(CreateQaaDiscussionHistoryEntry(
+                    string.Join("\n", lines),
+                    RolloverExtendedActionTypeId,
+                    qaaQualificationId));
+            }
+
+            if (excluded.Count > 0)
+            {
+                var lines = excluded.Select(c =>
+                    $"{c.FundingOffer.Name} was not extended due to {c.ExclusionReason}");
+
+                historyEntries.Add(CreateQaaDiscussionHistoryEntry(
+                    string.Join("\n", lines),
+                    RolloverNotExtendedActionTypeId,
+                    qaaQualificationId));
+            }
+        }
+
+        return historyEntries;
+    }
+
+    private QaaQualificationDiscussionHistory CreateQaaDiscussionHistoryEntry(
+        string note,
+        Guid actionTypeId,
+        Guid qaaQualificationId)
+    {
+        return new QaaQualificationDiscussionHistory
+        {
+            Id = _guidProvider.NewGuid(),
+            Title = "Rollover Funding Decision",
+            UserDisplayName = "Rollover System",
+            ActionTypeId = actionTypeId,
+            QaaQualificationId = qaaQualificationId,
             Notes = note,
             Timestamp = _clockService.UtcNow
         };

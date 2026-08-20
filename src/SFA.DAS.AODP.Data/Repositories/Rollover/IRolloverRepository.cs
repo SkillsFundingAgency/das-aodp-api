@@ -14,8 +14,6 @@ public interface IRolloverRepository
         RolloverQueryBuilderRequest filters,
         CancellationToken cancellationToken);
 
-    Task<IEnumerable<RolloverCandidateDto>> GetRolloverCandidatesByIdsAsync(IReadOnlyCollection<Guid> rolloverCandidateIds, 
-        CancellationToken cancellationToken);
     Task<IReadOnlyList<RolloverCandidateP1CheckData>> GetRolloverCandidatesWithP1ChecksAsync(
         IReadOnlyCollection<RolloverCandidateP1CheckRequest> requests,
         CancellationToken cancellationToken);

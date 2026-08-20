@@ -18,6 +18,7 @@ public class RolloverWorkflowCandidateTests
         var result = RolloverWorkflowCandidate.Create(
             workflowRunId,
             rolloverCandidateRecordId,
+            RolloverSourceTypes.Qaa,
             qualificationVersionId,
             fundingOfferId,
             academicYear,
@@ -29,7 +30,8 @@ public class RolloverWorkflowCandidateTests
         // Assert
         Assert.Equal(workflowRunId, result.RolloverWorkflowRunId);
         Assert.Equal(rolloverCandidateRecordId, result.RolloverCandidatesId);
-        Assert.Equal(qualificationVersionId, result.QualificationVersionId);
+        Assert.Equal(RolloverSourceTypes.Qaa, result.SourceType);
+        Assert.Equal(qualificationVersionId, result.SourceQualificationId);
         Assert.Equal(fundingOfferId, result.FundingOfferId);
         Assert.Equal(academicYear, result.AcademicYear);
         Assert.Equal(currentFundingEndDate, result.CurrentFundingEndDate);
@@ -53,6 +55,7 @@ public class RolloverWorkflowCandidateTests
             RolloverWorkflowCandidate.Create(
                 Guid.NewGuid(),
                 Guid.NewGuid(),
+                RolloverSourceTypes.Ofqual,
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 null!,
@@ -85,6 +88,71 @@ public class RolloverWorkflowCandidateTests
 
         Assert.False(candidate.PassP1);
         Assert.Contains("Not Offered in England", candidate.P1FailureReason);
+    }
+
+    [Fact]
+    public void ProcessP1Checks_ForQaaCandidate_WithNullOperationalEndDateAndEnglandFieldsTrue_PassesP1()
+    {
+        // AWARD-858: QAA candidates only have 3 of the 5 P1 checks applied (funding stream,
+        // funding end date threshold, defunding list). The Operational End Date and
+        // Offered/Funded in England checks are exempted for QAA - not by branching on
+        // SourceType here, but because the repository query projection for QAA always
+        // supplies OperationalEndDate = null and OfferedInEngland/IntentionToSeekFundingInEngland
+        // = true (see RolloverSourceQueryableExtensions). This test pins that combination at
+        // the entity level so a change to EvaluateP1Checks can't silently break the QAA exemption.
+        var candidate = CreateCandidate(sourceType: RolloverSourceTypes.Qaa);
+        var checks = CreateValidChecks();
+
+        candidate.ProcessP1Checks(checks);
+
+        Assert.True(candidate.PassP1);
+        Assert.Null(candidate.P1FailureReason);
+    }
+
+    [Fact]
+    public void ProcessP1Checks_ForQaaCandidate_FailsOnlyOnFundingStreamEndDateAndDefundingList()
+    {
+        // The 3 checks that DO apply to QAA should still be able to fail it, even though the
+        // Operational End Date and England checks are structurally exempted (see test above).
+        var candidate = CreateCandidate(sourceType: RolloverSourceTypes.Qaa);
+
+        var checks = new RolloverWorkflowCandidatesP1Checks
+        {
+            FundingStream = null,
+            OperationalEndDate = null,
+            OfferedInEngland = true,
+            IntentionToSeekFundingInEngland = true,
+            IsOnDefundingList = true,
+            FundingEndDateThreshold = new DateTime(2026, 01, 01),
+            OperationalEndDateThreshold = DateTime.MinValue,
+            LatestFundingApprovalEndDate = new DateTime(2025, 01, 01)
+        };
+
+        candidate.ProcessP1Checks(checks);
+
+        Assert.False(candidate.PassP1);
+        Assert.Contains("Funding Stream out of scope", candidate.P1FailureReason);
+        Assert.Contains("Funding Approval End Date is before the Threshold", candidate.P1FailureReason);
+        Assert.Contains("Qualification is on Defunding", candidate.P1FailureReason);
+        Assert.DoesNotContain("Operating End Date", candidate.P1FailureReason);
+        Assert.DoesNotContain("Not Offered in England", candidate.P1FailureReason);
+        Assert.DoesNotContain("Not Funded in England", candidate.P1FailureReason);
+    }
+
+    [Fact]
+    public void ProcessP1Checks_ForOfqualCandidate_WithOperationalEndDateBeforeThreshold_FailsOnOperationalEndDateCheck()
+    {
+        // Proves the Operational End Date check is a real, non-skipped check for Ofqual
+        // candidates - the QAA exemption above comes from the projection hardcoding
+        // OperationalEndDate to null for QAA, not from this check being disabled outright.
+        var candidate = CreateCandidate(sourceType: RolloverSourceTypes.Ofqual);
+        var checks = CreateValidChecks(operationalEndDate: new DateTime(2025, 01, 01));
+        checks.OperationalEndDateThreshold = new DateTime(2025, 06, 01);
+
+        candidate.ProcessP1Checks(checks);
+
+        Assert.False(candidate.PassP1);
+        Assert.Contains("Operating End Date is before the Threshold", candidate.P1FailureReason);
     }
 
     [Fact]
@@ -133,6 +201,7 @@ public class RolloverWorkflowCandidateTests
         var candidate = RolloverWorkflowCandidate.Create(
             Guid.NewGuid(),
             Guid.NewGuid(),
+            RolloverSourceTypes.Ofqual,
             Guid.NewGuid(),
             Guid.NewGuid(),
             "2025/26",
@@ -235,11 +304,14 @@ public class RolloverWorkflowCandidateTests
     }
 
 
-    private static RolloverWorkflowCandidate CreateCandidate(DateTime? proposedFundingEndDate = null)
+    private static RolloverWorkflowCandidate CreateCandidate(
+        DateTime? proposedFundingEndDate = null,
+        string sourceType = RolloverSourceTypes.Ofqual)
     {
         return RolloverWorkflowCandidate.Create(
             Guid.NewGuid(),
             Guid.NewGuid(),
+            sourceType,
             Guid.NewGuid(),
             Guid.NewGuid(),
             "2025/26",

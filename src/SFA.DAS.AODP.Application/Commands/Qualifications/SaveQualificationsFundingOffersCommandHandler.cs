@@ -13,10 +13,11 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
         private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
         private readonly IFundingOfferRepository _fundingOfferRepository;
         private readonly IQualificationsRepository _qualificationsRepository;
-
-
-
-        public SaveQualificationsFundingOffersCommandHandler(IQualificationFundingsRepository repository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository, IFundingOfferRepository fundingOfferRepository, IQualificationsRepository qualificationsRepository)
+        public SaveQualificationsFundingOffersCommandHandler(
+            IQualificationFundingsRepository repository,
+            IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository,
+            IFundingOfferRepository fundingOfferRepository,
+            IQualificationsRepository qualificationsRepository)
         {
             _qualificationFundingsrepository = repository;
             _qualificationDiscussionHistoryRepository = qualificationDiscussionHistoryRepository;
@@ -39,21 +40,25 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                 foreach (var offerId in request.SelectedOfferIds)
                 {
                     var offer = qualificationfundedOffers.FirstOrDefault(a => a.FundingOfferId == offerId);
-                    if (offer == null) create.Add(new()
+                    if (offer == null)
                     {
-                        QualificationVersionId = request.QualificationVersionId,
-                        FundingOfferId = offerId,
-                        StartDate = operationalStartDate
-                    });
+                        create.Add(QualificationFundings.Create(
+                            request.QualificationVersionId,
+                            offerId,
+                            operationalStartDate,
+                            null));
+                    }
                 }
 
-                if (create.Count > 0) await _qualificationFundingsrepository.CreateAsync(create);
+                if (create.Count > 0)
+                {
+                    await _qualificationFundingsrepository.CreateAsync(create);
+                }
 
                 if (request.UpdateDiscussionHistory == true)
                 {
                     StringBuilder qualificationDiscussionHistoryNotes = new();
                     qualificationDiscussionHistoryNotes.AppendLine("Feedback from DfE:");
-                    
                     if (create.Count > 0)
                     {
                         qualificationDiscussionHistoryNotes.AppendLine("The following offers have been selected:");

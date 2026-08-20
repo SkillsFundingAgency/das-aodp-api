@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
+using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Data.Repositories.FundingExtension;
 
@@ -17,8 +19,9 @@ public class FundingExtensionPersistenceRepository(
 
     public async Task PersistAsync(
         IReadOnlyCollection<RolloverCandidates> candidates,
-        IReadOnlyCollection<QualificationFundings> fundings,
+        IReadOnlyCollection<RolloverFundingUpdate> fundingUpdates,
         IReadOnlyCollection<QualificationDiscussionHistory> histories,
+        IReadOnlyCollection<QaaQualificationDiscussionHistory> qaaHistories,
         CancellationToken cancellationToken)
     {
         var operationId = Guid.NewGuid();
@@ -36,7 +39,7 @@ public class FundingExtensionPersistenceRepository(
             var stagingRows = CreateStagingRows(
                 operationId,
                 candidates,
-                fundings,
+                fundingUpdates,
                 createdAt);
 
             currentStage = "StageChanges";
@@ -94,32 +97,66 @@ public class FundingExtensionPersistenceRepository(
                 updatedCandidateCount,
                 Stopwatch.GetElapsedTime(candidateUpdateStarted).TotalMilliseconds);
 
-            currentStage = "ApplyFundingUpdates";
-            var fundingUpdateStarted = Stopwatch.GetTimestamp();
-            var updatedFundingCount = await context.QualificationFundings
-                .Where(funding => operationRows.Any(
-                    row => row.QualificationFundingId == funding.Id))
+            // Funding tables are polymorphic by SourceType, so bulk updates are applied in two
+            // set-based passes - one per underlying funding table - rather than one combined
+            // pass, since a single staging row cannot point at two different tables.
+
+            currentStage = "ApplyOfqualFundingUpdates";
+            var ofqualFundingUpdateStarted = Stopwatch.GetTimestamp();
+            var ofqualOperationRows = operationRows.Where(row => row.SourceType == RolloverSourceTypes.Ofqual);
+            var updatedOfqualFundingCount = await context.QualificationFundings
+                .Where(funding => ofqualOperationRows.Any(
+                    row => row.SourceFundingRecordId == funding.Id))
                 .ExecuteUpdateAsync(setters => setters
                     .SetProperty(
                         funding => funding.EndDate,
-                        funding => operationRows
-                            .Where(row => row.QualificationFundingId == funding.Id)
+                        funding => ofqualOperationRows
+                            .Where(row => row.SourceFundingRecordId == funding.Id)
                             .Select(row => row.FundingEndDate)
                             .First())
                     .SetProperty(
                         funding => funding.Comments,
-                        funding => operationRows
-                            .Where(row => row.QualificationFundingId == funding.Id)
+                        funding => ofqualOperationRows
+                            .Where(row => row.SourceFundingRecordId == funding.Id)
                             .Select(row => row.FundingComments)
                             .First()),
                     cancellationToken);
 
-            EnsureExpectedRowCount("qualification funding", fundings.Count, updatedFundingCount);
+            logger.LogInformation(
+                "Updated {FundingCount} Ofqual qualification fundings in {ElapsedMilliseconds} ms",
+                updatedOfqualFundingCount,
+                Stopwatch.GetElapsedTime(ofqualFundingUpdateStarted).TotalMilliseconds);
+
+            currentStage = "ApplyQaaFundingUpdates";
+            var qaaFundingUpdateStarted = Stopwatch.GetTimestamp();
+            var qaaOperationRows = operationRows.Where(row => row.SourceType == RolloverSourceTypes.Qaa);
+            var updatedQaaFundingCount = await context.QaaQualificationFundings
+                .Where(funding => qaaOperationRows.Any(
+                    row => row.SourceFundingRecordId == funding.Id))
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(
+                        funding => funding.EndDate,
+                        funding => qaaOperationRows
+                            .Where(row => row.SourceFundingRecordId == funding.Id)
+                            .Select(row => row.FundingEndDate)
+                            .First())
+                    .SetProperty(
+                        funding => funding.Comments,
+                        funding => qaaOperationRows
+                            .Where(row => row.SourceFundingRecordId == funding.Id)
+                            .Select(row => row.FundingComments)
+                            .First()),
+                    cancellationToken);
 
             logger.LogInformation(
-                "Updated {FundingCount} qualification fundings in {ElapsedMilliseconds} ms",
-                updatedFundingCount,
-                Stopwatch.GetElapsedTime(fundingUpdateStarted).TotalMilliseconds);
+                "Updated {FundingCount} QAA qualification fundings in {ElapsedMilliseconds} ms",
+                updatedQaaFundingCount,
+                Stopwatch.GetElapsedTime(qaaFundingUpdateStarted).TotalMilliseconds);
+
+            EnsureExpectedRowCount(
+                "qualification funding",
+                fundingUpdates.Count,
+                updatedOfqualFundingCount + updatedQaaFundingCount);
 
             currentStage = "InsertHistory";
             var historyStarted = Stopwatch.GetTimestamp();
@@ -135,9 +172,22 @@ public class FundingExtensionPersistenceRepository(
                     cancellationToken: cancellationToken);
             }
 
+            if (qaaHistories.Count > 0)
+            {
+                await context.BulkInsertAsync(
+                    qaaHistories.ToList(),
+                    new BulkConfig
+                    {
+                        BatchSize = BatchSize,
+                        SetOutputIdentity = false
+                    },
+                    cancellationToken: cancellationToken);
+            }
+
             logger.LogInformation(
-                "Inserted {HistoryCount} discussion-history rows in {ElapsedMilliseconds} ms",
+                "Inserted {HistoryCount} discussion-history rows ({QaaHistoryCount} QAA) in {ElapsedMilliseconds} ms",
                 histories.Count,
+                qaaHistories.Count,
                 Stopwatch.GetElapsedTime(historyStarted).TotalMilliseconds);
 
             currentStage = "CompleteWorkflow";
@@ -175,37 +225,38 @@ public class FundingExtensionPersistenceRepository(
         }
     }
 
-    private static List<FundingExtensionStaging> CreateStagingRows(
+    internal static List<FundingExtensionStaging> CreateStagingRows(
         Guid operationId,
         IReadOnlyCollection<RolloverCandidates> candidates,
-        IReadOnlyCollection<QualificationFundings> fundings,
+        IReadOnlyCollection<RolloverFundingUpdate> fundingUpdates,
         DateTime createdAt)
     {
-        var fundingLookup = fundings.ToDictionary(
-            funding => (funding.QualificationVersionId, funding.FundingOfferId));
+        var fundingLookup = fundingUpdates.ToDictionary(
+            funding => (funding.SourceType, funding.SourceQualificationId, funding.FundingOfferId));
 
         return candidates.Select(candidate =>
         {
             fundingLookup.TryGetValue(
-                (candidate.QualificationVersionId, candidate.FundingOfferId),
+                (candidate.SourceType, candidate.SourceQualificationId, candidate.FundingOfferId),
                 out var funding);
 
             return new FundingExtensionStaging
             {
                 OperationId = operationId,
                 RolloverCandidateId = candidate.Id,
-                QualificationFundingId = funding?.Id,
+                SourceType = funding?.SourceType,
+                SourceFundingRecordId = funding?.Id,
                 RolloverStatus = candidate.RolloverStatus,
                 ExclusionReason = candidate.ExclusionReason,
                 NewFundingEndDate = candidate.NewFundingEndDate,
-                FundingEndDate = funding?.EndDate,
+                FundingEndDate = funding?.FundingApprovalEndDate,
                 FundingComments = funding?.Comments,
                 CreatedAt = createdAt
             };
         }).ToList();
     }
 
-    private static void EnsureExpectedRowCount(
+    internal static void EnsureExpectedRowCount(
         string rowType,
         int expectedCount,
         int actualCount)
@@ -253,3 +304,5 @@ public class FundingExtensionPersistenceRepository(
         }
     }
 }
+
+
