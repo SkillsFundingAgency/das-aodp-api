@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Data.Repositories.Rollover;
@@ -9,6 +10,7 @@ public interface IRolloverCandidateReconciler
         CancellationToken cancellationToken);
 }
 
+[ExcludeFromCodeCoverage]
 public sealed record FundingReconciliationResult(
     int Created,
     int Refreshed,
@@ -17,6 +19,7 @@ public sealed record FundingReconciliationResult(
     int WorkflowsInvalidated,
     IReadOnlyCollection<FundingReconciliationOutcome> Outcomes);
 
+[ExcludeFromCodeCoverage]
 public sealed record FundingReconciliationOutcome(
     FundingChangeKey Key,
     string Outcome,

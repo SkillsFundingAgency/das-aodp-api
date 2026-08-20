@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using SFA.DAS.AODP.Models.Rollover;
 
 namespace SFA.DAS.AODP.Data.Entities.Rollover;
 
 [Table("FundingExtensionStaging")]
+[ExcludeFromCodeCoverage]
 public class FundingExtensionStaging
 {
     public Guid OperationId { get; set; }

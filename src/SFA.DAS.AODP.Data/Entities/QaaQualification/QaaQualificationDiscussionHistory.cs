@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 
 namespace SFA.DAS.AODP.Data.Entities.QaaQualification;
 
+[ExcludeFromCodeCoverage]
 public partial record QaaQualificationDiscussionHistory
 {
     public Guid Id { get; set; }

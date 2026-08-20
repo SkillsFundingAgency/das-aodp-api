@@ -116,6 +116,53 @@ public class RolloverCandidateReconcilerTests
     }
 
     [Fact]
+    public async Task ReconcileAsync_RefreshesAlreadyActiveEligibleCandidate()
+    {
+        await using var context = CreateContext();
+        var key = new FundingChangeKey(
+            RolloverSourceTypes.Ofqual,
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            "2026/27");
+        var candidate = RolloverCandidates.CreateInitialRound(
+            key.SourceType,
+            key.SourceQualificationId,
+            key.FundingOfferId,
+            key.AcademicYear!,
+            Now);
+        context.RolloverCandidates.Add(candidate);
+        await context.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var sut = CreateSut(context, CreateEligibilityRepository([key], true));
+
+        var result = await sut.ReconcileAsync([key], TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, result.Refreshed);
+        Assert.True(candidate.IsActive);
+        Assert.Equal(
+            new DateOnly(2027, 7, 31).ToDateTime(TimeOnly.MinValue),
+            candidate.PreviousFundingEndDate);
+    }
+
+    [Fact]
+    public async Task ReconcileAsync_IneligibleWithNoExistingCandidate_DeactivatesNothing()
+    {
+        await using var context = CreateContext();
+        var key = new FundingChangeKey(
+            RolloverSourceTypes.Ofqual,
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            "2026/27");
+        var sut = CreateSut(context, CreateEligibilityRepository([key], false));
+
+        var result = await sut.ReconcileAsync([key], TestContext.Current.CancellationToken);
+
+        Assert.Equal(0, result.Deactivated);
+        Assert.Equal(0, await context.RolloverCandidates.CountAsync(
+            TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task ReconcileAsync_ReactivatesCandidateWithoutRevalidatingHistoricalWorkflow()
     {
         await using var context = CreateContext();

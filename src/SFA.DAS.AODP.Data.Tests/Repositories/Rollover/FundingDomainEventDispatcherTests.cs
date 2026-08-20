@@ -110,6 +110,49 @@ public class FundingDomainEventDispatcherTests : UnitTest
     }
 
     [Fact]
+    public async Task DispatchAsync_WhenQaaFundingHasPreviousQualification_ThrowsBecauseOnlyOfqualCanMove()
+    {
+        // Arrange - only Ofqual funding is expected to move between qualification versions;
+        // a Qaa event carrying a previous qualification id indicates a bug upstream.
+        await using var context = CreateContext();
+        var sut = CreateDispatcher();
+
+        // Act / Assert
+        await Should.ThrowAsync<InvalidOperationException>(() =>
+            sut.DispatchAsync(
+                context,
+                [new FundingChangedDomainEvent(
+                    RolloverSourceTypes.Qaa,
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    Guid.NewGuid())],
+                CancellationToken));
+    }
+
+    [Fact]
+    public async Task DispatchAsync_WhenFundingChangeHasNoPreviousQualification_ReconcilesWithoutMoving()
+    {
+        // Arrange - no previous qualification id means this isn't a version move, so
+        // dispatch should fall through to the normal reconciliation pipeline. With no
+        // matching funding row on record the change resolves as ineligible, and with no
+        // existing candidate there's nothing to deactivate.
+        await using var context = CreateContext();
+        var sut = CreateDispatcher();
+
+        // Act
+        await sut.DispatchAsync(
+            context,
+            [new FundingChangedDomainEvent(
+                RolloverSourceTypes.Ofqual,
+                Guid.NewGuid(),
+                Guid.NewGuid())],
+            CancellationToken);
+
+        // Assert
+        (await context.RolloverCandidates.CountAsync(CancellationToken)).ShouldBe(0);
+    }
+
+    [Fact]
     public async Task SaveChangesAsync_WhenFundingChanges_DispatchesFundingEventFromContextBoundary()
     {
         // Arrange
@@ -185,6 +228,7 @@ public class FundingDomainEventDispatcherTests : UnitTest
     {
         var clock = new Mock<ISystemClockProvider>();
         clock.SetupGet(provider => provider.UtcNow).Returns(Now);
+        clock.SetupGet(provider => provider.Today).Returns(DateOnly.FromDateTime(Now));
         return new FundingDomainEventDispatcher(
             clock.Object,
             NullLogger<FundingDomainEventDispatcher>.Instance);
