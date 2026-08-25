@@ -19,6 +19,22 @@ public class QaaQualificationRepository(ApplicationDbContext context) : IQaaQual
             .ToListAsync(cancellationToken);
 
     /// <inheritdoc/>.
-    public async Task SaveChangesAsync(CancellationToken cancellationToken) 
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
         => await _context.SaveChangesAsync(cancellationToken);
+
+    /// <inheritdoc/>.
+    public async Task<QaaQualificationSummaryCounts> GetSummaryCountsAsync(CancellationToken cancellationToken)
+    {
+        var query = _context.RegulatedQaaQualifications.AsNoTracking();
+
+        return new QaaQualificationSummaryCounts
+        {
+            DataLastImportedDate = await query.Select(q => (DateTime?)q.DateOfDataSnapshot).MaxAsync(cancellationToken),
+            NewCount = await query.CountAsync(q => q.LatestImportComparisonOutcome == QaaImportComparisonOutcome.New, cancellationToken),
+            ExtendedCount = await query.CountAsync(q =>
+                q.LatestImportComparisonOutcome == QaaImportComparisonOutcome.LastDateForRegistrationChanged &&
+                q.LastDateForRegistrationChangeType == QaaLastDateForRegistrationChangeType.Extended, cancellationToken),
+            DiscontinuedCount = await query.CountAsync(q => q.IsDiscontinued, cancellationToken)
+        };
+    }
 }
