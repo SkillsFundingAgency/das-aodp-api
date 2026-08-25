@@ -1080,6 +1080,7 @@ public class RolloverRepositoryTests
         db.FundingOffers.Add(funding);
         db.RolloverCandidates.Add(candidate);
         db.RolloverWorkflowCandidates.Add(wc);
+
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sut = new RolloverRepository(db);
@@ -1128,7 +1129,6 @@ public class RolloverRepositoryTests
             funding.Id,
             "2024/25",
             now);
-
         candidate.FundingOffer = funding;
 
         var wc = RolloverWorkflowCandidate.Create(
@@ -1142,7 +1142,6 @@ public class RolloverRepositoryTests
             now,
             null,
             now);
-
         wc.RolloverCandidates = candidate;
 
         db.Qualification.Add(qualification);
@@ -1208,10 +1207,9 @@ public class RolloverRepositoryTests
         var candidate = RolloverCandidates.CreateInitialRound(
             RolloverSourceTypes.Ofqual,
             version.Id,
-            funding.Id,
+            FundingStream.Age1416.Id,
             "2024/25",
             now);
-
         candidate.FundingOffer = funding;
 
         var wc = RolloverWorkflowCandidate.Create(
@@ -1219,13 +1217,12 @@ public class RolloverRepositoryTests
             candidate.Id,
             RolloverSourceTypes.Ofqual,
             version.Id,
-            funding.Id,
+            FundingStream.Age1416.Id,
             "2024/25",
             1,
             now,
             null,
             now);
-
         wc.RolloverCandidates = candidate;
 
         db.Qualification.Add(qualification);

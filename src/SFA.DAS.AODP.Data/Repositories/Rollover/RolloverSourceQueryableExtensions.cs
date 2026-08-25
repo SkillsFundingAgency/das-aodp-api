@@ -96,15 +96,6 @@ internal static class RolloverSourceQueryableExtensions
         };
     }
 
-    public static IQueryable<RolloverCandidateSourceProjection> WithAllSourceQualifications(
-        this IQueryable<RolloverCandidates> candidates,
-        IApplicationDbContext context)
-    {
-        return candidates
-            .WithSourceQualification(context, RolloverSourceTypes.Ofqual)
-            .Concat(candidates.WithSourceQualification(context, RolloverSourceTypes.Qaa));
-    }
-
     public static IQueryable<RolloverWorkflowCandidateSourceProjection> WithSourceQualification(
         this IQueryable<RolloverWorkflowCandidate> workflowCandidates,
         IApplicationDbContext context,
@@ -205,5 +196,14 @@ internal static class RolloverSourceQueryableExtensions
         return workflowCandidates
             .WithSourceQualification(context, RolloverSourceTypes.Ofqual)
             .Concat(workflowCandidates.WithSourceQualification(context, RolloverSourceTypes.Qaa));
+    }
+
+    public static IQueryable<RolloverCandidateSourceProjection> WithAllSourceQualifications(
+        this IQueryable<RolloverCandidates> candidates,
+        IApplicationDbContext context)
+    {
+        return candidates
+            .WithSourceQualification(context, RolloverSourceTypes.Ofqual)
+            .Concat(candidates.WithSourceQualification(context, RolloverSourceTypes.Qaa));
     }
 }

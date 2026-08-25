@@ -56,92 +56,25 @@ public class RolloverCandidateReconciler(
 
         foreach (var eligibility in eligibilityResults)
         {
-            var matches = candidates
-                .Where(x =>
-                    x.SourceType == eligibility.Key.SourceType &&
-                    x.SourceQualificationId == eligibility.Key.SourceQualificationId &&
-                    x.FundingOfferId == eligibility.Key.FundingOfferId &&
-                    x.AcademicYear == eligibility.AcademicYear)
-                .OrderByDescending(x => x.RolloverRound)
-                .ToList();
-
-            if (!eligibility.IsEligible)
-            {
-                var activeMatches = matches.Where(x => x.IsActive).ToList();
-                foreach (var candidate in activeMatches)
-                {
-                    candidate.Deactivate(now);
-                    deactivated++;
-                    deactivatedCandidateIds.Add(candidate.Id);
-                    deactivatedCandidateKeys[candidate.Id] = eligibility.Key;
-                }
-
-                outcomes.Add(new FundingReconciliationOutcome(
-                    eligibility.Key,
-                    activeMatches.Count > 0 ? "deactivated" : "ineligible-no-candidate",
-                    activeMatches.Count));
-                continue;
-            }
-
-            var activeCandidate = matches.FirstOrDefault(x => x.IsActive);
-            if (activeCandidate is not null)
-            {
-                activeCandidate.RefreshFunding(eligibility.FundingEndDate, now);
-                refreshed++;
-                outcomes.Add(new FundingReconciliationOutcome(
-                    eligibility.Key,
-                    "refreshed",
-                    1));
-                continue;
-            }
-
-            var inactiveCandidate = matches.FirstOrDefault();
-            if (inactiveCandidate is not null)
-            {
-                inactiveCandidate.Reactivate(eligibility.FundingEndDate, now);
-                reactivated++;
-                outcomes.Add(new FundingReconciliationOutcome(
-                    eligibility.Key,
-                    "reactivated",
-                    1));
-                continue;
-            }
-
-            var newCandidate = RolloverCandidates.CreateInitialRound(
-                eligibility.Key.SourceType,
-                eligibility.Key.SourceQualificationId,
-                eligibility.Key.FundingOfferId,
-                eligibility.AcademicYear,
-                now);
-            newCandidate.RefreshFunding(eligibility.FundingEndDate, now);
-            context.RolloverCandidates.Add(newCandidate);
-            candidates.Add(newCandidate);
-            created++;
-            outcomes.Add(new FundingReconciliationOutcome(
-                eligibility.Key,
-                "created",
-                1));
+            var outcome = ReconcileEligibility(
+                eligibility,
+                candidates,
+                now,
+                deactivatedCandidateIds,
+                deactivatedCandidateKeys,
+                ref created,
+                ref refreshed,
+                ref deactivated,
+                ref reactivated);
+            outcomes.Add(outcome);
         }
 
-        var workflowsInvalidated = 0;
-        if (deactivatedCandidateIds.Count > 0)
-        {
-            var workflowCandidates = await context.RolloverWorkflowCandidates
-                .Where(x =>
-                    deactivatedCandidateIds.Contains(x.RolloverCandidatesId) &&
-                    !x.InvalidatedAt.HasValue)
-                .ToListAsync(cancellationToken);
-
-            foreach (var workflowCandidate in workflowCandidates)
-            {
-                workflowCandidate.Invalidate(FundingNoLongerApplicableReason, now);
-                workflowsInvalidated++;
-                outcomes.Add(new FundingReconciliationOutcome(
-                    deactivatedCandidateKeys[workflowCandidate.RolloverCandidatesId],
-                    "workflow-invalidated",
-                    1));
-            }
-        }
+        var workflowsInvalidated = await InvalidateWorkflowsForDeactivatedCandidatesAsync(
+            deactivatedCandidateIds,
+            deactivatedCandidateKeys,
+            now,
+            outcomes,
+            cancellationToken);
 
         return new FundingReconciliationResult(
             created,
@@ -150,5 +83,118 @@ public class RolloverCandidateReconciler(
             reactivated,
             workflowsInvalidated,
             outcomes);
+    }
+
+    private FundingReconciliationOutcome ReconcileEligibility(
+        RolloverFundingEligibility eligibility,
+        List<RolloverCandidates> candidates,
+        DateTime now,
+        List<Guid> deactivatedCandidateIds,
+        Dictionary<Guid, FundingChangeKey> deactivatedCandidateKeys,
+        ref int created,
+        ref int refreshed,
+        ref int deactivated,
+        ref int reactivated)
+    {
+        var matches = candidates
+            .Where(x =>
+                x.SourceType == eligibility.Key.SourceType &&
+                x.SourceQualificationId == eligibility.Key.SourceQualificationId &&
+                x.FundingOfferId == eligibility.Key.FundingOfferId &&
+                x.AcademicYear == eligibility.AcademicYear)
+            .OrderByDescending(x => x.RolloverRound)
+            .ToList();
+
+        if (!eligibility.IsEligible)
+        {
+            return DeactivateCandidates(
+                matches,
+                eligibility,
+                now,
+                deactivatedCandidateIds,
+                deactivatedCandidateKeys,
+                ref deactivated);
+        }
+
+        var activeCandidate = matches.FirstOrDefault(x => x.IsActive);
+        if (activeCandidate is not null)
+        {
+            activeCandidate.RefreshFunding(eligibility.FundingEndDate, now);
+            refreshed++;
+            return new FundingReconciliationOutcome(eligibility.Key, "refreshed", 1);
+        }
+
+        var inactiveCandidate = matches.FirstOrDefault();
+        if (inactiveCandidate is not null)
+        {
+            inactiveCandidate.Reactivate(eligibility.FundingEndDate, now);
+            reactivated++;
+            return new FundingReconciliationOutcome(eligibility.Key, "reactivated", 1);
+        }
+
+        var newCandidate = RolloverCandidates.CreateInitialRound(
+            eligibility.Key.SourceType,
+            eligibility.Key.SourceQualificationId,
+            eligibility.Key.FundingOfferId,
+            eligibility.AcademicYear,
+            now);
+        newCandidate.RefreshFunding(eligibility.FundingEndDate, now);
+        context.RolloverCandidates.Add(newCandidate);
+        candidates.Add(newCandidate);
+        created++;
+        return new FundingReconciliationOutcome(eligibility.Key, "created", 1);
+    }
+
+    private static FundingReconciliationOutcome DeactivateCandidates(
+        List<RolloverCandidates> matches,
+        RolloverFundingEligibility eligibility,
+        DateTime now,
+        List<Guid> deactivatedCandidateIds,
+        Dictionary<Guid, FundingChangeKey> deactivatedCandidateKeys,
+        ref int deactivated)
+    {
+        var activeMatches = matches.Where(x => x.IsActive).ToList();
+        foreach (var candidate in activeMatches)
+        {
+            candidate.Deactivate(now);
+            deactivated++;
+            deactivatedCandidateIds.Add(candidate.Id);
+            deactivatedCandidateKeys[candidate.Id] = eligibility.Key;
+        }
+
+        return new FundingReconciliationOutcome(
+            eligibility.Key,
+            activeMatches.Count > 0 ? "deactivated" : "ineligible-no-candidate",
+            activeMatches.Count);
+    }
+
+    private async Task<int> InvalidateWorkflowsForDeactivatedCandidatesAsync(
+        List<Guid> deactivatedCandidateIds,
+        Dictionary<Guid, FundingChangeKey> deactivatedCandidateKeys,
+        DateTime now,
+        List<FundingReconciliationOutcome> outcomes,
+        CancellationToken cancellationToken)
+    {
+        if (deactivatedCandidateIds.Count == 0)
+        {
+            return 0;
+        }
+
+        var workflowCandidates = await context.RolloverWorkflowCandidates
+            .Where(x =>
+                deactivatedCandidateIds.Contains(x.RolloverCandidatesId) &&
+                !x.InvalidatedAt.HasValue)
+            .ToListAsync(cancellationToken);
+
+        foreach (var workflowCandidate in workflowCandidates)
+        {
+            workflowCandidate.Invalidate(FundingNoLongerApplicableReason, now);
+            outcomes.Add(new FundingReconciliationOutcome(
+                deactivatedCandidateKeys[workflowCandidate.RolloverCandidatesId],
+                "workflow-invalidated",
+                1));
+        }
+
+        return workflowCandidates.Count;
     }
 }

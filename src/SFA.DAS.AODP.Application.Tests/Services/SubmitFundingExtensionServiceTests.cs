@@ -136,7 +136,7 @@ public class SubmitFundingExtensionServiceTests : UnitTest
         persistedHistories!.Count.ShouldBe(1);
         persistedHistories.Single().Id.ShouldBe(historyId);
         persistedHistories.Single().QualificationId.ShouldBe(qualificationId);
-        persistedHistories.Single().Notes.ShouldContain(item.FundingStreamName);
+        persistedHistories.Single().Notes.ShouldNotBeNull().ShouldContain(item.FundingStreamName);
     }
 
     [Fact]
@@ -251,7 +251,7 @@ public class SubmitFundingExtensionServiceTests : UnitTest
         candidate.ExclusionReason.ShouldBe(item.ExclusionReason);
 
         persistedHistories.ShouldNotBeNull();
-        persistedHistories!.Single().Notes.ShouldContain(item.ExclusionReason);
+        persistedHistories!.Single().Notes.ShouldNotBeNull().ShouldContain(item.ExclusionReason);
     }
 
     [Fact]

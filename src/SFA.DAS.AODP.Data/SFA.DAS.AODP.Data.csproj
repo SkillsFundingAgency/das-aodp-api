@@ -25,6 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="SFA.DAS.AODP.Data.UnitTests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Entities\Jobs\" />
     <Folder Include="Entities\QueryExtensions\" />
   </ItemGroup>

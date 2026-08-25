@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace SFA.DAS.AODP.Data.Entities.Qualification;
 
+[ExcludeFromCodeCoverage]
 public class AllQualificationFunding
 {
     public Guid FundingId { get; set; }

@@ -225,7 +225,7 @@ public class FundingExtensionPersistenceRepository(
         }
     }
 
-    private static List<FundingExtensionStaging> CreateStagingRows(
+    internal static List<FundingExtensionStaging> CreateStagingRows(
         Guid operationId,
         IReadOnlyCollection<RolloverCandidates> candidates,
         IReadOnlyCollection<RolloverFundingUpdate> fundingUpdates,
@@ -256,7 +256,7 @@ public class FundingExtensionPersistenceRepository(
         }).ToList();
     }
 
-    private static void EnsureExpectedRowCount(
+    internal static void EnsureExpectedRowCount(
         string rowType,
         int expectedCount,
         int actualCount)
