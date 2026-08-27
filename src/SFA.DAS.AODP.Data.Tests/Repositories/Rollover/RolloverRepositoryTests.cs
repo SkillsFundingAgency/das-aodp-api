@@ -1008,6 +1008,46 @@ public class RolloverRepositoryTests
     }
 
     [Fact]
+    public async Task GetRolloverStartSummaryAsync_ExcludesDeactivatedCandidates()
+    {
+        // A candidate can be deactivated (e.g. by reconciliation, when its funding is no longer
+        // eligible) without its RolloverStatus being reset - Deactivate() only flips IsActive.
+        // The summary must not count that stale status, since every other rollover screen only
+        // ever shows active candidates.
+        await using var db = CreateDb(nameof(GetRolloverStartSummaryAsync_ExcludesDeactivatedCandidates));
+
+        var now = DateTime.UtcNow;
+        var funding = new FundingOffer { Id = Guid.NewGuid(), Name = "FundX", DisplayName = "Fund X" };
+        await db.FundingOffers.AddAsync(funding, TestContext.Current.CancellationToken);
+
+        var active = RolloverCandidates.CreateInitialRound(RolloverSourceTypes.Ofqual, Guid.NewGuid(), funding.Id, "2024/25", now);
+        active.SetExtended(now.AddYears(1));
+        active.FundingOffer = funding;
+
+        var deactivatedButStillExtended = RolloverCandidates.CreateInitialRound(RolloverSourceTypes.Ofqual, Guid.NewGuid(), funding.Id, "2024/25", now);
+        deactivatedButStillExtended.SetExtended(now.AddYears(1));
+        deactivatedButStillExtended.Deactivate(now);
+        deactivatedButStillExtended.FundingOffer = funding;
+
+        var needsReview = RolloverCandidates.CreateInitialRound(RolloverSourceTypes.Qaa, Guid.NewGuid(), funding.Id, "2024/25", now);
+        needsReview.FundingOffer = funding;
+
+        await db.RolloverCandidates.AddRangeAsync(
+            new[] { active, deactivatedButStillExtended, needsReview },
+            TestContext.Current.CancellationToken);
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var sut = new RolloverRepository(db);
+
+        var result = await sut.GetRolloverStartSummaryAsync("2024/25", TestContext.Current.CancellationToken);
+
+        result.TotalCandidatesCount.ShouldBe(2);
+        result.CandidatesEligibleCount.ShouldBe(1);
+        result.CandidatesIneligibleCount.ShouldBe(0);
+        result.CandidatesRemainingCount.ShouldBe(1);
+    }
+
+    [Fact]
     public async Task GetRolloverCandidatesStatusAsync_ReturnsProjectedItems()
     {
         // Arrange

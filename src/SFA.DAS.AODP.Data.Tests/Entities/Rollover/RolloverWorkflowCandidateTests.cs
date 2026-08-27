@@ -95,13 +95,29 @@ public class RolloverWorkflowCandidateTests
     {
         // AWARD-858: QAA candidates only have 3 of the 5 P1 checks applied (funding stream,
         // funding end date threshold, defunding list). The Operational End Date and
-        // Offered/Funded in England checks are exempted for QAA - not by branching on
-        // SourceType here, but because the repository query projection for QAA always
-        // supplies OperationalEndDate = null and OfferedInEngland/IntentionToSeekFundingInEngland
-        // = true (see RolloverSourceQueryableExtensions). This test pins that combination at
-        // the entity level so a change to EvaluateP1Checks can't silently break the QAA exemption.
+        // Offered/Funded in England checks are exempted for QAA by branching on SourceType
+        // in EvaluateP1Checks, so this passes regardless of what the repository projection
+        // happens to supply for those fields.
         var candidate = CreateCandidate(sourceType: RolloverSourceTypes.Qaa);
         var checks = CreateValidChecks();
+
+        candidate.ProcessP1Checks(checks);
+
+        Assert.True(candidate.PassP1);
+        Assert.Null(candidate.P1FailureReason);
+    }
+
+    [Fact]
+    public void ProcessP1Checks_ForQaaCandidate_IgnoresOperationalEndDateAndEnglandChecksEvenWhenValuesWouldFail()
+    {
+        // AWARD-858: proves the QAA exemption is structural (SourceType-driven), not just an
+        // artifact of the repository projection defaulting these fields to "good" values -
+        // even deliberately failing values for the exempted checks must not affect PassP1.
+        var candidate = CreateCandidate(sourceType: RolloverSourceTypes.Qaa);
+        var checks = CreateValidChecks(operationalEndDate: new DateTime(2000, 01, 01));
+        checks.OperationalEndDateThreshold = DateTime.MaxValue;
+        checks.OfferedInEngland = false;
+        checks.IntentionToSeekFundingInEngland = false;
 
         candidate.ProcessP1Checks(checks);
 
@@ -113,7 +129,7 @@ public class RolloverWorkflowCandidateTests
     public void ProcessP1Checks_ForQaaCandidate_FailsOnlyOnFundingStreamEndDateAndDefundingList()
     {
         // The 3 checks that DO apply to QAA should still be able to fail it, even though the
-        // Operational End Date and England checks are structurally exempted (see test above).
+        // Operational End Date and England checks are structurally exempted (see tests above).
         var candidate = CreateCandidate(sourceType: RolloverSourceTypes.Qaa);
 
         var checks = new RolloverWorkflowCandidatesP1Checks
@@ -143,8 +159,8 @@ public class RolloverWorkflowCandidateTests
     public void ProcessP1Checks_ForOfqualCandidate_WithOperationalEndDateBeforeThreshold_FailsOnOperationalEndDateCheck()
     {
         // Proves the Operational End Date check is a real, non-skipped check for Ofqual
-        // candidates - the QAA exemption above comes from the projection hardcoding
-        // OperationalEndDate to null for QAA, not from this check being disabled outright.
+        // candidates - the QAA exemption above comes from branching on SourceType in
+        // EvaluateP1Checks.
         var candidate = CreateCandidate(sourceType: RolloverSourceTypes.Ofqual);
         var checks = CreateValidChecks(operationalEndDate: new DateTime(2025, 01, 01));
         checks.OperationalEndDateThreshold = new DateTime(2025, 06, 01);

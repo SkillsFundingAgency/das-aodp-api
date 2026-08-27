@@ -143,6 +143,10 @@ public class RolloverWorkflowCandidate
     {
         var failures = new List<string>();
 
+        // QAA qualifications have no Operational End Date or England-offering concept,
+        // so those checks don't apply to them - enforced here by SourceType
+        var isQaaSource = SourceType == RolloverSourceTypes.Qaa;
+
         // 1) Is the Funding Stream included in the RollOver
         if (checks.FundingStream == null)
             failures.Add("Funding Stream out of scope for RollOver");
@@ -151,18 +155,21 @@ public class RolloverWorkflowCandidate
         if (checks.LatestFundingApprovalEndDate.HasValue && checks.LatestFundingApprovalEndDate.Value < checks.FundingEndDateThreshold)
             failures.Add("Funding Approval End Date is before the Threshold");
 
-        // 3) Operating End Date > Threshold Date  (If Operating End Date = Null, this should Pass the check)
-        if (checks.OperationalEndDate.HasValue && checks.OperationalEndDate.Value <= checks.OperationalEndDateThreshold)
-            failures.Add("Operating End Date is before the Threshold");
+        // 3-5) Operational End Date and England-offering checks. Do not apply to QAA.
+        if (!isQaaSource)
+        {
+            // 3) Operating End Date > Threshold Date (If Operating End Date = Null, this should Pass the check)
+            if (checks.OperationalEndDate.HasValue && checks.OperationalEndDate.Value <= checks.OperationalEndDateThreshold)
+                failures.Add("Operating End Date is before the Threshold");
 
-        // 4) Offered in England = TRUE
-        if (!checks.OfferedInEngland)
-            failures.Add("Not Offered in England");
+            // 4) Offered in England = TRUE
+            if (!checks.OfferedInEngland)
+                failures.Add("Not Offered in England");
 
-        // 5) Intention to seek funding in England = TRUE
-        if (!checks.IntentionToSeekFundingInEngland)
-            failures.Add("Not Funded in England");
-
+            // 5) Intention to seek funding in England = TRUE
+            if (!checks.IntentionToSeekFundingInEngland)
+                failures.Add("Not Funded in England");
+        }
 
         // 7) Does the Qualification appear in the Defunding (Defunded) List
         if (checks.IsOnDefundingList)

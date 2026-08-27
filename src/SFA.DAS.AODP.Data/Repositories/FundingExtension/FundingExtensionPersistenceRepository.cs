@@ -145,7 +145,10 @@ public class FundingExtensionPersistenceRepository(
                         funding => qaaOperationRows
                             .Where(row => row.SourceFundingRecordId == funding.Id)
                             .Select(row => row.FundingComments)
-                            .First()),
+                            .First())
+                    .SetProperty(
+                        funding => funding.UpdatedAt,
+                        _ => createdAt),
                     cancellationToken);
 
             logger.LogInformation(
