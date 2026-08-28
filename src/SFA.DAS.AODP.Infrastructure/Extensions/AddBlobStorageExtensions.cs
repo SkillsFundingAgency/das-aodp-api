@@ -1,16 +1,16 @@
 ﻿using Microsoft.Extensions.Azure;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SFA.DAS.AODP.Models.Settings;
 
 namespace SFA.DAS.AODP.Infrastructure.Extensions
 {
     public static class AddBlobStorageExtensions
     {
-        public static IServiceCollection AddBlobStorage(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddBlobStorage(this IServiceCollection services, StorageSettings storageSettings)
         {
             services.AddAzureClients(clientBuilder =>
             {
-                clientBuilder.AddBlobServiceClient(configuration.GetValue<string>("OutputFileBlobStorageSettings:ConnectionString"));
+                clientBuilder.AddBlobServiceClient(new Uri(storageSettings.ServiceUri));
             });
 
             services.AddTransient<IBlobStorageService, BlobStorageService>();
