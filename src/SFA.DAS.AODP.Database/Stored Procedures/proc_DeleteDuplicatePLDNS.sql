@@ -6,7 +6,7 @@
 -- ==================================================
 
 CREATE PROCEDURE [dbo].[proc_DeleteDuplicatePldns]
-	@Qan VARCHAR(100) = NULL
+	@Qan NVARCHAR(10) = NULL
 AS
 BEGIN
 	SET NOCOUNT ON;

@@ -6,7 +6,7 @@ using SFA.DAS.AODP.Application.Queries.Application.Application;
 using SFA.DAS.AODP.Application.Queries.Application.Review;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Repositories.Application;
-using SFA.DAS.AODP.Shared.UnitTests.Helpers;
+using SFA.DAS.AODP.Testing.Helpers;
 
 namespace SFA.DAS.AODP.Application.Tests.Queries.Application.Review
 {

@@ -14,4 +14,5 @@ public class ChangedQualification
     public string ChangedFieldNames { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public Guid StatusId { get; set; }
+    public bool EligibleForFunding { get; set; } = false;
 }

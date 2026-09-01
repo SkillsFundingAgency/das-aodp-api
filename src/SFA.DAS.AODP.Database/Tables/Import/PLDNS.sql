@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [Pldns]
 (
     [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    [Qan] VARCHAR(100) NOT NULL,
+    [Qan] NVARCHAR(10) NOT NULL,
     [ListUpdatedDate] DATE NULL,
     [Notes] VARCHAR(4000) NULL,
 

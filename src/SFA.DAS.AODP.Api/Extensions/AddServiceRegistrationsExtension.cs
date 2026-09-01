@@ -1,12 +1,19 @@
 ﻿using RestEase;
 using SFA.DAS.AODP.Application.Services;
+using SFA.DAS.AODP.Application.Services.Export;
+using SFA.DAS.AODP.Application.Services.FundingExtension;
+using SFA.DAS.AODP.Application.Services.Validation;
 using SFA.DAS.AODP.Data.Extensions;
-using SFA.DAS.AODP.Infrastructure.Clients.Ofqual;
 using SFA.DAS.AODP.Data.Search;
+using SFA.DAS.AODP.Infrastructure.Clients.Ofqual;
+using SFA.DAS.AODP.Infrastructure.Extensions;
 using SFA.DAS.AODP.Infrastructure.Services;
 using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
 using SFA.DAS.AODP.Models.Settings;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Internal;
+using SFA.DAS.AODP.Data.Providers;
+using SFA.DAS.AODP.Data.Repositories.Pldns;
 
 namespace SFA.DAS.AODP.Api.Extensions;
 
@@ -49,6 +56,20 @@ public static class AddServiceRegistrationsExtension
         });
         services.AddScoped<IQanValidationService, QanValidationService>();
         services.AddScoped<IQualificationsApi, QualificationsApi>();
+        services.AddScoped<IRolloverWorkflowCandidatesCsvBuilder, RolloverWorkflowCandidatesCsvBuilder>();
+        services.AddScoped<IFundingExtensionCandidatesCsvBuilder, FundingExtensionCandidatesCsvBuilder>();
+        services.AddScoped<IRolloverFundingExtensionValidator, FundingExtensionValidator>();
+        services.AddScoped<IFundingExtensionProjectionService, FundingExtensionProjectionService>();
+        services.AddScoped<ISubmitFundingExtensionService, SubmitFundingExtensionService>();
+
+        services.AddScoped<IGuidProvider, DefaultGuidProvider>();
+        services.AddScoped<IAcademicYearService, AcademicYearService>();
+
+        services.AddScoped<ISystemClockProvider, SystemClockProvider>();
+        services.AddScoped<IAcademicYearProvider, AcademicYearProvider>();
+        services.AddScoped<IIlrSubmissionDeadlinesProvider, IlrSubmissionDeadlinesProvider>();
+        services.AddScoped<IQaaFundingApprovalEndDateCalculator, QaaFundingApprovalEndDateCalculator>();
+        services.AddScoped<IPldnsRepository, PldnsRepository>();
 
         return services;
     }

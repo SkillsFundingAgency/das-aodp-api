@@ -5,29 +5,49 @@ using SFA.DAS.AODP.Infrastructure;
 using SFA.DAS.AODP.Models.Settings;
 using System.Globalization;
 using System.Text;
+using SFA.DAS.AODP.Data.Repositories.QaaQualification;
+using SFA.DAS.AODP.Data.Providers;
+
 namespace SFA.DAS.AODP.Application.Queries.Qualifications;
 
 public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualificationOutputFileQuery, BaseMediatrResponse<GetQualificationOutputFileResponse>>
 {
     private readonly IQualificationOutputFileRepository _outputFileRepository;
     private readonly IQualificationOutputFileLogRepository _outputFileLogRepository;
+    private readonly IQaaQualificationRepository _qaaQualificationRepository;
+    private readonly IQaaFundingApprovalEndDateCalculator _qaaFundingApprovalEndDateCalculator;
 
     public const string NoQualificationsFound = "No qualifications found for the output file.";
     public const string UnexpectedErrorGeneratingFile = "An unexpected error occurred while generating the output file.";
-    public GetQualificationOutputFileQueryHandler(IQualificationOutputFileRepository outputFileRepository, IQualificationOutputFileLogRepository outputFileLogRepository)
+    public GetQualificationOutputFileQueryHandler(IQualificationOutputFileRepository outputFileRepository, IQualificationOutputFileLogRepository outputFileLogRepository, IQaaQualificationRepository qaaQualificationRepository, IQaaFundingApprovalEndDateCalculator qaaFundingApprovalEndDateCalculator)
     {
         _outputFileRepository = outputFileRepository;
         _outputFileLogRepository = outputFileLogRepository;
+        _qaaQualificationRepository = qaaQualificationRepository;
+        _qaaFundingApprovalEndDateCalculator = qaaFundingApprovalEndDateCalculator;
     }
 
     public async Task<BaseMediatrResponse<GetQualificationOutputFileResponse>> Handle(
-    GetQualificationOutputFileQuery request,
-    CancellationToken cancellationToken)
+        GetQualificationOutputFileQuery request,
+        CancellationToken cancellationToken)
     {
         var response = new BaseMediatrResponse<GetQualificationOutputFileResponse>();
 
         try
         {
+            var qaaQualifications = await _qaaQualificationRepository.GetAllAsync(cancellationToken);
+
+            var regulatedQaaQualifications = qaaQualifications.ToList();
+            if (regulatedQaaQualifications.Count > 0)
+            {
+                foreach (var qaaQualification in regulatedQaaQualifications)
+                {
+                    await qaaQualification.SetFundingApprovalEndDateAsync(request.PublicationDate, _qaaFundingApprovalEndDateCalculator, cancellationToken);
+                }
+
+                await _qaaQualificationRepository.SaveChangesAsync(cancellationToken);
+            }
+
             var qualifications = await _outputFileRepository.GetQualificationOutputFile();
 
             if (qualifications is null)
@@ -276,5 +296,3 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
         
     }
 }
-
-

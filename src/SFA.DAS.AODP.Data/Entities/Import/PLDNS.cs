@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SFA.DAS.AODP.Data.Entities.Qualification;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SFA.DAS.AODP.Data.Entities.Import;
 
@@ -52,12 +53,6 @@ public partial class Pldns
     [Column("NotesDigitalEntitlement")]
     public string? DigitalEntitlementNote { get; set; }
 
-    [Column("ESF-L3-L4")]
-    public DateTime? EsfL3L4 { get; set; }
-
-    [Column("NotesESF-L3-L4")]
-    public string? EsfL3L4Note { get; set; }
-
     [Column("Loans")]
     public DateTime? Loans { get; set; }
 
@@ -76,11 +71,24 @@ public partial class Pldns
     [Column("NotesLevel 3FreeCoursesForJobs")]
     public string? Level3FCoursesForJobsNote { get; set; }
 
+    #region Columns not used by QFAST
+
+    /** 
+     * ESF-L3-L4 and CoF are not used by QFAST, but are included in the PLDNS table for completeness.
+     * */
+
+    [Column("ESF-L3-L4")]
+    public DateTime? EsfL3L4 { get; set; }
+
+    [Column("NotesESF-L3-L4")]
+    public string? EsfL3L4Note { get; set; }
+
     [Column("CoF")]
     public DateTime? Cof { get; set; }
 
     [Column("NotesCoF")]
     public string? CofNote { get; set; }
+    #endregion
 
     [Column("StartDate")]
     public DateTime? StartDate { get; set; }
@@ -90,4 +98,49 @@ public partial class Pldns
 
     [Column("ImportDate")]
     public DateTime ImportDate { get; set; }
+
+    public DateTime? ForFundingStream(FundingStream fundingStream)
+    {
+        if (fundingStream == FundingStream.Age1619)
+        {
+            return Pldns16To19;
+        }
+
+        if (fundingStream == FundingStream.AdvancedLearnerLoans)
+        {
+            return Loans;
+        }
+
+        if (fundingStream == FundingStream.LegalEntitlementL2L3)
+        {
+            return LegalEntitlementL2L3;
+        }
+
+        if (fundingStream == FundingStream.Age1416)
+        {
+            return Pldns14To16;
+        }
+
+        if (fundingStream == FundingStream.DigitalEntitlement)
+        {
+            return DigitalEntitlement;
+        }
+
+        if (fundingStream == FundingStream.FreeCoursesForJobs)
+        {
+            return Level3FCoursesForJobs;
+        }
+
+        if (fundingStream == FundingStream.LegalEntitlementEnglishAndMaths)
+        {
+            return LegalEntitlementEngMaths;
+        }
+
+        if (fundingStream == FundingStream.LifelongLearningEntitlement)
+        {
+            return LifelongLearning;
+        }
+
+        return LocalFlex;
+    }
 }

@@ -1,18 +1,9 @@
 ﻿using Moq;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Application.Queries.Qualification;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
-using Moq;
 using SFA.DAS.AODP.Application;
-using SFA.DAS.AODP.Application.Queries.Qualification;
-using SFA.DAS.AODP.Application.Queries.Qualifications;
-using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Models.Qualifications;
 
 namespace SFA.DAS.AODP.Tests.Application.Queries

@@ -1,6 +1,6 @@
 ﻿namespace SFA.DAS.AODP.Data.Entities.Qualification;
 
-public partial class QualificationDiscussionHistory
+public partial record QualificationDiscussionHistory
 {
     public Guid Id { get; set; }
     public Guid QualificationId { get; set; }

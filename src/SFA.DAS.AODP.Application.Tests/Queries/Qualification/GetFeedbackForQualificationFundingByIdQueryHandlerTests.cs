@@ -5,7 +5,7 @@ using Moq;
 using SFA.DAS.AODP.Application.Queries.Qualification;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
-using SFA.DAS.AODP.Shared.UnitTests.Helpers;
+using SFA.DAS.AODP.Testing.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Threading;
