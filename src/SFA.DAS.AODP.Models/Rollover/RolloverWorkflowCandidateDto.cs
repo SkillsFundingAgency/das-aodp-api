@@ -7,7 +7,8 @@ public class RolloverWorkflowCandidateDto
 {
     public Guid Id { get; set; }
     public Guid RolloverWorkflowRunId { get; set; }
-    public Guid QualificationVersionId { get; set; }
+    public string SourceType { get; set; } = null!;
+    public Guid SourceQualificationId { get; set; }
     public Guid FundingOfferId { get; set; }
     public string AcademicYear { get; set; } = null!;
     public Guid RolloverCandidatesId { get; set; }

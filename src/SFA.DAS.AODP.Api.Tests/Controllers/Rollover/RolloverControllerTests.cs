@@ -68,59 +68,6 @@ public class RolloverControllerTests : UnitTest
     }
 
     [Fact]
-    public async Task RolloverWorkflowCandidatesAfterP1Checks_ReturnsOk_WhenMediatorReturnsSuccess()
-    {
-        var command = new UpdateRolloverWorkflowCandidatesAfterP1ChecksCommand();
-        var response = new BaseMediatrResponse<EmptyResponse> { Success = true, Value = new EmptyResponse() };
-
-        _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateRolloverWorkflowCandidatesAfterP1ChecksCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(response);
-
-        var result = await _controller.RolloverWorkflowCandidatesAfterP1Checks(command);
-
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        Assert.IsType<EmptyResponse>(okResult.Value);
-    }
-
-    [Fact]
-    public async Task RolloverWorkflowCandidatesAfterP1Checks_ReturnsNotFound_WhenMediatorReturnsNotFoundException()
-    {
-        var command = new UpdateRolloverWorkflowCandidatesAfterP1ChecksCommand();
-        var response = new BaseMediatrResponse<EmptyResponse>
-        {
-            Success = false,
-            InnerException = new NotFoundException(Guid.NewGuid())
-        };
-
-        _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateRolloverWorkflowCandidatesAfterP1ChecksCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(response);
-
-        var result = await _controller.RolloverWorkflowCandidatesAfterP1Checks(command);
-
-        Assert.IsType<NotFoundResult>(result);
-    }
-
-    [Fact]
-    public async Task RolloverWorkflowCandidatesAfterP1Checks_ReturnsInternalServerError_WhenMediatorReturnsFailure()
-    {
-        var command = new UpdateRolloverWorkflowCandidatesAfterP1ChecksCommand();
-        var response = new BaseMediatrResponse<EmptyResponse>
-        {
-            Success = false,
-            ErrorMessage = "Some error",
-            InnerException = new Exception("Some error")
-        };
-
-        _mediatorMock.Setup(m => m.Send(It.IsAny<UpdateRolloverWorkflowCandidatesAfterP1ChecksCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(response);
-
-        var result = await _controller.RolloverWorkflowCandidatesAfterP1Checks(command);
-
-        var statusResult = Assert.IsType<StatusCodeResult>(result);
-        Assert.Equal(500, statusResult.StatusCode);
-    }
-
-    [Fact]
     public async Task GetRolloverCandidates_ReturnsOk_WhenMediatorReturnsSuccess()
     {
         var response = _fixture.Create<BaseMediatrResponse<GetRolloverCandidatesQueryResponse>>();

@@ -23,8 +23,15 @@ namespace SFA.DAS.AODP.Models.Rollover
 
     [ExcludeFromCodeCoverage]
     public record QualificationFundingKey(
-        Guid QualificationVersionId,
+        Guid SourceQualificationId,
         Guid FundingOfferId);
+
+    [ExcludeFromCodeCoverage]
+    public record SourceQualificationFundingKey(
+        string SourceType,
+        Guid SourceQualificationId,
+        Guid FundingOfferId,
+        string AcademicYear);
 
     [ExcludeFromCodeCoverage]
     public record FundingExtensionCandidateValidationContext(

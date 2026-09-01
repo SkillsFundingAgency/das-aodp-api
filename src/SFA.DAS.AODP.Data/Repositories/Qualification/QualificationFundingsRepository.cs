@@ -32,12 +32,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
             await _context.SaveChangesAsync();
         }
 
-        public async Task RemoveAsync(List<QualificationFundings> qualificationFundings)
-        {
-            _context.QualificationFundings.RemoveRange(qualificationFundings);
-            await _context.SaveChangesAsync();
-        }
-
         public async Task CreateAsync(List<QualificationFundings> qualificationFundings)
         {
             foreach (var qualificationFunding in qualificationFundings)
@@ -49,29 +43,37 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
         }
 
         public async Task<List<QualificationFundings>> GetRolloverQualificationFundingsAsync(
-            List<QualificationFundingKey> candidates,
-            CancellationToken cancellationToken)
+    List<QualificationFundingKey> candidates,
+    CancellationToken cancellationToken)
         {
             if (candidates.Count == 0)
             {
                 return [];
             }
 
-            var keySet = candidates
-                .Select(x => (x.QualificationVersionId, x.FundingOfferId))
-                .ToHashSet();
-
-            var qualificationVersionIds = keySet
-                .Select(x => x.QualificationVersionId)
+            var sourceQualificationIds = candidates
+                .Select(x => x.SourceQualificationId)
+                .Distinct()
                 .ToList();
 
-            var possibleFundings = await _context.QualificationFundings
+            var fundingOfferIds = candidates
+                .Select(x => x.FundingOfferId)
+                .Distinct()
+                .ToList();
+
+            var fundings = await _context.QualificationFundings
                 .AsNoTracking()
-                .Where(qf => qualificationVersionIds.Contains(qf.QualificationVersionId))
+                .Where(qf =>
+                    sourceQualificationIds.Contains(qf.QualificationVersionId) &&
+                    fundingOfferIds.Contains(qf.FundingOfferId))
                 .ToListAsync(cancellationToken);
 
-            return possibleFundings
-                .Where(qf => keySet.Contains((qf.QualificationVersionId, qf.FundingOfferId)))
+            var keySet = candidates
+                .Select(x => (x.SourceQualificationId, x.FundingOfferId))
+                .ToHashSet();
+
+            return fundings
+                .Where(x => keySet.Contains((x.QualificationVersionId, x.FundingOfferId)))
                 .ToList();
         }
     }

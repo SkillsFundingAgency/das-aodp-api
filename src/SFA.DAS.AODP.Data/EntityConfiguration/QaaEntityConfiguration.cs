@@ -13,39 +13,21 @@ public class QaaEntityConfiguration : IEntityTypeConfiguration<RegulatedQaaQuali
 {
     public void Configure(EntityTypeBuilder<RegulatedQaaQualification> builder)
     {
-        const string datetime2 = "datetime2";
         const string nvarchar50 = "nvarchar(50)";
 
         builder
             .Property(q => q.StartDate)
             .HasConversion<DateOnlyToDateTimeConverter>()
-            .HasColumnType(datetime2);
+            .HasColumnType("date");
 
         builder
             .Property(q => q.LastDateForRegistration)
             .HasConversion<DateOnlyToDateTimeConverter>()
-            .HasColumnType(datetime2);
+            .HasColumnType("date");
 
         builder
-            .Property(q => q.Age1619FundingApprovalEndDate)
-            .HasConversion<NullableDateOnlyToDateTimeConverter>()
-            .HasColumnType(datetime2);
-
-        builder
-            .Property(q => q.AdvancedLearnerLoansFundingApprovalEndDate)
-            .HasConversion<NullableDateOnlyToDateTimeConverter>()
-            .HasColumnType(datetime2);
-
-        builder
-            .Property(q => q.LegalEntitlementL2L3FundingApprovalEndDate)
-            .HasConversion<NullableDateOnlyToDateTimeConverter>()
-            .HasColumnType(datetime2);
-
-        builder
-            .Property(q => q.SectorSubjectArea)
-            .HasConversion(
-                ssaTier => ssaTier.Name,
-                ssaName => SectorSubjectArea.FromName(ssaName));
+            .Property(q => q.SectorSubjectAreaName)
+            .HasColumnName("SectorSubjectArea");
 
         builder
             .Property(q => q.LatestImportComparisonOutcome)

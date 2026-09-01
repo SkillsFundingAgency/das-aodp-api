@@ -7,7 +7,6 @@ namespace SFA.DAS.AODP.Data.Repositories.Qualification
     {
         Task CreateAsync(List<QualificationFundings> qualificationFundings);
         Task<List<QualificationFundings>> GetByIdAsync(Guid applicationReviewId);
-        Task RemoveAsync(List<QualificationFundings> qualificationFundings);
         Task UpdateAsync(List<QualificationFundings> qualificationFundings);
         Task<List<QualificationFundings>> GetRolloverQualificationFundingsAsync(
             List<QualificationFundingKey> candidates,

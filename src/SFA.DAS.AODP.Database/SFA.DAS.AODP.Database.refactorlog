@@ -56,4 +56,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ArchivedFilename" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="7a2f6e0c-9b4a-4d7d-9f0a-2c3e8b1f6a4d" ChangeDateTime="08/11/2026 09:00:00">
+    <Property Name="ElementName" Value="[dbo].[RolloverCandidates].[QualificationVersionId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[RolloverCandidates]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="SourceQualificationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1d4c8f2b-3e6a-4a1d-8c5f-7b9d0e2a4c6f" ChangeDateTime="08/11/2026 09:00:01">
+    <Property Name="ElementName" Value="[dbo].[RolloverWorkflowCandidate].[QualificationVersionId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[RolloverWorkflowCandidate]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="SourceQualificationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9f3b6d1e-5a8c-47f2-b0d4-1e6c9a3f7b2d" ChangeDateTime="08/11/2026 09:00:02">
+    <Property Name="ElementName" Value="[dbo].[FundingExtensionStaging].[QualificationFundingId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[FundingExtensionStaging]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="SourceFundingRecordId" />
+  </Operation>
 </Operations>

@@ -31,8 +31,8 @@ public class RemovePreviousWorkflowCandidatesTests
         var olderRun = Guid.NewGuid();
         var now = DateTime.UtcNow;
 
-        var c1 = RolloverWorkflowCandidate.Create(latestRun, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now, null, now);
-        var c2 = RolloverWorkflowCandidate.Create(olderRun, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now, null, now);
+        var c1 = RolloverWorkflowCandidate.Create(latestRun, Guid.NewGuid(), RolloverSourceTypes.Ofqual, Guid.NewGuid(), Guid.NewGuid(), "2024/25", 1, now, null, now);
+        var c2 = RolloverWorkflowCandidate.Create(olderRun, Guid.NewGuid(), RolloverSourceTypes.Qaa, Guid.NewGuid(),  Guid.NewGuid(), "2024/25", 1, now, null, now);
 
         await db.RolloverWorkflowCandidates.AddRangeAsync(c1, c2);
         

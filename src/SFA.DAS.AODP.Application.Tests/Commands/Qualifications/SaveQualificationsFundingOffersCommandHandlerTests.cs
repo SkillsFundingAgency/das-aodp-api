@@ -31,9 +31,11 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             _qualificationDiscussionHistoryRepositoryMock = _fixture.Freeze<Mock<IQualificationDiscussionHistoryRepository>>();
             _qualificationsRepositoryMock = _fixture.Freeze<Mock<IQualificationsRepository>>();
             _fundingOfferRepositoryMock = _fixture.Freeze<Mock<IFundingOfferRepository>>();
-
             _handler = new SaveQualificationsFundingOffersCommandHandler(
-                _qualificationFundingsRepositoryMock.Object, _qualificationDiscussionHistoryRepositoryMock.Object, _fundingOfferRepositoryMock.Object, _qualificationsRepositoryMock.Object);
+                _qualificationFundingsRepositoryMock.Object,
+                _qualificationDiscussionHistoryRepositoryMock.Object,
+                _fundingOfferRepositoryMock.Object,
+                _qualificationsRepositoryMock.Object);
         }
 
         [Fact]
@@ -53,8 +55,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             Assert.True(result.Success);
 
             _qualificationFundingsRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<List<QualificationFundings>>()), Times.Once);
-            _qualificationFundingsRepositoryMock.Verify(repo => repo.RemoveAsync(It.IsAny<List<QualificationFundings>>()), Times.Never);
-
             _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<QualificationDiscussionHistory>()), Times.Once);
         }
 
@@ -82,7 +82,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             // Assert
             Assert.True(result.Success);
             _qualificationFundingsRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<List<QualificationFundings>>()), Times.Never);
-            _qualificationFundingsRepositoryMock.Verify(repo => repo.RemoveAsync(It.IsAny<List<QualificationFundings>>()), Times.Never);
             _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<QualificationDiscussionHistory>()), Times.Once);
         }
 
@@ -106,7 +105,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
         }
 
         [Fact]
-        public async Task Handle_DoesNotRemoveExistingOffers()
+        public async Task Handle_DoesNotDeleteExistingOffers_WhenTheyAreNotSelected()
         {
             var command = _fixture.Create<SaveQualificationsFundingOffersCommand>();
 
@@ -119,19 +118,19 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
             _fundingOfferRepositoryMock.Setup(repo => repo.GetFundingOffersAsync())
                 .ReturnsAsync(fundingOffers);
 
-            // No new offers selected
             command.SelectedOfferIds.Clear();
 
             var result = await _handler.Handle(command, CancellationToken.None);
 
             Assert.True(result.Success);
-
-            // Ensure nothing is removed
-            _qualificationFundingsRepositoryMock.Verify(repo => repo.RemoveAsync(It.IsAny<List<QualificationFundings>>()), Times.Never);
-
-            // Ensure discussion history does NOT mention removals
+            _qualificationFundingsRepositoryMock.Verify(
+                repo => repo.UpdateAsync(It.IsAny<List<QualificationFundings>>()),
+                Times.Never);
+            _qualificationFundingsRepositoryMock.Verify(
+                repo => repo.CreateAsync(It.IsAny<List<QualificationFundings>>()),
+                Times.Never);
             _qualificationDiscussionHistoryRepositoryMock.Verify(repo => repo.CreateAsync(It.Is<QualificationDiscussionHistory>(qdh =>
-                !qdh.Notes.Contains("removed"))), Times.Once);
+                qdh.Notes != null && qdh.Notes.Contains("no offers have been selected"))), Times.Once);
         }
 
 

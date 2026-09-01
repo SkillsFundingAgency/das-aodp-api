@@ -2,7 +2,8 @@
     [Id]                     UNIQUEIDENTIFIER NOT NULL,
     [RolloverWorkflowRunId]  UNIQUEIDENTIFIER NOT NULL,
     [RolloverCandidatesId]   UNIQUEIDENTIFIER NOT NULL,
-    [QualificationVersionId] UNIQUEIDENTIFIER NOT NULL,
+    [SourceType]             NVARCHAR (50)    NOT NULL DEFAULT 'Ofqual',
+    [SourceQualificationId]  UNIQUEIDENTIFIER NOT NULL,
     [FundingOfferId]         UNIQUEIDENTIFIER NOT NULL,
     [AcademicYear]           NVARCHAR (255)   NOT NULL,
     [RolloverRound]          INT              NOT NULL,
@@ -14,6 +15,8 @@
     [ProposedFundingEndDate] DATETIME2 (7)    NULL,
     [CreatedAt]              DATETIME2 (7)    NOT NULL,
     [UpdatedAt]              DATETIME2 (7)    NOT NULL,
+    [InvalidatedAt]          DATETIME2 (7)    NULL,
+    [InvalidationReason]     NVARCHAR (255)   NULL,
     PRIMARY KEY CLUSTERED ([Id] ASC),
     FOREIGN KEY ([RolloverWorkflowRunId]) REFERENCES [dbo].[RolloverWorkflowRun] ([Id]),
     FOREIGN KEY ([RolloverCandidatesId]) REFERENCES [dbo].[RolloverCandidates] ([Id])
@@ -29,4 +32,4 @@ CREATE NONCLUSTERED INDEX [IX_WorkflowCandidate_RolloverCandidatesId]
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [UX_WorkflowCandidate_Run_NaturalKey]
-    ON [dbo].[RolloverWorkflowCandidate]([RolloverWorkflowRunId] ASC, [QualificationVersionId] ASC, [FundingOfferId] ASC, [AcademicYear] ASC, [RolloverRound] ASC);
+    ON [dbo].[RolloverWorkflowCandidate]([RolloverWorkflowRunId] ASC, [SourceType] ASC, [SourceQualificationId] ASC, [FundingOfferId] ASC, [AcademicYear] ASC, [RolloverRound] ASC);

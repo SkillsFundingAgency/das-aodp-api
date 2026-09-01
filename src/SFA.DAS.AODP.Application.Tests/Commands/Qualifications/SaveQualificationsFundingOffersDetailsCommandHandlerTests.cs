@@ -26,9 +26,9 @@ namespace SFA.DAS.AODP.Application.UnitTests.Commands.Qualifications
 
             _qualificationFundingsRepositoryMock = _fixture.Freeze<Mock<IQualificationFundingsRepository>>();
             _qualificationDiscussionHistoryRepositoryMock = _fixture.Freeze<Mock<IQualificationDiscussionHistoryRepository>>();
-
             _handler = new SaveQualificationsFundingOffersDetailsCommandHandler(
-                _qualificationFundingsRepositoryMock.Object, _qualificationDiscussionHistoryRepositoryMock.Object);
+                _qualificationFundingsRepositoryMock.Object,
+                _qualificationDiscussionHistoryRepositoryMock.Object);
         }
 
         [Fact]

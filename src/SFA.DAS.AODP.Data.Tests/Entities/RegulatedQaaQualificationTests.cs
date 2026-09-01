@@ -41,10 +41,8 @@ public class RegulatedQaaQualificationTests : UnitTest
         qualification.Level.ShouldBe("Level 3");
         qualification.Type.ShouldBe("Access to Higher Education");
         qualification.Status.ShouldBe("Approved");
-        qualification.Age1619FundingApprovalEndDate.ShouldBeNull();
-        qualification.AdvancedLearnerLoansFundingApprovalEndDate.ShouldBeNull();
-        qualification.LegalEntitlementL2L3FundingApprovalEndDate.ShouldBeNull();
-        qualification.Id.ShouldBe(Guid.Empty);
+        qualification.Fundings.ShouldBeEmpty();
+        qualification.Id.ShouldNotBe(Guid.Empty);
     }
 
     [Theory]
@@ -62,6 +60,7 @@ public class RegulatedQaaQualificationTests : UnitTest
         var qualification1 = RegulatedQaaQualification.Create(
             snapshot1, TestAimCode, TestQualificationTitle, TestAwardingBody,
             _testStartDate, lastDateForRegistration, _testSectorSubjectArea);
+        SetId(qualification1, Guid.NewGuid());
 
         qualification1.SetChangeOutcome(outcome, changeType);
 
@@ -74,9 +73,10 @@ public class RegulatedQaaQualificationTests : UnitTest
         await qualification1.SetFundingApprovalEndDateAsync(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object, CancellationToken);
 
         // Assert
-        qualification1.Age1619FundingApprovalEndDate.ShouldBe(lastDateForRegistration);
-        qualification1.AdvancedLearnerLoansFundingApprovalEndDate.ShouldBe(lastDateForRegistration);
-        qualification1.LegalEntitlementL2L3FundingApprovalEndDate.ShouldBe(lastDateForRegistration);
+        qualification1.Fundings.Count.ShouldBe(3);
+        qualification1.GetFundingApprovalEndDateForFundingStream(FundingStream.Age1619).ShouldBe(lastDateForRegistration);
+        qualification1.GetFundingApprovalEndDateForFundingStream(FundingStream.AdvancedLearnerLoans).ShouldBe(lastDateForRegistration);
+        qualification1.GetFundingApprovalEndDateForFundingStream(FundingStream.LegalEntitlementL2L3).ShouldBe(lastDateForRegistration);
     }
 
     [Theory]
@@ -92,6 +92,7 @@ public class RegulatedQaaQualificationTests : UnitTest
         var qualification1 = RegulatedQaaQualification.Create(
             snapshot1, TestAimCode, TestQualificationTitle, TestAwardingBody,
             _testStartDate, lastDateForRegistration, _testSectorSubjectArea);
+        SetId(qualification1, Guid.NewGuid());
 
         qualification1.SetChangeOutcome(outcome, changeType);
 
@@ -99,8 +100,13 @@ public class RegulatedQaaQualificationTests : UnitTest
         await qualification1.SetFundingApprovalEndDateAsync(publicationDate, mockQaaFundingApprovalEndDateCalculator.Object, CancellationToken);
 
         // Assert
-        qualification1.Age1619FundingApprovalEndDate.ShouldBeNull();
-        qualification1.AdvancedLearnerLoansFundingApprovalEndDate.ShouldBeNull();
-        qualification1.LegalEntitlementL2L3FundingApprovalEndDate.ShouldBeNull();
+        qualification1.Fundings.ShouldBeEmpty();
+    }
+
+    private static void SetId(RegulatedQaaQualification qualification, Guid id)
+    {
+        typeof(RegulatedQaaQualification)
+            .GetProperty(nameof(RegulatedQaaQualification.Id))!
+            .SetValue(qualification, id);
     }
 }

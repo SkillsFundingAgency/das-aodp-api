@@ -20,6 +20,13 @@ public class AcademicYearProvider(ISystemClockProvider clock) : IAcademicYearPro
     }
 
     /// <inheritdoc/>.
+    public string GetCurrentAcademicYear()
+    {
+        var endYear = GetCurrentAcademicYearEndDate().Year;
+        return $"{endYear - 1}/{endYear % 100:00}";
+    }
+
+    /// <inheritdoc/>.
     public DateOnly GetAcademicYearEndForDate(DateOnly dateOnly)
     {
         if (dateOnly > new DateOnly(dateOnly.Year, 7, 31))
