@@ -8,7 +8,6 @@ using SFA.DAS.AODP.Data.Providers;
 using SFA.DAS.AODP.Data.Repositories.QaaQualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Infrastructure;
-using SFA.DAS.AODP.Models.Settings;
 using System.Text;
 using SFA.DAS.AODP.Testing.Testing;
 
@@ -22,10 +21,9 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
         private readonly Mock<IQualificationOutputFileLogRepository> _logRepo;
         private readonly Mock<IBlobStorageService> _blob;
         private readonly Mock<IQaaFundingApprovalEndDateCalculator> _fundingApprovalEndDateCalculator;
-        private readonly OutputFileBlobStorageSettings _settings;
         private readonly GetQualificationOutputFileQueryHandler _handler;
 
-        private const string ContainerName = "unit-test-container";
+        private const string ContainerName = "funded-qualifications-output";
         private const string CsvContentType = "text/csv";
         private const string ErrorNoQualifications = "No qualifications found for the output file.";
         private const string ErrorGeneric = "Exception message";
@@ -51,8 +49,6 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             _blob = _fixture.Freeze<Mock<IBlobStorageService>>();
             _logRepo = _fixture.Freeze<Mock<IQualificationOutputFileLogRepository>>();
             _fundingApprovalEndDateCalculator = _fixture.Freeze<Mock<IQaaFundingApprovalEndDateCalculator>>();
-            _settings = _fixture.Freeze<OutputFileBlobStorageSettings>();
-            _settings.ContainerName = ContainerName;
 
             _handler = _fixture.Create<GetQualificationOutputFileQueryHandler>();
         }
@@ -117,7 +113,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             });
 
             // Assert – blob upload (one call, correct name, container, content type)
-            _blob.Verify(x => x.UploadFileAsync(_settings.ContainerName, expectedFile,
+            _blob.Verify(x => x.UploadFileAsync(ContainerName, expectedFile,
                                                 It.IsAny<Stream>(), CsvContentType, It.IsAny<CancellationToken>()), Times.Once);
 
             Assert.Multiple(() =>
@@ -262,7 +258,7 @@ namespace SFA.DAS.AODP.Application.UnitTests.Queries.Qualification
             Assert.NotEmpty(result.Value.FileContent);
 
             _blob.Verify(x => x.UploadFileAsync(
-                _settings.ContainerName,
+                ContainerName,
                 expectedFilename,
                 It.IsAny<Stream>(),
                 "text/csv",
