@@ -73,4 +73,16 @@ public class FileRecordRepository : IFileRecordRepository
         return fileRecord;
     }
 
+    public async Task<FileRecord?> GetByCategoryAsync(FileCategory category)
+    {
+        return await _context.FileRecords
+            .SingleOrDefaultAsync(f => f.FileCategory == category);
+    }
+
+    public async Task UpdateAsync(FileRecord fileRecord)
+    {
+        _context.FileRecords.Update(fileRecord);
+        await _context.SaveChangesAsync();
+    }
+
 }

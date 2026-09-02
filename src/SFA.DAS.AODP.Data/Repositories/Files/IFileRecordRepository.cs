@@ -13,6 +13,8 @@ namespace SFA.DAS.AODP.Data.Repositories.Files
         Task<IReadOnlyList<FileRecord>> GetByApplicationIdAsync(Guid applicationId);
         Task DeleteAsync(Guid fileId);
         Task<FileRecord?> GetByIdAsync(Guid fileId);
+        Task<FileRecord?> GetByCategoryAsync(FileCategory category);
         Task<FileRecord> AddAsync(FileRecord fileRecord);
+        Task UpdateAsync(FileRecord fileRecord);
     }
 }

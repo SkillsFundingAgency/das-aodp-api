@@ -80,6 +80,172 @@ namespace SFA.DAS.AODP.Application.Tests.Commands.Files
         }
 
         [Fact]
+        public async Task Handle_PldnsUpload_WhenNoExistingRecord_AddsFileRecord()
+        {
+            // Arrange
+            var command = new CreateFileMetadataCommand
+            {
+                FileCategory = FileCategory.Pldns,
+                FileName = "Pldns.xlsx",
+                ContentType = "text/csv",
+                BlobContainer = "importfilescontainer",
+                BlobPath = "Pldns/" + Guid.NewGuid(),
+                UploadedBy = "Alice Admin"
+            };
+
+            _repository
+                .Setup(r => r.GetByCategoryAsync(FileCategory.Pldns))
+                .ReturnsAsync((FileRecord?)null);
+
+            _repository
+                .Setup(r => r.AddAsync(It.IsAny<FileRecord>()))
+                .ReturnsAsync((FileRecord f) => f);
+
+            // Act
+            var result = await _handler.Handle(command, TestContext.Current.CancellationToken);
+
+            // Assert
+            Assert.Multiple(() =>
+            {
+                Assert.True(result.Success);
+
+                _repository.Verify(r => r.GetByCategoryAsync(FileCategory.Pldns), Times.Once);
+                _repository.Verify(r =>
+                    r.AddAsync(It.Is<FileRecord>(f =>
+                        f.FileCategory == FileCategory.Pldns &&
+                        f.BlobPath == command.BlobPath &&
+                        f.ScanResult == MalwareScanStatus.NotScanned)),
+                    Times.Once);
+                _repository.Verify(r => r.UpdateAsync(It.IsAny<FileRecord>()), Times.Never);
+            });
+        }
+
+        [Fact]
+        public async Task Handle_PldnsUpload_WhenExistingRecord_UpdatesInPlace_AndResetsScanStatus()
+        {
+            // Arrange
+            var command = new CreateFileMetadataCommand
+            {
+                FileCategory = FileCategory.Pldns,
+                FileName = "Pldns.xlsx",
+                ContentType = "text/csv",
+                BlobContainer = "importfilescontainer",
+                BlobPath = "Pldns/" + Guid.NewGuid(),
+                UploadedBy = "Bob Admin"
+            };
+
+            var existing = new FileRecord
+            {
+                Id = Guid.NewGuid(),
+                FileCategory = FileCategory.Pldns,
+                FileName = "Pldns.xlsx",
+                ContentType = "text/csv",
+                BlobContainer = "importfilescontainer",
+                BlobPath = "Pldns/" + Guid.NewGuid(),
+                UploadedByDisplayName = "Alice Admin",
+                UploadedAt = DateTime.UtcNow.AddDays(-1),
+                ScanResult = MalwareScanStatus.Clean,
+                LastScanAt = DateTime.UtcNow.AddDays(-1)
+            };
+
+            _repository
+                .Setup(r => r.GetByCategoryAsync(FileCategory.Pldns))
+                .ReturnsAsync(existing);
+
+            // Act
+            var result = await _handler.Handle(command, TestContext.Current.CancellationToken);
+
+            // Assert
+            Assert.Multiple(() =>
+            {
+                Assert.True(result.Success);
+
+                _repository.Verify(r => r.AddAsync(It.IsAny<FileRecord>()), Times.Never);
+                _repository.Verify(r =>
+                    r.UpdateAsync(It.Is<FileRecord>(f =>
+                        f.Id == existing.Id &&
+                        f.BlobPath == command.BlobPath &&
+                        f.UploadedByDisplayName == command.UploadedBy &&
+                        f.ScanResult == MalwareScanStatus.NotScanned &&
+                        f.LastScanAt == null)),
+                    Times.Once);
+            });
+        }
+
+        [Fact]
+        public async Task Handle_DefundingListUpload_WhenExistingRecord_UpdatesInPlace()
+        {
+            // Arrange
+            var command = new CreateFileMetadataCommand
+            {
+                FileCategory = FileCategory.DefundingList,
+                FileName = "DefundingList.xlsx",
+                BlobContainer = "importfilescontainer",
+                BlobPath = "DefundingList/" + Guid.NewGuid(),
+                UploadedBy = "Bob Admin"
+            };
+
+            var existing = new FileRecord
+            {
+                Id = Guid.NewGuid(),
+                FileCategory = FileCategory.DefundingList,
+                ScanResult = MalwareScanStatus.Malicious
+            };
+
+            _repository
+                .Setup(r => r.GetByCategoryAsync(FileCategory.DefundingList))
+                .ReturnsAsync(existing);
+
+            // Act
+            var result = await _handler.Handle(command, TestContext.Current.CancellationToken);
+
+            // Assert
+            Assert.Multiple(() =>
+            {
+                Assert.True(result.Success);
+
+                _repository.Verify(r => r.AddAsync(It.IsAny<FileRecord>()), Times.Never);
+                _repository.Verify(r =>
+                    r.UpdateAsync(It.Is<FileRecord>(f =>
+                        f.Id == existing.Id &&
+                        f.ScanResult == MalwareScanStatus.NotScanned)),
+                    Times.Once);
+            });
+        }
+
+        [Fact]
+        public async Task Handle_QuestionUpload_NeverChecksForExistingRecord()
+        {
+            // Arrange
+            var command = new CreateFileMetadataCommand
+            {
+                FileCategory = FileCategory.QuestionUpload,
+                ApplicationId = Guid.NewGuid(),
+                QuestionId = Guid.NewGuid(),
+                FileName = "evidence.pdf",
+                BlobContainer = "files",
+                BlobPath = "some/path/" + Guid.NewGuid(),
+                UploadedBy = "Alice Admin"
+            };
+
+            _repository
+                .Setup(r => r.AddAsync(It.IsAny<FileRecord>()))
+                .ReturnsAsync((FileRecord f) => f);
+
+            // Act
+            var result = await _handler.Handle(command, TestContext.Current.CancellationToken);
+
+            // Assert
+            Assert.Multiple(() =>
+            {
+                Assert.True(result.Success);
+
+                _repository.Verify(r => r.GetByCategoryAsync(It.IsAny<FileCategory>()), Times.Never);
+                _repository.Verify(r => r.AddAsync(It.IsAny<FileRecord>()), Times.Once);
+            });
+        }
+
+        [Fact]
         public async Task Handle_RepositoryThrowsException_ReturnsFailure()
         {
             // Arrange
