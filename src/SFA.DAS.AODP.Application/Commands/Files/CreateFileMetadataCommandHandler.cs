@@ -54,7 +54,7 @@ namespace SFA.DAS.AODP.Application.Commands.Files
                 {
                     var fileMetadata = new FileRecord
                     {
-                        Id = Guid.NewGuid(),
+                        Id = command.Id ?? Guid.NewGuid(),
                         FileCategory = command.FileCategory,
                         ApplicationId = command.ApplicationId,
                         MessageId = command.MessageId,
