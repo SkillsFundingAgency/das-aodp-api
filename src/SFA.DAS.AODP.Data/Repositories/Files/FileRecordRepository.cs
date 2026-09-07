@@ -66,7 +66,11 @@ public class FileRecordRepository : IFileRecordRepository
 
     public async Task<FileRecord> AddAsync(FileRecord fileRecord)
     {
-        fileRecord.Id = Guid.NewGuid();
+        if (fileRecord.Id == Guid.Empty)
+        {
+            fileRecord.Id = Guid.NewGuid();
+        }
+
         await _context.FileRecords.AddAsync(fileRecord);
         await _context.SaveChangesAsync();
 
