@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.Feedback;
+using SFA.DAS.AODP.Data.Entities.Files;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Entities.Import;
 using SFA.DAS.AODP.Data.Entities.Jobs;
@@ -68,6 +69,9 @@ namespace SFA.DAS.AODP.Data.Context
         DbSet<QualificationOutputFileLog> QualificationOutputFileLog { get; set; }
 
         DbSet<QualificationFundingStatus> QualificationFundingStatus { get; set; }
+
+        DbSet<FileRecord> FileRecords { get; set; }
+
         DbSet<RegulatedQaaQualification> RegulatedQaaQualifications { get; set; }
         DbSet<RegulatedQaaQualificationHistory> RegulatedQaaQualificationHistory { get; set; }
 

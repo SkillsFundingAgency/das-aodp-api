@@ -27,7 +27,7 @@ public static class AddServiceRegistrationsExtension
         var formBuilderSettings = configuration.GetRequiredSection("FormBuilderSettings").Get<FormBuilderSettings>();
         if (formBuilderSettings != null) services.AddSingleton(formBuilderSettings);
 
-        var blobStorageSettings = configuration.GetRequiredSection("OutputFileBlobStorageSettings").Get<OutputFileBlobStorageSettings>();
+        var blobStorageSettings = configuration.GetRequiredSection("BlobStorageSettings").Get<BlobStorageSettings>();
         if (blobStorageSettings != null) services.AddSingleton(blobStorageSettings);
 
         services.Configure<FuzzySearchSettings>(configuration.GetSection("FuzzySearchSettings"));
@@ -62,7 +62,6 @@ public static class AddServiceRegistrationsExtension
         services.AddScoped<IFundingExtensionProjectionService, FundingExtensionProjectionService>();
         services.AddScoped<ISubmitFundingExtensionService, SubmitFundingExtensionService>();
 
-        services.AddScoped<ISystemClockService, SystemClockService>();
         services.AddScoped<IGuidProvider, DefaultGuidProvider>();
         services.AddScoped<IAcademicYearService, AcademicYearService>();
 

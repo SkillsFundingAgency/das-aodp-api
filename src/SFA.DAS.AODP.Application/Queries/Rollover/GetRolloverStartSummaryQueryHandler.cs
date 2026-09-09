@@ -19,23 +19,15 @@ public class GetRolloverStartSummaryQueryHandler(IRolloverRepository repository,
             
             var result = await repository.GetRolloverStartSummaryAsync(currentAcademicYear, cancellationToken);
 
-            if (result != null) 
+            response.Value = new GetRolloverStartSummaryQueryResponse
             {
-                response.Value = new GetRolloverStartSummaryQueryResponse
-                {
-                    TotalCandidatesCount = result.TotalCandidatesCount,
-                    CandidatesEligibleCount = result.CandidatesEligibleCount,
-                    CandidatesIneligibleCount = result.CandidatesIneligibleCount,
-                    CandidatesRemainingCount = result.CandidatesRemainingCount
-                };
+                TotalCandidatesCount = result.TotalCandidatesCount,
+                CandidatesEligibleCount = result.CandidatesEligibleCount,
+                CandidatesIneligibleCount = result.CandidatesIneligibleCount,
+                CandidatesRemainingCount = result.CandidatesRemainingCount
+            };
 
-                response.Success = true;
-            }
-            else
-            {
-                response.Success = false;
-                response.ErrorMessage = "Not sure what goes here.";
-            }
+            response.Success = true;
         }
         catch (Exception ex)
         {

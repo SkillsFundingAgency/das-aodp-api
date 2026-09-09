@@ -189,6 +189,7 @@
     <Build Include="Tables\Rollover\RolloverWorkflowRunFundingOffer.sql" />
     <Build Include="Views\view_RolloverWorkflowCandidatesP1Checks.sql" />
     <None Include="MigrationScripts\MVS1_Drop_OutputChangedQualifications_View.sql" />
+    <Build Include="Tables\FileRecords.sql" />
     <Build Include="Views\Output\view_OutputQaaQualifications.sql" />
     <None Include="MigrationScripts\MVS1_AWARD_1047_Rollover_action_types.sql" />
     <None Include="MigrationScripts\MVS1_OfferTypes_DisplayName.sql">

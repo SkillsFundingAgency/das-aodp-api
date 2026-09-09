@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using SFA.DAS.AODP.Data.Entities;
 using SFA.DAS.AODP.Data.Entities.Application;
 using SFA.DAS.AODP.Data.Entities.Feedback;
+using SFA.DAS.AODP.Data.Entities.Files;
 using SFA.DAS.AODP.Data.Entities.FormBuilder;
 using SFA.DAS.AODP.Data.Entities.Import;
 using SFA.DAS.AODP.Data.Entities.Jobs;
@@ -58,6 +59,8 @@ namespace SFA.DAS.AODP.Data.Context
         public DbSet<ChangedQualificationExport> ChangedQualificationExport { get; set; }
 
         public DbSet<QualificationOutputFile> QualificationExport { get; set; }
+
+        public DbSet<FileRecord> FileRecords { get; set; }
 
         public virtual DbSet<Job> Jobs { get; set; }
         public virtual DbSet<JobConfiguration> JobConfigurations { get; set; }
@@ -129,6 +132,21 @@ namespace SFA.DAS.AODP.Data.Context
                 .HasConversion(
                     ssaTier => ssaTier.Name,
                     ssaName => SectorSubjectArea.FromName(ssaName));
+
+
+            modelBuilder.Entity<FileRecord>(entity =>
+            {
+                entity.Property(e => e.FileCategory)
+                  .HasConversion<string>()
+                  .HasMaxLength(50)
+                  .IsRequired();
+
+                entity.Property(e => e.ScanResult)
+                    .HasConversion<string>()
+                    .HasMaxLength(25)
+                    .IsRequired();
+
+            });
 
             modelBuilder.Entity<RegulatedQaaQualificationHistory>()
                 .Property(q => q.LastDateForRegistrationChangeType)

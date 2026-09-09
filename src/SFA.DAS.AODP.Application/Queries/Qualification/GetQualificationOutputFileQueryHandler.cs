@@ -14,19 +14,15 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
 {
     private readonly IQualificationOutputFileRepository _outputFileRepository;
     private readonly IQualificationOutputFileLogRepository _outputFileLogRepository;
-    private readonly IBlobStorageService _blobStorageService;
-    private readonly OutputFileBlobStorageSettings _storageSettings;
     private readonly IQaaQualificationRepository _qaaQualificationRepository;
     private readonly IQaaFundingApprovalEndDateCalculator _qaaFundingApprovalEndDateCalculator;
 
     public const string NoQualificationsFound = "No qualifications found for the output file.";
     public const string UnexpectedErrorGeneratingFile = "An unexpected error occurred while generating the output file.";
-    public GetQualificationOutputFileQueryHandler(IQualificationOutputFileRepository outputFileRepository, IQualificationOutputFileLogRepository outputFileLogRepository, IBlobStorageService blobStorageService, OutputFileBlobStorageSettings blobStorageSettings, IQaaQualificationRepository qaaQualificationRepository, IQaaFundingApprovalEndDateCalculator qaaFundingApprovalEndDateCalculator)
+    public GetQualificationOutputFileQueryHandler(IQualificationOutputFileRepository outputFileRepository, IQualificationOutputFileLogRepository outputFileLogRepository, IQaaQualificationRepository qaaQualificationRepository, IQaaFundingApprovalEndDateCalculator qaaFundingApprovalEndDateCalculator)
     {
         _outputFileRepository = outputFileRepository;
         _outputFileLogRepository = outputFileLogRepository;
-        _blobStorageService = blobStorageService;
-        _storageSettings = blobStorageSettings;
         _qaaQualificationRepository = qaaQualificationRepository;
         _qaaFundingApprovalEndDateCalculator = qaaFundingApprovalEndDateCalculator;
     }
@@ -86,16 +82,6 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
             var csvFileName = $"{formattedPublicationDate}-AOdPOutputFile.csv";
 
             var csvFileBytes = await BuildCsvBytesAsync(qualificationsWithPublicationStatus);
-
-            using (var csvStream = new MemoryStream(csvFileBytes, writable: false))
-            {
-                await _blobStorageService.UploadFileAsync(
-                    containerName: _storageSettings.ContainerName,
-                    fileName: csvFileName,
-                    content: csvStream,
-                    contentType: "text/csv",
-                    cancellationToken: cancellationToken);
-            }
 
             var history = new QualificationOutputFileLog
             {
