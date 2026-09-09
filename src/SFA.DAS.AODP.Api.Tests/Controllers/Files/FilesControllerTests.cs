@@ -163,7 +163,7 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Files
             var response = new BaseMediatrResponse<GetFileMetadataQueryResponse>
             {
                 Success = true,
-                Value = null
+                Value = null!
             };
 
             _mediatorMock

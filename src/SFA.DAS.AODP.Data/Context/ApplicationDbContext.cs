@@ -66,7 +66,7 @@ namespace SFA.DAS.AODP.Data.Context
         public virtual DbSet<JobConfiguration> JobConfigurations { get; set; }
         public virtual DbSet<JobRun> JobRuns { get; set; }
 
-        public virtual DbSet<FundingOffer> FundingOffers{ get; set; }
+        public virtual DbSet<FundingOffer> FundingOffers { get; set; }
         public virtual DbSet<ActionType> ActionType { get; set; }
         public virtual DbSet<LifecycleStage> LifecycleStages { get; set; }
         public virtual DbSet<AwardingOrganisation> AwardingOrganisation { get; set; }

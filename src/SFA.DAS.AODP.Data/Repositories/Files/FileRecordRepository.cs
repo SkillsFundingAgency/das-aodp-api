@@ -15,14 +15,14 @@ public class FileRecordRepository : IFileRecordRepository
     }
 
     public async Task<List<FileRecord>> GetFilesAsync(
-        IEnumerable<FileCategory> categories,
+        IEnumerable<FileCategory>? categories,
         Guid? applicationId,
         Guid? messageId,
         Guid? questionId)
     {
         IQueryable<FileRecord> query = _context.FileRecords.AsQueryable();
 
-        if (categories != null && categories.Count() > 0)
+        if (categories != null && categories.Any())
             query = query.Where(f => categories.Contains(f.FileCategory));
 
         if (applicationId.HasValue)
