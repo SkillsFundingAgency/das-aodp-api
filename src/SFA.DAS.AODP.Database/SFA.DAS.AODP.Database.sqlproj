@@ -199,6 +199,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Build Include="Tables\QaaQualificationDiscussionHistory.sql" />
+    <None Include="MigrationScripts\AWARD_3560_Drop_blocking_column_changes.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />

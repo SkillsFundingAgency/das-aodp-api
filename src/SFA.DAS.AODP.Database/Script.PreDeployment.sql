@@ -12,3 +12,5 @@
 :r .\MigrationScripts\MVS1_AWARD_855_ConsolidateQaaFundings.sql
 
 :r .\MigrationScripts\MVS1_Pldns_Qan_NVarchar_Fix.sql
+
+:r .\MigrationScripts\AWARD_3560_Drop_blocking_column_changes.sql
