@@ -14,6 +14,7 @@
     [Status] [nvarchar](100) NOT NULL,
     [StartDate] date NOT NULL,
     [LastDateForRegistration] date NOT NULL,
+    [LastDateForCertifications] date NULL,
     [IsDiscontinued] bit NOT NULL DEFAULT 0,
     [DiscontinuedDate] date NULL,
     [SectorSubjectArea] nvarchar(150) NOT NULL,

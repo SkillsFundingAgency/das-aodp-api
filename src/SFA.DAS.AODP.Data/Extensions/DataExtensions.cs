@@ -81,6 +81,7 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IQaaQualificationRepository, QaaQualificationRepository>();
             services.AddScoped<IQaaQualificationFundingsRepository, QaaQualificationFundingsRepository>();
             services.AddScoped<IQaaQualificationDiscussionHistoryRepository, QaaQualificationDiscussionHistoryRepository>();
+            services.AddScoped<IQaaQualificationDownloadLogRepository, QaaQualificationDownloadLogRepository>();
 
             return services;
         }
