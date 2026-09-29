@@ -41,11 +41,18 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
             var qaaQualifications = await _qaaQualificationRepository.GetAllAsync(cancellationToken);
 
             var regulatedQaaQualifications = qaaQualifications.ToList();
-            if (regulatedQaaQualifications.Count > 0)
+            var qaaQualificationsToRecalculate = regulatedQaaQualifications
+                .Where(x => x.RequiresFundingRecalculation)
+                .ToList();
+
+            if (qaaQualificationsToRecalculate.Count > 0)
             {
-                foreach (var qaaQualification in regulatedQaaQualifications)
+                foreach (var qaaQualification in qaaQualificationsToRecalculate)
                 {
-                    await qaaQualification.SetFundingApprovalEndDateAsync(request.PublicationDate, _qaaFundingApprovalEndDateCalculator, cancellationToken);
+                    await qaaQualification.SetFundingApprovalEndDateAsync(
+                        request.PublicationDate,
+                        _qaaFundingApprovalEndDateCalculator,
+                        cancellationToken);
                 }
 
                 await _qaaQualificationRepository.SaveChangesAsync(cancellationToken);
@@ -124,6 +131,7 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
             return response;
         }
     }
+
     private static DateTime? GetMaxFundingEndDate(QualificationOutputFile q)
     {
         DateTime? max = null;

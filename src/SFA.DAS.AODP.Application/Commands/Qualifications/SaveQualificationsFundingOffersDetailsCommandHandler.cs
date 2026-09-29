@@ -11,7 +11,9 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
     {
         private readonly IQualificationFundingsRepository _qualificationFundingsrepository;
         private readonly IQualificationDiscussionHistoryRepository _qualificationDiscussionHistoryRepository;
-        public SaveQualificationsFundingOffersDetailsCommandHandler(IQualificationFundingsRepository repository, IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository)
+        public SaveQualificationsFundingOffersDetailsCommandHandler(
+            IQualificationFundingsRepository repository,
+            IQualificationDiscussionHistoryRepository qualificationDiscussionHistoryRepository)
         {
             _qualificationFundingsrepository = repository;
             _qualificationDiscussionHistoryRepository = qualificationDiscussionHistoryRepository;
@@ -25,44 +27,15 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
             {
                 var fundedOffers = await _qualificationFundingsrepository.GetByIdAsync(request.QualificationVersionId);
 
-                foreach (var detail in request.Details)
-                {
-                    var offer = fundedOffers.FirstOrDefault(a => a.FundingOfferId == detail.FundingOfferId) ?? throw new RecordNotFoundException(detail.FundingOfferId);
-
-                    offer.StartDate = detail.StartDate;
-                    offer.EndDate = detail.EndDate;
-                    offer.Comments = detail.Comments;
-                }
-
-                await _qualificationFundingsrepository.UpdateAsync(fundedOffers);
+                await ApplyFundingChangesAsync(fundedOffers, request.Details);
 
                 if (request.UpdateDiscussionHistory == true)
                 {
-                    StringBuilder qualificationDiscussionHistoryNotes = new();
-                    qualificationDiscussionHistoryNotes.AppendLine("Feedback from DfE:");
-                    if (request.Details != null && request.Details.Count != 0)
-                    {
-                        qualificationDiscussionHistoryNotes.AppendLine("The following offers details have been selected:");
-                        qualificationDiscussionHistoryNotes.AppendLine();
-
-                        foreach (var qf in request.Details)
-                        {
-                            qualificationDiscussionHistoryNotes.AppendLine($"Start date: {qf.StartDate.ToFundingEndDateFormat()}");
-                            qualificationDiscussionHistoryNotes.AppendLine($"End date: {qf.EndDate.ToFundingEndDateFormat()}");
-                            if (!string.IsNullOrWhiteSpace(qf.Comments)) qualificationDiscussionHistoryNotes.AppendLine($"Comments: {qf.Comments}");
-                            qualificationDiscussionHistoryNotes.AppendLine();
-                        }
-                    }
-                    else
-                    {
-                        qualificationDiscussionHistoryNotes.AppendLine("No funding offers have been selected");
-                    }
-
                     await _qualificationDiscussionHistoryRepository.CreateAsync(new QualificationDiscussionHistory
                     {
                         QualificationId = request.QualificationId,
                         UserDisplayName = request.UserDisplayName,
-                        Notes = qualificationDiscussionHistoryNotes.ToString(),
+                        Notes = BuildDiscussionHistoryNotes(request.Details),
                         ActionTypeId = request.ActionTypeId,
                         Timestamp = DateTime.UtcNow
                     });
@@ -76,6 +49,67 @@ namespace SFA.DAS.AODP.Application.Commands.Qualifications
                 response.Success = false;
             }
             return response;
+        }
+
+        private async Task ApplyFundingChangesAsync(
+            List<QualificationFundings> fundedOffers,
+            List<SaveQualificationsFundingOffersDetailsCommand.OfferFundingDetails> details)
+        {
+            var changedDetails = details
+                .Select(detail => new
+                {
+                    Detail = detail,
+                    Funding = fundedOffers.FirstOrDefault(a => a.FundingOfferId == detail.FundingOfferId)
+                        ?? throw new RecordNotFoundException(detail.FundingOfferId)
+                })
+                .Where(x =>
+                    x.Funding.StartDate != x.Detail.StartDate ||
+                    x.Funding.EndDate != x.Detail.EndDate ||
+                    x.Funding.Comments != x.Detail.Comments)
+                .ToList();
+
+            if (changedDetails.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var changedDetail in changedDetails)
+            {
+                changedDetail.Funding.UpdateFunding(
+                    changedDetail.Detail.StartDate,
+                    changedDetail.Detail.EndDate,
+                    changedDetail.Detail.Comments);
+            }
+
+            await _qualificationFundingsrepository.UpdateAsync(fundedOffers);
+        }
+
+        private static string BuildDiscussionHistoryNotes(List<SaveQualificationsFundingOffersDetailsCommand.OfferFundingDetails> details)
+        {
+            var notes = new StringBuilder();
+            notes.AppendLine("Feedback from DfE:");
+
+            if (details == null || details.Count == 0)
+            {
+                notes.AppendLine("No funding offers have been selected");
+                return notes.ToString();
+            }
+
+            notes.AppendLine("The following offers details have been selected:");
+            notes.AppendLine();
+
+            foreach (var qf in details)
+            {
+                notes.AppendLine($"Start date: {qf.StartDate.ToFundingEndDateFormat()}");
+                notes.AppendLine($"End date: {qf.EndDate.ToFundingEndDateFormat()}");
+                if (!string.IsNullOrWhiteSpace(qf.Comments))
+                {
+                    notes.AppendLine($"Comments: {qf.Comments}");
+                }
+                notes.AppendLine();
+            }
+
+            return notes.ToString();
         }
     }
 

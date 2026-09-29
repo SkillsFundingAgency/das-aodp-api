@@ -25,7 +25,7 @@ public class CreateRolloverWorkflowRunCommandHandlerTests : UnitTest
     {
         // Arrange
         var command = CreateCommand();
-        var candidates = CreateCandidates(command.RolloverCandidateIds, command.AcademicYear);
+        var candidates = CreateCandidates(command.RolloverCandidateIds, command.AcademicYear, RolloverSourceTypes.Ofqual);
         _repository
             .Setup(x => x.GetRolloverCandidatesWithP1ChecksAsync(
                 It.Is<IReadOnlyCollection<RolloverCandidateP1CheckRequest>>(requests =>
@@ -65,6 +65,55 @@ public class CreateRolloverWorkflowRunCommandHandlerTests : UnitTest
     }
 
     [Fact]
+    public async Task Handle_WhenCandidatesAreMixedSourceTypes_PreservesSourceTypeAndSourceQualificationIdPerCandidate()
+    {
+        // Arrange - one Ofqual candidate and one QAA candidate in the same run
+        var command = CreateCommand();
+        var ofqualCandidate = CreateCandidates(
+            [command.RolloverCandidateIds[0]], command.AcademicYear, RolloverSourceTypes.Ofqual)[0];
+        var qaaCandidate = CreateCandidates(
+            [command.RolloverCandidateIds[1]], command.AcademicYear, RolloverSourceTypes.Qaa)[0];
+        var candidates = new List<RolloverCandidateDto> { ofqualCandidate, qaaCandidate };
+
+        _repository
+            .Setup(x => x.GetRolloverCandidatesWithP1ChecksAsync(
+                It.IsAny<IReadOnlyCollection<RolloverCandidateP1CheckRequest>>(),
+                CancellationToken))
+            .ReturnsAsync(CreateCandidatesWithChecks(candidates, command));
+
+        IReadOnlyCollection<RolloverWorkflowCandidate>? capturedWorkflowCandidates = null;
+        _repository
+            .Setup(x => x.CreateRolloverWorkflowAsync(
+                It.IsAny<RolloverWorkflowRun>(),
+                It.IsAny<IReadOnlyCollection<RolloverWorkflowCandidate>>(),
+                It.IsAny<IReadOnlyCollection<RolloverWorkflowRunFundingOffer>>(),
+                CancellationToken))
+            .Callback<RolloverWorkflowRun, IReadOnlyCollection<RolloverWorkflowCandidate>, IReadOnlyCollection<RolloverWorkflowRunFundingOffer>, CancellationToken>(
+                (_, workflowCandidates, _, _) => capturedWorkflowCandidates = workflowCandidates)
+            .ReturnsAsync((
+                RolloverWorkflowRun workflowRun,
+                IReadOnlyCollection<RolloverWorkflowCandidate> _,
+                IReadOnlyCollection<RolloverWorkflowRunFundingOffer> _,
+                CancellationToken _) => workflowRun.Id);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken);
+
+        // Assert
+        result.Success.ShouldBeTrue();
+        capturedWorkflowCandidates.ShouldNotBeNull();
+        capturedWorkflowCandidates!.Count.ShouldBe(2);
+
+        var createdOfqual = capturedWorkflowCandidates.Single(c => c.RolloverCandidatesId == ofqualCandidate.Id);
+        createdOfqual.SourceType.ShouldBe(RolloverSourceTypes.Ofqual);
+        createdOfqual.SourceQualificationId.ShouldBe(ofqualCandidate.SourceQualificationId);
+
+        var createdQaa = capturedWorkflowCandidates.Single(c => c.RolloverCandidatesId == qaaCandidate.Id);
+        createdQaa.SourceType.ShouldBe(RolloverSourceTypes.Qaa);
+        createdQaa.SourceQualificationId.ShouldBe(qaaCandidate.SourceQualificationId);
+    }
+
+    [Fact]
     public async Task Handle_WhenCandidateListIsNull_ReturnsFailure()
     {
         // Arrange
@@ -101,7 +150,8 @@ public class CreateRolloverWorkflowRunCommandHandlerTests : UnitTest
         var command = CreateCommand();
         var candidates = CreateCandidates(
             command.RolloverCandidateIds.Take(1),
-            command.AcademicYear);
+            command.AcademicYear,
+            RolloverSourceTypes.Ofqual);
         _repository
             .Setup(x => x.GetRolloverCandidatesWithP1ChecksAsync(
                 It.IsAny<IReadOnlyCollection<RolloverCandidateP1CheckRequest>>(),
@@ -216,7 +266,7 @@ public class CreateRolloverWorkflowRunCommandHandlerTests : UnitTest
 
     private void SetupCandidatesAndChecks(CreateRolloverWorkflowRunCommand command)
     {
-        var candidates = CreateCandidates(command.RolloverCandidateIds, command.AcademicYear);
+        var candidates = CreateCandidates(command.RolloverCandidateIds, command.AcademicYear, RolloverSourceTypes.Ofqual);
 
         _repository
             .Setup(x => x.GetRolloverCandidatesWithP1ChecksAsync(
@@ -242,13 +292,15 @@ public class CreateRolloverWorkflowRunCommandHandlerTests : UnitTest
 
     private static List<RolloverCandidateDto> CreateCandidates(
         IEnumerable<Guid> candidateIds,
-        string academicYear)
+        string academicYear,
+        string sourceType)
     {
         return candidateIds
             .Select((id, index) => new RolloverCandidateDto
             {
                 Id = id,
-                QualificationVersionId = Guid.NewGuid(),
+                SourceType = sourceType,
+                SourceQualificationId = Guid.NewGuid(),
                 FundingOfferId = Guid.NewGuid(),
                 AcademicYear = academicYear,
                 RolloverRound = index + 1,
@@ -268,7 +320,8 @@ public class CreateRolloverWorkflowRunCommandHandlerTests : UnitTest
                 new RolloverWorkflowCandidatesP1Checks
                 {
                     RolloverCandidatesId = candidate.Id,
-                    QualificationVersionId = candidate.QualificationVersionId,
+                    SourceType = candidate.SourceType,
+                    SourceQualificationId = candidate.SourceQualificationId,
                     FundingOfferId = candidate.FundingOfferId,
                     AcademicYear = candidate.AcademicYear!,
                     FundingStream = "AdultSkills",

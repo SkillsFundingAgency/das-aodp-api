@@ -46,6 +46,8 @@ public partial class RegulatedQaaQualification
     /// </summary>
     protected bool NeedToRecalculateFundingApprovalEndDate => HasLastDateForRegistrationChanged || IsNewQualification;
 
+    public bool RequiresFundingRecalculation => NeedToRecalculateFundingApprovalEndDate;
+
     /// <summary>
     /// Is the qualification one we have not seen before, i.e. it is new?.
     /// </summary>
@@ -113,24 +115,21 @@ public partial class RegulatedQaaQualification
     public DateOnly? DiscontinuedDate { get; private set; }
 
     /// <summary>
-    /// The last date that this qualification will be funded to for the Age 16-19 funding stream.
-    /// </summary>
-    public DateOnly? Age1619FundingApprovalEndDate { get; set; }
-
-    /// <summary>
-    /// The last date that this qualification will be funded to for the Advanced Learner Loans funding stream.
-    /// </summary>
-    public DateOnly? AdvancedLearnerLoansFundingApprovalEndDate { get; set; }
-
-    /// <summary>
-    /// The last date that this qualification will be funded to for the Legal entitlement L2-L3 funding stream.
-    /// </summary>
-    public DateOnly? LegalEntitlementL2L3FundingApprovalEndDate { get; set; }
-
-    /// <summary>
     /// A value object representation for the sector subject area.
     /// </summary>
-    public SectorSubjectArea SectorSubjectArea { get; private set; } = null!;
+    [NotMapped]
+    public SectorSubjectArea SectorSubjectArea =>
+        global::SFA.DAS.AODP.Data.Entities.Qualification.SectorSubjectArea.FromName(SectorSubjectAreaName);
+
+    /// <summary>
+    /// Persisted sector subject area name used by database projections.
+    /// </summary>
+    public string SectorSubjectAreaName { get; private set; } = null!;
+
+    /// <summary>
+    /// Funding records held for this QAA qualification.
+    /// </summary>
+    public virtual ICollection<QaaQualificationFunding> Fundings { get; private set; } = new List<QaaQualificationFunding>();
 
     /// <summary>
     /// Creates a new entry.
@@ -143,11 +142,11 @@ public partial class RegulatedQaaQualification
         string awardingBody,
         DateOnly startDateForRegistration,
         DateOnly lastDateForRegistration,
-        SectorSubjectArea sectorSubjectArea,
-        DateOnly? fundingApprovalEndDate = null)
+        SectorSubjectArea sectorSubjectArea)
     {
         return new RegulatedQaaQualification
         {
+            Id = Guid.NewGuid(),
             DateOfDataSnapshot = dateOfDataSnapshot,
             AimCode = aimCode,
             QualificationTitle = qualificationTitle,
@@ -157,10 +156,7 @@ public partial class RegulatedQaaQualification
             Status = "Approved",
             StartDate = startDateForRegistration,
             LastDateForRegistration = lastDateForRegistration,
-            SectorSubjectArea = sectorSubjectArea,
-            Age1619FundingApprovalEndDate = fundingApprovalEndDate,
-            AdvancedLearnerLoansFundingApprovalEndDate = fundingApprovalEndDate,
-            LegalEntitlementL2L3FundingApprovalEndDate = fundingApprovalEndDate
+            SectorSubjectAreaName = sectorSubjectArea.Name
         };
     }
 
@@ -171,19 +167,64 @@ public partial class RegulatedQaaQualification
     /// <param name="qaaFundingApprovalEndDateCalculator">Provides access to a calculator for determining the funding approval end date.</param>
     /// <param name="cancellationToken">Propagates notification that operations should be cancelled.</param>
     /// <returns>The updated regulated qualification.</returns>
-    public async Task<RegulatedQaaQualification> SetFundingApprovalEndDateAsync(DateTime publicationDate, IQaaFundingApprovalEndDateCalculator qaaFundingApprovalEndDateCalculator, CancellationToken cancellationToken)
+    public async Task<RegulatedQaaQualification> SetFundingApprovalEndDateAsync(
+        DateTime publicationDate,
+        IQaaFundingApprovalEndDateCalculator qaaFundingApprovalEndDateCalculator,
+        CancellationToken cancellationToken)
     {
         // We want to calculate the funding approval end dates individually for each of the applicable funding streams.
         // The reason for this is that there is a possibility that not all funding streams will have the same approval end date, this could be down to PLDNS having different values for different streams.
         
         if (NeedToRecalculateFundingApprovalEndDate)
         {
-            Age1619FundingApprovalEndDate = await qaaFundingApprovalEndDateCalculator.CalculateFundingApprovalEndDateAsync(this, FundingStream.Age1619, DateOnly.FromDateTime(publicationDate), cancellationToken);
-            AdvancedLearnerLoansFundingApprovalEndDate = await qaaFundingApprovalEndDateCalculator.CalculateFundingApprovalEndDateAsync(this, FundingStream.AdvancedLearnerLoans, DateOnly.FromDateTime(publicationDate), cancellationToken);
-            LegalEntitlementL2L3FundingApprovalEndDate = await qaaFundingApprovalEndDateCalculator.CalculateFundingApprovalEndDateAsync(this, FundingStream.LegalEntitlementL2L3, DateOnly.FromDateTime(publicationDate), cancellationToken);
+            await SetFundingApprovalEndDateForFundingStreamAsync(FundingStream.Age1619, publicationDate, qaaFundingApprovalEndDateCalculator, cancellationToken);
+            await SetFundingApprovalEndDateForFundingStreamAsync(FundingStream.AdvancedLearnerLoans, publicationDate, qaaFundingApprovalEndDateCalculator, cancellationToken);
+            await SetFundingApprovalEndDateForFundingStreamAsync(FundingStream.LegalEntitlementL2L3, publicationDate, qaaFundingApprovalEndDateCalculator, cancellationToken);
         }
 
         return this;
+    }
+
+    public async Task SetFundingApprovalEndDateForFundingStreamAsync(
+        FundingStream fundingStream,
+        DateTime publicationDate,
+        IQaaFundingApprovalEndDateCalculator qaaFundingApprovalEndDateCalculator,
+        CancellationToken cancellationToken)
+    {
+        var fundingApprovalEndDate = await qaaFundingApprovalEndDateCalculator.CalculateFundingApprovalEndDateAsync(this, fundingStream, DateOnly.FromDateTime(publicationDate), cancellationToken);
+
+        SetFundingApprovalEndDateForFundingStream(
+            fundingStream,
+            StartDate,
+            fundingApprovalEndDate,
+            DateTime.UtcNow);
+    }
+
+    public void SetFundingApprovalEndDateForFundingStream(
+        FundingStream fundingStream,
+        DateOnly? fundingApprovalStartDate,
+        DateOnly? fundingApprovalEndDate,
+        DateTime updatedAt)
+    {
+        var funding = Fundings.FirstOrDefault(f => f.FundingOfferId == fundingStream.Id);
+
+        if (funding is null)
+        {
+            Fundings.Add(QaaQualificationFunding.Create(
+                Id,
+                fundingStream.Id,
+                fundingApprovalStartDate,
+                fundingApprovalEndDate,
+                "Approved",
+                updatedAt));
+            return;
+        }
+
+        funding.Update(
+            fundingApprovalStartDate,
+            fundingApprovalEndDate,
+            "Approved",
+            updatedAt);
     }
 
     /// <summary>
@@ -193,17 +234,11 @@ public partial class RegulatedQaaQualification
     /// <returns>The funding approval end date for the funding stream.</returns>
     public DateOnly? GetFundingApprovalEndDateForFundingStream(FundingStream fundingStream)
     {
-        if (fundingStream == FundingStream.Age1619)
-        {
-            return Age1619FundingApprovalEndDate;
-        }
-
-        if (fundingStream == FundingStream.AdvancedLearnerLoans)
-        {
-            return AdvancedLearnerLoansFundingApprovalEndDate;
-        }
-
-        return LegalEntitlementL2L3FundingApprovalEndDate;
+        return Fundings
+            .Where(f => f.FundingOfferId == fundingStream.Id)
+            .OrderByDescending(f => f.EndDate)
+            .Select(f => f.EndDate)
+            .FirstOrDefault();
     }
 
     /// <summary>

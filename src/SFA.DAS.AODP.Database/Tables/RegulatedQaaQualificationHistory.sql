@@ -12,9 +12,6 @@ CREATE TABLE [regulated].[QaaQualificationHistory] (
     [DiscontinuedDate] datetime2 NULL,
     [SectorSubjectArea] nvarchar(150) NOT NULL,
     [LastDateForRegistrationChangeType] nvarchar(50) NOT NULL,
-    [Age1619FundingApprovalEndDate] date NULL,
-    [AdvancedLearnerLoansFundingApprovalEndDate] date NULL,
-    [LegalEntitlementL2L3FundingApprovalEndDate] date NULL,
     CONSTRAINT [PK_QaaQualificationHistory] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_QaaQualificationHistory_QaaQualification] FOREIGN KEY ([QaaQualificationId])
         REFERENCES [regulated].[QaaQualification] ([Id])
