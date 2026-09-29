@@ -19,4 +19,10 @@ public interface IQaaQualificationRepository
     /// </summary>
     /// <param name="cancellationToken">Propagates a notification to cancel the operation.</param>
     Task SaveChangesAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Retrieves summary counts (new, extended, discontinued) and the date data was last imported.
+    /// </summary>
+    /// <param name="cancellationToken">Propagates a notification to cancel the operation.</param>
+    Task<QaaQualificationSummaryCounts> GetSummaryCountsAsync(CancellationToken cancellationToken);
 }
