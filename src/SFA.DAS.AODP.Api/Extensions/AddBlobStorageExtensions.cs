@@ -1,9 +1,12 @@
 ﻿using Microsoft.Extensions.Azure;
-using Microsoft.Extensions.DependencyInjection;
+using SFA.DAS.AODP.Infrastructure;
+using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
 using SFA.DAS.AODP.Models.Settings;
+using System.Diagnostics.CodeAnalysis;
 
-namespace SFA.DAS.AODP.Infrastructure.Extensions
+namespace SFA.DAS.AODP.Api.Extensions
 {
+    [ExcludeFromCodeCoverage]
     public static class AddBlobStorageExtensions
     {
         public static IServiceCollection AddBlobStorage(this IServiceCollection services, StorageSettings storageSettings)

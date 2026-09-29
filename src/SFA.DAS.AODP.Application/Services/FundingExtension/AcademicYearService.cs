@@ -1,4 +1,4 @@
-﻿using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
+﻿using SFA.DAS.AODP.Data.Providers;
 
 namespace SFA.DAS.AODP.Application.Services.FundingExtension
 {
@@ -9,9 +9,9 @@ namespace SFA.DAS.AODP.Application.Services.FundingExtension
 
     public class AcademicYearService : IAcademicYearService
     {
-        private readonly ISystemClockService _clock;
+        private readonly ISystemClockProvider _clock;
 
-        public AcademicYearService(ISystemClockService clock)
+        public AcademicYearService(ISystemClockProvider clock)
         {
             _clock = clock;
         }

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
+using SFA.DAS.AODP.Data.Providers;
 using SFA.DAS.AODP.Data.Repositories.FundingExtension;
 using SFA.DAS.AODP.Infrastructure.Extensions;
 using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
@@ -21,13 +22,13 @@ public class SubmitFundingExtensionService : ISubmitFundingExtensionService
         Guid.Parse("00000000-0000-0000-0000-000000000005");
 
     private readonly IFundingExtensionPersistenceRepository _persistenceRepository;
-    private readonly ISystemClockService _clockService;
+    private readonly ISystemClockProvider _clockService;
     private readonly IGuidProvider _guidProvider;
     private readonly ILogger<SubmitFundingExtensionService> _logger;
 
     public SubmitFundingExtensionService(
         IFundingExtensionPersistenceRepository persistenceRepository,
-        ISystemClockService clockService,
+        ISystemClockProvider clockService,
         IGuidProvider guidProvider,
         ILogger<SubmitFundingExtensionService> logger)
     {

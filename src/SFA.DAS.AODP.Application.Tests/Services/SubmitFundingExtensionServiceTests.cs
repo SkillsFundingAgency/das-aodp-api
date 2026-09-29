@@ -9,6 +9,7 @@ using SFA.DAS.AODP.Application.UnitTests.Helpers;
 using SFA.DAS.AODP.Data.Entities.Qualification;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Entities.Rollover;
+using SFA.DAS.AODP.Data.Providers;
 using SFA.DAS.AODP.Data.Repositories.FundingExtension;
 using SFA.DAS.AODP.Infrastructure.Services.Interfaces;
 using SFA.DAS.AODP.Models.Rollover;
@@ -19,7 +20,7 @@ namespace SFA.DAS.AODP.Application.Tests.Services.Rollover;
 public class SubmitFundingExtensionServiceTests : UnitTest
 {
     private readonly Mock<IFundingExtensionPersistenceRepository> _persistenceRepository = new();
-    private readonly Mock<ISystemClockService> _clockService = new();
+    private readonly Mock<ISystemClockProvider> _clockService = new();
     private readonly Mock<IGuidProvider> _guidProvider = new();
     private readonly Mock<ILogger<SubmitFundingExtensionService>> _logger = new();
     private readonly IFixture _fixture = new Fixture().Customize(new AutoMoqCustomization());
