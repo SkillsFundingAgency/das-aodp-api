@@ -197,9 +197,9 @@ public class ApplicationsController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(EmptyResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DeleteApplicationByIdAsync(Guid applicationId)
+    public async Task<IActionResult> DeleteApplicationByIdAsync(Guid applicationId, [FromQuery] string? userType = null)
     {
-        var query = new DeleteApplicationCommand(applicationId);
+        var query = new DeleteApplicationCommand(applicationId) { UserType = userType };
 
         return await SendRequestAsync(query);
     }

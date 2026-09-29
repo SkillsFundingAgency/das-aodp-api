@@ -423,6 +423,35 @@ namespace SFA.DAS.AODP.Api.Tests.Controllers.Application
         }
 
         [Fact]
+        public async Task RemoveAsync_ForwardsUserTypeOntoCommand()
+        {
+            // Arrange
+            var applicationId = Guid.NewGuid();
+            const string userType = "Qfau";
+            var response = _fixture.Create<EmptyResponse>();
+            BaseMediatrResponse<EmptyResponse> wrapper = new()
+            {
+                Value = response,
+                Success = true
+            };
+
+            _mediatorMock
+                .Setup(m => m.Send(It.IsAny<DeleteApplicationCommand>(), default))
+                .ReturnsAsync(wrapper);
+
+            // Act
+            await _controller.DeleteApplicationByIdAsync(applicationId, userType);
+
+            // Assert
+            _mediatorMock.Verify(m =>
+                m.Send(
+                    It.Is<DeleteApplicationCommand>(q =>
+                        q.ApplicationId == applicationId &&
+                        q.UserType == userType
+            ), default), Times.Once());
+        }
+
+        [Fact]
         public async Task GetRelatedQualificationForApplicationAsync_ReturnsOkResult()
         {
             // Arrange

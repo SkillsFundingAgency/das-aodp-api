@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Data.Repositories.Application;
+using SFA.DAS.AODP.Models.Application;
 
 namespace SFA.DAS.AODP.Application.Commands.Application.Application
 {
@@ -19,7 +20,10 @@ namespace SFA.DAS.AODP.Application.Commands.Application.Application
             try
             {
                 var application = await _applicationRepository.GetByIdAsync(request.ApplicationId);
-                if (application.Submitted == true) throw new InvalidOperationException("The application has been submitted");
+
+                var isQfauUser = Enum.TryParse(request.UserType, true, out UserType userType) && userType == UserType.Qfau;
+
+                if (application.Submitted == true && !isQfauUser) throw new InvalidOperationException("The application has been submitted");
 
                 await _applicationRepository.DeleteAsync(application);
                 response.Success = true;
