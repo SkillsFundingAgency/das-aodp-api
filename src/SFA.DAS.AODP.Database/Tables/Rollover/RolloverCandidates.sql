@@ -21,6 +21,17 @@
 );
 
 GO
+ALTER TABLE [dbo].[RolloverCandidates]
+    ADD CONSTRAINT [UQ_RolloverCandidates_QualOfferYearRound]
+        UNIQUE (
+            [SourceType],
+            [SourceQualificationId],
+            [FundingOfferId],
+            [AcademicYear],
+            [RolloverRound]
+        );
+
+GO
 CREATE NONCLUSTERED INDEX [IX_RolloverCandidates_DecisionRunId]
     ON [dbo].[RolloverCandidates]([RolloverDecisionRunId] ASC);
 
@@ -33,5 +44,5 @@ CREATE NONCLUSTERED INDEX [IX_RolloverCandidates_Totals]
     ON [dbo].[RolloverCandidates]([AcademicYear] ASC, [RolloverStatus] ASC, [IsActive] ASC);
 
 GO
-CREATE UNIQUE NONCLUSTERED INDEX [UX_RolloverCandidates_SourceOfferYearRound]
+CREATE UNIQUE NONCLUSTERED INDEX [UX_RolloverCandidates_QualOfferYearRound]
     ON [dbo].[RolloverCandidates]([SourceType] ASC, [SourceQualificationId] ASC, [FundingOfferId] ASC, [AcademicYear] ASC, [RolloverRound] ASC);

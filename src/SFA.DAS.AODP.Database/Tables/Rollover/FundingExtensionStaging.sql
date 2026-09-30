@@ -17,7 +17,7 @@ CREATE TABLE [dbo].[FundingExtensionStaging]
 );
 
 GO
-CREATE NONCLUSTERED INDEX [IX_FundingExtensionStaging_SourceFundingRecordId]
+CREATE NONCLUSTERED INDEX [IX_FundingExtensionStaging_QualificationFundingId]
     ON [dbo].[FundingExtensionStaging]([OperationId], [SourceType], [SourceFundingRecordId])
     WHERE [SourceFundingRecordId] IS NOT NULL;
 
