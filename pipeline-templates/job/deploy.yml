@@ -52,6 +52,7 @@ jobs:
             ConfigurationSecrets:
               SqlConnectionStringAdAuth: $(SqlConnectionStringAdAuth)
               SharedRedisConnectionString: $(SharedRedisConnectionString)
+              OutputFileBlobStorageConnectionString: $(OutputFileBlobStorageConnectionString)
               QualificationsAPISubscriptionKey: $(QualificationsAPISubscriptionKey)
         - task: AzurePowerShell@5
           displayName: 'Fetch SQL admin password for drop step'
