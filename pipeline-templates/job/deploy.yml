@@ -53,6 +53,28 @@ jobs:
               SqlConnectionStringAdAuth: $(SqlConnectionStringAdAuth)
               SharedRedisConnectionString: $(SharedRedisConnectionString)
               QualificationsAPISubscriptionKey: $(QualificationsAPISubscriptionKey)
+        - task: AzurePowerShell@5
+          displayName: 'Fetch SQL admin password for drop step'
+          inputs:
+            azureSubscription: ${{ parameters.ServiceConnection }}
+            ScriptType: InlineScript
+            Inline: |
+              $pw = Get-AzKeyVaultSecret -VaultName $(SharedKeyVaultName) -Name $(SharedSQLServerName) -AsPlainText
+              Write-Output "##vso[task.setvariable variable=DropStepsqlPassword;issecret=true]$pw"
+            azurePowerShellVersion: LatestVersion
+        - task: SqlAzureDacpacDeployment@1
+          displayName: 'Drop obsolete database objects before deploying dacpac'
+          inputs:
+            azureSubscription: ${{ parameters.ServiceConnection }}
+            ServerName: $(SharedSQLServerFQDN)
+            DatabaseName: $(DatabaseName)
+            SqlUsername: $(SharedSQLServerUsername)
+            SqlPassword: $(DropStepsqlPassword)
+            deployType: InlineSqlTask
+            SqlInline: |
+              DROP INDEX IF EXISTS UX_RolloverCandidates_QualOfferYearRound ON dbo.RolloverCandidates;
+              ALTER TABLE dbo.RolloverCandidates DROP CONSTRAINT IF EXISTS UQ_RolloverCandidates_QualOfferYearRound;
+              DROP INDEX IF EXISTS IX_FundingExtensionStaging_QualificationFundingId ON dbo.FundingExtensionStaging;
         - template: azure-pipelines-templates/deploy/step/sql-dacpac-deploy.yml@das-platform-building-blocks
           parameters:
             AzureSubscription: ${{ parameters.ServiceConnection }}
