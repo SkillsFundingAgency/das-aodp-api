@@ -200,6 +200,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Build Include="Tables\QaaQualificationDiscussionHistory.sql" />
+    <None Include="MigrationScripts\P2_3724_Funding_import_file_record_seed.sql"/>
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="SFA.DAS.AODP.Database.refactorlog" />
