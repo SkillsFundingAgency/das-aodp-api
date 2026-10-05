@@ -101,7 +101,254 @@
         "storageAccountName": "[concat(replace(replace(variables('resourceNamePrefix'), 'api', ''), '-', ''), 'str')]",
         "storageAccount2Name": "[concat(replace(replace(variables('resourceNamePrefix'), 'api', ''), '-', ''), 'str2')]",
         "configNames": "SFA.DAS.AODP.Api",
-        "privateLinkScopeName": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-shared-ampls'))]"
+        "privateLinkScopeName": "[toLower(concat('das-', parameters('resourceEnvironmentName'),'-shared-ampls'))]",
+        "quarantineContainerName": "quarantine",
+        "malwareQuarantineLogicAppName": "[concat(replace(variables('resourceNamePrefix'), 'api', ''), '-malware-quarantine-la')]",
+        "malwareQuarantineAutomationName": "[concat(replace(variables('resourceNamePrefix'), 'api', ''), '-malware-quarantine')]",
+        "malwareQuarantineWorkflowDefinition": {
+            "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+                "quarantineContainerName": {
+                    "type": "String"
+                }
+            },
+            "triggers": {
+                "manual": {
+                    "type": "Request",
+                    "kind": "Http",
+                    "inputs": {
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "actions": {
+                "Initialise_Failed_Blobs": {
+                    "type": "InitializeVariable",
+                    "runAfter": {},
+                    "inputs": {
+                        "variables": [
+                            {
+                                "name": "failedBlobs",
+                                "type": "array",
+                                "value": []
+                            }
+                        ]
+                    }
+                },
+                "Get_Blob_Entities": {
+                    "type": "Query",
+                    "runAfter": {
+                        "Initialise_Failed_Blobs": [
+                            "Succeeded"
+                        ]
+                    },
+                    "inputs": {
+                        "from": "@coalesce(triggerBody()?['Entities'], json('[]'))",
+                        "where": "@equals(toLower(coalesce(item()?['Type'], '')), 'blob')"
+                    }
+                },
+                "For_Each_Blob": {
+                    "type": "Foreach",
+                    "runAfter": {
+                        "Get_Blob_Entities": [
+                            "Succeeded"
+                        ]
+                    },
+                    "foreach": "@body('Get_Blob_Entities')",
+                    "runtimeConfiguration": {
+                        "concurrency": {
+                            "repetitions": 1
+                        }
+                    },
+                    "actions": {
+                        "Is_Already_Quarantined": {
+                            "type": "If",
+                            "runAfter": {},
+                            "expression": {
+                                "and": [
+                                    {
+                                        "startsWith": [
+                                            "@toLower(uriPath(items('For_Each_Blob')?['Url']))",
+                                            "@toLower(concat('/', parameters('quarantineContainerName'), '/'))"
+                                        ]
+                                    }
+                                ]
+                            },
+                            "actions": {},
+                            "else": {
+                                "actions": {
+                                    "Copy_To_Quarantine": {
+                                        "type": "Http",
+                                        "runAfter": {},
+                                        "inputs": {
+                                            "method": "PUT",
+                                            "uri": "@{concat('https://', uriHost(items('For_Each_Blob')?['Url']), '/', parameters('quarantineContainerName'), uriPath(items('For_Each_Blob')?['Url']))}",
+                                            "headers": {
+                                                "x-ms-version": "2021-08-06",
+                                                "x-ms-copy-source": "@{items('For_Each_Blob')?['Url']}"
+                                            },
+                                            "authentication": {
+                                                "type": "ManagedServiceIdentity",
+                                                "audience": "https://storage.azure.com/"
+                                            }
+                                        }
+                                    },
+                                    "Wait_For_Copy": {
+                                        "type": "Until",
+                                        "runAfter": {
+                                            "Copy_To_Quarantine": [
+                                                "Succeeded"
+                                            ]
+                                        },
+                                        "expression": "@not(equals(outputs('Get_Copy_Status')?['headers']?['x-ms-copy-status'], 'pending'))",
+                                        "limit": {
+                                            "count": 60,
+                                            "timeout": "PT10M"
+                                        },
+                                        "actions": {
+                                            "Get_Copy_Status": {
+                                                "type": "Http",
+                                                "runAfter": {},
+                                                "inputs": {
+                                                    "method": "HEAD",
+                                                    "uri": "@{concat('https://', uriHost(items('For_Each_Blob')?['Url']), '/', parameters('quarantineContainerName'), uriPath(items('For_Each_Blob')?['Url']))}",
+                                                    "headers": {
+                                                        "x-ms-version": "2021-08-06"
+                                                    },
+                                                    "authentication": {
+                                                        "type": "ManagedServiceIdentity",
+                                                        "audience": "https://storage.azure.com/"
+                                                    }
+                                                }
+                                            },
+                                            "Delay_If_Pending": {
+                                                "type": "If",
+                                                "runAfter": {
+                                                    "Get_Copy_Status": [
+                                                        "Succeeded"
+                                                    ]
+                                                },
+                                                "expression": {
+                                                    "and": [
+                                                        {
+                                                            "equals": [
+                                                                "@outputs('Get_Copy_Status')?['headers']?['x-ms-copy-status']",
+                                                                "pending"
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                "actions": {
+                                                    "Delay": {
+                                                        "type": "Wait",
+                                                        "runAfter": {},
+                                                        "inputs": {
+                                                            "interval": {
+                                                                "count": 10,
+                                                                "unit": "Second"
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                "else": {
+                                                    "actions": {}
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "Was_Copy_Successful": {
+                                        "type": "If",
+                                        "runAfter": {
+                                            "Wait_For_Copy": [
+                                                "Succeeded"
+                                            ]
+                                        },
+                                        "expression": {
+                                            "and": [
+                                                {
+                                                    "equals": [
+                                                        "@outputs('Get_Copy_Status')?['headers']?['x-ms-copy-status']",
+                                                        "success"
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "actions": {
+                                            "Delete_Original_Blob": {
+                                                "type": "Http",
+                                                "runAfter": {},
+                                                "inputs": {
+                                                    "method": "DELETE",
+                                                    "uri": "@{items('For_Each_Blob')?['Url']}",
+                                                    "headers": {
+                                                        "x-ms-version": "2021-08-06",
+                                                        "x-ms-delete-snapshots": "include"
+                                                    },
+                                                    "authentication": {
+                                                        "type": "ManagedServiceIdentity",
+                                                        "audience": "https://storage.azure.com/"
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        "else": {
+                                            "actions": {
+                                                "Record_Failed_Copy": {
+                                                    "type": "AppendToArrayVariable",
+                                                    "runAfter": {},
+                                                    "inputs": {
+                                                        "name": "failedBlobs",
+                                                        "value": "@{concat(items('For_Each_Blob')?['Url'], ' (copy status: ', coalesce(outputs('Get_Copy_Status')?['headers']?['x-ms-copy-status'], 'unknown'), ')')}"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "Any_Copies_Failed": {
+                    "type": "If",
+                    "runAfter": {
+                        "For_Each_Blob": [
+                            "Succeeded"
+                        ]
+                    },
+                    "expression": {
+                        "and": [
+                            {
+                                "greater": [
+                                    "@length(variables('failedBlobs'))",
+                                    0
+                                ]
+                            }
+                        ]
+                    },
+                    "actions": {
+                        "Fail_Run": {
+                            "type": "Terminate",
+                            "runAfter": {},
+                            "inputs": {
+                                "runStatus": "Failed",
+                                "runError": {
+                                    "code": "QuarantineCopyFailed",
+                                    "message": "@{concat('Copy to quarantine did not succeed, so the original blobs were not deleted: ', join(variables('failedBlobs'), ', '))}"
+                                }
+                            }
+                        }
+                    },
+                    "else": {
+                        "actions": {}
+                    }
+                }
+            },
+            "outputs": {}
+        }
     },
     "resources": [
         {
@@ -467,6 +714,150 @@
                 "[concat(variables('appServiceName'), '-application-insights-', parameters('utcValue'))]",
                 "[concat('role-assignment-', variables('appServiceName'), '-', parameters('utcValue'))]",
                 "[concat('role-assignment-', variables('appServiceName'), '-2-', parameters('utcValue'))]"
+            ]
+        },
+        {
+            "apiVersion": "2021-04-01",
+            "name": "[concat(variables('storageAccountName'), '-quarantine-container-', parameters('utcValue'))]",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'), 'storage-container.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "storageAccountName": {
+                        "value": "[variables('storageAccountName')]"
+                    },
+                    "containerName": {
+                        "value": "[variables('quarantineContainerName')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]"
+            ]
+        },
+        {
+            "apiVersion": "2021-04-01",
+            "name": "[concat(variables('malwareQuarantineLogicAppName'), '-', parameters('utcValue'))]",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'), 'logic-app.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "logicAppName": {
+                        "value": "[variables('malwareQuarantineLogicAppName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('resourceGroupLocation')]"
+                    },
+                    "tags": {
+                        "value": "[parameters('tags')]"
+                    },
+                    "workflowDefinition": {
+                        "value": "[variables('malwareQuarantineWorkflowDefinition')]"
+                    },
+                    "workflowParameters": {
+                        "value": {
+                            "quarantineContainerName": {
+                                "value": "[variables('quarantineContainerName')]"
+                            }
+                        }
+                    }
+                }
+            },
+            "dependsOn": [
+                "[variables('resourceGroupName')]"
+            ]
+        },
+        {
+            "apiVersion": "2021-04-01",
+            "name": "[concat('role-assignment-', variables('malwareQuarantineLogicAppName'), '-', parameters('utcValue'))]",
+            "type": "Microsoft.Resources/deployments",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'),'role-assignments/role-assignment-storage-account.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "principalId": {
+                        "value": "[reference(concat(variables('malwareQuarantineLogicAppName'), '-', parameters('utcValue'))).outputs.principalId.value]"
+                    },
+                    "assignmentType": {
+                        "value": "StorageBlobDataContributor"
+                    },
+                    "resourceName": {
+                        "value": "[variables('storageAccountName')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('storageAccountName'), '-storage-account-', parameters('utcValue'))]",
+                "[concat(variables('malwareQuarantineLogicAppName'), '-', parameters('utcValue'))]"
+            ]
+        },
+        {
+            "apiVersion": "2021-04-01",
+            "name": "[concat(variables('malwareQuarantineAutomationName'), '-', parameters('utcValue'))]",
+            "resourceGroup": "[variables('resourceGroupName')]",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[concat(variables('deploymentUrlBase'), 'defender-workflow-automation.json')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "automationName": {
+                        "value": "[variables('malwareQuarantineAutomationName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('resourceGroupLocation')]"
+                    },
+                    "tags": {
+                        "value": "[parameters('tags')]"
+                    },
+                    "automationDescription": {
+                        "value": "[concat('Moves malicious blobs detected by Defender for Storage in ', variables('storageAccountName'), ' to the ', variables('quarantineContainerName'), ' container.')]"
+                    },
+                    "ruleSets": {
+                        "value": [
+                            {
+                                "rules": [
+                                    {
+                                        "propertyJPath": "AlertType",
+                                        "propertyType": "String",
+                                        "expectedValue": "Storage.Blob_AM.MalwareFound",
+                                        "operator": "Equals"
+                                    },
+                                    {
+                                        "propertyJPath": "CompromisedEntity",
+                                        "propertyType": "String",
+                                        "expectedValue": "[variables('storageAccountName')]",
+                                        "operator": "Equals"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "logicAppName": {
+                        "value": "[variables('malwareQuarantineLogicAppName')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('storageAccountName'), '-defender-', parameters('utcValue'))]",
+                "[concat(variables('storageAccountName'), '-quarantine-container-', parameters('utcValue'))]",
+                "[concat('role-assignment-', variables('malwareQuarantineLogicAppName'), '-', parameters('utcValue'))]"
             ]
         },
         {
