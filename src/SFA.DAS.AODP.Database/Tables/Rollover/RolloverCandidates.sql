@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[RolloverCandidates] (
     [Id]                     UNIQUEIDENTIFIER NOT NULL,
-    [QualificationVersionId] UNIQUEIDENTIFIER NOT NULL,
+    [SourceType]             NVARCHAR (50)    NOT NULL DEFAULT 'Ofqual',
+    [SourceQualificationId]  UNIQUEIDENTIFIER NOT NULL,
     [FundingOfferId]         UNIQUEIDENTIFIER NOT NULL,
     [AcademicYear]           NVARCHAR (255)   NOT NULL,
     [RolloverRound]          INT              NOT NULL,
@@ -16,14 +17,19 @@
     [UpdatedAt]              DATETIME2 (7)    NOT NULL,
     PRIMARY KEY CLUSTERED ([Id] ASC),
     FOREIGN KEY ([RolloverDecisionRunId]) REFERENCES [dbo].[RolloverDecisionRun] ([Id]),
-    FOREIGN KEY ([QualificationVersionId]) REFERENCES [regulated].[QualificationVersions] ([Id]),
     FOREIGN KEY ([FundingOfferId]) REFERENCES [dbo].[FundingOffers] ([Id]),
 );
 
 GO
-ALTER TABLE dbo.RolloverCandidates
-    ADD CONSTRAINT UQ_RolloverCandidates_QualOfferYearRound
-        UNIQUE (QualificationVersionId, FundingOfferId, AcademicYear, RolloverRound);
+ALTER TABLE [dbo].[RolloverCandidates]
+    ADD CONSTRAINT [UQ_RolloverCandidates_QualOfferYearRound]
+        UNIQUE (
+            [SourceType],
+            [SourceQualificationId],
+            [FundingOfferId],
+            [AcademicYear],
+            [RolloverRound]
+        );
 
 GO
 CREATE NONCLUSTERED INDEX [IX_RolloverCandidates_DecisionRunId]
@@ -31,7 +37,7 @@ CREATE NONCLUSTERED INDEX [IX_RolloverCandidates_DecisionRunId]
 
 GO
 CREATE NONCLUSTERED INDEX [IX_RolloverCandidates_ByCandidateKey]
-    ON [dbo].[RolloverCandidates]([QualificationVersionId] ASC, [FundingOfferId] ASC, [AcademicYear] ASC);
+    ON [dbo].[RolloverCandidates]([SourceType] ASC, [SourceQualificationId] ASC, [FundingOfferId] ASC, [AcademicYear] ASC);
 
 GO
 CREATE NONCLUSTERED INDEX [IX_RolloverCandidates_Totals]
@@ -39,4 +45,4 @@ CREATE NONCLUSTERED INDEX [IX_RolloverCandidates_Totals]
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [UX_RolloverCandidates_QualOfferYearRound]
-    ON [dbo].[RolloverCandidates]([QualificationVersionId] ASC, [FundingOfferId] ASC, [AcademicYear] ASC, [RolloverRound] ASC);
+    ON [dbo].[RolloverCandidates]([SourceType] ASC, [SourceQualificationId] ASC, [FundingOfferId] ASC, [AcademicYear] ASC, [RolloverRound] ASC);

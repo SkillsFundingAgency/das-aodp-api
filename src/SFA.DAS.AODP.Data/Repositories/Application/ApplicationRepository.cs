@@ -34,6 +34,16 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
 
         public async Task DeleteAsync(Entities.Application.Application application)
         {
+            var applicationReviewIds = await _context.ApplicationReviews
+                .Where(r => r.ApplicationId == application.Id)
+                .Select(r => r.Id)
+                .ToListAsync();
+
+            await _context.ApplicationReviewFeedbacks.Where(f => applicationReviewIds.Contains(f.ApplicationReviewId)).ExecuteDeleteAsync();
+            await _context.ApplicationReviewFundings.Where(f => applicationReviewIds.Contains(f.ApplicationReviewId)).ExecuteDeleteAsync();
+            await _context.ApplicationReviews.Where(r => r.ApplicationId == application.Id).ExecuteDeleteAsync();
+            await _context.Messages.Where(m => m.ApplicationId == application.Id).ExecuteDeleteAsync();
+
             await _context.ApplicationQuestionAnswers.Where(t => t.ApplicationPage.ApplicationId == application.Id).ExecuteDeleteAsync();
             await _context.ApplicationPages.Where(t => t.ApplicationId == application.Id).ExecuteDeleteAsync();
 
@@ -78,12 +88,20 @@ namespace SFA.DAS.AODP.Data.Repositories.Application
 
         public async Task<List<Data.Entities.Application.Application>> GetByQan(string qan)
         {
+            var normalizedQan = NormalizeQan(qan);
+
             return await _context.Applications
                 .Include(a => a.ApplicationReview)
                 .ThenInclude(r => r.ApplicationReviewFeedbacks)
-                .Where(v => v.QualificationNumber == qan)
+                .Where(v => v.QualificationNumber != null
+                    && v.QualificationNumber.Replace("/", "").Trim().ToUpper() == normalizedQan)
                 .ToListAsync();
 
+        }
+
+        private static string NormalizeQan(string qan)
+        {
+            return (qan ?? string.Empty).Replace("/", "").Trim().ToUpper();
         }
 
         public async Task<Entities.Application.Application> GetByReviewIdAsync(Guid applicationReviewId)

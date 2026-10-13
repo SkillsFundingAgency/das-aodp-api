@@ -1,3 +1,6 @@
+IF OBJECT_ID(N'[dbo].[MigrationScripts]', N'U') IS NOT NULL
+   AND OBJECT_ID(N'[dbo].[Pldns]', N'U') IS NOT NULL
+BEGIN
 BEGIN TRY
 BEGIN TRANSACTION
 
@@ -17,18 +20,31 @@ BEGIN TRANSACTION
         -- of Pldns.Qan, which prevents IX_Pldns_Qan being seeked and causes a full scan on every
         -- comparison. Aligning the type removes the implicit conversion.
 
-        -- Fail fast with a clear message if narrowing the column would truncate existing data,
-        -- rather than letting ALTER COLUMN raise a generic truncation error.
-        IF EXISTS (SELECT 1 FROM [dbo].[Pldns] WHERE LEN([Qan]) > 10)
+        -- Only alter if the column is still VARCHAR — a database created fresh from the dacpac
+        -- already has NVARCHAR(10), so there is nothing to fix and the script is just recorded.
+        IF EXISTS (
+            SELECT 1
+            FROM sys.columns c
+            JOIN sys.types t ON c.user_type_id = t.user_type_id
+            WHERE c.object_id = OBJECT_ID(N'[dbo].[Pldns]')
+              AND c.name = N'Qan'
+              AND t.name = N'varchar')
         BEGIN
-            RAISERROR('MVS1_Pldns_Qan_NVarchar_Fix: cannot proceed - one or more Pldns.Qan values exceed 10 characters.', 16, 1);
+
+            -- Fail fast with a clear message if narrowing the column would truncate existing data,
+            -- rather than letting ALTER COLUMN raise a generic truncation error.
+            IF EXISTS (SELECT 1 FROM [dbo].[Pldns] WHERE LEN([Qan]) > 10)
+            BEGIN
+                RAISERROR('MVS1_Pldns_Qan_NVarchar_Fix: cannot proceed - one or more Pldns.Qan values exceed 10 characters.', 16, 1);
+            END
+
+            DROP INDEX IF EXISTS [IX_Pldns_Qan] ON [dbo].[Pldns];
+
+            ALTER TABLE [dbo].[Pldns] ALTER COLUMN [Qan] NVARCHAR(10) NOT NULL;
+
+            CREATE NONCLUSTERED INDEX [IX_Pldns_Qan] ON [dbo].[Pldns] ([Qan]);
+
         END
-
-        DROP INDEX [IX_Pldns_Qan] ON [dbo].[Pldns];
-
-        ALTER TABLE [dbo].[Pldns] ALTER COLUMN [Qan] NVARCHAR(10) NOT NULL;
-
-        CREATE NONCLUSTERED INDEX [IX_Pldns_Qan] ON [dbo].[Pldns] ([Qan]);
 
         -- Record the script as run
         INSERT INTO [dbo].[MigrationScripts]
@@ -53,3 +69,4 @@ BEGIN CATCH
     THROW
 
 END CATCH
+END

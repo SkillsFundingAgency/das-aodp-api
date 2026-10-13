@@ -6,7 +6,8 @@ namespace SFA.DAS.AODP.Models.Rollover
     public class RolloverCandidateDto
     {
         public Guid Id { get; set; }
-        public Guid QualificationVersionId { get; set; }
+        public string SourceType { get; set; } = null!;
+        public Guid SourceQualificationId { get; set; }
         public string? QualificationNumber { get; set; }
         public string? QualificationName { get; set; }
         public Guid FundingOfferId { get; set; }

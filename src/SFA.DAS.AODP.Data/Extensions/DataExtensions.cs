@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SFA.DAS.AODP.Data.Context;
 using SFA.DAS.AODP.Data.Repositories.Application;
 using SFA.DAS.AODP.Data.Repositories.Feedback;
+using SFA.DAS.AODP.Data.Repositories.Files;
 using SFA.DAS.AODP.Data.Repositories.FormBuilder;
 using SFA.DAS.AODP.Data.Repositories.FundingOffer;
 using SFA.DAS.AODP.Data.Repositories.Jobs;
@@ -21,7 +22,8 @@ namespace SFA.DAS.AODP.Data.Extensions
     {
         public static IServiceCollection ConfigureDatabase(this IServiceCollection services, IConfigurationRoot configuration)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddScoped<IFundingDomainEventDispatcher, FundingDomainEventDispatcher>();
+            services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options =>
             {
                var  connectionString = configuration["AodpApi:DatabaseConnectionString"];
 
@@ -35,8 +37,6 @@ namespace SFA.DAS.AODP.Data.Extensions
                 }
                 options.UseSqlServer(connectionString);
             });
-            services.AddScoped<IApplicationDbContext>(provider =>
-                provider.GetRequiredService<ApplicationDbContext>());
             services.AddScoped<IFormVersionRepository, FormVersionRepository>();
             services.AddScoped<ISectionRepository, SectionRepository>();
             services.AddScoped<IPageRepository, PageRepository>();
@@ -49,6 +49,7 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IQualificationDetailsRepository, QualificationDetailsRepository>();
             services.AddScoped<IQualificationFundingFeedbackRepository, QualificationFundingFeedbackRepository>();
             services.AddScoped<IQualificationFundingsRepository, QualificationFundingsRepository>();
+            services.AddScoped<IAllQualificationFundingsRepository, AllQualificationFundingsRepository>();
             services.AddScoped<IQualificationDiscussionHistoryRepository, QualificationDiscussionHistoryRepository>();
             services.AddScoped<IChangedQualificationsRepository, ChangedQualificationsRepository>();
 
@@ -70,12 +71,19 @@ namespace SFA.DAS.AODP.Data.Extensions
             services.AddScoped<IJobRunsRepository, JobRunsRepository>();
 
             services.AddScoped<IRolloverRepository, RolloverRepository>();
+            services.AddScoped<IRolloverFundingUpdateRepository, RolloverFundingUpdateRepository>();
+            services.AddScoped<IRolloverFundingEligibilityRepository, RolloverFundingEligibilityRepository>();
+            services.AddScoped<IRolloverCandidateReconciler, RolloverCandidateReconciler>();
             services.AddScoped<IFundingExtensionPersistenceRepository, FundingExtensionPersistenceRepository>();
 
             services.AddScoped<IQualificationOutputFileRepository, QualificationOutputFileRepository>();
             services.AddScoped<IQualificationOutputFileLogRepository, QualificationOutputFileLogRepository>();
 
+            services.AddScoped<IFileRecordRepository, FileRecordRepository>();
             services.AddScoped<IQaaQualificationRepository, QaaQualificationRepository>();
+            services.AddScoped<IQaaQualificationFundingsRepository, QaaQualificationFundingsRepository>();
+            services.AddScoped<IQaaQualificationDiscussionHistoryRepository, QaaQualificationDiscussionHistoryRepository>();
+            services.AddScoped<IQaaQualificationDownloadLogRepository, QaaQualificationDownloadLogRepository>();
 
             return services;
         }

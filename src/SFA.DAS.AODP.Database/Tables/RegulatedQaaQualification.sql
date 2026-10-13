@@ -14,11 +14,9 @@
     [Status] [nvarchar](100) NOT NULL,
     [StartDate] date NOT NULL,
     [LastDateForRegistration] date NOT NULL,
+    [LastDateForCertifications] date NULL,
     [IsDiscontinued] bit NOT NULL DEFAULT 0,
     [DiscontinuedDate] date NULL,
-    [Age1619FundingApprovalEndDate] date NULL,
-    [AdvancedLearnerLoansFundingApprovalEndDate] date NULL,
-    [LegalEntitlementL2L3FundingApprovalEndDate] date NULL,
     [SectorSubjectArea] nvarchar(150) NOT NULL,
     CONSTRAINT [PK_QaaQualification] PRIMARY KEY CLUSTERED ([ID] ASC)
     );
