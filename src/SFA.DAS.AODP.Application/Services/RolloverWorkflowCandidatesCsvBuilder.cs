@@ -104,7 +104,7 @@ namespace SFA.DAS.AODP.Application.Services
                 return;
             }
 
-            var s = value.ToString() ?? "";
+            var s = value is string str ? str.ToCsvSafe() : value.ToString() ?? "";
 
             var needsQuotes = s.Contains(',') || s.Contains('"') || s.Contains('\n') || s.Contains('\r');
             if (needsQuotes)
