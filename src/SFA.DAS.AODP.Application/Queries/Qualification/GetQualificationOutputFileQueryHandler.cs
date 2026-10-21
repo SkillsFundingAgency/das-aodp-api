@@ -1,11 +1,12 @@
 ﻿using MediatR;
 using SFA.DAS.AODP.Data.Entities.Qualification;
+using SFA.DAS.AODP.Data.Providers;
+using SFA.DAS.AODP.Data.Repositories.QaaQualification;
 using SFA.DAS.AODP.Data.Repositories.Qualification;
 using SFA.DAS.AODP.Infrastructure;
+using SFA.DAS.AODP.Infrastructure.Extensions;
 using System.Globalization;
 using System.Text;
-using SFA.DAS.AODP.Data.Repositories.QaaQualification;
-using SFA.DAS.AODP.Data.Providers;
 
 namespace SFA.DAS.AODP.Application.Queries.Qualifications;
 
@@ -150,6 +151,7 @@ public class GetQualificationOutputFileQueryHandler : IRequestHandler<GetQualifi
         switch (value)
         {
             case string s:
+                s = s.ToCsvSafe();
                 if (string.Equals(s, "NULL", StringComparison.OrdinalIgnoreCase))
                     return ""; // normalize literal "NULL"
                 var needsQuotes = s.Contains(',') || s.Contains('"') || s.Contains('\n') || s.Contains('\r');

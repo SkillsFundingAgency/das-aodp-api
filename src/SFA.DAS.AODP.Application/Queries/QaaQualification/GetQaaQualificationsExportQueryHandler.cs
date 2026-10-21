@@ -1,6 +1,7 @@
 using MediatR;
 using SFA.DAS.AODP.Data.Entities.QaaQualification;
 using SFA.DAS.AODP.Data.Repositories.QaaQualification;
+using SFA.DAS.AODP.Infrastructure.Extensions;
 using System.Globalization;
 using System.Text;
 
@@ -92,6 +93,7 @@ public class GetQaaQualificationsExportQueryHandler : IRequestHandler<GetQaaQual
         switch (value)
         {
             case string s:
+                s = s.ToCsvSafe();
                 var needsQuotes = s.Contains(',') || s.Contains('"') || s.Contains('\n') || s.Contains('\r');
                 return needsQuotes ? $"\"{s.Replace("\"", "\"\"")}\"" : s;
 
