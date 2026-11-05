@@ -1,7 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+    <!--
+        LICENSING - EFCore.BulkExtensions.SqlServer
+        This package is dual-licensed (free community licence / paid commercial licence).
+        We use it under the FREE COMMUNITY LICENCE because the publisher's Dual Licence Agreement
+        (v1.0, Jan 2024) grants it when the package is consumed "for use in software licensed under
+        a Free Open Source license". This repository is licensed under MIT (see LICENSE), which is
+        OSI-approved and FSF-recognised, so the condition is met.
+        Note: the "Non-profit (Non-governmental)" condition does NOT apply to DfE; we rely solely on
+        the open-source condition above.
 
+        REMOVE OR LICENSE COMMERCIALLY IF ANY OF THE FOLLOWING HAPPEN:
+        - This repository's licence changes from MIT to a proprietary or non-open-source licence.
+        - This code is reused in, or moved into, software that is not open-source licensed.
+        - An upgrade to this package ships licence terms that remove or narrow the open-source condition
+	        (re-check the licence on NuGet before every version bump).
+        Replacement options: EF Core AddRange/SaveChangesAsync, or SqlBulkCopy (Microsoft.Data.SqlClient, MIT).
+
+        USAGE: funding-extension bulk inserts in FundingExtensionPersistenceRepository only.
+        VERSION: keep aligned with the EF Core major version - do not downgrade independently.
+        Ref: P2-3793
+    -->
+    <ItemGroup Label="Conditionally licensed packages">
+        <PackageReference Include="EFCore.BulkExtensions.SqlServer" Version="10.0.1" />
+    </ItemGroup>
+	
   <ItemGroup>
-	<PackageReference Include="EFCore.BulkExtensions.SqlServer" Version="10.0.1" />
 	<PackageReference Include="Lucene.Net" Version="4.8.0-beta00017" />
 	<PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00017" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.13" />
