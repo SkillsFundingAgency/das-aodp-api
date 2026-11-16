@@ -10,6 +10,7 @@
 	Version No.			Updated By		Updated Date		Description of Change
 ####################################################################################################
 	1					Robert Rybnikar		12/03/2025			Original
+    2					Karen Hanna		    16/11/2026			Restricted to the latest qualification version only	
 ##################################################################################################*/
 
 SELECT 
@@ -73,6 +74,7 @@ SELECT
  
 FROM dbo.Qualification q
 Left Outer Join regulated.QualificationVersions qv ON q.Id = qv.QualificationId
+    AND qv.Version = (SELECT MAX(v2.Version) FROM regulated.QualificationVersions v2 WHERE v2.QualificationId = q.Id)
 Left Outer Join dbo.AwardingOrganisation ao ON qv.AwardingOrganisationId = ao.Id
 Left Outer Join regulated.LifecycleStage ls ON qv.LifecycleStageId = ls.Id
 Left Outer Join regulated.ProcessStatus ps ON qv.ProcessStatusId = ps.Id
